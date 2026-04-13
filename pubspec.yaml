@@ -1,0 +1,84 @@
+name: socbay
+description: "A new Flutter project."
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: ^3.9.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.2
+  transparent_image: ^2.0.0
+  package_info_plus: ^8.3.1
+  logger: ^2.6.2
+  flutter_bloc: ^9.1.1
+  equatable: ^2.0.3
+  intl: ^0.17.0
+  shared_preferences: ^2.0.8
+  flutter_svg: ^2.0.9
+  dio: ^5.9.0
+  event_bus: ^2.0.0
+  flutter_secure_storage: ^10.0.0
+  google_fonts: ^6.3.3
+  flutter_spinkit: ^5.1.0
+  flutter_staggered_grid_view: ^0.7.0
+  carousel_slider: ^5.1.1
+  image_picker: ^1.2.1
+  permission_handler: ^12.0.1
+  share_plus: ^12.0.1
+  uuid: ^4.5.2
+  url_launcher: ^6.1.5
+
+  google_maps_flutter: ^2.1.8
+  geocoding: ^4.0.0
+  location: ^8.0.1
+  geolocator: ^14.0.1
+  decimal: ^2.3.0
+  flutter_rating_bar: ^4.0.1
+  http: ^1.6.0
+  full_screen_image_null_safe: ^2.0.0
+  flutter_format_money_vietnam: 
+  date_range_form_field: ^1.0.2
+  textfield_search: ^0.11.1
+  floor: ^1.4.2
+  flutter_local_notifications: ^19.5.0
+  timezone: ^0.10.1
+  rxdart: ^0.28.0
+  android_intent_plus: ^6.0.0
+  restart_app: ^1.1.2
+  firebase_messaging: ^16.1.0
+  firebase_core: ^4.3.0
+  cloud_firestore: ^6.1.1
+  onesignal_flutter: ^5.1.2
+  connectivity_plus: ^7.0.0
+  crypto: ^3.0.3
+  flutter_html: ^3.0.0-beta.2
+  multi_dropdown: ^3.0.1
+  file_picker: ^10.3.8
+  cached_network_image: ^3.2.3
+  signature: ^6.3.0
+  image: ^4.7.2
+  flutter_image_compress: ^2.3.0
+  path: ^1.9.1
+  image_gallery_saver_plus: ^4.0.1
+  nb_utils: ^7.2.0
+  webview_flutter: ^4.13.0
+  app_links: ^6.4.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  build_runner: ^2.3.3
+  floor_generator: ^1.4.2
+  change_app_package_name: ^1.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/
+    - assets/images/

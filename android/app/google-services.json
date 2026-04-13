@@ -1,0 +1,67 @@
+{
+  "project_info": {
+    "project_number": "74379867334",
+    "project_id": "socbay-9e758",
+    "storage_bucket": "socbay-9e758.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:74379867334:android:42ce710edd344cf92193c7",
+        "android_client_info": {
+          "package_name": "com.diagonalley.socbay1"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBcFmtqvF5zF6eVYnlMIAclgp7vO-GQ1S4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:74379867334:android:b596643fe8ba92c02193c7",
+        "android_client_info": {
+          "package_name": "com.example.pizza_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBcFmtqvF5zF6eVYnlMIAclgp7vO-GQ1S4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:74379867334:android:4eb67f5083499b172193c7",
+        "android_client_info": {
+          "package_name": "com.example.socbay"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBcFmtqvF5zF6eVYnlMIAclgp7vO-GQ1S4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

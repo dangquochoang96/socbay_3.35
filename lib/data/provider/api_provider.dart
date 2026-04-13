@@ -1,0 +1,917 @@
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:dio/dio.dart';
+import 'package:intl/intl.dart';
+import 'package:socbay/application.dart';
+import 'package:socbay/config/app_config.dart';
+import 'package:socbay/data/data_provider/api_manager.dart';
+import 'package:socbay/data/data_provider/base_api.dart';
+import 'package:socbay/data/model/banner_model.dart';
+import 'package:socbay/data/model/blog_model.dart';
+import 'package:socbay/data/model/gift_response.dart';
+import 'package:socbay/data/model/home_service_model.dart';
+import 'package:socbay/data/model/login_response.dart';
+import 'package:socbay/data/model/notification_response.dart';
+import 'package:socbay/data/model/product_category.dart';
+import 'package:socbay/data/model/product_model.dart';
+import 'package:socbay/data/model/request/change_password_request.dart';
+import 'package:socbay/data/model/request/create_task_request.dart';
+import 'package:socbay/data/model/request/new_password_request.dart';
+import 'package:socbay/data/model/request/register_request_model.dart';
+import 'package:socbay/data/model/request/staff_by_distance_request.dart';
+import 'package:socbay/data/model/request/update_staff_request_model.dart';
+import 'package:socbay/data/model/request/update_task_request.dart';
+import 'package:socbay/data/model/request/user_address_request.dart';
+import 'package:socbay/data/model/request/user_info_request.dart';
+import 'package:socbay/data/model/task_model.dart';
+import 'package:socbay/data/model/user_address.dart';
+import 'package:socbay/data/model/user_profile.dart';
+import 'package:socbay/data/response/api_response.dart';
+import 'package:socbay/utils/logger_util.dart';
+
+import 'package:http/http.dart' as http;
+import 'package:path/path.dart' as path_manager;
+
+class ApiProvider {
+  final BaseAPI _baseAPI;
+
+  ApiProvider(this._baseAPI);
+
+  Future<DefaultResponse> setOTP(String phoneNumber) async {
+    try {
+      var dio = Dio();
+      var response = await dio.post(
+          "$protocol${AppConfig.instance.values.apiUrl}/api/user/setOTP",
+          data: {
+            'phone': phoneNumber,
+          },
+          options: Options(contentType: 'application/json'));
+      // print(json.decode(response.toString()));
+      var res = Map<String, dynamic>.from(jsonDecode(response.toString()));
+      // final res = response.data;
+      if (res["code"] != null && res["code"] == 1 && res["data"] != null) {
+        return DefaultResponse(data: res["data"]);
+      } else {
+        return DefaultResponse(message: res["message"]);
+      }
+    } catch (e) {
+      return DefaultResponse.withError(Error(message: e.toString()));
+    }
+  }
+
+  Future<DefaultResponse<LoginResponse>> login(
+      String phone, String password) async {
+    try {
+      final Map resJson = await _baseAPI.request(
+        manager: ApiManager(ApiType.login),
+        isUseAccessToken: false,
+        bodyParams: {
+          "phone": phone,
+          "pass": password,
+        },
+      );
+      final res = DefaultResponse.fromMap(resJson);
+      if (res.message == "success" && res.data != null) {
+        final item = LoginResponse.fromJson(res.data);
+        return DefaultResponse(data: item);
+      } else {
+        return DefaultResponse(status: res.status, message: res.message);
+      }
+    } catch (e) {
+      return DefaultResponse.withError(Error(message: e.toString()));
+    }
+  }
+
+  Future<DefaultResponse> register(
+      RegisterRequestModel registerRequestModel) async {
+    try {
+      final Map resJson = await _baseAPI.request(
+        manager: ApiManager(ApiType.register),
+        isUseAccessToken: false,
+        bodyParams: {
+          "username": registerRequestModel.username,
+          "phone": registerRequestModel.phone,
+          "password": registerRequestModel.password,
+          "otp": registerRequestModel.otp,
+        },
+      );
+      final res = DefaultResponse.fromMap(resJson);
+      if (res.status == 200 && res.data != null) {
+        return DefaultResponse(data: res.data);
+      } else {
+        return DefaultResponse(status: res.status, message: res.message);
+      }
+    } catch (e) {
+      return DefaultResponse.withError(Error(message: e.toString()));
+    }
+  }
+
+  Future<DefaultResponse<UserProfile>> updateStaff(
+      UpdateStaffRequestModel updateStaffRequestModel) async {
+    try {
+      final Map resJson = await _baseAPI
+          .request(manager: ApiManager(ApiType.updateStaff), bodyParams: {
+        "birthday": updateStaffRequestModel.birthday,
+        "address": updateStaffRequestModel.address,
+        "certification": updateStaffRequestModel.certification,
+        "id_card": updateStaffRequestModel.idCard,
+        "id_card_image_front": updateStaffRequestModel.idCardImageFront,
+        "id_card_image_back": updateStaffRequestModel.idCardImageBack,
+        "services": updateStaffRequestModel.services
+      });
+      final res = DefaultResponse.fromMap(resJson);
+      if (res.status == 200 && res.data != null) {
+        final item = UserProfile.fromJson(res.data);
+        return DefaultResponse(data: item);
+      } else {
+        return DefaultResponse(status: res.status, message: res.message);
+      }
+    } catch (e) {
+      return DefaultResponse.withError(Error(message: e.toString()));
+    }
+  }
+
+  Future<DefaultResponse<UserProfile>> getUserInfo() async {
+    try {
+      final Map resJson = await _baseAPI.request(
+        manager: ApiManager(ApiType.userInfo),
+      );
+      final res = DefaultResponse.fromMap(resJson);
+      if (res.status == 200 && res.data != null) {
+        final item = UserProfile.fromJson(res.data);
+        return DefaultResponse(data: item);
+      } else {
+        return DefaultResponse(status: res.status, message: res.message);
+      }
+    } catch (e) {
+      return DefaultResponse.withError(Error(message: e.toString()));
+    }
+  }
+
+  Future<DefaultResponse<List<ProductCategory>>> getProductCategory() async {
+    try {
+      final Map resJson = await _baseAPI.request(
+        manager: ApiManager(ApiType.getListProductCategory),
+      );
+      final res = DefaultResponse.fromMap(resJson);
+      if (res.status == 200 && res.data != null) {
+        List<ProductCategory> list = [];
+        for (final item in res.data ?? []) {
+          final model = ProductCategory.fromJson(item);
+          list.add(model);
+        }
+        return DefaultResponse(data: list);
+      } else {
+        return DefaultResponse(status: res.status, message: res.message);
+      }
+    } catch (e) {
+      return DefaultResponse.withError(Error(message: e.toString()));
+    }
+  }
+
+  Future<DefaultResponse<ProductCategory>> getProductCategoryDetail(
+      int id) async {
+    try {
+      final Map resJson = await _baseAPI.request(
+        manager: ApiManager(
+          ApiType.getListProductCategory,
+          additionalPath: '/$id',
+        ),
+      );
+      final res = DefaultResponse.fromMap(resJson);
+      if (res.status == 200 && res.data != null) {
+        return DefaultResponse(data: ProductCategory.fromJson(res.data));
+      } else {
+        return DefaultResponse(status: res.status, message: res.message);
+      }
+    } catch (e) {
+      return DefaultResponse.withError(Error(message: e.toString()));
+    }
+  }
+
+  Future<DefaultResponse<List<ProductModel>>> getListProduct(
+      {required int isLike}) async {
+    try {
+      final Map resJson = await _baseAPI.request(
+        manager: ApiManager(ApiType.getProduct),
+        queryParams: {
+          "is_like": isLike,
+        },
+      );
+      final res = DefaultResponse.fromMap(resJson);
+      if (res.status == 200 && res.data != null) {
+        List<ProductModel> list = [];
+        for (final item in res.data ?? []) {
+          final model = ProductModel.fromJson(item);
+          list.add(model);
+        }
+        return DefaultResponse(data: list);
+      } else {
+        return DefaultResponse(status: res.status, message: res.message);
+      }
+    } catch (e) {
+      return DefaultResponse.withError(Error(message: e.toString()));
+    }
+  }
+
+  Future<DefaultResponse<List<ProductModel>>> getProductsInUse() async {
+    try {
+      final Map resJson = await _baseAPI.request(
+        manager: ApiManager(ApiType.getProduct),
+        queryParams: {
+          //"user_id": App.instance.userApp?.id,
+          "user_id": 2
+        },
+      );
+      final res = DefaultResponse.fromMap(resJson);
+      if (res.status == 200 && res.data != null) {
+        List<ProductModel> list = [];
+        for (final item in res.data ?? []) {
+          final model = ProductModel.fromJson(item);
+          list.add(model);
+        }
+        return DefaultResponse(data: list);
+      } else {
+        return DefaultResponse(status: res.status, message: res.message);
+      }
+    } catch (e) {
+      return DefaultResponse.withError(Error(message: e.toString()));
+    }
+  }
+
+  Future<DefaultResponse<ProductModel>> getProductDetail(
+      ProductModel productModel) async {
+    try {
+      final Map resJson = await _baseAPI.request(
+        manager: ApiManager(ApiType.getProduct,
+            additionalPath: '/${productModel.id}'),
+      );
+      final res = DefaultResponse.fromMap(resJson);
+      if (res.status == 200 && res.data != null) {
+        return DefaultResponse(data: ProductModel.fromJson(res.data));
+      } else {
+        return DefaultResponse(status: res.status, message: res.message);
+      }
+    } catch (e) {
+      return DefaultResponse.withError(Error(message: e.toString()));
+    }
+  }
+
+  Future<DefaultResponse<List<BlogModel>>> getBlogs({int page = 1}) async {
+    try {
+      final Map resJson = await _baseAPI.request(
+        manager: ApiManager(ApiType.getBlogs),
+        queryParams: {
+          "page": page,
+        },
+      );
+      final res = DefaultResponse.fromMap(resJson);
+      if (res.status == 200 && res.data != null) {
+        List<BlogModel> list = [];
+        for (final item in res.data ?? []) {
+          final model = BlogModel.fromJson(item);
+          list.add(model);
+        }
+        return DefaultResponse(data: list);
+      } else {
+        return DefaultResponse(status: res.status, message: res.message);
+      }
+    } catch (e) {
+      return DefaultResponse.withError(Error(message: e.toString()));
+    }
+  }
+
+  Future<DefaultResponse<List<BannerModel>>> getBanners() async {
+    try {
+      final Map resJson = await _baseAPI.request(
+        manager: ApiManager(ApiType.getBanners),
+      );
+      final res = DefaultResponse.fromMap(resJson);
+      if (res.status == 200 && res.data != null) {
+        List<BannerModel> list = [];
+        for (final item in res.data ?? []) {
+          final model = BannerModel.fromJson(item);
+          list.add(model);
+        }
+        return DefaultResponse(data: list);
+      } else {
+        return DefaultResponse(status: res.status, message: res.message);
+      }
+    } catch (e) {
+      return DefaultResponse.withError(Error(message: e.toString()));
+    }
+  }
+
+  Future<DefaultResponse> logout() async {
+    try {
+      final Map resJson = await _baseAPI.request(
+        manager: ApiManager(ApiType.logout),
+      );
+      final res = DefaultResponse.fromMap(resJson);
+      if (res.status == 200 && res.data != null) {
+        return DefaultResponse();
+      } else {
+        return DefaultResponse(status: res.status, message: res.message);
+      }
+    } catch (e) {
+      return DefaultResponse.withError(Error(message: e.toString()));
+    }
+  }
+
+  Future<DefaultResponse<List<NotificationResponse>>> getNotifications() async {
+    try {
+      var dio = Dio();
+      var response = await dio.get(
+          "$protocol${AppConfig.instance.values.apiUrl}/api/notify/list",
+          options: Options(contentType: 'application/json'));
+      var res = Map<String, dynamic>.from(jsonDecode(response.toString()));
+      // final res = response.data;
+      if (res["code"] != null && res["code"] == 1 && res["data"] != null) {
+        var response = DefaultResponse(
+            status: res["code"],
+            data: List<NotificationResponse>.from(res["data"]
+                .map((model) => NotificationResponse.fromJson(model))));
+        return response;
+      } else {
+        return DefaultResponse(message: res["message"]);
+      }
+    } catch (e) {
+      return DefaultResponse.withError(Error(message: e.toString()));
+    }
+  }
+
+  Future<DefaultResponse<List<GiftResponse>>> getGiftsList(
+      {bool isReceiveList = false}) async {
+    try {
+      final Map resJson = await _baseAPI.request(
+        manager: ApiManager(ApiType.getGiftList,
+            additionalPath: isReceiveList ? "/listReceive" : ''),
+      );
+      final res = DefaultResponse.fromMap(resJson);
+      if (res.status == 200 && res.data != null) {
+        List<GiftResponse> list = [];
+        for (final item in res.data ?? []) {
+          final model = GiftResponse.fromJson(item);
+          list.add(model);
+        }
+        return DefaultResponse(data: list);
+      } else {
+        return DefaultResponse(status: res.status, message: res.message);
+      }
+    } catch (e) {
+      return DefaultResponse.withError(Error(message: e.toString()));
+    }
+  }
+
+  Future<DefaultResponse<List<UserProfile>>> getStaffs({int isLike = 0}) async {
+    try {
+      final Map resJson = await _baseAPI
+          .request(manager: ApiManager(ApiType.getStaffs), queryParams: {
+        "is_like": isLike,
+      });
+      final res = DefaultResponse.fromMap(resJson);
+      if (res.status == 200 && res.data != null) {
+        List<UserProfile> list = [];
+        for (final item in res.data ?? []) {
+          final model = UserProfile.fromJson(item);
+          list.add(model);
+        }
+        return DefaultResponse(data: list);
+      } else {
+        return DefaultResponse(status: res.status, message: res.message);
+      }
+    } catch (e) {
+      return DefaultResponse.withError(Error(message: e.toString()));
+    }
+  }
+
+  Future<DefaultResponse> uploadImage({required File file}) async {
+    try {
+      final FormData formData = FormData.fromMap(
+        {
+          'file': await MultipartFile.fromFile(file.path,
+              filename: path_manager.basename(file.path)),
+        },
+      );
+      final Map resJson = await _baseAPI.request(
+        manager: ApiManager(ApiType.uploadImage),
+        bodyParams: formData,
+      );
+      final res = DefaultResponse.fromMap(resJson);
+      if (res.status == 200 && res.data != null) {
+        return DefaultResponse(data: res.data);
+      } else {
+        return DefaultResponse(status: res.status, message: res.message);
+      }
+    } catch (e) {
+      return DefaultResponse.withError(Error(message: e.toString()));
+    }
+  }
+
+  Future<DefaultResponse<UserProfile>> updateUserInfo(
+      UserInfoRequest userInfoRequest) async {
+    try {
+      Map<String, dynamic> bodyParams = {};
+      bodyParams["username"] = userInfoRequest.username?.isNotEmpty == true
+          ? userInfoRequest.username
+          : (App.instance.userApp?.username ?? '');
+      bodyParams["phone"] = userInfoRequest.phone?.isNotEmpty == true
+          ? userInfoRequest.phone
+          : (App.instance.userApp?.phone ?? '');
+      bodyParams["avartar"] = userInfoRequest.avatar?.isNotEmpty == true
+          ? userInfoRequest.avatar
+          : (App.instance.userApp?.avatar ?? '');
+      bodyParams["email"] = userInfoRequest.email?.isNotEmpty == true
+          ? userInfoRequest.email
+          : (App.instance.userApp?.email ?? '');
+      bodyParams["address"] = userInfoRequest.address?.isNotEmpty == true
+          ? userInfoRequest.address
+          : (App.instance.userApp?.address ?? '');
+      bodyParams["birthday"] = userInfoRequest.birthday?.isNotEmpty == true
+          ? DateFormat('yyyy/MM/dd')
+              .format(DateFormat('dd/MM/yyyy').parse(userInfoRequest.birthday!))
+          : (App.instance.userApp?.birthday != null
+              ? DateFormat('yyyy/MM/dd').format(DateFormat('dd/MM/yyyy')
+                  .parse(App.instance.userApp!.birthday!))
+              : '');
+      bodyParams["cmt"] = userInfoRequest.cmt?.isNotEmpty == true
+          ? userInfoRequest.cmt
+          : (App.instance.userApp?.cmt ?? '');
+      var url = Uri.http(
+          AppConfig.instance.values.apiUrl, "/api/user/updateUser", bodyParams);
+      var res = await http.post(url);
+      if (res.statusCode == HttpStatus.ok) {
+        var response = Map<String, dynamic>.from(json.decode(res.body));
+        if (response["code"] == 1 && response["data"] != null) {
+          return DefaultResponse(data: UserProfile.fromJson(response["data"]));
+        } else {
+          return DefaultResponse(message: response["message"]);
+        }
+      } else {
+        return DefaultResponse(message: "Update fail");
+      }
+    } catch (e) {
+      return DefaultResponse.withError(Error(message: e.toString()));
+    }
+  }
+
+  Future<DefaultResponse<UserProfile>> changePassword(
+      ChangePasswordRequest changePasswordRequest) async {
+    try {
+      var bodyParams = {
+        "password": changePasswordRequest.oldPassword,
+        "new_password": changePasswordRequest.password,
+        "new_password_confirm": changePasswordRequest.rePassword,
+      };
+      var url = Uri.http(
+          AppConfig.instance.values.apiUrl,
+          "/api/user/${App.instance.userApp!.phone}/changePassWord",
+          bodyParams);
+      var res = await http.post(url);
+      if (res.statusCode == HttpStatus.ok) {
+        var response = Map<String, dynamic>.from(json.decode(res.body));
+        if (response["status"] != null &&
+            response["status"] == 1 &&
+            response["data"] != null) {
+          return DefaultResponse(data: UserProfile.fromJson(response["data"]));
+        } else {
+          return DefaultResponse(
+              status: response["status"], message: response["message"]);
+        }
+        // if (response["code"] == 1 && response["data"] != null) {
+        //   return DefaultResponse(
+        //       data: UserProfile.fromJson(response["data"]));
+        // } else {
+        //   return DefaultResponse(message: response["message"]);
+        // }
+      } else {
+        return DefaultResponse(message: "Update fail");
+      }
+
+      // var dio = Dio();
+      // var response = await dio.post(
+      //     "$protocol${AppConfig.instance.values.apiUrl}/api/user/${App.instance.userApp!.phone}/changePassWord",
+      //     data: bodyParams,
+      //     options: Options(contentType: 'application/json'));
+      // final res = response.data;
+      // if (res["status"]!=null && res["status"] == 1 && res.data != null) {
+      //   return DefaultResponse(data: UserProfile.fromJson(res.data));
+      // } else {
+      //   return DefaultResponse(status: res.status, message: res.message);
+      // }
+    } catch (e) {
+      return DefaultResponse.withError(Error(message: e.toString()));
+    }
+  }
+
+  Future<DefaultResponse> forgotPassword(
+      NewPasswordRequest newPasswordRequest) async {
+    try {
+      var dio = Dio();
+      var response = await dio.post(
+          "$protocol${AppConfig.instance.values.apiUrl}/api/user/updateUser",
+          data: {
+            "phone": newPasswordRequest.phone,
+            "password": newPasswordRequest.newPassword,
+            "password_confirmation": newPasswordRequest.newPasswordConfirm
+          },
+          options: Options(contentType: 'application/json'));
+      var res = Map<String, dynamic>.from(jsonDecode(response.toString()));
+      // final res = response.data;
+      if (res["code"] != null && res["code"] == 1 && res["data"] != null) {
+        LoggerUtil.log("res.data ${res["data"]}");
+        return DefaultResponse(data: res["data"]);
+      } else {
+        return DefaultResponse(message: res["message"]);
+      }
+
+      // final Map resJson = await _baseAPI.request(
+      //     manager: ApiManager(ApiType.updateUserInfo),
+      //     bodyParams: {
+      //       "phone": newPasswordRequest.phone,
+      //       "password": newPasswordRequest.newPassword,
+      //       "password_confirmation": newPasswordRequest.newPasswordConfirm
+      //     },
+      //     isUseAccessToken: false);
+      // LoggerUtil.log("resJson ${resJson.toString()}");
+      //
+      // final res = DefaultResponse.fromMap(resJson);
+      // if (res.status == 200 && res.data != null) {
+      //   LoggerUtil.log("res.data ${res.data}");
+      //   return DefaultResponse(data: res.data);
+      // } else {
+      //   return DefaultResponse(status: res.status, message: res.message);
+      // }
+    } catch (e) {
+      return DefaultResponse.withError(Error(message: e.toString()));
+    }
+  }
+
+  Future<DefaultResponse<List<HomeServiceModel>>> getListService() async {
+    try {
+      final Map resJson =
+          await _baseAPI.request(manager: ApiManager(ApiType.getServices));
+      final res = DefaultResponse.fromMap(resJson);
+      if (res.status == 200 && res.data != null) {
+        List<HomeServiceModel> list = [];
+        for (final item in res.data ?? []) {
+          final model = HomeServiceModel.fromJson(item);
+          list.add(model);
+        }
+        return DefaultResponse(data: list);
+      } else {
+        return DefaultResponse(status: res.status, message: res.message);
+      }
+    } catch (e) {
+      return DefaultResponse.withError(Error(message: e.toString()));
+    }
+  }
+
+  Future<DefaultResponse> createTask(
+      CreateTaskRequest createTaskRequest) async {
+    try {
+      final Map resJson = await _baseAPI
+          .request(manager: ApiManager(ApiType.createTask), bodyParams: {
+        "type": createTaskRequest.type,
+        "name": createTaskRequest.name,
+        "des": createTaskRequest.des,
+        "status": createTaskRequest.status,
+        "priority": createTaskRequest.priority,
+        "serviceId": createTaskRequest.serviceId,
+        "timeStart": createTaskRequest.timeStart,
+        "timeEnd": createTaskRequest.timeEnd,
+        "address": createTaskRequest.address,
+        "lat": createTaskRequest.lat,
+        "lng": createTaskRequest.lng,
+        "staffId": createTaskRequest.staffId,
+        "video": createTaskRequest.video,
+        "images": createTaskRequest.images
+      });
+      final res = DefaultResponse.fromMap(resJson);
+      if (res.status == 200 && res.data != null) {
+        LoggerUtil.log("res.data ${res.data}");
+        return DefaultResponse(data: res.data);
+      } else {
+        return DefaultResponse(status: res.status, message: res.message);
+      }
+    } catch (e) {
+      return DefaultResponse.withError(Error(message: e.toString()));
+    }
+  }
+
+  Future<DefaultResponse> likeProduct(int productId, bool isLike) async {
+    try {
+      final Map resJson = await _baseAPI.request(
+        manager: ApiManager(ApiType.likeProduct),
+        bodyParams: {
+          "product_id": productId,
+        },
+        optionalPath: "/${isLike ? "likeProduct" : "unlikeProduct"}",
+      );
+      final res = DefaultResponse.fromMap(resJson);
+      if (res.status == 200 && res.data != null) {
+        return DefaultResponse(data: res.data);
+      } else {
+        return DefaultResponse(status: res.status, message: res.message);
+      }
+    } catch (e) {
+      return DefaultResponse.withError(Error(message: e.toString()));
+    }
+  }
+
+  Future<DefaultResponse> exchangeGift(int giftId) async {
+    try {
+      final Map resJson = await _baseAPI.request(
+        manager: ApiManager(ApiType.exchangeGift),
+        bodyParams: {
+          "gift_id": giftId,
+        },
+      );
+      final res = DefaultResponse.fromMap(resJson);
+      if (res.status == 200 && res.data != null) {
+        return DefaultResponse(data: res.data);
+      } else {
+        return DefaultResponse(status: res.status, message: res.message);
+      }
+    } catch (e) {
+      return DefaultResponse.withError(Error(message: e.toString()));
+    }
+  }
+
+  Future<DefaultResponse<List<UserProfile>>> getListStaffByDistance(
+      StaffByDistanceRequest staffByDistanceRequest) async {
+    try {
+      final Map resJson = await _baseAPI
+          .request(manager: ApiManager(ApiType.staffByDistance), bodyParams: {
+        "lat": staffByDistanceRequest.lat,
+        "lng": staffByDistanceRequest.lng,
+        "distance": staffByDistanceRequest.distance
+      });
+      final res = DefaultResponse.fromMap(resJson);
+      if (res.status == 200 && res.data != null) {
+        LoggerUtil.log("res.data ${res.data}");
+        List<UserProfile> list = [];
+        for (final item in res.data ?? []) {
+          final model = UserProfile.fromJson(item);
+          list.add(model);
+        }
+        return DefaultResponse(data: list);
+      } else {
+        return DefaultResponse(status: res.status, message: res.message);
+      }
+    } catch (e) {
+      return DefaultResponse.withError(Error(message: e.toString()));
+    }
+  }
+
+  Future<DefaultResponse<List<UserProfile>>> getListSupporters() async {
+    try {
+      final Map resJson = await _baseAPI.request(
+        manager: ApiManager(ApiType.getListSupporters),
+      );
+      final res = DefaultResponse.fromMap(resJson);
+      if (res.status == 200 && res.data != null) {
+        List<UserProfile> list = [];
+        for (final item in res.data ?? []) {
+          final model = UserProfile.fromJson(item);
+          list.add(model);
+        }
+        return DefaultResponse(data: list);
+      } else {
+        return DefaultResponse(status: res.status, message: res.message);
+      }
+    } catch (e) {
+      return DefaultResponse.withError(Error(message: e.toString()));
+    }
+  }
+
+  Future<DefaultResponse> updateTask(
+      int id, UpdateTaskRequest updateTaskRequest) async {
+    try {
+      final Map resJson = await _baseAPI.request(
+          manager: ApiManager(ApiType.updateTask, additionalPath: '/$id'),
+          bodyParams: {
+            "type": updateTaskRequest.type,
+            "name": updateTaskRequest.name,
+            "des": updateTaskRequest.des,
+            "status": updateTaskRequest.status,
+            "priority": updateTaskRequest.priority,
+            "service_id": updateTaskRequest.serviceId,
+            "time_start": updateTaskRequest.timeStart,
+            "time_end": updateTaskRequest.timeEnd,
+            "staff_id": updateTaskRequest.staffId,
+            "sale_id": updateTaskRequest.saleId,
+            "customer_id": updateTaskRequest.customerId,
+            "order_id": updateTaskRequest.orderId,
+            "products": updateTaskRequest.products
+          });
+      final res = DefaultResponse.fromMap(resJson);
+      if (res.status == 200 && res.data != null) {
+        return DefaultResponse(data: res.data);
+      } else {
+        return DefaultResponse(status: res.status, message: res.message);
+      }
+    } catch (e) {
+      return DefaultResponse.withError(Error(message: e.toString()));
+    }
+  }
+
+  Future<DefaultResponse> likeStaff(int id) async {
+    try {
+      final Map resJson = await _baseAPI.request(
+          manager: ApiManager(ApiType.likeStaff), bodyParams: {"staff_id": id});
+      final res = DefaultResponse.fromMap(resJson);
+      if (res.status == 200 && res.data != null) {
+        return DefaultResponse(data: res.data);
+      } else {
+        return DefaultResponse(status: res.status, message: res.message);
+      }
+    } catch (e) {
+      return DefaultResponse.withError(Error(message: e.toString()));
+    }
+  }
+
+  Future<DefaultResponse> unLikeStaff(int id) async {
+    try {
+      final Map resJson = await _baseAPI.request(
+          manager: ApiManager(ApiType.unlikeStaff),
+          bodyParams: {"staff_id": id});
+      final res = DefaultResponse.fromMap(resJson);
+      if (res.status == 200 && res.data != null) {
+        return DefaultResponse(data: res.data);
+      } else {
+        return DefaultResponse(status: res.status, message: res.message);
+      }
+    } catch (e) {
+      return DefaultResponse.withError(Error(message: e.toString()));
+    }
+  }
+
+  Future<DefaultResponse<List<UserAddress>>> getListUserAddress() async {
+    try {
+      final Map resJson = await _baseAPI.request(
+          manager: ApiManager(ApiType.getListUserAddress));
+      final res = DefaultResponse.fromMap(resJson);
+      if (res.status == 200 && res.data != null) {
+        List<UserAddress> list = [];
+        for (final item in res.data ?? []) {
+          final model = UserAddress.fromJson(item);
+          list.add(model);
+        }
+        return DefaultResponse(data: list);
+      } else {
+        return DefaultResponse(status: res.status, message: res.message);
+      }
+    } catch (e) {
+      return DefaultResponse.withError(Error(message: e.toString()));
+    }
+  }
+
+  Future<DefaultResponse> createUserAddress(
+      UserAddressRequest userAddressRequest) async {
+    try {
+      var dio = Dio();
+      var data = {
+        "name": userAddressRequest.name,
+        "phone": userAddressRequest.phone,
+        "address": userAddressRequest.address,
+        "type_staff": userAddressRequest.typeStaff ?? '0',
+        "lat": userAddressRequest.lat,
+        "lng": userAddressRequest.lng,
+        "is_default": userAddressRequest.isDefault,
+        "city_code": userAddressRequest.cityCode,
+        "state_code": userAddressRequest.stateCode,
+        "pass": userAddressRequest.pass,
+      };
+
+      if (userAddressRequest.typeStaff == "1") {
+        data['type'] = '2';
+        data['birthday'] = DateFormat('yyyy/MM/dd').format(
+            DateFormat('dd/MM/yyyy').parse(userAddressRequest.birthday!));
+        // data['id_card_number'] = userAddressRequest.idCard;
+        data['cmt'] = userAddressRequest.cmt;
+        data['id_card_image_front'] = userAddressRequest.idCardImageFront;
+        data['id_card_image_back'] = userAddressRequest.idCardImageBack;
+        data['services'] = userAddressRequest.services;
+      }
+
+      var response = await dio.post(
+          "$protocol${AppConfig.instance.values.apiUrl}/api/user/register",
+          data: data,
+          options: Options(contentType: 'application/json'));
+      var res = Map<String, dynamic>.from(jsonDecode(response.toString()));
+      print(res);
+      if (res["code"] != null && res["code"] == 1 && res["data"] != null) {
+        LoggerUtil.log("res.data ${res["data"]}");
+        return DefaultResponse(status: res["code"], data: res["data"]);
+      } else {
+        return DefaultResponse(status: res["code"], message: res["message"]);
+      }
+    } catch (e) {
+      return DefaultResponse.withError(Error(message: e.toString()));
+    }
+  }
+
+  Future<DefaultResponse> updateUserAddress(
+      UserAddressRequest userAddressRequest) async {
+    try {
+      final Map resJson = await _baseAPI.request(
+        manager: ApiManager(ApiType.updateUserAddress),
+        bodyParams: {
+          "name": userAddressRequest.name,
+          "phone": userAddressRequest.phone,
+          "address": userAddressRequest.address,
+          "lat": userAddressRequest.lat,
+          "lng": userAddressRequest.lng,
+          "is_default": userAddressRequest.isDefault,
+          "city_code": userAddressRequest.cityCode,
+          "state_code": userAddressRequest.stateCode,
+        },
+        optionalPath: "/${userAddressRequest.id}",
+      );
+      final res = DefaultResponse.fromMap(resJson);
+      if (res.status == 200 && res.data != null) {
+        return DefaultResponse(data: res.data);
+      } else {
+        return DefaultResponse(status: res.status, message: res.message);
+      }
+    } catch (e) {
+      return DefaultResponse.withError(Error(message: e.toString()));
+    }
+  }
+
+  Future<DefaultResponse> deleteUserAddress(String id) async {
+    try {
+      final Map resJson = await _baseAPI.request(
+        manager: ApiManager(ApiType.deleteUserAddress),
+        optionalPath: "/$id",
+      );
+      final res = DefaultResponse.fromMap(resJson);
+      if (res.status == 200 && res.data != null) {
+        return DefaultResponse(data: res.data);
+      } else {
+        return DefaultResponse(status: res.status, message: res.message);
+      }
+    } catch (e) {
+      return DefaultResponse.withError(Error(message: e.toString()));
+    }
+  }
+
+  Future<DefaultResponse<List<TaskModel>>> getListTask(
+      {required int page}) async {
+    try {
+      final Map resJson = await _baseAPI.request(
+        manager: ApiManager(ApiType.getListTask),
+        queryParams: {
+          "page": page,
+        },
+      );
+      final res = DefaultResponse.fromMap(resJson);
+      if (res.status == 200 && res.data != null) {
+        List<TaskModel> list = [];
+        for (final item in res.data ?? []) {
+          final model = TaskModel.fromJson(item);
+          list.add(model);
+        }
+        return DefaultResponse(data: list);
+      } else {
+        return DefaultResponse(status: res.status, message: res.message);
+      }
+    } catch (e) {
+      return DefaultResponse.withError(Error(message: e.toString()));
+    }
+  }
+
+  Future<DefaultResponse<TaskModel>> getTask(int id) async {
+    try {
+      final Map resJson = await _baseAPI.request(
+          manager: ApiManager(ApiType.getTask), optionalPath: '/$id');
+      final res = DefaultResponse.fromMap(resJson);
+      if (res.status == 200 && res.data != null) {
+        return DefaultResponse(data: TaskModel.fromJson(res.data));
+      } else {
+        return DefaultResponse(status: res.status, message: res.message);
+      }
+    } catch (e) {
+      return DefaultResponse.withError(Error(message: e.toString()));
+    }
+  }
+
+  Future<DefaultResponse> deleteTask(int id, String name, String des) async {
+    try {
+      final Map resJson = await _baseAPI.request(
+          manager: ApiManager(ApiType.deleteTask),
+          bodyParams: {'name': name, 'description': des},
+          optionalPath: '/$id');
+      final res = DefaultResponse.fromMap(resJson);
+      if (res.status == 200 && res.data != null) {
+        return DefaultResponse(data: res.data);
+      } else {
+        return DefaultResponse(status: res.status, message: res.message);
+      }
+    } catch (e) {
+      return DefaultResponse.withError(Error(message: e.toString()));
+    }
+  }
+}

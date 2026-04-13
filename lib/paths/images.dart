@@ -1,0 +1,34 @@
+class Images {
+  static const String iconAddProduct = "add_product.jpg";
+  static const String iconApp = "icon_app.png";
+  static const String iconApp1 = "newSocbayLogo.jpg";
+  static const String iconHidden = "eye.png";
+  static const String iconClose = "ic_close.png";
+  static const String iconHome = "ic_home.png";
+  static const String iconHistory = "ic_history.png";
+  static const String iconSearch = "ic_search.png";
+  static const String iconProduct = "ic_product.png";
+  static const String iconNoti = "icon_notification.png";
+  static const String iconPoint = "icon_point.jpg";
+  static const String iconWorker = "icon_worker.png";
+  static const String banner = "banner.png";
+  static const String iconMaintenance = "ic_maintenance2.png";
+  static const String iconFix = "icon_fix.png";
+  static const String iconReplace = "icon_replace2.png";
+  static const String iconFeedback = "icon_feedback.jpg";
+  static const String iconAdvise = "icon_advise2.png";
+  static const String iconHotline = "icon_hotline2.png";
+  static const String iconNotSecurePassword = "icon_not_secure_password.png";
+  static const String iconSecurePassword = "icon_secure_password.png";
+  static const String iconMarker = "icon_marker.png";
+  static const String iconReset = "ic_reset.png";
+  static const String iconCancel = "icon_cancel.png";
+  static const String iconCheck = "icon_check.png";
+  static const String iconStats = "stats2.png";
+  static const String iconCrowd = "crowd2.png";
+  static const String iconMegaphone = "megaphone2.png";
+  static const String iconNews = "newspaper2.png";
+  static const String iconinventory = "inventory.jpg";
+  static const String iconRemovComen = "comenandremov2.png";
+  static const String successPayment = "da-thanh-toan.jpg";
+}
