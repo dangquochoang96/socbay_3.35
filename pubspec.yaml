@@ -1,6 +1,6 @@
 name: socbay
 description: "A new Flutter project."
-publish_to: 'none'
+publish_to: "none"
 version: 0.1.0
 
 environment:
@@ -40,7 +40,7 @@ dependencies:
   flutter_rating_bar: ^4.0.1
   http: ^1.6.0
   full_screen_image_null_safe: ^2.0.0
-  flutter_format_money_vietnam: 
+  flutter_format_money_vietnam:
   date_range_form_field: ^1.0.2
   textfield_search: ^0.11.1
   floor: ^1.4.2
@@ -80,5 +80,10 @@ flutter:
   uses-material-design: true
 
   assets:
+    # Languages
+    - lang/en.json
+    - lang/vi.json
+
+    # Images
     - assets/
     - assets/images/

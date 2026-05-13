@@ -30,12 +30,9 @@ void _handlePromptForPushPermission() {
   OneSignal.Notifications.requestPermission(true);
 }
 
-
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   // requestNotificationPermissions();
   OneSignal.Debug.setLogLevel(OSLogLevel.verbose);
   // OneSignal.initialize("766bd09f-dcfb-464d-b79c-e544a3600917");
@@ -63,7 +60,7 @@ Future main() async {
         break;
     }
     await appLocalization.init();
-    LoggerUtil.info('app name: ' + packageInfo.packageName);
+    LoggerUtil.info('app name: ${packageInfo.packageName}');
     AppConfig(flavor, '');
     HttpOverrides.global = MyHttpOverrides();
     runApp(
