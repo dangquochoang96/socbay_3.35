@@ -18,7 +18,7 @@ import 'package:socbay/widgets/loading_indicator.dart';
 import 'package:socbay/widgets/my_app_bar.dart';
 
 class MachineDetailScreen extends StatefulWidget {
-  const MachineDetailScreen({Key? key}) : super(key: key);
+  const MachineDetailScreen({super.key});
 
   @override
   State<MachineDetailScreen> createState() => _MachineDetailScreenState();
@@ -87,8 +87,7 @@ class _MachineDetailScreenState extends State<MachineDetailScreen> {
                             url: _bloc.order.product!.images!.isNotEmpty &&
                                     _bloc.order.product!.images![0].link == null
                                 ? ""
-                                : "$protocol${AppConfig.instance.values.apiUrl}" +
-                                    _bloc.order.product!.images![0].link!,
+                                : "$protocol${AppConfig.instance.values.apiUrl}${_bloc.order.product!.images![0].link!}",
                             width: MediaQuery.of(context).size.width * 0.6,
                             height: MediaQuery.of(context).size.width * 0.6
                             //height: context.width - paddingHorizontal * 2),

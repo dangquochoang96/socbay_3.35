@@ -11,12 +11,13 @@ import 'package:socbay/data/repository/auth/api_repository.dart';
 import 'package:http/http.dart' as http;
 import 'package:socbay/utils/logger_util.dart';
 
-import 'comment_ technique_event.dart';
-import 'comment_ technique_state.dart';
+import 'comment_technique_event.dart';
+import 'comment_technique_state.dart';
 
-class CommentTechniqueBloc extends Bloc<CommentTechniqueEvent, CommentTechniqueState> {
+class CommentTechniqueBloc
+    extends Bloc<CommentTechniqueEvent, CommentTechniqueState> {
   CommentTechniqueBloc({required this.apiRepository, required this.args})
-      : super(CommentTechniqueInitState()) {
+    : super(CommentTechniqueInitState()) {
     on<CommentTechniqueListEvent>(_mapGetListCommentAndRatingEventToState);
   }
   final ApiRepository apiRepository;
@@ -27,37 +28,46 @@ class CommentTechniqueBloc extends Bloc<CommentTechniqueEvent, CommentTechniqueS
   bool isLoading = true;
   List<OrderDetailModel>? lstOrder;
   FutureOr<void> _mapGetListCommentAndRatingEventToState(
-      CommentTechniqueListEvent event,
-      Emitter<CommentTechniqueState> emit) async {
+    CommentTechniqueListEvent event,
+    Emitter<CommentTechniqueState> emit,
+  ) async {
     isLoading = true;
     await _getProfile();
     await _getRating();
     isLoading = false;
     emit(CommentTechniqueInitState());
   }
+
   Future<void> _getProfile() async {
-    var url = Uri.http(AppConfig.instance.values.apiUrl,"/api/user/${(args["id"])}");
-    try{
+    var url = Uri.http(
+      AppConfig.instance.values.apiUrl,
+      "/api/user/${(args["id"])}",
+    );
+    try {
       var res = await http.get(url);
-      if(res.statusCode == HttpStatus.ok){
-        var map = Map<String,dynamic>.from(json.decode(res.body));
+      if (res.statusCode == HttpStatus.ok) {
+        var map = Map<String, dynamic>.from(json.decode(res.body));
         userProfile = UserProfile.fromJson(map["data"]);
       }
-    }catch(ex){
+    } catch (ex) {
       LoggerUtil.log(ex.toString());
     }
   }
-  Future<void> _getRating() async{
+
+  Future<void> _getRating() async {
     int diem = 0;
-    var url = Uri.http(AppConfig.instance.values.apiUrl,"/api/order/get-list-order-rating-by-staff",
-        {
-          'user_id':args["id"].toString()
-        });
-    try{
+    var url = Uri.http(
+      AppConfig.instance.values.apiUrl,
+      "/api/order/get-list-order-rating-by-staff",
+      {'user_id': args["id"].toString()},
+    );
+    try {
       var res = await http.get(url);
-      if(res.statusCode == HttpStatus.ok){
-        var map = Map<String,dynamic>.from(json.decode(res.body));
-        lstOrder = List<OrderDetailModel>.from(map["data"].map((model)=>OrderDetailModel.fromJson(model)));
+      if (res.statusCode == HttpStatus.ok) {
+        var map = Map<String, dynamic>.from(json.decode(res.body));
+        lstOrder = List<OrderDetailModel>.from(
+          map["data"].map((model) => OrderDetailModel.fromJson(model)),
+        );
         dem = 0;
         lstOrder?.forEach((element) {
           // if(element.rate != null){
@@ -65,15 +75,15 @@ class CommentTechniqueBloc extends Bloc<CommentTechniqueEvent, CommentTechniqueS
           //   dem =dem+1;
           // }
           diem = diem + int.parse(element.rate!);
-          dem =dem+1;
+          dem = dem + 1;
         });
-        if(dem > 0){
-          rating = diem/dem;
-        }else{
+        if (dem > 0) {
+          rating = diem / dem;
+        } else {
           rating = 0;
         }
       }
-    }catch(ex){
+    } catch (ex) {
       LoggerUtil.log(ex.toString());
     }
   }

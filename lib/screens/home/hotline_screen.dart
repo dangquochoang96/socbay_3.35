@@ -14,7 +14,7 @@ import '../../utils/color_util.dart';
 import '../../routes.dart';
 
 class HotlineScreen extends StatefulWidget {
-  const HotlineScreen({Key? key}) : super(key: key);
+  const HotlineScreen({super.key});
 
   @override
   State<HotlineScreen> createState() => _HotlineScreenState();

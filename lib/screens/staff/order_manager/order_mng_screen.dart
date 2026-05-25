@@ -17,7 +17,7 @@ import 'package:socbay/widgets/loading_indicator.dart';
 import 'package:socbay/widgets/my_app_bar.dart';
 
 class OrderManagerScreen extends StatefulWidget {
-  const OrderManagerScreen({Key? key}) : super(key: key);
+  const OrderManagerScreen({super.key});
 
   @override
   State<OrderManagerScreen> createState() => _OrderManagerScreenState();
@@ -149,12 +149,12 @@ class _OrderManagerScreenState extends State<OrderManagerScreen> {
                             fontWeight: FontWeight.w600,
                             color: ColorUtil.bangladeshGreen))),
                 Align(
+                  alignment: Alignment.center,
                   child: SizedBox(
                     width: MediaQuery.of(context).size.width * 0.8,
                     child: const Divider(
                         color: Color(0xFFD6D6D6), thickness: 2, height: 30),
                   ),
-                  alignment: Alignment.center,
                 ),
                 _buildHistoryFilterCore()
               ],

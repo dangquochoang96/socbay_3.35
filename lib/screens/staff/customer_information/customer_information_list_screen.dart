@@ -12,7 +12,7 @@ import '../../../routes.dart';
 import '../../../utils/color_util.dart';
 
 class CustomerInformationListScreen extends StatefulWidget {
-  const CustomerInformationListScreen({Key? key}) : super(key: key);
+  const CustomerInformationListScreen({super.key});
 
   @override
   State<CustomerInformationListScreen> createState() =>
@@ -173,6 +173,7 @@ class _CustomerInformationListScreenState
               ],
             ),
             Align(
+              alignment: Alignment.center,
               child: SizedBox(
                 width: MediaQuery.of(context).size.width * 0.8,
                 child: const Divider(
@@ -181,7 +182,6 @@ class _CustomerInformationListScreenState
                   height: 30,
                 ),
               ),
-              alignment: Alignment.center,
             ),
             _tableAction(),
             Expanded(
@@ -407,31 +407,31 @@ class _CustomerInformationListScreenState
             children: const [
               TableCell(
                   child: Align(
+                alignment: Alignment.center,
                 child: Text("STT", style: TextStyle(color: ColorUtil.white)),
-                alignment: Alignment.center,
               )),
               TableCell(
                   child: Align(
+                alignment: Alignment.center,
                 child: Text("Họ tên", style: TextStyle(color: ColorUtil.white)),
-                alignment: Alignment.center,
               )),
               TableCell(
                   child: Align(
+                alignment: Alignment.center,
                 child: Text("Số điện thoại",
                     style: TextStyle(color: ColorUtil.white)),
-                alignment: Alignment.center,
               )),
               TableCell(
                   child: Align(
+                alignment: Alignment.center,
                 child:
                     Text("Địa chỉ", style: TextStyle(color: ColorUtil.white)),
-                alignment: Alignment.center,
               )),
               TableCell(
                   child: Align(
+                alignment: Alignment.center,
                 child:
                     Text("Lịch sử", style: TextStyle(color: ColorUtil.white)),
-                alignment: Alignment.center,
               )),
             ]),
       ],

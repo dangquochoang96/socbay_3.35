@@ -32,7 +32,7 @@ extension MediaQueryValues on BuildContext {
     ));
   }
 
-  showSnackBarError(
+  void showSnackBarError(
     String message, {
     Duration? duration,
   }) {
@@ -44,7 +44,7 @@ extension MediaQueryValues on BuildContext {
     );
   }
 
-  showSnackBarSuccess(
+  void showSnackBarSuccess(
     String message, {
     Duration? duration,
   }) {

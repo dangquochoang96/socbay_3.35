@@ -16,9 +16,8 @@ abstract class NumberFormatUtil {
     if(price == null){
       return "- - vnđ";
     }
-    return currencyFormat(Parse.toNumValue(price),
-            decimalDigits: decimalDigits) +
-        " vnđ";
+    return "${currencyFormat(Parse.toNumValue(price),
+            decimalDigits: decimalDigits)} vnđ";
   }
 
   static double parse(String? price) {

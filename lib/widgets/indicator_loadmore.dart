@@ -7,7 +7,7 @@ import '../utils/color_util.dart';
 class IndicatorLoadMore extends StatelessWidget {
   final EdgeInsets? padding;
 
-  const IndicatorLoadMore({Key? key, this.padding}) : super(key: key);
+  const IndicatorLoadMore({super.key, this.padding});
 
   @override
   Widget build(BuildContext context) {

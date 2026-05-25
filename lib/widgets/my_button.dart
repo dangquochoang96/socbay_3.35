@@ -9,13 +9,13 @@ class DefaultOutlinedButton extends StatelessWidget {
   final Color? textColor;
 
   const DefaultOutlinedButton({
-    Key? key,
+    super.key,
     required this.onPressed,
     this.text,
     this.child,
     this.textColor = ColorUtil.bangladeshGreen,
     this.padding = const EdgeInsets.symmetric(horizontal: 12),
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +32,7 @@ class DefaultOutlinedButton extends StatelessWidget {
 
 class DefaultButton extends StatelessWidget {
   const DefaultButton({
-    Key? key,
+    super.key,
     required this.onPressed,
     this.color = ColorUtil.bangladeshGreen,
     this.textColor = Colors.white,
@@ -43,7 +43,7 @@ class DefaultButton extends StatelessWidget {
     this.borderRadius,
     this.width,
     this.height,
-  }) : super(key: key);
+  });
   final void Function()? onPressed;
   final String? text;
   final Widget? child;

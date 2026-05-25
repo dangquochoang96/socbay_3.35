@@ -15,7 +15,7 @@ import '../staff/technique/technique_screen.dart';
 
 
 class ChooseFavouriteStaffScreen extends StatefulWidget {
-  const ChooseFavouriteStaffScreen({Key? key}) : super(key: key);
+  const ChooseFavouriteStaffScreen({super.key});
 
   @override
   State<ChooseFavouriteStaffScreen> createState() =>

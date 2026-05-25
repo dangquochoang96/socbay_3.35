@@ -21,7 +21,7 @@ import 'package:socbay/widgets/loading_indicator.dart';
 import 'package:socbay/widgets/my_app_bar.dart';
 
 class FeedbackScreen extends StatefulWidget {
-  const FeedbackScreen({Key? key}) : super(key: key);
+  const FeedbackScreen({super.key});
 
   @override
   State<FeedbackScreen> createState() => _FeedbackScreenState();
@@ -573,7 +573,7 @@ class _FeedbackScreenState extends State<FeedbackScreen>
             ClipRRect(
               borderRadius: BorderRadius.circular(8.0),
               child: ImageUtil.loadNetWorkImage(
-                  url: "$protocol${AppConfig.instance.values.apiUrl}" + path,
+                  url: "$protocol${AppConfig.instance.values.apiUrl}$path",
                   width: 120,
                   height: 200),
             ),

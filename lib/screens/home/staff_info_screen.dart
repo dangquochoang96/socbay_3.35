@@ -21,7 +21,7 @@ import 'package:socbay/widgets/my_app_bar.dart';
 import '../../data/model/order_detail_model.dart';
 
 class StaffInfoScreen extends StatefulWidget {
-  const StaffInfoScreen({Key? key}) : super(key: key);
+  const StaffInfoScreen({super.key});
 
   @override
   State<StaffInfoScreen> createState() => _StaffInfoScreenState();
@@ -147,8 +147,7 @@ class _StaffInfoScreenState extends State<StaffInfoScreen> {
                   children: [
                     staffInfo.avatar != null
                         ? fullScreenHeroWidget(
-                            "$protocol${AppConfig.instance.values.apiUrl}/" +
-                                staffInfo.avatar!,
+                            "$protocol${AppConfig.instance.values.apiUrl}/${staffInfo.avatar!}",
                           )
                         : ClipRRect(
                             borderRadius: BorderRadius.circular(14),
@@ -271,7 +270,6 @@ class _StaffInfoScreenState extends State<StaffInfoScreen> {
                               (service) => Container(
                                 margin: const EdgeInsets.only(left: 3.0),
                                 child: TextButton(
-                                  child: Text(service),
                                   onPressed: () {},
                                   style: OutlinedButton.styleFrom(
                                     side: const BorderSide(
@@ -280,6 +278,7 @@ class _StaffInfoScreenState extends State<StaffInfoScreen> {
                                     ),
                                     padding: const EdgeInsets.all(10.0),
                                   ),
+                                  child: Text(service),
                                 ),
                               ),
                             )
@@ -427,8 +426,7 @@ class _StaffInfoScreenState extends State<StaffInfoScreen> {
                 borderRadius: BorderRadius.circular(10),
                 child: ImageUtil.loadNetWorkImage(
                     url: _lstOrder?[index].user?.avatar != null
-                        ? ("$protocol${AppConfig.instance.values.apiUrl}/" +
-                            _lstOrder![index].user!.avatar!)
+                        ? ("$protocol${AppConfig.instance.values.apiUrl}/${_lstOrder![index].user!.avatar!}")
                         : "",
                     height: MediaQuery.of(context).size.width * 0.12 - 15,
                     width: MediaQuery.of(context).size.width * 0.12 - 15,

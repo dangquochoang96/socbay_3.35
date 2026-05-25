@@ -29,10 +29,10 @@ class VerifyOTPScreen extends StatefulWidget {
   final Map<String, dynamic> userData;
 
   const VerifyOTPScreen({
-    Key? key,
+    super.key,
     this.isForgotPassword = false,
     required this.userData,
-  }) : super(key: key);
+  });
 
   @override
   State<VerifyOTPScreen> createState() => _VerifyOTPScreenState();

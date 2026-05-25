@@ -19,7 +19,7 @@ import 'package:socbay/widgets/my_button.dart';
 import '../../data/event_bus/event_bus_event.dart';
 
 class GiftDetailScreen extends StatefulWidget {
-  const GiftDetailScreen({Key? key, required this.args}) : super(key: key);
+  const GiftDetailScreen({super.key, required this.args});
   final Map<String, dynamic> args;
 
   @override

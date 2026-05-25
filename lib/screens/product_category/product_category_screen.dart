@@ -18,7 +18,7 @@ import 'package:socbay/widgets/my_app_bar.dart';
 class ProductCategoryScreen extends StatefulWidget {
   final Map<String, dynamic>? args;
 
-  const ProductCategoryScreen({Key? key, this.args}) : super(key: key);
+  const ProductCategoryScreen({super.key, this.args});
 
   @override
   State<ProductCategoryScreen> createState() => _ProductCategoryScreenState();
@@ -135,8 +135,7 @@ class _ProductCategoryScreenState extends State<ProductCategoryScreen> {
             children: [
               ImageUtil.loadNetWorkImage(
                   url: productCategoryInfo.image != null
-                      ? "$protocol${AppConfig.instance.values.apiUrl}" +
-                          productCategoryInfo.image!
+                      ? "$protocol${AppConfig.instance.values.apiUrl}${productCategoryInfo.image!}"
                       : "",
                   fit: BoxFit.contain,
                   height: context.width / 2.8,

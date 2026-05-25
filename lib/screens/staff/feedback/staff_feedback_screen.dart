@@ -11,7 +11,7 @@ import 'package:socbay/widgets/loading_indicator.dart';
 import 'package:socbay/widgets/my_app_bar.dart';
 
 class StaffFeedbackScreen extends StatefulWidget {
-  const StaffFeedbackScreen({Key? key}) : super(key: key);
+  const StaffFeedbackScreen({super.key});
 
   @override
   State<StaffFeedbackScreen> createState() => _FeedbackScreenState();

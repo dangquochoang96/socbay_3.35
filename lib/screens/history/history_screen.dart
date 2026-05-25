@@ -22,7 +22,7 @@ import 'package:socbay/widgets/text_field_default.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class HistoryScreen extends StatefulWidget {
-  const HistoryScreen({Key? key}) : super(key: key);
+  const HistoryScreen({super.key});
   @override
   State<HistoryScreen> createState() => _HistoryScreenState();
 }
@@ -84,7 +84,6 @@ class _HistoryScreenState extends State<HistoryScreen>
         floatingActionButton: FloatingActionButton(
             heroTag: "history_screen",
             backgroundColor: ColorUtil.brightYellow,
-            child: const Icon(Icons.add),
             shape: const CircleBorder(
               side: BorderSide(
                 color: Colors.white,
@@ -104,7 +103,8 @@ class _HistoryScreenState extends State<HistoryScreen>
                     "listService": [],
                     "index": "",
                   });
-            }),
+            },
+            child: const Icon(Icons.add)),
         appBar: MyAppBar(
           title: "Lịch sử",
           isBackNavigation: false,
@@ -350,8 +350,7 @@ class _HistoryScreenState extends State<HistoryScreen>
                     child: ImageUtil.loadNetWorkImage(
                         url: machine.product?.images?[0].link == null
                             ? ""
-                            : "$protocol${AppConfig.instance.values.apiUrl}" +
-                                machine.product!.images![0].link!,
+                            : "$protocol${AppConfig.instance.values.apiUrl}${machine.product!.images![0].link!}",
                         height: MediaQuery.of(context).size.width * 0.16,
                         width: MediaQuery.of(context).size.width * 0.16),
                   ),
@@ -466,8 +465,8 @@ class _HistoryScreenState extends State<HistoryScreen>
         : ElevatedButton(
             style: ButtonStyle(
               backgroundColor:
-                  MaterialStateProperty.all<Color>(ColorUtil.white),
-              shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                  WidgetStateProperty.all<Color>(ColorUtil.white),
+              shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                 RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                   side: const BorderSide(

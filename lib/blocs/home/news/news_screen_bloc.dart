@@ -57,7 +57,7 @@ class NewsScreenBloc extends Bloc<NewsScreenEvent, NewsScreenState> {
       isLoading = false;
       emit(NewsScreenInitialState());
     }catch(ex){
-      LoggerUtil.error("---GET BLOGS LIST ERROR--- \n"+ex.toString());
+      LoggerUtil.error("---GET BLOGS LIST ERROR--- \n$ex");
     }
   }
 

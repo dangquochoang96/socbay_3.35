@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 
 class TaskCancelTab extends StatefulWidget {
-  const TaskCancelTab({Key? key}) : super(key: key);
+  const TaskCancelTab({super.key});
 
   @override
   State<TaskCancelTab> createState() => _TaskCancelTabState();

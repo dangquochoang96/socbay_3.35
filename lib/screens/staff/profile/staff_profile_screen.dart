@@ -20,7 +20,7 @@ import 'package:socbay/widgets/dialog/custom_alert_dialog.dart';
 import 'package:socbay/widgets/my_app_bar.dart';
 
 class StaffProfileScreen extends StatefulWidget {
-  const StaffProfileScreen({Key? key}) : super(key: key);
+  const StaffProfileScreen({super.key});
 
   @override
   State<StaffProfileScreen> createState() => _StaffProfileScreenState();
@@ -217,14 +217,14 @@ class _StaffProfileScreenState extends State<StaffProfileScreen> {
                   Container(
                     margin: const EdgeInsets.only(left: 3.0),
                     child: TextButton(
-                        child: Text(service),
                         onPressed: () {},
                         style: OutlinedButton.styleFrom(
                           //<-- SEE HERE
                             side: const BorderSide(
                                 width: 1.0, color: ColorUtil.bangladeshGreen),
                             padding: const EdgeInsets.all(10.0)
-                        )
+                        ),
+                        child: Text(service)
                     ),)
               )
                   .toList(),
@@ -275,7 +275,7 @@ class _StaffProfileScreenState extends State<StaffProfileScreen> {
                 borderRadius: BorderRadius.circular(140),
                 child: staffInfo.avatar != null
                     ? Image.network(
-                    "$protocol${AppConfig.instance.values.apiUrl}" + staffInfo.avatar!,
+                    "$protocol${AppConfig.instance.values.apiUrl}${staffInfo.avatar!}",
                     height: 160, width: 160, fit: BoxFit.cover)
                     : ImageUtil.loadAssetsImage(
                     fileName: Images.iconAdvise,

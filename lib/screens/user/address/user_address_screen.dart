@@ -18,7 +18,7 @@ import 'package:socbay/widgets/my_app_bar.dart';
 import 'package:socbay/widgets/my_button.dart';
 
 class UserAddressScreen extends StatefulWidget {
-  const UserAddressScreen({Key? key}) : super(key: key);
+  const UserAddressScreen({super.key});
 
   @override
   State<UserAddressScreen> createState() => _UserAddressScreenState();
@@ -151,14 +151,14 @@ class _UserAddressScreenState extends State<UserAddressScreen> {
         secondaryBackground: Container(
           color: Colors.red,
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: const Icon(Icons.delete_forever, color: Colors.white),
           alignment: Alignment.centerRight,
+          child: const Icon(Icons.delete_forever, color: Colors.white),
         ),
         background: Container(
           color: ColorUtil.bangladeshGreen,
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: const Icon(Icons.edit, color: Colors.white),
           alignment: Alignment.centerLeft,
+          child: const Icon(Icons.edit, color: Colors.white),
         ),
         child: Container(
           width: double.infinity,

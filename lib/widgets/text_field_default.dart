@@ -39,7 +39,7 @@ class TextFieldDefault extends StatefulWidget {
   final Widget? label;
 
   const TextFieldDefault({
-    Key? key,
+    super.key,
     this.decoration = const InputDecoration(),
     this.millisecondDurationDebounce = 500,
     this.autoFocus = false,
@@ -63,7 +63,7 @@ class TextFieldDefault extends StatefulWidget {
     this.prefixIcon,
     this.contentPadding,
     this.label,
-  }) : super(key: key);
+  });
 
   @override
   State<StatefulWidget> createState() => _TextFiledDebounceState();

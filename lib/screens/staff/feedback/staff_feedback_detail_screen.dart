@@ -18,7 +18,7 @@ import 'package:socbay/widgets/dialog/custom_alert_dialog.dart';
 import 'package:socbay/widgets/my_app_bar.dart';
 
 class StaffDetailFeedbackScreen extends StatefulWidget {
-  const StaffDetailFeedbackScreen({Key? key}) : super(key: key);
+  const StaffDetailFeedbackScreen({super.key});
 
   @override
   State<StaffDetailFeedbackScreen> createState() => _FeedbackScreenState();
@@ -157,11 +157,11 @@ class _FeedbackScreenState extends State<StaffDetailFeedbackScreen>
             ? _button(isPositive, action, text)
             : ElevatedButton(
                 style: ButtonStyle(
-                  padding: MaterialStateProperty.all<EdgeInsets>(
+                  padding: WidgetStateProperty.all<EdgeInsets>(
                       const EdgeInsets.symmetric(vertical: 10)),
                   backgroundColor:
-                      MaterialStateProperty.all<Color>(ColorUtil.white),
-                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                      WidgetStateProperty.all<Color>(ColorUtil.white),
+                  shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                     RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),
                       side: const BorderSide(

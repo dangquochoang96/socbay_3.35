@@ -17,7 +17,7 @@ class DbManager {
 
   Database? db;
 
-  openDb() async {
+  Future<void> openDb() async {
     LoggerUtil.info('openDb', tag: tag);
     try {
       db ??= await openDatabase(
@@ -31,7 +31,7 @@ class DbManager {
         onUpgrade: (db, oldVersion, newVersion) async {},
       );
     } catch (ex) {
-      LoggerUtil.error("OpenDb Error : "+ex.toString());
+      LoggerUtil.error("OpenDb Error : $ex");
       db = null;
     }
   }
@@ -48,7 +48,7 @@ class DbManager {
           ''');
   }
 
-  closeDb() async {
+  Future<void> closeDb() async {
     LoggerUtil.info('closeDb', tag: tag);
     try {
       await db?.close();
@@ -74,7 +74,7 @@ class DbManager {
     try {
       result = await db?.insert(tableUser, data) ?? 0;
     } catch (ex) {
-      LoggerUtil.error("OpenDb InsertAccount Error : "+ex.toString());
+      LoggerUtil.error("OpenDb InsertAccount Error : $ex");
     }
     LoggerUtil.info('insertAccount : $tableUser - result: $result', tag: tag);
     if(result ==0){
@@ -90,7 +90,7 @@ class DbManager {
       List<Map<String, Object?>>? list = await db?.query(tableUser);
       LoggerUtil.info('SHOW TABLE ACCOUNTS $tableUser: $list', tag: tag);
     } catch (ex) {
-      LoggerUtil.error("OpenDb ShowTableAccounts Error : "+ex.toString());
+      LoggerUtil.error("OpenDb ShowTableAccounts Error : $ex");
     }
     await closeDb();
   }
@@ -108,7 +108,7 @@ class DbManager {
       result = await db
           ?.update(tableUser, data, where: where, whereArgs: [username]);
     } catch (ex) {
-      LoggerUtil.error("OpenDb UpdatePassword Error : "+ex.toString());
+      LoggerUtil.error("OpenDb UpdatePassword Error : $ex");
     }
     await showTableAccounts();
     await closeDb();
@@ -122,9 +122,9 @@ class DbManager {
       maps = await db?.query(
         tableUser,
       );
-      LoggerUtil.info("OpenDb GetAccounts Infor : "+maps.toString());
+      LoggerUtil.info("OpenDb GetAccounts Infor : $maps");
     } catch (ex) {
-      LoggerUtil.error("OpenDb GetAccounts Error : "+ex.toString());
+      LoggerUtil.error("OpenDb GetAccounts Error : $ex");
     }
 
     List<AccountDb> accounts = [];

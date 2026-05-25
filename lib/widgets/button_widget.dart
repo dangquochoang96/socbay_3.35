@@ -10,15 +10,14 @@ class ButtonWidget extends StatelessWidget {
   final EdgeInsetsGeometry margin;
 
   const ButtonWidget(
-      {Key? key,
+      {super.key,
       required this.onTap,
       required this.child,
       this.color = Colors.transparent,
       this.borderRadius,
       this.padding = EdgeInsets.zero,
       this.margin = EdgeInsets.zero,
-      this.isEnabled = true})
-      : super(key: key);
+      this.isEnabled = true});
 
   @override
   Widget build(BuildContext context) {

@@ -21,7 +21,7 @@ const double defaultLat = 21.0278; // HaNoi
 const double defaultLng = 105.8342; // HaNoi
 
 class MapScreen extends StatefulWidget {
-  const MapScreen({Key? key}) : super(key: key);
+  const MapScreen({super.key});
 
   @override
   State<MapScreen> createState() => MapScreenState();

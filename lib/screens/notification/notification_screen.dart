@@ -14,7 +14,7 @@ import 'package:socbay/widgets/button_widget.dart';
 import 'package:socbay/widgets/my_app_bar.dart';
 
 class NotificationScreen extends StatefulWidget {
-  const NotificationScreen({Key? key}) : super(key: key);
+  const NotificationScreen({super.key});
 
   @override
   State<NotificationScreen> createState() => _NotificationScreenState();

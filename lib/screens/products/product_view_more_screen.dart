@@ -6,7 +6,7 @@ import 'package:socbay/blocs/product/product_view_more/product_view_more_screen_
 import 'package:socbay/widgets/my_app_bar.dart';
 
 class ProductViewMoreScreen extends StatefulWidget {
-  const ProductViewMoreScreen({Key? key}) : super(key: key);
+  const ProductViewMoreScreen({super.key});
 
   @override
   State<ProductViewMoreScreen> createState() => _ProductViewMoreScreenState();

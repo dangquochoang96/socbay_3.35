@@ -41,7 +41,7 @@ class ProductCategoryScreenBloc extends Bloc<ProductCategoryScreenEvent, Product
         isLoading=false;
       }
     }catch(exception){
-      LoggerUtil.error("--- LIST CATEGORY PRODUCTS ERROR--- \n"+exception.toString());
+      LoggerUtil.error("--- LIST CATEGORY PRODUCTS ERROR--- \n$exception");
     }
 
     // final res = await apiRepository.getProductCategory();

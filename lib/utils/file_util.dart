@@ -94,7 +94,7 @@ Future<File?> onGetVideo(
   return null;
 }
 
-_showPhotoPermissionAlertDialog(BuildContext context) {
+void _showPhotoPermissionAlertDialog(BuildContext context) {
   CustomAlertDialog.show(
     context,
     leftText: "Cài đặt",
@@ -116,7 +116,7 @@ Future<String> getAppPath() async {
 
 Future saveAndShareImage(
     {required Uint8List image, String content = ''}) async {
-  String filePath = await getAppPath() + '/screenshot_result.png';
+  String filePath = '${await getAppPath()}/screenshot_result.png';
   File file = File(filePath);
   await file.writeAsBytes(image);
   XFile xFile = XFile(filePath);

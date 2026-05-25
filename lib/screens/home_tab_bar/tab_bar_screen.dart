@@ -14,7 +14,7 @@ import '../../application.dart';
 class TabBarScreen extends StatefulWidget {
   static const String routeName = '/tab';
 
-  const TabBarScreen({Key? key}) : super(key: key);
+  const TabBarScreen({super.key});
 
   @override
   _TabBarScreenState createState() => _TabBarScreenState();

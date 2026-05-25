@@ -6,7 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../config/app_localization.dart';
 
 class HotlineWidget extends StatelessWidget {
-  const HotlineWidget({Key? key}) : super(key: key);
+  const HotlineWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +14,7 @@ class HotlineWidget extends StatelessWidget {
         height: 70,
         child: Center(
           child: MyRichText(
-              firstText: l("Hotline") + ": ",
+              firstText: "${l("Hotline")}: ",
               secondText: l("0963456911"),
               firstTextStyle: const TextStyle(
                   color: Colors.grey,

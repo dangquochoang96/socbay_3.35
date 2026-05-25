@@ -17,7 +17,7 @@ import 'package:socbay/widgets/loading_indicator.dart';
 import '../../../data/model/user_profile.dart';
 
 class TaskWaitTab extends StatefulWidget {
-  const TaskWaitTab({Key? key}) : super(key: key);
+  const TaskWaitTab({super.key});
 
   @override
   State<TaskWaitTab> createState() => _TaskWaitState();

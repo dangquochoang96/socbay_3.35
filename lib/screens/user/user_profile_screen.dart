@@ -22,7 +22,7 @@ import 'package:url_launcher/url_launcher.dart';
 const BorderRadius borderTextField = BorderRadius.all(Radius.circular(13));
 
 class UserProfileScreen extends StatefulWidget {
-  const UserProfileScreen({Key? key}) : super(key: key);
+  const UserProfileScreen({super.key});
 
   @override
   State<UserProfileScreen> createState() => _UserProfileScreenState();
@@ -115,7 +115,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     );
   }
 
-  _launchURL() async {
+  Future<void> _launchURL() async {
     final Uri url = Uri.parse(
         'https://geysereco.com/chinh-sach-bao-mat-thong-tin-khach-hang');
     if (!await launchUrl(url)) {
@@ -132,8 +132,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 borderRadius: BorderRadius.circular(140),
                 child: ImageUtil.loadNetWorkImage(
                     url: _bloc.user != null && _bloc.user!.avatar != null
-                        ? "$protocol${AppConfig.instance.values.apiUrl}" +
-                            _bloc.user!.avatar!
+                        ? "$protocol${AppConfig.instance.values.apiUrl}${_bloc.user!.avatar!}"
                         : '',
                     width: 160,
                     height: 160)),

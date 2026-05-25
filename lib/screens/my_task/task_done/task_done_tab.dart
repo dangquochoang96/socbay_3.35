@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 
 class TaskDoneTab extends StatefulWidget {
-  const TaskDoneTab({Key? key}) : super(key: key);
+  const TaskDoneTab({super.key});
 
   @override
   State<TaskDoneTab> createState() => _TaskDoneTabState();

@@ -13,7 +13,7 @@ import '../../widgets/loading_indicator.dart';
 import '../../widgets/my_app_bar.dart';
 
 class EvaluateScreen extends StatefulWidget {
-  const EvaluateScreen({Key? key}) : super(key: key);
+  const EvaluateScreen({super.key});
 
   @override
   State<EvaluateScreen> createState() => _EvaluateScreenListState();

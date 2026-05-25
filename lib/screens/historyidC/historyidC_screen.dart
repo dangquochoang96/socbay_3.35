@@ -24,7 +24,7 @@ import '../../blocs/historyidC/historyidC_screen_event.dart';
 import '../../blocs/historyidC/historyidC_screen_state.dart';
 
 class HistoryidCScreen extends StatefulWidget {
-  const HistoryidCScreen({Key? key}) : super(key: key);
+  const HistoryidCScreen({super.key});
 
   @override
   State<HistoryidCScreen> createState() => _HistoryidCScreenState();
@@ -92,7 +92,6 @@ class _HistoryidCScreenState extends State<HistoryidCScreen>
         floatingActionButton: FloatingActionButton(
             heroTag: "history_screen",
             backgroundColor: ColorUtil.brightYellow,
-            child: const Icon(Icons.add),
             shape: const CircleBorder(
               side: BorderSide(
                 color: Colors.white,
@@ -101,9 +100,9 @@ class _HistoryidCScreenState extends State<HistoryidCScreen>
             ),
             tooltip: "Thêm công việc",
             onPressed: () {
-              var _phone = '';
+              var phone = '';
               if (_bloc.args.containsKey('phone')) {
-                _phone = _bloc.args['phone'];
+                phone = _bloc.args['phone'];
               }
               Navigator.pushNamed(
                   context,
@@ -112,8 +111,9 @@ class _HistoryidCScreenState extends State<HistoryidCScreen>
                       : App.instance.userApp?.isUserRole() == true
                           ? Routes.staffServiceScreen
                           : Routes.staffServiceScreenSale,
-                  arguments: {"listService": [], "index": "", "phone": _phone});
-            }),
+                  arguments: {"listService": [], "index": "", "phone": phone});
+            },
+            child: const Icon(Icons.add)),
         appBar: MyAppBar(
           title: "Lịch sử",
           isBackNavigation: true,
@@ -362,8 +362,7 @@ class _HistoryidCScreenState extends State<HistoryidCScreen>
                     child: ImageUtil.loadNetWorkImage(
                         url: machine.product!.images?[0].link == null
                             ? ""
-                            : "$protocol${AppConfig.instance.values.apiUrl}" +
-                                machine.product!.images![0].link!,
+                            : "$protocol${AppConfig.instance.values.apiUrl}${machine.product!.images![0].link!}",
                         height: MediaQuery.of(context).size.width * 0.16,
                         width: MediaQuery.of(context).size.width * 0.16),
                   ),
@@ -478,8 +477,8 @@ class _HistoryidCScreenState extends State<HistoryidCScreen>
         : ElevatedButton(
             style: ButtonStyle(
               backgroundColor:
-                  MaterialStateProperty.all<Color>(ColorUtil.white),
-              shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                  WidgetStateProperty.all<Color>(ColorUtil.white),
+              shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                 RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                   side: const BorderSide(

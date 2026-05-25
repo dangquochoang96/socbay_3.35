@@ -36,7 +36,7 @@ class DetailBookingBloc extends Bloc<DetailBookingEvent, DetailBookingState> {
         //print(blogs);
       }
     }catch(ex){
-      LoggerUtil.error("---GET TASK ${args['id']} ERROR---\n"+ ex.toString());
+      LoggerUtil.error("---GET TASK ${args['id']} ERROR---\n$ex");
     }
 
     isLoading = false;

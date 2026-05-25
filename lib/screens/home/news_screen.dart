@@ -16,7 +16,7 @@ import '../../widgets/button_widget.dart';
 import '../../widgets/indicator_loadmore.dart';
 
 class NewsScreen extends StatefulWidget {
-  const NewsScreen({Key? key}) : super(key: key);
+  const NewsScreen({super.key});
 
   @override
   State<NewsScreen> createState() => _NewsScreenState();
@@ -94,8 +94,7 @@ class _NewsScreenState extends State<NewsScreen> {
             child: ImageUtil.loadNetWorkImage(
                 url: itemBlog.image == null
                     ? ""
-                    : "$protocol${AppConfig.instance.values.apiUrl}" +
-                        itemBlog.image!,
+                    : "$protocol${AppConfig.instance.values.apiUrl}${itemBlog.image!}",
                 fit: BoxFit.cover,
                 height: 100,
                 width: 100),

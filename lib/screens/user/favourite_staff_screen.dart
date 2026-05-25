@@ -15,7 +15,7 @@ import '../../blocs/user_info/favourite_staff/favourite_staff_state.dart';
 import '../../routes.dart';
 
 class FavouriteStaffScreen extends StatefulWidget {
-  const FavouriteStaffScreen({Key? key}) : super(key: key);
+  const FavouriteStaffScreen({super.key});
 
   @override
   State<FavouriteStaffScreen> createState() => _FavouriteStaffScreenState();

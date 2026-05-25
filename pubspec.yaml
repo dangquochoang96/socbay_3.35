@@ -69,6 +69,11 @@ dependencies:
   webview_flutter: ^4.13.0
   app_links: ^6.4.1
 
+  bloc: any
+  collection: any
+  meta: any
+  sqflite: any
+  path_provider: any
 dev_dependencies:
   flutter_test:
     sdk: flutter

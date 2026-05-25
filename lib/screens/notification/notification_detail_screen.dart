@@ -11,9 +11,9 @@ import 'package:socbay/widgets/my_app_bar.dart';
 
 class NotificationDetailScreen extends StatelessWidget {
   const NotificationDetailScreen({
-    Key? key,
+    super.key,
     required this.notificationResponse,
-  }) : super(key: key);
+  });
   final NotificationResponse notificationResponse;
 
   @override

@@ -6,7 +6,7 @@ import '../data/model/banner_model.dart';
 import '../utils/image_util.dart';
 
 class BannerSliderWidget extends StatefulWidget {
-  const BannerSliderWidget({Key? key, required this.banners}) : super(key: key);
+  const BannerSliderWidget({super.key, required this.banners});
 
   @override
   State<BannerSliderWidget> createState() => _SliderWidget();

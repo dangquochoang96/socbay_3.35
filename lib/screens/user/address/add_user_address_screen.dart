@@ -18,7 +18,7 @@ import 'package:socbay/widgets/text_field_default.dart';
 import '../../../utils/color_util.dart';
 
 class AddUserAddressScreen extends StatefulWidget {
-  const AddUserAddressScreen({Key? key, this.arguments}) : super(key: key);
+  const AddUserAddressScreen({super.key, this.arguments});
   final Object? arguments;
 
   @override
@@ -189,7 +189,7 @@ class _AddUserAddressScreenState extends State<AddUserAddressScreen> {
     String detailAddress = _addressDetailTextController.text.trim();
     String address = _addressTextController.text.trim();
     if (detailAddress.isNotEmpty) {
-      address = detailAddress + " - " + address;
+      address = "$detailAddress - $address";
     }
     if (userAddress == null) {
       _bloc.add(

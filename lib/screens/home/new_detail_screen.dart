@@ -11,9 +11,9 @@ class NewDetailScreen extends StatelessWidget {
   final BlogModel blogModel;
 
   const NewDetailScreen({
-    Key? key,
+    super.key,
     required this.blogModel,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +25,7 @@ class NewDetailScreen extends StatelessWidget {
         padding: const EdgeInsets.symmetric(
             horizontal: paddingHorizontal, vertical: paddingVertical),
         children: [
-          ImageUtil.loadNetWorkImage(url: blogModel.image!=null? '$protocol${AppConfig.instance.values.apiUrl}'+blogModel.image!:"" , height: 200),
+          ImageUtil.loadNetWorkImage(url: blogModel.image!=null? '$protocol${AppConfig.instance.values.apiUrl}${blogModel.image!}':"" , height: 200),
           const SizedBox(height: 16),
           Center(
             child: Text(

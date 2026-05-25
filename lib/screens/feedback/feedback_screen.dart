@@ -12,7 +12,7 @@ import '../../widgets/loading_indicator.dart';
 import '../../widgets/my_app_bar.dart';
 
 class FeedbackkScreen extends StatefulWidget {
-  const FeedbackkScreen({Key? key}) : super(key: key);
+  const FeedbackkScreen({super.key});
 
   @override
   State<FeedbackkScreen> createState() =>

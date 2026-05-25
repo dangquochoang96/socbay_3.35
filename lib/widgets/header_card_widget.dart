@@ -10,11 +10,11 @@ class HeaderCardWidget extends StatelessWidget {
   final void Function()? onViewMore;
 
   const HeaderCardWidget({
-    Key? key,
+    super.key,
     required this.text,
     this.isViewMore = true,
     this.onViewMore,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -16,7 +16,7 @@ import '../../blocs/comment_ technique/comment_ technique_event.dart';
 import '../../blocs/comment_ technique/comment_ technique_state.dart';
 
 class CommentTechniqueListScreen extends StatefulWidget {
-  const CommentTechniqueListScreen({Key? key}) : super(key: key);
+  const CommentTechniqueListScreen({super.key});
 
   @override
   State<CommentTechniqueListScreen> createState() =>
@@ -68,12 +68,12 @@ class _CommentTechniqueListScreenState
             children: [
               _buildStaffInfo(),
               Align(
+                alignment: Alignment.center,
                 child: SizedBox(
                   width: MediaQuery.of(context).size.width * 0.8,
                   child: const Divider(
                       color: Color(0xFFD6D6D6), thickness: 2, height: 30),
                 ),
-                alignment: Alignment.center,
               ),
               _buildStaffCommentAndRatingList()
             ],
@@ -138,8 +138,7 @@ class _CommentTechniqueListScreenState
                     borderRadius: BorderRadius.circular(10),
                     child: ImageUtil.loadNetWorkImage(
                         url: _lstOrder?[index].user?.avatar != null
-                            ? ("$protocol${AppConfig.instance.values.apiUrl}/" +
-                            _lstOrder![index].user!.avatar!)
+                            ? ("$protocol${AppConfig.instance.values.apiUrl}/${_lstOrder![index].user!.avatar!}")
                             : "",
                         height: MediaQuery.of(context).size.width * 0.2 - 15,
                         width: MediaQuery.of(context).size.width * 0.2 - 15,
@@ -226,7 +225,7 @@ class _CommentTechniqueListScreenState
           borderRadius: BorderRadius.circular(16),
           child: ImageUtil.loadNetWorkImage(
               url: _bloc.userProfile?.avatar != null
-                  ? ("$protocol${AppConfig.instance.values.apiUrl}/" + _bloc.userProfile!.avatar!)
+                  ? ("$protocol${AppConfig.instance.values.apiUrl}/${_bloc.userProfile!.avatar!}")
                   : "$protocol${AppConfig.instance.values.apiUrl}/product_images/ktv-avatar.jpg",
               height: MediaQuery.of(context).size.width * 0.18,
               width: MediaQuery.of(context).size.width * 0.18,

@@ -12,7 +12,7 @@ import 'package:socbay/widgets/dialog/custom_alert_dialog.dart';
 import 'blocs/root/root_event.dart';
 
 class Root extends StatefulWidget {
-  const Root({Key? key}) : super(key: key);
+  const Root({super.key});
 
   @override
   _RootState createState() => _RootState();

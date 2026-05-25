@@ -36,7 +36,7 @@ import 'package:socbay/widgets/text_field_default.dart';
 import 'package:image/image.dart' as img;
 
 class StaffServiceSaleScreen extends StatefulWidget {
-  const StaffServiceSaleScreen({Key? key}) : super(key: key);
+  const StaffServiceSaleScreen({super.key});
 
   @override
   State<StatefulWidget> createState() => _StaffServiceSaleScreenState();
@@ -952,11 +952,11 @@ class _StaffServiceSaleScreenState extends State<StaffServiceSaleScreen> {
             ? _button(isPositive, action, text)
             : ElevatedButton(
                 style: ButtonStyle(
-                  padding: MaterialStateProperty.all<EdgeInsets>(
+                  padding: WidgetStateProperty.all<EdgeInsets>(
                       const EdgeInsets.symmetric(vertical: 10)),
                   backgroundColor:
-                      MaterialStateProperty.all<Color>(ColorUtil.white),
-                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                      WidgetStateProperty.all<Color>(ColorUtil.white),
+                  shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                     RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),
                       side: const BorderSide(
@@ -1030,7 +1030,7 @@ class _StaffServiceSaleScreenState extends State<StaffServiceSaleScreen> {
             ClipRRect(
               borderRadius: BorderRadius.circular(8.0),
               child: ImageUtil.loadNetWorkImage(
-                  url: "$protocol${AppConfig.instance.values.apiUrl}" + path,
+                  url: "$protocol${AppConfig.instance.values.apiUrl}$path",
                   width: 120,
                   height: 200),
             ),

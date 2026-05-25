@@ -20,7 +20,7 @@ import '../../utils/image_util.dart';
 import '../../widgets/my_button.dart';
 
 class AccountInfoScreen extends StatefulWidget {
-  const AccountInfoScreen({Key? key}) : super(key: key);
+  const AccountInfoScreen({super.key});
 
   @override
   State<AccountInfoScreen> createState() => _AccountInfoScreenState();
@@ -182,7 +182,7 @@ class _AccountInfoScreenState extends State<AccountInfoScreen> {
                 borderRadius: BorderRadius.circular(140),
                 child: avatarFile != null
                     ? Image.network(
-                        "$protocol${AppConfig.instance.values.apiUrl}" + avatarFile!,
+                        "$protocol${AppConfig.instance.values.apiUrl}${avatarFile!}",
                         height: 160,
                         width: 160,
                         fit: BoxFit.cover)

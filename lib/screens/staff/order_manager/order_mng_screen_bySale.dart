@@ -18,7 +18,7 @@ import 'package:socbay/widgets/my_app_bar.dart';
 import '../../../blocs/staff/order/order_manager_bloc_bySale.dart';
 
 class OrderManagerScreenBySale extends StatefulWidget {
-  const OrderManagerScreenBySale({Key? key}) : super(key: key);
+  const OrderManagerScreenBySale({super.key});
 
   @override
   State<OrderManagerScreenBySale> createState() => _OrderManagerScreenState();
@@ -154,12 +154,12 @@ class _OrderManagerScreenState extends State<OrderManagerScreenBySale> {
                               fontWeight: FontWeight.w600,
                               color: ColorUtil.bangladeshGreen))),
                   Align(
+                    alignment: Alignment.center,
                     child: SizedBox(
                       width: MediaQuery.of(context).size.width * 0.8,
                       child: const Divider(
                           color: Color(0xFFD6D6D6), thickness: 2, height: 30),
                     ),
-                    alignment: Alignment.center,
                   ),
                   _buildHistoryFilterCore()
                 ],

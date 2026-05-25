@@ -15,7 +15,7 @@ import 'package:socbay/widgets/loading_indicator.dart';
 import 'package:socbay/widgets/my_app_bar.dart';
 
 class FavouriteProductScreen extends StatefulWidget {
-  const FavouriteProductScreen({Key? key}) : super(key: key);
+  const FavouriteProductScreen({super.key});
 
   @override
   State<FavouriteProductScreen> createState() => _FavouriteProductScreenState();

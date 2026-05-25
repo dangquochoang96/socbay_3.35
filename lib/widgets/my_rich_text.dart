@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 class MyRichText extends StatelessWidget {
   const MyRichText({
-    Key? key,
+    super.key,
     required this.firstText,
     required this.secondText,
     required this.firstTextStyle,
@@ -12,7 +12,7 @@ class MyRichText extends StatelessWidget {
     this.flexStart = 0,
     this.flexEnd = 1,
     this.mainAxisAlignment = MainAxisAlignment.center,
-  }) : super(key: key);
+  });
   final String firstText;
   final String secondText;
   final TextStyle firstTextStyle;

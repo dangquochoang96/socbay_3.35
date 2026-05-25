@@ -19,7 +19,7 @@ import 'package:socbay/widgets/text_field_default.dart';
 // import '../../widgets/text_field_default.dart';
 
 class TaskProcessedScreen extends StatefulWidget {
-  const TaskProcessedScreen({Key? key}) : super(key: key);
+  const TaskProcessedScreen({super.key});
   @override
   State<TaskProcessedScreen> createState() => _TaskProcessedScreenState();
 }
@@ -159,23 +159,23 @@ class _TaskProcessedScreenState extends State<TaskProcessedScreen> {
             children: const [
               TableCell(
                   child: Align(
+                alignment: Alignment.center,
                 child: Text("Ngày",
                     style: TextStyle(
                       color: ColorUtil.white,
                     )),
-                alignment: Alignment.center,
               )),
               TableCell(
                   child: Align(
+                alignment: Alignment.center,
                 child:
                     Text("Tên lõi", style: TextStyle(color: ColorUtil.white)),
-                alignment: Alignment.center,
               )),
               TableCell(
                   child: Align(
+                alignment: Alignment.center,
                 child: Text("Thành tiền",
                     style: TextStyle(color: ColorUtil.white)),
-                alignment: Alignment.center,
               ))
             ]),
         if (_bloc.taskProcessedModel != null &&
@@ -185,20 +185,20 @@ class _TaskProcessedScreenState extends State<TaskProcessedScreen> {
             TableRow(children: [
               TableCell(
                 child: Align(
+                  alignment: Alignment.center,
                   child: Text(_formatDatetime(item.createAt.toString())),
-                  alignment: Alignment.center,
                 ),
               ),
               TableCell(
                 child: Align(
-                  child: Text(item.name!),
                   alignment: Alignment.centerLeft,
+                  child: Text(item.name!),
                 ),
               ),
               TableCell(
                 child: Align(
-                  child: Text(item.price.toString()),
                   alignment: Alignment.center,
+                  child: Text(item.price.toString()),
                 ),
               )
             ])
@@ -250,17 +250,17 @@ class _TaskProcessedScreenState extends State<TaskProcessedScreen> {
             children: const [
               TableCell(
                   child: Align(
+                alignment: Alignment.center,
                 child: Text("Dịch vụ",
                     style: TextStyle(
                       color: ColorUtil.white,
                     )),
-                alignment: Alignment.center,
               )),
               TableCell(
                   child: Align(
+                alignment: Alignment.center,
                 child: Text("Lịch kiểm tra bảo dưỡng tiếp theo",
                     style: TextStyle(color: ColorUtil.white)),
-                alignment: Alignment.center,
               )),
             ]),
         if (_bloc.taskProcessedModel != null &&
@@ -270,15 +270,15 @@ class _TaskProcessedScreenState extends State<TaskProcessedScreen> {
             TableRow(children: [
               TableCell(
                 child: Align(
-                  child: Text(item.name!),
                   alignment: Alignment.centerLeft,
+                  child: Text(item.name!),
                 ),
               ),
               TableCell(
                 child: Align(
+                  alignment: Alignment.center,
                   child: Text(_formatDatetime(item.updateAt.toString())
                       .substring(0, 10)),
-                  alignment: Alignment.center,
                 ),
               )
             ])

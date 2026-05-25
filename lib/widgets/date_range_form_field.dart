@@ -47,15 +47,13 @@ class DateRangeField extends FormField<DateTimeRange> {
         this.width,
         this.margin,
         ValueChanged<DateTimeRange?>? onChanged,
-        FormFieldSetter<DateTimeRange>? onSaved,
-        FormFieldValidator<DateTimeRange>? validator,
+        super.onSaved,
+        super.validator,
         this.initialValue,
         bool autoValidate = false,
         this.dateFormat,
         InputDecoration decoration = const InputDecoration()})
       : super(
-      validator: validator,
-      onSaved: onSaved,
       enabled: enabled,
       initialValue: initialValue,
       builder: (FormFieldState<DateTimeRange> state) {

@@ -11,7 +11,7 @@ import 'package:socbay/widgets/my_app_bar.dart';
 
 
 class TaskScreenSale extends StatefulWidget {
-  const TaskScreenSale({Key? key}) : super(key: key);
+  const TaskScreenSale({super.key});
 
   @override
   State<TaskScreenSale> createState() => _TaskScreenState();

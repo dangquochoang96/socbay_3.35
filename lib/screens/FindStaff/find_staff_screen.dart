@@ -27,7 +27,7 @@ import 'package:socbay/widgets/my_app_bar.dart';
 const double defaultLat = 21.0278; // HaNoi
 const double defaultLng = 105.8342; // HaNoi
 class FindStaffScreen extends StatefulWidget{
-  const FindStaffScreen({Key? key}) : super(key: key);
+  const FindStaffScreen({super.key});
   @override
   State<FindStaffScreen> createState() => _SearchStaffScreenState();
 }

@@ -14,14 +14,13 @@ class LoadingIndicator extends StatelessWidget {
   final String text;
 
   const LoadingIndicator(
-      {Key? key,
+      {super.key,
       required this.isLoading,
       required this.child,
       this.opacity = 0,
       this.contentOpacity = 0.5,
       this.color = Colors.grey,
-      this.text = ''})
-      : super(key: key);
+      this.text = ''});
 
   final spinKit = const SpinKitRing(
     color: ColorUtil.white,

@@ -20,7 +20,7 @@ import 'package:socbay/widgets/my_app_bar.dart';
 import 'package:socbay/widgets/my_button.dart';
 
 class UpdateStaffScreen extends StatefulWidget {
-  const UpdateStaffScreen({Key? key}) : super(key: key);
+  const UpdateStaffScreen({super.key});
 
   @override
   State<StatefulWidget> createState() => _UpdateStaffScreenState();

@@ -12,8 +12,7 @@ import '../../../widgets/button_widget.dart';
 
 class TechniqueScreen extends StatefulWidget {
   const TechniqueScreen(
-      {Key? key, required int initialTabIndex, UserProfile? favoriteStaff})
-      : super(key: key);
+      {super.key, required int initialTabIndex, UserProfile? favoriteStaff});
 
   @override
   State<TechniqueScreen> createState() => _TechniqueScreenState();

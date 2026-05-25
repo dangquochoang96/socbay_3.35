@@ -28,7 +28,7 @@ import 'package:socbay/widgets/my_button.dart';
 class EditRentServiceScreen extends StatefulWidget {
   final Map<String, dynamic> args;
 
-  const EditRentServiceScreen({Key? key, required this.args}) : super(key: key);
+  const EditRentServiceScreen({super.key, required this.args});
 
   @override
   State<EditRentServiceScreen> createState() => _EditRentServiceScreenState();
@@ -81,14 +81,8 @@ class _EditRentServiceScreenState extends State<EditRentServiceScreen> {
       _currentSelectedValue = _bloc.taskModel?.type;
       if (_bloc.taskModel?.timeStar != null) {
         _parsedDate = DateTime.parse(_bloc.taskModel!.timeStar!);
-        _dateStart = _parsedDate.day.toString() +
-            "/" +
-            _parsedDate.month.toString() +
-            "/" +
-            _parsedDate.year.toString();
-        _timeStart = _parsedDate.hour.toString().padLeft(2, "0") +
-            ":" +
-            _parsedDate.minute.toString().padLeft(2, "0");
+        _dateStart = "${_parsedDate.day}/${_parsedDate.month}/${_parsedDate.year}";
+        _timeStart = "${_parsedDate.hour.toString().padLeft(2, "0")}:${_parsedDate.minute.toString().padLeft(2, "0")}";
       }
       _favouriteStaff = _bloc.taskModel?.staff;
       _listPath = _bloc.taskModel?.images ?? [];
@@ -633,7 +627,7 @@ class _EditRentServiceScreenState extends State<EditRentServiceScreen> {
             ClipRRect(
               borderRadius: BorderRadius.circular(8.0),
               child: ImageUtil.loadNetWorkImage(
-                  url: "$protocol${AppConfig.instance.values.apiUrl}" + path,
+                  url: "$protocol${AppConfig.instance.values.apiUrl}$path",
                   width: 120,
                   height: 200),
             ),

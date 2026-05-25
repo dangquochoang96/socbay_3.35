@@ -31,7 +31,7 @@ import '../../widgets/header_card_widget.dart';
 import '../../widgets/status_bar_color_widget.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -65,7 +65,6 @@ class _HomeScreenState extends State<HomeScreen> {
         floatingActionButton: FloatingActionButton(
             heroTag: "home",
             backgroundColor: ColorUtil.brightYellow,
-            child: const Icon(Icons.add),
             shape: const CircleBorder(
               side: BorderSide(
                 color: Colors.white,
@@ -85,7 +84,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     "listService": _bloc.services,
                     "index": "",
                   });
-            }),
+            },
+            child: const Icon(Icons.add)),
         appBar: _buildAppBar(),
         body: RefreshIndicator(
           onRefresh: _onRefresh,
@@ -273,8 +273,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: ImageUtil.loadNetWorkImage(
                       url: machine.product?.images?[0].link == null
                           ? ""
-                          : "$protocol${AppConfig.instance.values.apiUrl}" +
-                              machine.product!.images![0].link!,
+                          : "$protocol${AppConfig.instance.values.apiUrl}${machine.product!.images![0].link!}",
                       height: MediaQuery.of(context).size.width * 0.5,
                       width: MediaQuery.of(context).size.width * 0.5),
                 ),
@@ -763,8 +762,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: ImageUtil.loadNetWorkImage(
                 url: itemBlog.image == null
                     ? ""
-                    : "$protocol${AppConfig.instance.values.apiUrl}" +
-                        itemBlog.image!,
+                    : "$protocol${AppConfig.instance.values.apiUrl}${itemBlog.image!}",
                 fit: BoxFit.cover,
                 height: 100,
                 width: 100),

@@ -87,15 +87,15 @@ extension StringDateExtension on String {
       return ('Just now');
     } else {
       if (hoursDiff < 1) {
-        result = '$minuteDiff' + (isShort ? 'm' : ' ${('minute')}');
+        result = '$minuteDiff${isShort ? 'm' : ' ${('minute')}'}';
       } else if (dayDiff < 1) {
-        result = '$hoursDiff' + (isShort ? 'h' : ' ${('hours')}');
+        result = '$hoursDiff${isShort ? 'h' : ' ${('hours')}'}';
       } else if (week < 1) {
-        result = '$dayDiff' + (isShort ? 'd' : ' ${('days')}');
+        result = '$dayDiff${isShort ? 'd' : ' ${('days')}'}';
       } else if (year < 1) {
-        result = '$week' + (isShort ? 'w' : ' ${('weeks')}');
+        result = '$week${isShort ? 'w' : ' ${('weeks')}'}';
       } else {
-        result = '$year' + (isShort ? 'y' : ' ${('years')}');
+        result = '$year${isShort ? 'y' : ' ${('years')}'}';
       }
     }
 

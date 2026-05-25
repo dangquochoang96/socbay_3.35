@@ -12,7 +12,7 @@ import '../../blocs/home/feedbackid/feedbackid_screen_event.dart';
 import '../../blocs/home/feedbackid/feedbackid_screen_state.dart';
 
 class StaffFeedbackListScreen extends StatefulWidget {
-  const StaffFeedbackListScreen({Key? key}) : super(key: key);
+  const StaffFeedbackListScreen({super.key});
 
   @override
   State<StaffFeedbackListScreen> createState() => _FeedbackScreenListState();

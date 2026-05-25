@@ -17,7 +17,7 @@ import '../../utils/color_util.dart';
 
 class ProductScreen extends StatefulWidget {
   final Map<String, dynamic>? args;
-  const ProductScreen({Key? key, this.args}) : super(key: key);
+  const ProductScreen({super.key, this.args});
 
   @override
   State<ProductScreen> createState() => _ProductScreenState();
@@ -49,7 +49,7 @@ class _ProductScreenState extends State<ProductScreen> {
 
   }
 //// ADDING THE SCROLL LISTINER
-  _scrollListener() {
+  void _scrollListener() {
     if (_scrollController.offset >= _scrollController.position.maxScrollExtent &&
         !_scrollController.position.outOfRange) {
       setState(() {
@@ -148,7 +148,7 @@ class _ProductScreenState extends State<ProductScreen> {
                   child:ClipRRect(
                       borderRadius: BorderRadius.circular(8.0),
                     child: ImageUtil.loadNetWorkImage(
-                        url: productInfo.images!.isNotEmpty && productInfo.images![0].link != null?"$protocol${AppConfig.instance.values.apiUrl}"+productInfo.images![0].link!:"",
+                        url: productInfo.images!.isNotEmpty && productInfo.images![0].link != null?"$protocol${AppConfig.instance.values.apiUrl}${productInfo.images![0].link!}":"",
                         height: double.infinity,
                         fit: BoxFit.contain,
                         )),

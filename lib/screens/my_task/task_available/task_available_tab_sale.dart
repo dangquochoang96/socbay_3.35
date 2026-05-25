@@ -17,7 +17,7 @@ import 'package:socbay/widgets/loading_indicator.dart';
 import 'package:socbay/widgets/text_field_default.dart';
 
 class TaskAvailableTabSale extends StatefulWidget {
-  const TaskAvailableTabSale({Key? key}) : super(key: key);
+  const TaskAvailableTabSale({super.key});
 
   @override
   State<TaskAvailableTabSale> createState() => _TaskAvailableTabState();
@@ -359,8 +359,8 @@ class _TaskAvailableTabState extends State<TaskAvailableTabSale> {
         : ElevatedButton(
             style: ButtonStyle(
               backgroundColor:
-                  MaterialStateProperty.all<Color>(ColorUtil.white),
-              shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                  WidgetStateProperty.all<Color>(ColorUtil.white),
+              shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                 RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                   side: const BorderSide(

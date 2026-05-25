@@ -86,7 +86,6 @@ class _HistoryidScreenState extends State<HistoryidScreen>
         floatingActionButton: FloatingActionButton(
             heroTag: "history_screen",
             backgroundColor: ColorUtil.brightYellow,
-            child: const Icon(Icons.add),
             shape: const CircleBorder(
               side: BorderSide(
                 color: Colors.white,
@@ -106,7 +105,8 @@ class _HistoryidScreenState extends State<HistoryidScreen>
                     "listService": [],
                     "index": "",
                   });
-            }),
+            },
+            child: const Icon(Icons.add)),
         appBar: MyAppBar(
           title: "Lịch sử",
           isBackNavigation: false,
@@ -353,8 +353,7 @@ class _HistoryidScreenState extends State<HistoryidScreen>
                     child: ImageUtil.loadNetWorkImage(
                         url: machine.product!.images?[0].link == null
                             ? ""
-                            : "$protocol${AppConfig.instance.values.apiUrl}" +
-                                machine.product!.images![0].link!,
+                            : "$protocol${AppConfig.instance.values.apiUrl}${machine.product!.images![0].link!}",
                         height: MediaQuery.of(context).size.width * 0.16,
                         width: MediaQuery.of(context).size.width * 0.16),
                   ),
@@ -469,8 +468,8 @@ class _HistoryidScreenState extends State<HistoryidScreen>
         : ElevatedButton(
             style: ButtonStyle(
               backgroundColor:
-                  MaterialStateProperty.all<Color>(ColorUtil.white),
-              shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                  WidgetStateProperty.all<Color>(ColorUtil.white),
+              shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                 RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                   side: const BorderSide(

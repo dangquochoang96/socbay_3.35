@@ -18,9 +18,9 @@ import 'package:intl/intl.dart';
 class BillScreen extends StatefulWidget {
   final BillData billData;
   const BillScreen({
-    Key? key,
+    super.key,
     required this.billData,
-  }) : super(key: key);
+  });
 
   @override
   State<BillScreen> createState() => _BillScreenState();
@@ -252,6 +252,7 @@ class _BillScreenState extends State<BillScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     Expanded(
+                      flex: 1,
                       child: Column(
                         children: [
                           const Text('Tiền mặt',
@@ -266,9 +267,9 @@ class _BillScreenState extends State<BillScreen> {
                           ),
                         ],
                       ),
-                      flex: 1,
                     ),
                     Expanded(
+                      flex: 1,
                       child: Column(
                         children: [
                           const Text('Chuyển khoản',
@@ -283,9 +284,9 @@ class _BillScreenState extends State<BillScreen> {
                           ),
                         ],
                       ),
-                      flex: 1,
                     ),
                     Expanded(
+                      flex: 1,
                       child: Column(
                         children: [
                           const Text('Ví', style: TextStyle(fontSize: 18)),
@@ -299,7 +300,6 @@ class _BillScreenState extends State<BillScreen> {
                           ),
                         ],
                       ),
-                      flex: 1,
                     ),
                   ],
                 ),

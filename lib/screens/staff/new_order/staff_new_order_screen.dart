@@ -31,7 +31,7 @@ import 'package:socbay/utils/context_extension.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 
 class StaffNewOrderScreen extends StatefulWidget {
-  const StaffNewOrderScreen({Key? key}) : super(key: key);
+  const StaffNewOrderScreen({super.key});
 
   @override
   State<StatefulWidget> createState() => _StaffNewOrderScreen();
@@ -367,6 +367,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                           children: [
                             TableCell(
                                 child: Align(
+                              alignment: Alignment.bottomCenter,
                               child: TextButton(
                                 onPressed: () => {},
                                 child: const Padding(
@@ -376,7 +377,6 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                                       style: TextStyle(color: ColorUtil.white)),
                                 ),
                               ),
-                              alignment: Alignment.bottomCenter,
                             )),
                             const TableCell(
                               child: SizedBox(),
@@ -558,6 +558,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
                       Expanded(
+                        flex: 1,
                         child: Column(
                           children: [
                             const Text('Tiền mặt'),
@@ -575,9 +576,9 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                             ),
                           ],
                         ),
-                        flex: 1,
                       ),
                       Expanded(
+                        flex: 1,
                         child: Column(
                           children: [
                             const Text('Chuyển khoản'),
@@ -595,9 +596,9 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                             ),
                           ],
                         ),
-                        flex: 1,
                       ),
                       Expanded(
+                        flex: 1,
                         child: Column(
                           children: [
                             const Text('Ví'),
@@ -615,7 +616,6 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                             ),
                           ],
                         ),
-                        flex: 1,
                       ),
                     ],
                   ),
@@ -901,7 +901,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
             ClipRRect(
               borderRadius: BorderRadius.circular(8.0),
               child: ImageUtil.loadNetWorkImage(
-                  url: "$protocol${AppConfig.instance.values.apiUrl}" + path,
+                  url: "$protocol${AppConfig.instance.values.apiUrl}$path",
                   width: 120,
                   height: 200),
             ),
@@ -1040,6 +1040,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
             children: [
               TableCell(
                   child: Align(
+                alignment: Alignment.bottomCenter,
                 child: TextButton(
                   onPressed: () => {},
                   child: const Padding(
@@ -1048,10 +1049,10 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                         style: TextStyle(color: ColorUtil.white)),
                   ),
                 ),
-                alignment: Alignment.bottomCenter,
               )),
               TableCell(
                   child: Align(
+                alignment: Alignment.topRight,
                 child: IconButton(
                     onPressed: () {
                       setState(() {
@@ -1068,7 +1069,6 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                       Icons.add,
                       color: Colors.white,
                     )),
-                alignment: Alignment.topRight,
               ))
             ]),
         const TableRow(
@@ -1079,23 +1079,23 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
               TableCell(
                 verticalAlignment: TableCellVerticalAlignment.middle,
                 child: Align(
+                  alignment: Alignment.center,
                   child: Padding(
                     padding: EdgeInsets.only(left: 10.0, top: 3.0, bottom: 3.0),
                     child: Text("Tên lõi",
                         style: TextStyle(color: Colors.white, fontSize: 16)),
                   ),
-                  alignment: Alignment.center,
                 ),
               ),
               TableCell(
                 verticalAlignment: TableCellVerticalAlignment.middle,
                 child: Align(
+                  alignment: Alignment.center,
                   child: Padding(
                     padding: EdgeInsets.only(left: 10.0, top: 3.0, bottom: 3.0),
                     child: Text("Thành tiền",
                         style: TextStyle(color: Colors.white, fontSize: 16)),
                   ),
-                  alignment: Alignment.center,
                 ),
               )
             ]),
@@ -1106,6 +1106,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
               TableCell(
                 verticalAlignment: TableCellVerticalAlignment.middle,
                 child: Padding(
+                  padding: const EdgeInsets.only(top: 6.0, bottom: 6.0),
                   child: TextFieldSearch(
                     label: '',
                     decoration: const InputDecoration(
@@ -1119,12 +1120,12 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                     minStringLength: 0,
                     initialList: ListOrderCoreModel.coreList,
                   ),
-                  padding: const EdgeInsets.only(top: 6.0, bottom: 6.0),
                 ),
               ),
               TableCell(
                 verticalAlignment: TableCellVerticalAlignment.middle,
                 child: Padding(
+                  padding: const EdgeInsets.only(top: 6.0, bottom: 6.0),
                   child: TextField(
                     controller: lstKeyValueCores[i].value,
                     textAlign: TextAlign.center,
@@ -1193,7 +1194,6 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                       }
                     },
                   ),
-                  padding: const EdgeInsets.only(top: 6.0, bottom: 6.0),
                 ),
               )
             ])
@@ -1219,6 +1219,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
             children: [
               TableCell(
                   child: Align(
+                alignment: Alignment.bottomCenter,
                 child: TextButton(
                   onPressed: () => {},
                   child: const Padding(
@@ -1227,10 +1228,10 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                         style: TextStyle(color: ColorUtil.white)),
                   ),
                 ),
-                alignment: Alignment.bottomCenter,
               )),
               TableCell(
                   child: Align(
+                alignment: Alignment.topRight,
                 child: IconButton(
                     onPressed: () {
                       setState(() {
@@ -1251,7 +1252,6 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                       Icons.add,
                       color: Colors.white,
                     )),
-                alignment: Alignment.topRight,
               ))
             ]),
         const TableRow(
@@ -1261,22 +1261,22 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
             children: [
               TableCell(
                 child: Align(
+                  alignment: Alignment.center,
                   child: Padding(
                     padding: EdgeInsets.only(left: 10.0, top: 3.0, bottom: 3.0),
                     child: Text("Tên lõi",
                         style: TextStyle(color: Colors.white, fontSize: 16)),
                   ),
-                  alignment: Alignment.center,
                 ),
               ),
               TableCell(
                 child: Align(
+                  alignment: Alignment.center,
                   child: Padding(
                     padding: EdgeInsets.only(left: 10.0, top: 3.0, bottom: 3.0),
                     child: Text("Ngày thay tiếp theo",
                         style: TextStyle(color: Colors.white, fontSize: 16)),
                   ),
-                  alignment: Alignment.center,
                 ),
               )
             ]),
@@ -1286,6 +1286,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
               TableCell(
                 verticalAlignment: TableCellVerticalAlignment.middle,
                 child: Padding(
+                  padding: const EdgeInsets.only(top: 6.0, bottom: 6.0),
                   child: TextFieldSearch(
                     label: '',
                     decoration: const InputDecoration(
@@ -1299,12 +1300,13 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                     minStringLength: 0,
                     initialList: ListOrderCoreModel.coreList,
                   ),
-                  padding: const EdgeInsets.only(top: 6.0, bottom: 6.0),
                 ),
               ),
               TableCell(
                 verticalAlignment: TableCellVerticalAlignment.middle,
                 child: Padding(
+                  padding:
+                      const EdgeInsets.only(left: 12.0, top: 6.0, bottom: 6.0),
                   child: InkWell(
                     onTap: () {
                       _selectDate(i); // Call Function that has showDatePicker()
@@ -1323,8 +1325,6 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                       ),
                     ),
                   ),
-                  padding:
-                      const EdgeInsets.only(left: 12.0, top: 6.0, bottom: 6.0),
                 ),
               )
             ])
@@ -1524,7 +1524,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
   }
 
   Widget _selectNewProduct() {
-    List<String> _options = _listProductsAll.map((ProductModel sv) {
+    List<String> options = _listProductsAll.map((ProductModel sv) {
       return sv.name!;
     }).toList();
     return RawAutocomplete<String>(
@@ -1532,7 +1532,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
       focusNode: _focusNode,
       textEditingController: currentSelectedProductAllValue,
       optionsBuilder: (TextEditingValue textEditingValue) {
-        return _options.where((String option) {
+        return options.where((String option) {
           return option
               .toLowerCase()
               .contains(textEditingValue.text.toLowerCase());

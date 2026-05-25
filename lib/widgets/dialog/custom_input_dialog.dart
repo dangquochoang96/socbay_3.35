@@ -78,7 +78,7 @@ class _CustomInputDialogWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    TextEditingController _feedbackController = TextEditingController();
+    TextEditingController feedbackController = TextEditingController();
     return WillPopScope(
         child: Material(
           type: MaterialType.transparency,
@@ -142,7 +142,7 @@ class _CustomInputDialogWidget extends StatelessWidget {
                           constraints: const BoxConstraints(maxHeight: 400),
                           child: SingleChildScrollView(
                             child: TextFieldDefault(
-                              controller: _feedbackController,
+                              controller: feedbackController,
                               maxLines: 5,
                             ),
                           ),

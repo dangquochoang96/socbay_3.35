@@ -37,7 +37,7 @@ import 'package:location/location.dart' as location_dart;
 import '../staff/technique/technique_screen.dart';
 
 class ServiceScreen extends StatefulWidget {
-  const ServiceScreen({Key? key}) : super(key: key);
+  const ServiceScreen({super.key});
 
   @override
   State<ServiceScreen> createState() => _ServiceScreenState();
@@ -389,7 +389,7 @@ class _ServiceScreenState extends State<ServiceScreen> {
             ClipRRect(
               borderRadius: BorderRadius.circular(8.0),
               child: ImageUtil.loadNetWorkImage(
-                  url: "$protocol${AppConfig.instance.values.apiUrl}" + path,
+                  url: "$protocol${AppConfig.instance.values.apiUrl}$path",
                   width: 120,
                   height: 200),
             ),
@@ -790,11 +790,11 @@ class _ServiceScreenState extends State<ServiceScreen> {
             ? _button(isPositive, action, text)
             : ElevatedButton(
                 style: ButtonStyle(
-                  padding: MaterialStateProperty.all<EdgeInsets>(
+                  padding: WidgetStateProperty.all<EdgeInsets>(
                       const EdgeInsets.symmetric(vertical: 10)),
                   backgroundColor:
-                      MaterialStateProperty.all<Color>(ColorUtil.white),
-                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                      WidgetStateProperty.all<Color>(ColorUtil.white),
+                  shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                     RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),
                       side: const BorderSide(

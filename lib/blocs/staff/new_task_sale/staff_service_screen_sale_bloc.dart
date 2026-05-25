@@ -47,7 +47,7 @@ class StaffServiceSaleScreenBloc
       emit(StaffServiceScreenSaleChangeTypeServiceState(event.typeService));
     } catch (ex) {
       LoggerUtil.error(
-          "---_mapChangeTypeServiceEventToState--- \n" + ex.toString());
+          "---_mapChangeTypeServiceEventToState--- \n$ex");
     }
   }
 

@@ -16,7 +16,7 @@ import 'package:socbay/widgets/my_app_bar.dart';
 
 class ProductScreen extends StatefulWidget {
   final Map<String, dynamic>? args;
-  const ProductScreen({Key? key, this.args}) : super(key: key);
+  const ProductScreen({super.key, this.args});
 
   @override
   State<ProductScreen> createState() => _ProductScreenState();
@@ -137,8 +137,7 @@ class _ProductScreenState extends State<ProductScreen> {
               ImageUtil.loadNetWorkImage(
                   url: productInfo.images!.isNotEmpty &&
                           productInfo.images![0].link != null
-                      ? "$protocol${AppConfig.instance.values.apiUrl}" +
-                          productInfo.images![0].link!
+                      ? "$protocol${AppConfig.instance.values.apiUrl}${productInfo.images![0].link!}"
                       : "",
                   height: context.width / 3,
                   width: double.infinity),

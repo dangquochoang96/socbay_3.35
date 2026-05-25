@@ -15,7 +15,7 @@ import 'package:socbay/widgets/loading_indicator.dart';
 import 'package:socbay/widgets/text_field_default.dart';
 
 class RentTaskTabSale extends StatefulWidget {
-  const RentTaskTabSale({Key? key}) : super(key: key);
+  const RentTaskTabSale({super.key});
 
   @override
   State<RentTaskTabSale> createState() => _RentTaskTabSale();

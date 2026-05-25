@@ -15,7 +15,7 @@ import 'package:socbay/widgets/loading_indicator.dart';
 import 'package:socbay/widgets/my_app_bar.dart';
 
 class CommentAndRatingListScreen extends StatefulWidget {
-  const CommentAndRatingListScreen({Key? key}) : super(key: key);
+  const CommentAndRatingListScreen({super.key});
 
   @override
   State<CommentAndRatingListScreen> createState() =>
@@ -69,12 +69,12 @@ class _CommentAndRatingListScreenState
             children: [
               _buildStaffInfo(),
               Align(
+                alignment: Alignment.center,
                 child: SizedBox(
                   width: MediaQuery.of(context).size.width * 0.8,
                   child: const Divider(
                       color: Color(0xFFD6D6D6), thickness: 2, height: 30),
                 ),
-                alignment: Alignment.center,
               ),
               _buildStaffCommentAndRatingList()
             ],
@@ -146,8 +146,7 @@ class _CommentAndRatingListScreenState
                     borderRadius: BorderRadius.circular(10),
                     child: ImageUtil.loadNetWorkImage(
                         url: _lstOrder?[index].user?.avatar != null
-                            ? ("$protocol${AppConfig.instance.values.apiUrl}/" +
-                            _lstOrder![index].user!.avatar!)
+                            ? ("$protocol${AppConfig.instance.values.apiUrl}/${_lstOrder![index].user!.avatar!}")
                             : "",
                         height: MediaQuery.of(context).size.width * 0.2 - 15,
                         width: MediaQuery.of(context).size.width * 0.2 - 15,
@@ -250,8 +249,7 @@ class _CommentAndRatingListScreenState
           borderRadius: BorderRadius.circular(16),
           child: ImageUtil.loadNetWorkImage(
               url: _bloc.userProfile?.avatar != null
-                  ? ("$protocol${AppConfig.instance.values.apiUrl}/" +
-                      _bloc.userProfile!.avatar!)
+                  ? ("$protocol${AppConfig.instance.values.apiUrl}/${_bloc.userProfile!.avatar!}")
                   : "$protocol${AppConfig.instance.values.apiUrl}/product_images/ten-san-pham-55.jpg",
               height: MediaQuery.of(context).size.width * 0.18,
               width: MediaQuery.of(context).size.width * 0.18,

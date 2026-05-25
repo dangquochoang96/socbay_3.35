@@ -24,7 +24,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:android_intent_plus/android_intent.dart';
 
 class DetailRentBookingScreen extends StatefulWidget {
-  const DetailRentBookingScreen({Key? key}) : super(key: key);
+  const DetailRentBookingScreen({super.key});
 
   @override
   State<DetailRentBookingScreen> createState() => _DetailRentBookingScreenState();
@@ -490,8 +490,7 @@ class _DetailRentBookingScreenState extends State<DetailRentBookingScreen> {
                 itemBuilder: (BuildContext context, int index) {
                   return _buildItemMedia(_bloc.taskModel!.images![index].isEmpty
                       ? ""
-                      : "$protocol${AppConfig.instance.values.apiUrl}" +
-                          _bloc.taskModel!.images![index]);
+                      : "$protocol${AppConfig.instance.values.apiUrl}${_bloc.taskModel!.images![index]}");
                 },
               ),
             ),
@@ -541,7 +540,7 @@ class _DetailRentBookingScreenState extends State<DetailRentBookingScreen> {
       var output = DateFormat('dd/MM/yyyy HH:mm:ss').format(getDateTime);
       return output.toString();
     } on Exception catch (ex) {
-      LoggerUtil.error("format datetime error: " + ex.toString());
+      LoggerUtil.error("format datetime error: $ex");
       rethrow;
     }
   }
@@ -552,11 +551,11 @@ class _DetailRentBookingScreenState extends State<DetailRentBookingScreen> {
             ? _button(isPositive, action, text)
             : ElevatedButton(
                 style: ButtonStyle(
-                  padding: MaterialStateProperty.all<EdgeInsets>(
+                  padding: WidgetStateProperty.all<EdgeInsets>(
                       const EdgeInsets.symmetric(vertical: 10)),
                   backgroundColor:
-                      MaterialStateProperty.all<Color>(ColorUtil.white),
-                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                      WidgetStateProperty.all<Color>(ColorUtil.white),
+                  shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                     RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),
                       side: const BorderSide(

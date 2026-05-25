@@ -19,7 +19,7 @@ import '../../constants/constants.dart';
 import '../../utils/color_util.dart';
 
 class GiftScreen extends StatefulWidget {
-  const GiftScreen({Key? key}) : super(key: key);
+  const GiftScreen({super.key});
 
   @override
   State<GiftScreen> createState() => _GiftScreenState();
@@ -83,7 +83,7 @@ class _GiftScreenState extends State<GiftScreen> with TickerProviderStateMixin {
             TabBar(
               controller: _tabController,
               indicatorColor: ColorUtil.bangladeshGreen,
-              overlayColor: MaterialStateProperty.all(ColorUtil.transparent),
+              overlayColor: WidgetStateProperty.all(ColorUtil.transparent),
               tabs: [
                 _buildTab('Danh sách quà', _tabController.index == 0),
                 _buildTab('Danh sách quà đã đổi', _tabController.index == 1),

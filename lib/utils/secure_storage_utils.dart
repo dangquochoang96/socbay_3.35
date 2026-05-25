@@ -36,19 +36,19 @@ class SecureStorageUtil {
     await storage.deleteAll();
   }
   Future setCurrentUserLogin(String key, UserProfile userProfile) async {
-    await storage.write(key: key+"-id", value: userProfile.id.toString());
-    await storage.write(key: key+"-username", value: userProfile.username);
-    await storage.write(key: key+"-password", value: userProfile.password);
+    await storage.write(key: "$key-id", value: userProfile.id.toString());
+    await storage.write(key: "$key-username", value: userProfile.username);
+    await storage.write(key: "$key-password", value: userProfile.password);
   }
   Future<UserProfile> getCurrentUserLogin() async {
-    var id = await storage.read(key: currentUser+"-id");
-    var username = await storage.read(key: currentUser+"-username");
-    var password = await storage.read(key: currentUser+"-password");
+    var id = await storage.read(key: "$currentUser-id");
+    var username = await storage.read(key: "$currentUser-username");
+    var password = await storage.read(key: "$currentUser-password");
     return UserProfile(id: int.parse(id??"0"), username: username, password: password);
   }
   Future logoutCurrentUser() async {
-    await storage.delete(key: currentUser+"-id");
-    await storage.delete(key: currentUser+"-username");
-    await storage.delete(key: currentUser+"-password");
+    await storage.delete(key: "$currentUser-id");
+    await storage.delete(key: "$currentUser-username");
+    await storage.delete(key: "$currentUser-password");
   }
 }

@@ -49,7 +49,7 @@ const double defaultLat = 21.0278; // HaNoi
 const double defaultLng = 105.8342; // HaNoi
 
 class SearchStaffScreen extends StatefulWidget {
-  const SearchStaffScreen({Key? key}) : super(key: key);
+  const SearchStaffScreen({super.key});
 
   @override
   State<SearchStaffScreen> createState() => _SearchStaffScreenState();
@@ -508,7 +508,7 @@ class _SearchStaffScreenState extends State<SearchStaffScreen> {
     final Uint8List? markerIcon =
         await getBytesFromAsset(assetImg(Images.iconMarker), 100);
     // creating a new MARKER
-    final Marker _marker = Marker(
+    final Marker marker = Marker(
       markerId: markerId,
       position: LatLng(
           _userAddress?.lat ?? defaultLat, _userAddress?.lat ?? defaultLng),
@@ -517,7 +517,7 @@ class _SearchStaffScreenState extends State<SearchStaffScreen> {
       onTap: () {},
     );
     _markers.clear();
-    _markers.add(_marker);
+    _markers.add(marker);
     setState(() {});
   }
 

@@ -7,9 +7,9 @@ class StatusBarColorWidget extends StatelessWidget {
   final Color color;
 
   const StatusBarColorWidget({
-    Key? key,
+    super.key,
     this.color = ColorUtil.bangladeshGreen,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

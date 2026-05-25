@@ -34,7 +34,7 @@ class TextFieldSearch extends StatefulWidget {
 
   /// Creates a TextFieldSearch for displaying selected elements and retrieving a selected element
   const TextFieldSearch(
-      {Key? key,
+      {super.key,
       this.initialList,
       required this.label,
       required this.controller,
@@ -44,8 +44,7 @@ class TextFieldSearch extends StatefulWidget {
       this.decoration,
       this.scrollbarDecoration,
       this.itemsInView = 3,
-      this.minStringLength = 2})
-      : super(key: key);
+      this.minStringLength = 2});
 
   @override
   _TextFieldSearchState createState() => _TextFieldSearchState();
@@ -397,7 +396,7 @@ class Debouncer {
   /// Creates a Debouncer that executes a function after a certain length of time in milliseconds
   Debouncer({this.milliseconds});
 
-  run(VoidCallback action) {
+  void run(VoidCallback action) {
     if (_timer != null) {
       _timer!.cancel();
     }

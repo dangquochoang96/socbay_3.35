@@ -7,7 +7,7 @@ import 'package:socbay/utils/image_util.dart';
 import '../paths/images.dart';
 
 class SplashScreen extends StatefulWidget {
-  const SplashScreen({Key? key}) : super(key: key);
+  const SplashScreen({super.key});
 
   @override
   _SplashState createState() => _SplashState();

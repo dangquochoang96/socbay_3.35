@@ -25,7 +25,7 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
   final SystemUiOverlayStyle systemOverlayStyle;
 
   MyAppBar({
-    Key? key,
+    super.key,
     this.title = '',
     this.titleFontSize = 18,
     this.titleWidget,
@@ -44,8 +44,7 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.borderRadius = BorderRadius.zero,
     this.systemOverlayStyle = systemUiOverlayStyle,
   })  : barSize = Size.fromHeight(
-            kToolbarHeight + (bottom?.preferredSize.height ?? 0.0)),
-        super(key: key);
+            kToolbarHeight + (bottom?.preferredSize.height ?? 0.0));
 
   @override
   Size get preferredSize => Size.fromHeight(barSize.height);

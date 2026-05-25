@@ -14,7 +14,7 @@ import 'package:socbay/utils/theme_util.dart';
 import 'package:socbay/widgets/my_app_bar.dart';
 
 class ProductDetailScreen extends StatefulWidget {
-  const ProductDetailScreen({Key? key}) : super(key: key);
+  const ProductDetailScreen({super.key});
 
   @override
   State<ProductDetailScreen> createState() => _ProductDetailScreenState();
@@ -69,16 +69,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     tag: _bloc.product.images!.isNotEmpty &&
                         _bloc.product.images![0].link == null
                         ? ""
-                        : "$protocol${AppConfig.instance.values.apiUrl}" +
-                        _bloc.product.images![0].link!,
+                        : "$protocol${AppConfig.instance.values.apiUrl}${_bloc.product.images![0].link!}",
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(16),
                       child: ImageUtil.loadNetWorkImage(
                           url: _bloc.product.images!.isNotEmpty &&
                               _bloc.product.images![0].link == null
                               ? ""
-                              : "$protocol${AppConfig.instance.values.apiUrl}" +
-                              _bloc.product.images![0].link!, height: 0, fit: BoxFit.contain),
+                              : "$protocol${AppConfig.instance.values.apiUrl}${_bloc.product.images![0].link!}", height: 0, fit: BoxFit.contain),
                       //fit: BoxFit.cover,
                     ),
                   ),

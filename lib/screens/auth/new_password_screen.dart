@@ -18,7 +18,7 @@ const _passwordType = "password";
 const _rePasswordType = "re-password";
 
 class NewPasswordScreen extends StatefulWidget {
-  const NewPasswordScreen({Key? key}) : super(key: key);
+  const NewPasswordScreen({super.key});
 
   @override
   State<NewPasswordScreen> createState() => _NewPasswordScreenState();

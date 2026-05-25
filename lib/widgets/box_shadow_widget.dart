@@ -7,11 +7,10 @@ class BoxShadowWidget extends StatelessWidget {
   final EdgeInsetsGeometry padding;
 
   const BoxShadowWidget(
-      {Key? key,
+      {super.key,
       required this.child,
       this.margin = const EdgeInsets.symmetric(horizontal: paddingHorizontal),
-      this.padding = EdgeInsets.zero})
-      : super(key: key);
+      this.padding = EdgeInsets.zero});
 
   @override
   Widget build(BuildContext context) {

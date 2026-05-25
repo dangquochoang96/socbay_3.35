@@ -26,7 +26,7 @@ import 'package:socbay/widgets/my_app_bar.dart';
 import 'package:socbay/widgets/textfield_search.dart';
 
 class UserNewOrderScreen extends StatefulWidget {
-  const UserNewOrderScreen({Key? key}) : super(key: key);
+  const UserNewOrderScreen({super.key});
   @override
   State<StatefulWidget> createState() => _UserNewOrderScreenState();
 }
@@ -274,7 +274,7 @@ class _UserNewOrderScreenState extends State<UserNewOrderScreen> {
   }
 
   Widget _selectNewProduct() {
-    List<String> _options = _listProductsAll.map((ProductModel sv) {
+    List<String> options = _listProductsAll.map((ProductModel sv) {
       return sv.name!;
     }).toList();
     return RawAutocomplete<String>(
@@ -282,7 +282,7 @@ class _UserNewOrderScreenState extends State<UserNewOrderScreen> {
       focusNode: _focusNode,
       textEditingController: currentSelectedProductAllValue,
       optionsBuilder: (TextEditingValue textEditingValue) {
-        return _options.where((String option) {
+        return options.where((String option) {
           return option
               .toLowerCase()
               .contains(textEditingValue.text.toLowerCase());
@@ -370,6 +370,7 @@ class _UserNewOrderScreenState extends State<UserNewOrderScreen> {
             children: [
               TableCell(
                   child: Align(
+                alignment: Alignment.bottomCenter,
                 child: TextButton(
                   onPressed: () => {},
                   child: const Padding(
@@ -378,10 +379,10 @@ class _UserNewOrderScreenState extends State<UserNewOrderScreen> {
                         style: TextStyle(color: ColorUtil.white)),
                   ),
                 ),
-                alignment: Alignment.bottomCenter,
               )),
               TableCell(
                   child: Align(
+                alignment: Alignment.topRight,
                 child: IconButton(
                     onPressed: () {
                       setState(() {
@@ -394,7 +395,6 @@ class _UserNewOrderScreenState extends State<UserNewOrderScreen> {
                       Icons.add,
                       color: Colors.white,
                     )),
-                alignment: Alignment.topRight,
               ))
             ]),
         const TableRow(
@@ -405,23 +405,23 @@ class _UserNewOrderScreenState extends State<UserNewOrderScreen> {
               TableCell(
                 verticalAlignment: TableCellVerticalAlignment.middle,
                 child: Align(
+                  alignment: Alignment.center,
                   child: Padding(
                     padding: EdgeInsets.only(left: 10.0, top: 3.0, bottom: 3.0),
                     child: Text("Ngày lắp đặt",
                         style: TextStyle(color: Colors.white, fontSize: 16)),
                   ),
-                  alignment: Alignment.center,
                 ),
               ),
               TableCell(
                 verticalAlignment: TableCellVerticalAlignment.middle,
                 child: Align(
+                  alignment: Alignment.center,
                   child: Padding(
                     padding: EdgeInsets.only(left: 10.0, top: 3.0, bottom: 3.0),
                     child: Text("Giá tiền",
                         style: TextStyle(color: Colors.white, fontSize: 16)),
                   ),
-                  alignment: Alignment.center,
                 ),
               )
             ]),
@@ -431,6 +431,8 @@ class _UserNewOrderScreenState extends State<UserNewOrderScreen> {
               TableCell(
                 verticalAlignment: TableCellVerticalAlignment.middle,
                 child: Padding(
+                  padding:
+                      const EdgeInsets.only(left: 12.0, top: 6.0, bottom: 6.0),
                   child: InkWell(
                     onTap: () {
                       _installDate(
@@ -450,13 +452,12 @@ class _UserNewOrderScreenState extends State<UserNewOrderScreen> {
                       ),
                     ),
                   ),
-                  padding:
-                      const EdgeInsets.only(left: 12.0, top: 6.0, bottom: 6.0),
                 ),
               ),
               TableCell(
                 verticalAlignment: TableCellVerticalAlignment.middle,
                 child: Padding(
+                  padding: const EdgeInsets.only(top: 6.0, bottom: 6.0),
                   child: TextField(
                     controller: lstKeyValueCores[i].value,
                     textAlign: TextAlign.center,
@@ -523,7 +524,6 @@ class _UserNewOrderScreenState extends State<UserNewOrderScreen> {
                       }
                     },
                   ),
-                  padding: const EdgeInsets.only(top: 6.0, bottom: 6.0),
                 ),
               )
             ])
@@ -563,6 +563,7 @@ class _UserNewOrderScreenState extends State<UserNewOrderScreen> {
             children: [
               TableCell(
                   child: Align(
+                alignment: Alignment.bottomCenter,
                 child: TextButton(
                   onPressed: () => {},
                   child: const Padding(
@@ -571,10 +572,10 @@ class _UserNewOrderScreenState extends State<UserNewOrderScreen> {
                         style: TextStyle(color: ColorUtil.white)),
                   ),
                 ),
-                alignment: Alignment.bottomCenter,
               )),
               TableCell(
                   child: Align(
+                alignment: Alignment.topRight,
                 child: IconButton(
                     onPressed: () {
                       setState(() {
@@ -589,7 +590,6 @@ class _UserNewOrderScreenState extends State<UserNewOrderScreen> {
                       Icons.add,
                       color: Colors.white,
                     )),
-                alignment: Alignment.topRight,
               ))
             ]),
         const TableRow(
@@ -599,22 +599,22 @@ class _UserNewOrderScreenState extends State<UserNewOrderScreen> {
             children: [
               TableCell(
                 child: Align(
+                  alignment: Alignment.center,
                   child: Padding(
                     padding: EdgeInsets.only(left: 10.0, top: 3.0, bottom: 3.0),
                     child: Text("Tên lõi",
                         style: TextStyle(color: Colors.white, fontSize: 16)),
                   ),
-                  alignment: Alignment.center,
                 ),
               ),
               TableCell(
                 child: Align(
+                  alignment: Alignment.center,
                   child: Padding(
                     padding: EdgeInsets.only(left: 10.0, top: 3.0, bottom: 3.0),
                     child: Text("Ngày thay tiếp theo",
                         style: TextStyle(color: Colors.white, fontSize: 16)),
                   ),
-                  alignment: Alignment.center,
                 ),
               )
             ]),
@@ -624,6 +624,7 @@ class _UserNewOrderScreenState extends State<UserNewOrderScreen> {
               TableCell(
                 verticalAlignment: TableCellVerticalAlignment.middle,
                 child: Padding(
+                  padding: const EdgeInsets.only(top: 6.0, bottom: 6.0),
                   child: TextFieldSearch(
                     label: '',
                     decoration: const InputDecoration(
@@ -637,12 +638,13 @@ class _UserNewOrderScreenState extends State<UserNewOrderScreen> {
                     minStringLength: 0,
                     initialList: ListOrderCoreModel.coreList,
                   ),
-                  padding: const EdgeInsets.only(top: 6.0, bottom: 6.0),
                 ),
               ),
               TableCell(
                 verticalAlignment: TableCellVerticalAlignment.middle,
                 child: Padding(
+                  padding:
+                      const EdgeInsets.only(left: 12.0, top: 6.0, bottom: 6.0),
                   child: InkWell(
                     onTap: () {
                       _nextDate(i); // Call Function that has showDatePicker()
@@ -661,8 +663,6 @@ class _UserNewOrderScreenState extends State<UserNewOrderScreen> {
                       ),
                     ),
                   ),
-                  padding:
-                      const EdgeInsets.only(left: 12.0, top: 6.0, bottom: 6.0),
                 ),
               )
             ])
@@ -853,7 +853,7 @@ class _UserNewOrderScreenState extends State<UserNewOrderScreen> {
             ClipRRect(
               borderRadius: BorderRadius.circular(8.0),
               child: ImageUtil.loadNetWorkImage(
-                  url: "$protocol${AppConfig.instance.values.apiUrl}" + path,
+                  url: "$protocol${AppConfig.instance.values.apiUrl}$path",
                   width: 120,
                   height: 200),
             ),
