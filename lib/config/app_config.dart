@@ -4,7 +4,7 @@ const String appProductionPackageName = 'com.socbay.app';
 const String appStagingPackageName = 'com.socbay.app';
 const String appDevelopmentPackageName = 'com.socbay.app';
 const String apiUrl = ' ';
-const String protocol = 'http://';
+const String protocol = 'https://';
 
 extension FlavorExtension on Flavor {
   FlavorValues getValues() {

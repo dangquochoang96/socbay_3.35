@@ -28,8 +28,24 @@ class BaseAPI {
 
   // PROPERTIES
   Dio _dio = Dio();
-  final String _baseUrl = '${AppConfig.instance.values.apiUrl}/${App.versionApi}';
+  final String _baseUrl = _buildBaseUrl(
+    host: AppConfig.instance.values.apiUrl,
+    version: App.versionApi,
+  );
   late RootBloc _rootBloc;
+
+  static String _buildBaseUrl({
+    required String host,
+    required String version,
+  }) {
+    final normalizedHost = host.trim().replaceAll(RegExp(r'/+$'), '');
+    final normalizedVersion =
+        version.trim().replaceAll(RegExp(r'^/+|/+$'), '');
+    final hasScheme =
+        normalizedHost.startsWith('http://') || normalizedHost.startsWith('https://');
+    final url = hasScheme ? normalizedHost : '$protocol$normalizedHost';
+    return normalizedVersion.isEmpty ? url : '$url/$normalizedVersion';
+  }
 
   // INIT
   BaseAPI({

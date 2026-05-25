@@ -42,14 +42,20 @@ class UserScreenBloc extends Bloc<UserScreenEvent, UserScreenState> {
       UserScreenLogoutEvent event, Emitter<UserScreenState> emit) async {
     isLoading = true;
     emit(UserScreenInitialState());
-    if (defaultTargetPlatform == TargetPlatform.android ||
-        defaultTargetPlatform == TargetPlatform.iOS) {
-      final database =
-          await $FloorAppDatabase.databaseBuilder('socbay.db').build();
-      await database.userDao.deleteAllUser();
-      await database.close();
+    try {
+      await apiRepository.logout();
+    } catch (_) {
+      // Local logout must still complete if the server logout request fails.
+    } finally {
+      if (defaultTargetPlatform == TargetPlatform.android ||
+          defaultTargetPlatform == TargetPlatform.iOS) {
+        final database =
+            await $FloorAppDatabase.databaseBuilder('socbay.db').build();
+        await database.userDao.deleteAllUser();
+        await database.close();
+      }
+      await App.instance.onLogout();
     }
-    // App.instance.onLogout();
     isLoading = false;
     emit(UserScreenLogoutState());
   }

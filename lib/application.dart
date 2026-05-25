@@ -34,9 +34,15 @@ class App {
 
   AccountDb? initAccount;
 
-  onLogout() async {
-    _handleLogout();
+  Future<void> onLogout() async {
+    try {
+      _handleLogout();
+    } catch (e) {
+      LoggerUtil.info('OneSignal logout failed: $e');
+    }
     userApp = null;
+    await SecureStorageUtil.shared.deleteKey(SecureStorageUtil.tokenStorageKey);
+    await SecureStorageUtil.shared.deleteKey(SecureStorageUtil.registerStaffKey);
     await SecureStorageUtil.shared.logoutCurrentUser();
   }
 }

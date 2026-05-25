@@ -31,25 +31,28 @@ void _handlePromptForPushPermission() {
 }
 
 Future main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  // requestNotificationPermissions();
-  OneSignal.Debug.setLogLevel(OSLogLevel.verbose);
-  // OneSignal.initialize("766bd09f-dcfb-464d-b79c-e544a3600917");
-  _handlePromptForPushPermission();
-
-  Bloc.observer = SimpleBlocObserver();
-  //transparent status bar and navigation bar
-  SystemChrome.setSystemUIOverlayStyle(
-    const SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-      systemNavigationBarColor: Colors.transparent,
-      systemNavigationBarIconBrightness: Brightness.light,
-      statusBarIconBrightness: Brightness.light,
-    ),
-  );
-  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   await runZonedGuarded(() async {
+    WidgetsFlutterBinding.ensureInitialized();
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    // requestNotificationPermissions();
+    OneSignal.Debug.setLogLevel(OSLogLevel.verbose);
+    // OneSignal.initialize("766bd09f-dcfb-464d-b79c-e544a3600917");
+    _handlePromptForPushPermission();
+
+    Bloc.observer = SimpleBlocObserver();
+    //transparent status bar and navigation bar
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        systemNavigationBarColor: Colors.transparent,
+        systemNavigationBarIconBrightness: Brightness.light,
+        statusBarIconBrightness: Brightness.light,
+      ),
+    );
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+
     var flavor = Flavor.development;
     PackageInfo packageInfo = await PackageInfo.fromPlatform();
     switch (packageInfo.packageName) {

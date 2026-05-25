@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:socbay/blocs/booking/booking_bloc.dart';
 import 'package:socbay/blocs/booking/detail_booking/detail_booking_bloc.dart';
 import 'package:socbay/blocs/home/home_bloc.dart';
@@ -66,6 +67,11 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       child: _buildRepositoryProvider(
         child: _buildPrimaryBlocProvider(
           child: MaterialApp(
+            localizationsDelegates: const [
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
             supportedLocales: const [
               Locale('en', 'US'), // English
               Locale('he', 'IL'),
