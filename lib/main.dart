@@ -10,11 +10,11 @@ import 'package:socbay/blocs/root/root_event.dart';
 import 'package:socbay/config/app_config.dart';
 import 'package:socbay/config/app_localization.dart';
 import 'package:socbay/my_app.dart';
+import 'package:socbay/services/push_notification_service.dart';
 import 'package:socbay/utils/logger_util.dart';
 import 'package:socbay/utils/simple_bloc_delegate.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:socbay/firebase_options.dart';
-import 'package:onesignal_flutter/onesignal_flutter.dart';
 
 class MyHttpOverrides extends HttpOverrides {
   @override
@@ -25,21 +25,13 @@ class MyHttpOverrides extends HttpOverrides {
   }
 }
 
-void _handlePromptForPushPermission() {
-  print("Prompting for Permission");
-  OneSignal.Notifications.requestPermission(true);
-}
-
 Future main() async {
   await runZonedGuarded(() async {
     WidgetsFlutterBinding.ensureInitialized();
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
-    // requestNotificationPermissions();
-    OneSignal.Debug.setLogLevel(OSLogLevel.verbose);
-    // OneSignal.initialize("766bd09f-dcfb-464d-b79c-e544a3600917");
-    _handlePromptForPushPermission();
+    await PushNotificationService.instance.initialize();
 
     Bloc.observer = SimpleBlocObserver();
     //transparent status bar and navigation bar

@@ -1,14 +1,9 @@
 import 'package:event_bus/event_bus.dart';
 import 'package:socbay/data/model/local/account_db.dart';
+import 'package:socbay/services/push_notification_service.dart';
 import 'package:socbay/utils/logger_util.dart';
-import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:socbay/utils/secure_storage_utils.dart';
 import 'data/model/user_profile.dart';
-
-void _handleLogout() {
-  OneSignal.logout();
-  // OneSignal.User.removeAlias("user_id");
-}
 
 class App {
   ///Singleton factory
@@ -36,9 +31,9 @@ class App {
 
   Future<void> onLogout() async {
     try {
-      _handleLogout();
+      await PushNotificationService.instance.clearAuthenticatedUser();
     } catch (e) {
-      LoggerUtil.info('OneSignal logout failed: $e');
+      LoggerUtil.info('FCM logout cleanup failed: $e');
     }
     userApp = null;
     await SecureStorageUtil.shared.deleteKey(SecureStorageUtil.tokenStorageKey);

@@ -87,7 +87,7 @@ class _ServiceScreenState extends State<StaffServiceScreen> {
     _addressTextController = TextEditingController();
 
     addressSPRequestTxtController = TextEditingController();
-    service = LocaNotificationService();
+    service = LocaNotificationService.instance;
     service.initialize();
     listenToNotification();
     _listService = HomeServiceModel.taskServiceList;

@@ -15,7 +15,7 @@ import 'package:socbay/blocs/user_info/user_new_order/user_new_order_bloc.dart';
 import 'package:socbay/config/app_config.dart';
 import 'package:socbay/data/repository/auth/api_repository.dart';
 import 'package:socbay/routes.dart';
-// import 'package:socbay/services/navigation_service.dart';
+import 'package:socbay/services/navigation_service.dart';
 import 'package:socbay/utils/theme_util.dart';
 
 import 'blocs/evaluate/evaluate_bloc.dart';
@@ -27,7 +27,6 @@ import 'blocs/root/root_bloc.dart';
 import 'blocs/technique/technique_screen_bloc.dart';
 import 'data/data_provider/base_api.dart';
 
-import 'package:onesignal_flutter/onesignal_flutter.dart';
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
@@ -38,11 +37,9 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   final routes = Routes();
-  GlobalKey<NavigatorState>? navigatorKey;
 
   @override
   void initState() {
-    navigatorKey = GlobalKey<NavigatorState>();
     //Đăng ký Observer
     WidgetsBinding.instance.addObserver(this);
     super.initState();
@@ -50,14 +47,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    OneSignal.Notifications.addClickListener((event) {
-      print('NOTIFICATION CLICK LISTENER CALLED WITH EVENT: $event');
-      // ignore: unused_local_variable
-      final data = event.notification.additionalData;
-      // if (data?['screen'] == 'task-list') {
-      //   navigatorKey!.currentState!.pushNamed(Routes.orderManagerScreen);
-      // }
-    });
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () {
@@ -81,7 +70,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             title: AppConfig.instance.name,
             theme: ThemeUtil.appTheme,
             initialRoute: Routes.root,
-            navigatorKey: navigatorKey,
+            navigatorKey: NavigationService.instance.navigatorKey,
             onGenerateRoute: (settings) => routes.routePage(settings),
           ),
         ),
