@@ -11,8 +11,11 @@ import '../../../utils/theme_util.dart';
 import '../../../widgets/button_widget.dart';
 
 class TechniqueScreen extends StatefulWidget {
-  const TechniqueScreen(
-      {super.key, required int initialTabIndex, UserProfile? favoriteStaff});
+  const TechniqueScreen({
+    super.key,
+    required int initialTabIndex,
+    UserProfile? favoriteStaff,
+  });
 
   @override
   State<TechniqueScreen> createState() => _TechniqueScreenState();
@@ -29,7 +32,9 @@ class _TechniqueScreenState extends State<TechniqueScreen>
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<TechniqueScreenBloc, TechniqueScreenState>(
-        builder: _builder, listener: _listener);
+      builder: _builder,
+      listener: _listener,
+    );
   }
 
   @override
@@ -39,11 +44,7 @@ class _TechniqueScreenState extends State<TechniqueScreen>
     userProfile = _bloc.args['favouriteStaff'] as UserProfile? ?? UserProfile();
     _bloc.add(TechniqueScreenStartedFaEvent());
     _bloc.add(TechniqueScreenStartedEvent());
-    _tabController = TabController(
-      length: 2,
-      initialIndex: 0,
-      vsync: this,
-    );
+    _tabController = TabController(length: 2, initialIndex: 0, vsync: this);
     _tabController.addListener(() {
       if (_tabController.indexIsChanging) {
         setState(() {
@@ -77,12 +78,9 @@ class _TechniqueScreenState extends State<TechniqueScreen>
           Expanded(
             child: IndexedStack(
               index: _tabController.index,
-              children: [
-                _buildMyTask(),
-                _buildTaskAvailable(),
-              ],
+              children: [_buildMyTask(), _buildTaskAvailable()],
             ),
-          )
+          ),
         ],
       ),
     );
@@ -102,27 +100,28 @@ class _TechniqueScreenState extends State<TechniqueScreen>
     final usersToShow = index == 0 ? _bloc.favouriteStaffs : _bloc.users;
 
     return ListView.separated(
-        itemBuilder: _buildItemServiceHistory,
-        separatorBuilder: separatorBuilder,
-        itemCount: usersToShow.length);
+      itemBuilder: _buildItemServiceHistory,
+      separatorBuilder: separatorBuilder,
+      itemCount: usersToShow.length,
+    );
   }
 
   Widget _buildTaskAvailable() {
     final usersToShow = index == 0 ? _bloc.favouriteStaffs : _bloc.users;
 
     return ListView.separated(
-        itemBuilder: _buildItemMachineInUse,
-        separatorBuilder: separatorBuilder,
-        itemCount: usersToShow.length);
+      itemBuilder: _buildItemMachineInUse,
+      separatorBuilder: separatorBuilder,
+      itemCount: usersToShow.length,
+    );
   }
 
   Widget separatorBuilder(BuildContext context, int index) {
     return Container(
-        decoration: const BoxDecoration(
-      border: Border(
-        bottom: BorderSide(width: 1.0, color: Colors.black26),
+      decoration: const BoxDecoration(
+        border: Border(bottom: BorderSide(width: 1.0, color: Colors.black26)),
       ),
-    ));
+    );
   }
 
   Widget _buildItemServiceHistory(BuildContext context, int index) {
@@ -146,7 +145,10 @@ class _TechniqueScreenState extends State<TechniqueScreen>
             ClipRRect(
               borderRadius: BorderRadius.circular(50),
               child: ImageUtil.loadNetWorkImage(
-                  url: item.avatar ?? '', height: 50, width: 50),
+                url: item.avatar ?? '',
+                height: 50,
+                width: 50,
+              ),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -200,7 +202,10 @@ class _TechniqueScreenState extends State<TechniqueScreen>
             ClipRRect(
               borderRadius: BorderRadius.circular(50),
               child: ImageUtil.loadNetWorkImage(
-                  url: taskKT.avatar ?? '', height: 50, width: 50),
+                url: taskKT.avatar ?? '',
+                height: 50,
+                width: 50,
+              ),
             ),
             const SizedBox(width: 16),
             Expanded(

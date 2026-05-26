@@ -10,17 +10,12 @@ import 'package:socbay/data/response/api_response.dart';
 import 'package:socbay/utils/parse_util.dart';
 import 'package:socbay/utils/secure_storage_utils.dart';
 
-enum VerifyOtpType {
-  forgotPassword,
-  register,
-}
+enum VerifyOtpType { forgotPassword, register }
 
 class VerifyOtpScreenBloc
     extends Bloc<VerifyOtpScreenEvent, VerifyOtpScreenState> {
-  VerifyOtpScreenBloc({
-    required this.apiRepository,
-    required this.args,
-  }) : super(VerifyOtpScreenInitialState()) {
+  VerifyOtpScreenBloc({required this.apiRepository, required this.args})
+    : super(VerifyOtpScreenInitialState()) {
     on<VerifyOtpScreenStartedEvent>(_mapStartedEventToState);
     on<VerifyOtpScreenRegisterEvent>(_mapRegisterEventToState);
     on<VerifyOtpScreenLoginEvent>(_mapLoginEventToState);
@@ -31,8 +26,10 @@ class VerifyOtpScreenBloc
   bool isLoading = false;
   String otp = "";
 
-  FutureOr<void> _mapStartedEventToState(VerifyOtpScreenStartedEvent event,
-      Emitter<VerifyOtpScreenState> emit) async {
+  FutureOr<void> _mapStartedEventToState(
+    VerifyOtpScreenStartedEvent event,
+    Emitter<VerifyOtpScreenState> emit,
+  ) async {
     isLoading = true;
     emit(VerifyOtpScreenInitialState());
     final res = await apiRepository.setOTP(args['phone']);
@@ -44,8 +41,10 @@ class VerifyOtpScreenBloc
     emit(VerifyOtpScreenInitialState());
   }
 
-  FutureOr<void> _mapRegisterEventToState(VerifyOtpScreenRegisterEvent event,
-      Emitter<VerifyOtpScreenState> emit) async {
+  FutureOr<void> _mapRegisterEventToState(
+    VerifyOtpScreenRegisterEvent event,
+    Emitter<VerifyOtpScreenState> emit,
+  ) async {
     isLoading = true;
     emit(VerifyOtpScreenInitialState());
     RegisterRequestModel registerRequestModel = RegisterRequestModel(
@@ -71,17 +70,23 @@ class VerifyOtpScreenBloc
   ) async {
     isLoading = true;
     emit(VerifyOtpScreenInitialState());
-    final DefaultResponse result =
-        await apiRepository.loginAccount(args['phone'], args['password']);
+    final DefaultResponse result = await apiRepository.loginAccount(
+      args['phone'],
+      args['password'],
+    );
     if (result.status == 200) {
       LoginResponse loginResponse = result.data;
       if (loginResponse.accessToken != "") {
         await SecureStorageUtil.shared.writeData(
-            SecureStorageUtil.tokenStorageKey, loginResponse.accessToken!);
+          SecureStorageUtil.tokenStorageKey,
+          loginResponse.accessToken!,
+        );
       }
       if (args['isStaff'] == true) {
         await SecureStorageUtil.shared.writeData(
-            SecureStorageUtil.registerStaffKey, args['isStaff'].toString());
+          SecureStorageUtil.registerStaffKey,
+          args['isStaff'].toString(),
+        );
       }
       await Future.delayed(const Duration(milliseconds: 500));
       emit(VerifyOtpScreenLoginSuccessState());

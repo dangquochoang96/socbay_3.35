@@ -6,8 +6,11 @@ class LoggerUtil {
   static void log(String message, {String? tag, StackTrace? stackTrace}) {
     // if (AppConfig.instance.values.enableLog) {
     String time = '(${DateFormat('HH:mm:ss').format(DateTime.now())})';
-    developer.log('$time - $message',
-        name: tag ?? 'log', stackTrace: stackTrace);
+    developer.log(
+      '$time - $message',
+      name: tag ?? 'log',
+      stackTrace: stackTrace,
+    );
     // }
   }
 

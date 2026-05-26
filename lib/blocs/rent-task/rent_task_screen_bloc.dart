@@ -8,6 +8,7 @@ import 'package:socbay/application.dart';
 import 'package:socbay/blocs/rent-task/rent_task_screen_event.dart';
 import 'package:socbay/blocs/rent-task/rent_task_screen_state.dart';
 import 'package:socbay/config/app_config.dart';
+import 'package:socbay/constants/api_endpoints.dart';
 import 'package:socbay/data/model/task_model.dart';
 import 'package:socbay/data/repository/auth/api_repository.dart';
 import 'package:socbay/db/db_manager.dart';
@@ -15,9 +16,10 @@ import 'package:socbay/utils/logger_util.dart';
 
 import 'package:http/http.dart' as http;
 
-class RentTaskScreenSaleBloc extends Bloc<RentTaskScreenEvent, RentTaskScreenState> {
+class RentTaskScreenSaleBloc
+    extends Bloc<RentTaskScreenEvent, RentTaskScreenState> {
   RentTaskScreenSaleBloc({required this.apiRepository})
-      : super(MyTaskScreenInitialState()) {
+    : super(MyTaskScreenInitialState()) {
     on<TaskScreenGetTaskAvailableEvent>(_mapGetTaskAvailableEventToState);
     on<TaskScreenGetTaskEvent>(_mapGetTaskEventToState);
     on<StaffTaskScreenGetTaskByDayEvent>(_mapGetTaskByDayEventToState);
@@ -40,24 +42,28 @@ class RentTaskScreenSaleBloc extends Bloc<RentTaskScreenEvent, RentTaskScreenSta
   int pageTaskByday = 0;
 
   FutureOr<void> _mapGetTaskAvailableEventToState(
-      TaskScreenGetTaskAvailableEvent event,
-      Emitter<RentTaskScreenState> emit) async {}
+    TaskScreenGetTaskAvailableEvent event,
+    Emitter<RentTaskScreenState> emit,
+  ) async {}
 
   FutureOr<void> _mapGetTaskEventToState(
-      TaskScreenGetTaskEvent event, Emitter<RentTaskScreenState> emit) async {
+    TaskScreenGetTaskEvent event,
+    Emitter<RentTaskScreenState> emit,
+  ) async {
     isLoading = true;
     emit(MyTaskScreenInitialState());
     var userAccount = await DbManager.instance.getAccounts();
     try {
-      var url = Uri.http(
-          AppConfig.instance.values.apiUrl,
-          "/api/rent-tasks/customer/${userAccount.first.id}",
-          {'page': event.isRefresh ? 0 : page});
+      var url = AppConfig.instance.apiUri(
+        ApiEndpoints.rentTasksByCustomer(userAccount.first.id),
+        {'page': event.isRefresh ? 0 : page},
+      );
       var res = await http.get(url);
       if (res.statusCode == HttpStatus.ok) {
         var l = Map<String, dynamic>.from(json.decode(res.body));
         List<TaskModel> newlistTaskModel = List<TaskModel>.from(
-            l["data"].map((model) => TaskModel.fromJson(model)));
+          l["data"].map((model) => TaskModel.fromJson(model)),
+        );
         if (event.isRefresh) {
           listTaskModel.clear();
           page = 0;
@@ -73,21 +79,23 @@ class RentTaskScreenSaleBloc extends Bloc<RentTaskScreenEvent, RentTaskScreenSta
   }
 
   FutureOr<void> _mapGetTaskByDayEventToState(
-      StaffTaskScreenGetTaskByDayEvent event,
-      Emitter<RentTaskScreenState> emit) async {
+    StaffTaskScreenGetTaskByDayEvent event,
+    Emitter<RentTaskScreenState> emit,
+  ) async {
     isLoading = true;
     emit(MyTaskScreenInitialState());
     try {
-      var url = Uri.http(AppConfig.instance.values.apiUrl, "/api/rent-tasks", {
+      var url = AppConfig.instance.apiUri(ApiEndpoints.rentTasks, {
         'page': event.isRefresh ? "0" : pageTaskByday.toString(),
         'sale_id': App.instance.userApp?.id.toString(),
-        'start': DateFormat("yyyy-MM-dd").format(DateTime.now())
+        'start': DateFormat("yyyy-MM-dd").format(DateTime.now()),
       });
       var res = await http.get(url);
       if (res.statusCode == HttpStatus.ok) {
         var l = Map<String, dynamic>.from(json.decode(res.body));
         List<TaskModel> newlistTaskModel = List<TaskModel>.from(
-            l["data"].map((model) => TaskModel.fromJson(model)));
+          l["data"].map((model) => TaskModel.fromJson(model)),
+        );
         if (event.isRefresh) {
           staffListTaskBydayModel.clear();
           pageTaskByday = 0;
@@ -105,12 +113,13 @@ class RentTaskScreenSaleBloc extends Bloc<RentTaskScreenEvent, RentTaskScreenSta
   }
 
   FutureOr<void> _mapGetTaskAssigedEventToState(
-      StaffTaskScreenGetTaskAssigedEvent event,
-      Emitter<RentTaskScreenState> emit) async {
+    StaffTaskScreenGetTaskAssigedEvent event,
+    Emitter<RentTaskScreenState> emit,
+  ) async {
     isLoading = true;
     emit(MyTaskScreenInitialState());
     try {
-      var url = Uri.http(AppConfig.instance.values.apiUrl, "/api/rent-tasks/ton-dong", {
+      var url = AppConfig.instance.apiUri(ApiEndpoints.rentTasksPending, {
         'sale_id': App.instance.userApp?.id.toString(),
       });
       // Fetch data from the new API endpoint
@@ -118,7 +127,8 @@ class RentTaskScreenSaleBloc extends Bloc<RentTaskScreenEvent, RentTaskScreenSta
       if (res.statusCode == HttpStatus.ok) {
         var responseMap = Map<String, dynamic>.from(json.decode(res.body));
         List<TaskModel> newTaskModelList = List<TaskModel>.from(
-            responseMap["data"].map((model) => TaskModel.fromJson(model)));
+          responseMap["data"].map((model) => TaskModel.fromJson(model)),
+        );
 
         // Clear the list before adding new data, as we're fetching all data at once
         staffListTaskAssigedModel.clear();
@@ -132,8 +142,9 @@ class RentTaskScreenSaleBloc extends Bloc<RentTaskScreenEvent, RentTaskScreenSta
   }
 
   Future<void> _mapUpdateTaskEventToState(
-      StaffTaskScreenUpdateTaskDoneEvent event,
-      Emitter<RentTaskScreenState> emit) async {
+    StaffTaskScreenUpdateTaskDoneEvent event,
+    Emitter<RentTaskScreenState> emit,
+  ) async {
     isLoading = true;
     emit(MyTaskScreenInitialState());
     Map<String, dynamic> params = {
@@ -149,15 +160,20 @@ class RentTaskScreenSaleBloc extends Bloc<RentTaskScreenEvent, RentTaskScreenSta
       "user_id": event.status == '1' || event.status == '2'
           ? null
           : App.instance.userApp!.id.toString(),
-      "time_star": DateFormat('dd/MM/yyyy HH:mm')
-          .format(DateTime.parse(event.timeStart.toString())),
+      "time_star": DateFormat(
+        'dd/MM/yyyy HH:mm',
+      ).format(DateTime.parse(event.timeStart.toString())),
     };
 
-    var url = Uri.http(AppConfig.instance.values.apiUrl,
-        "/api/rent-tasks/editKTV/${event.taskId.toString()}");
+    var url = AppConfig.instance.apiUri(
+      ApiEndpoints.rentTaskEditKtv(event.taskId.toString()),
+    );
     var body = json.encode(params);
-    var res = await http
-        .post(url, body: body, headers: {'Content-type': 'application/json'});
+    var res = await http.post(
+      url,
+      body: body,
+      headers: {'Content-type': 'application/json'},
+    );
     if (res.statusCode == HttpStatus.ok) {
       var l = Map<String, dynamic>.from(json.decode(res.body));
       if (l["code"] == 1) {
@@ -172,8 +188,9 @@ class RentTaskScreenSaleBloc extends Bloc<RentTaskScreenEvent, RentTaskScreenSta
   }
 
   Future<void> _mapUpdateTaskEventDayToState(
-      StaffTaskScreenUpdateTaskDayDoneEvent event,
-      Emitter<RentTaskScreenState> emit) async {
+    StaffTaskScreenUpdateTaskDayDoneEvent event,
+    Emitter<RentTaskScreenState> emit,
+  ) async {
     isLoading = true;
     emit(MyTaskScreenInitialState());
 
@@ -189,14 +206,19 @@ class RentTaskScreenSaleBloc extends Bloc<RentTaskScreenEvent, RentTaskScreenSta
       "user_id": event.status == '1' || event.status == '2'
           ? null
           : App.instance.userApp!.id.toString(),
-      "time_star": DateFormat('dd/MM/yyyy HH:mm')
-          .format(DateTime.parse(event.timeStart.toString())),
+      "time_star": DateFormat(
+        'dd/MM/yyyy HH:mm',
+      ).format(DateTime.parse(event.timeStart.toString())),
     };
-    var url = Uri.http(AppConfig.instance.values.apiUrl,
-        "/api/rent-tasks/edit/${event.taskId.toString()}");
+    var url = AppConfig.instance.apiUri(
+      ApiEndpoints.rentTaskEdit(event.taskId.toString()),
+    );
     var body = json.encode(params);
-    var res = await http
-        .post(url, body: body, headers: {'Content-type': 'application/json'});
+    var res = await http.post(
+      url,
+      body: body,
+      headers: {'Content-type': 'application/json'},
+    );
     if (res.statusCode == HttpStatus.ok) {
       var l = Map<String, dynamic>.from(json.decode(res.body));
       if (l["code"] == 1) {
@@ -211,15 +233,20 @@ class RentTaskScreenSaleBloc extends Bloc<RentTaskScreenEvent, RentTaskScreenSta
   }
 
   FutureOr<void> _mapGetTaskDoneEventToState(
-      StaffTaskScreenGetTaskDoneEvent event,
-      Emitter<RentTaskScreenState> emit) async {}
+    StaffTaskScreenGetTaskDoneEvent event,
+    Emitter<RentTaskScreenState> emit,
+  ) async {}
 
   FutureOr<void> _mapBookingDeleteTaskEventToState(
-      BookingDeleteTaskEvent event, Emitter<RentTaskScreenState> emit) async {
+    BookingDeleteTaskEvent event,
+    Emitter<RentTaskScreenState> emit,
+  ) async {
     isLoading = true;
     emit(MyTaskScreenInitialState());
-    var url = Uri.http(AppConfig.instance.values.apiUrl, "/api/rent-tasks/xoa",
-        {'txt-uid': event.taskId.toString(), 'des': event.des});
+    var url = AppConfig.instance.apiUri(ApiEndpoints.rentTaskDelete, {
+      'txt-uid': event.taskId.toString(),
+      'des': event.des,
+    });
     var res1 = await http.post(url);
     if (res1.statusCode == HttpStatus.ok) {
       var l = Map<String, dynamic>.from(json.decode(res1.body));
@@ -234,11 +261,15 @@ class RentTaskScreenSaleBloc extends Bloc<RentTaskScreenEvent, RentTaskScreenSta
   }
 
   FutureOr<void> _mapBookingDeleteTaskToDayEventToState(
-      BookingDeleteTaskToDayEvent event, Emitter<RentTaskScreenState> emit) async {
+    BookingDeleteTaskToDayEvent event,
+    Emitter<RentTaskScreenState> emit,
+  ) async {
     isLoading = true;
     emit(MyTaskScreenInitialState());
-    var url = Uri.http(AppConfig.instance.values.apiUrl, "/api/rent-tasks/xoa",
-        {'txt-uid': event.taskId.toString(), 'des': event.des});
+    var url = AppConfig.instance.apiUri(ApiEndpoints.rentTaskDelete, {
+      'txt-uid': event.taskId.toString(),
+      'des': event.des,
+    });
     var res1 = await http.post(url);
     if (res1.statusCode == HttpStatus.ok) {
       var l = Map<String, dynamic>.from(json.decode(res1.body));

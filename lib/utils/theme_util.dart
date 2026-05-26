@@ -16,45 +16,57 @@ class ThemeUtil {
     // text styling for headlines, titles, bodies of text, and more.
     textTheme: TextTheme(
       headlineSmall: GoogleFonts.roboto(
-          textStyle: const TextStyle(
-              color: ColorUtil.raisinBlack,
-              fontSize: 17,
-              fontWeight: MyFontWeight.semiBold)),
+        textStyle: const TextStyle(
+          color: ColorUtil.raisinBlack,
+          fontSize: 17,
+          fontWeight: MyFontWeight.semiBold,
+        ),
+      ),
 
       //Large text in app bar title
       titleLarge: GoogleFonts.roboto(
-          textStyle: const TextStyle(
-              color: ColorUtil.raisinBlack,
-              fontSize: 16,
-              fontWeight: MyFontWeight.semiBold)),
+        textStyle: const TextStyle(
+          color: ColorUtil.raisinBlack,
+          fontSize: 16,
+          fontWeight: MyFontWeight.semiBold,
+        ),
+      ),
 
       //Primary text in list title
       titleMedium: GoogleFonts.roboto(
-          textStyle: const TextStyle(
-              color: ColorUtil.raisinBlack,
-              fontSize: 15,
-              fontWeight: MyFontWeight.regular)),
+        textStyle: const TextStyle(
+          color: ColorUtil.raisinBlack,
+          fontSize: 15,
+          fontWeight: MyFontWeight.regular,
+        ),
+      ),
 
       //Used for emphasizing text in body
       bodyLarge: GoogleFonts.roboto(
-          textStyle: const TextStyle(
-              color: ColorUtil.raisinBlack,
-              fontSize: 15,
-              fontWeight: MyFontWeight.regular)),
+        textStyle: const TextStyle(
+          color: ColorUtil.raisinBlack,
+          fontSize: 15,
+          fontWeight: MyFontWeight.regular,
+        ),
+      ),
 
       //Default Textstyle
       bodyMedium: GoogleFonts.roboto(
-          textStyle: const TextStyle(
-              color: ColorUtil.raisinBlack,
-              fontSize: 14,
-              fontWeight: MyFontWeight.regular)),
+        textStyle: const TextStyle(
+          color: ColorUtil.raisinBlack,
+          fontSize: 14,
+          fontWeight: MyFontWeight.regular,
+        ),
+      ),
 
       //Default button textstyle
       labelLarge: GoogleFonts.roboto(
-          textStyle: const TextStyle(
-              color: ColorUtil.raisinBlack,
-              fontSize: 16,
-              fontWeight: MyFontWeight.semiBold)),
+        textStyle: const TextStyle(
+          color: ColorUtil.raisinBlack,
+          fontSize: 16,
+          fontWeight: MyFontWeight.semiBold,
+        ),
+      ),
     ),
     // fontFamily: 'Montserrat', colorScheme: ColorScheme.fromSwatch().copyWith(secondary: ColorUtil.mustardAccent),
   );

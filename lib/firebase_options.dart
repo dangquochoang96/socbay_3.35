@@ -85,5 +85,4 @@ class DefaultFirebaseOptions {
     storageBucket: 'socbay-9e758.firebasestorage.app',
     measurementId: 'G-94SV6C02ED',
   );
-
 }

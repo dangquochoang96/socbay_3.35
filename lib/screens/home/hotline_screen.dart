@@ -33,39 +33,42 @@ class _HotlineScreenState extends State<HotlineScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<HotlineScreenBloc, HotlineScreenState>(
-        builder: _builder, listener: _listener);
+      builder: _builder,
+      listener: _listener,
+    );
   }
 
   void _listener(BuildContext context, HotlineScreenState state) {}
 
   Widget _builder(BuildContext context, HotlineScreenState state) {
     return SafeArea(
-        child: Scaffold(
-      appBar: MyAppBar(
-        title: "Hotline",
-        isBackNavigation: true,
-        centerTitle: true,
-      ),
-      body: LoadingIndicator(
-        isLoading: _bloc.isLoading,
-        child: ListView.builder(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-          itemBuilder: _itemBuilder,
-          itemCount: _bloc.users.length,
+      child: Scaffold(
+        appBar: MyAppBar(
+          title: "Hotline",
+          isBackNavigation: true,
+          centerTitle: true,
+        ),
+        body: LoadingIndicator(
+          isLoading: _bloc.isLoading,
+          child: ListView.builder(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            itemBuilder: _itemBuilder,
+            itemCount: _bloc.users.length,
+          ),
         ),
       ),
-    ));
+    );
   }
 
   Widget _itemBuilder(BuildContext context, int index) {
     final UserProfile item = _bloc.users[index];
     return GestureDetector(
       onTap: () async {
-        Navigator.pushNamed(context, Routes.staffInfoScreen, arguments: {
-          "id": item.id,
-          "name": item.username,
-          "staffInfo": item
-        });
+        Navigator.pushNamed(
+          context,
+          Routes.staffInfoScreen,
+          arguments: {"id": item.id, "name": item.username, "staffInfo": item},
+        );
       },
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 8),
@@ -79,7 +82,10 @@ class _HotlineScreenState extends State<HotlineScreen> {
             ClipRRect(
               borderRadius: BorderRadius.circular(50),
               child: ImageUtil.loadNetWorkImage(
-                  url: item.avatar ?? '', height: 50, width: 50),
+                url: item.avatar ?? '',
+                height: 50,
+                width: 50,
+              ),
             ),
             Expanded(
               child: Padding(
@@ -90,8 +96,9 @@ class _HotlineScreenState extends State<HotlineScreen> {
                     Text(
                       '${item.username}',
                       style: const TextStyle(
-                          fontWeight: MyFontWeight.bold,
-                          overflow: TextOverflow.ellipsis),
+                        fontWeight: MyFontWeight.bold,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                       maxLines: 1,
                     ),
                     Text('${item.phone}'),
@@ -112,7 +119,7 @@ class _HotlineScreenState extends State<HotlineScreen> {
                 ),
                 child: const Icon(Icons.phone, color: Colors.red),
               ),
-            )
+            ),
           ],
         ),
       ),

@@ -20,41 +20,42 @@ class BlogModel {
     return DateFormat("dd/MM/yyyy").format(date);
   }
 
-  BlogModel(
-      {this.id,
-      this.categoryId,
-      //this.app,
-      this.name,
-      this.image,
-      this.status,
-      this.shortdes,
-      this.des,
-      this.order,
-      this.createdAt});
+  BlogModel({
+    this.id,
+    this.categoryId,
+    //this.app,
+    this.name,
+    this.image,
+    this.status,
+    this.shortdes,
+    this.des,
+    this.order,
+    this.createdAt,
+  });
 
   factory BlogModel.fromJson(Map<String, dynamic> json) => BlogModel(
-        id: json['id'] as int?,
-        categoryId: json['category_id'] as List<String>?,
-        //app: json['app'] as int?,
-        name: json['name'] as String?,
-        image: json['image'] as String?,
-        status: json['status'] as String?,
-        shortdes: json['shortdes'] as String?,
-        des: json['des'] as String?,
-        order: json['order'] as String?,
-        createdAt: json['created_at'] as String?,
-      );
+    id: json['id'] as int?,
+    categoryId: json['category_id'] as List<String>?,
+    //app: json['app'] as int?,
+    name: json['name'] as String?,
+    image: json['image'] as String?,
+    status: json['status'] as String?,
+    shortdes: json['shortdes'] as String?,
+    des: json['des'] as String?,
+    order: json['order'] as String?,
+    createdAt: json['created_at'] as String?,
+  );
 
   Map<String, dynamic> toJson() => <String, dynamic>{
-        'id': id,
-        'category_id': categoryId,
-        //'app': app,
-        'name': name,
-        'image': image,
-        'status': status,
-        'shortdes': shortdes,
-        'des': des,
-        'order': order,
-        'created_at': createdAt,
-      };
+    'id': id,
+    'category_id': categoryId,
+    //'app': app,
+    'name': name,
+    'image': image,
+    'status': status,
+    'shortdes': shortdes,
+    'des': des,
+    'order': order,
+    'created_at': createdAt,
+  };
 }

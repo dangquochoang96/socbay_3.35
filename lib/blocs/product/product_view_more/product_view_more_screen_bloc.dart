@@ -21,12 +21,14 @@ class ProductViewMoreScreenBloc
   bool isLoading = false;
 
   FutureOr<void> _mapStartedEventToState(
-      ProductViewMoreScreenStartedEvent event,
-      Emitter<ProductViewMoreScreenState> emit) async {
+    ProductViewMoreScreenStartedEvent event,
+    Emitter<ProductViewMoreScreenState> emit,
+  ) async {
     isLoading = true;
     emit(ProductViewMoreScreenInitialState());
-    final res =
-        await apiRepository.getProductCategoryDetail(productCategory.id ?? -1);
+    final res = await apiRepository.getProductCategoryDetail(
+      productCategory.id ?? -1,
+    );
     if (res.data != null && res.status == HttpStatus.ok) {
       productCategory = res.data!;
     }

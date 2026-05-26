@@ -8,9 +8,8 @@ import 'notification_screen_event.dart';
 
 class NotificationScreenBloc
     extends Bloc<NotificationScreenEvent, NotificationScreenState> {
-  NotificationScreenBloc({
-    required this.apiRepository,
-  }) : super(NotificationScreenInitialState()) {
+  NotificationScreenBloc({required this.apiRepository})
+    : super(NotificationScreenInitialState()) {
     on<NotificationScreenStartedEvent>(_mapStartedEventToState);
   }
 

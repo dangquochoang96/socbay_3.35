@@ -13,14 +13,15 @@ class LoadingIndicator extends StatelessWidget {
   final Color color;
   final String text;
 
-  const LoadingIndicator(
-      {super.key,
-      required this.isLoading,
-      required this.child,
-      this.opacity = 0,
-      this.contentOpacity = 0.5,
-      this.color = Colors.grey,
-      this.text = ''});
+  const LoadingIndicator({
+    super.key,
+    required this.isLoading,
+    required this.child,
+    this.opacity = 0,
+    this.contentOpacity = 0.5,
+    this.color = Colors.grey,
+    this.text = '',
+  });
 
   final spinKit = const SpinKitRing(
     color: ColorUtil.white,
@@ -72,10 +73,6 @@ class LoadingIndicator extends StatelessWidget {
       );
       widgetList.add(modal);
     }
-    return Scaffold(
-      body: Stack(
-        children: widgetList,
-      ),
-    );
+    return Scaffold(body: Stack(children: widgetList));
   }
 }

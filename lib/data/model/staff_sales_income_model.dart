@@ -14,12 +14,13 @@ class StaffSalesIncomeModel {
     this.type,
     this.status,
   });
-  factory StaffSalesIncomeModel.fromJson(Map<String, dynamic> json) => StaffSalesIncomeModel(
-    totalOrder: json["totalOrder"] as String,
-    totalPrice: json["totalPrice"] as String,
-    totalChietKhau: json["totalChietKhau"] as String,
-    totalTruTichDiem: json["totalTruTichDiem"] as String,
-    type: json["type"] as String,
-    status: json["status"] as String,
-  );
+  factory StaffSalesIncomeModel.fromJson(Map<String, dynamic> json) =>
+      StaffSalesIncomeModel(
+        totalOrder: json["totalOrder"] as String,
+        totalPrice: json["totalPrice"] as String,
+        totalChietKhau: json["totalChietKhau"] as String,
+        totalTruTichDiem: json["totalTruTichDiem"] as String,
+        type: json["type"] as String,
+        status: json["status"] as String,
+      );
 }

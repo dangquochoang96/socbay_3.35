@@ -22,7 +22,7 @@ class App {
     return _instance;
   }
 
-  static String versionApi = "api";
+  static String versionApi = "";
   EventBus eventBus = EventBus();
 
   UserProfile? userApp;
@@ -37,7 +37,9 @@ class App {
     }
     userApp = null;
     await SecureStorageUtil.shared.deleteKey(SecureStorageUtil.tokenStorageKey);
-    await SecureStorageUtil.shared.deleteKey(SecureStorageUtil.registerStaffKey);
+    await SecureStorageUtil.shared.deleteKey(
+      SecureStorageUtil.registerStaffKey,
+    );
     await SecureStorageUtil.shared.logoutCurrentUser();
   }
 }

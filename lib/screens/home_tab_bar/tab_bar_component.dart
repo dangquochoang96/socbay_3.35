@@ -12,13 +12,7 @@ import '../../utils/color_util.dart';
 
 const imageSize = 24.0;
 
-enum TabItem {
-  home,
-  history,
-  booking,
-  myTask,
-  product,
-}
+enum TabItem { home, history, booking, myTask, product }
 
 extension TabItemExtension on TabItem {
   String getTitle() {
@@ -26,9 +20,9 @@ extension TabItemExtension on TabItem {
       case TabItem.home:
         return "Trang chủ";
       case TabItem.history:
-        if(App.instance.userApp?.isUserCustomer()==true){
+        if (App.instance.userApp?.isUserCustomer() == true) {
           return "Nhật ký";
-        }else{
+        } else {
           return "Ds Công việc";
         }
       case TabItem.booking:
@@ -66,10 +60,11 @@ List<BottomNavigationBarItem> getTabBarItems() {
 
 Widget _icon(String path, isActive) {
   return ImageUtil.loadAssetsImage(
-      fileName: path,
-      width: imageSize,
-      height: imageSize,
-      color: isActive ? ColorUtil.bangladeshGreen : Colors.grey);
+    fileName: path,
+    width: imageSize,
+    height: imageSize,
+    color: isActive ? ColorUtil.bangladeshGreen : Colors.grey,
+  );
 }
 
 List<Widget> getTabBarWidgetItem(BuildContext context) {
@@ -79,14 +74,13 @@ List<Widget> getTabBarWidgetItem(BuildContext context) {
       const HistoryScreen(),
       const ProductCategoryScreen(),
     ];
-  }else if(App.instance.userApp?.isUserSale() == true){
+  } else if (App.instance.userApp?.isUserSale() == true) {
     return [
       const HomeScreen(),
       const TaskScreenSale(),
       const ProductCategoryScreen(),
     ];
-  }
-  else {
+  } else {
     return [
       const HomeScreen(),
       const TaskScreen(),

@@ -16,23 +16,23 @@ class ProductCategory {
   // final int? isNew;
   // final List<ProductModel>? product;
 
-
-  ProductCategory(
-      {this.id,
-      // this.app,
-      // this.isHot,
-      // this.isNew,
-      this.name,
-      this.image,
-      this.slug,
-      this.parentId,
-      this.order,
-      this.keyword,
-      this.metaDescription,
-      this.status,
-      // this.product,
-      this.createdAt,
-      this.updatedAt});
+  ProductCategory({
+    this.id,
+    // this.app,
+    // this.isHot,
+    // this.isNew,
+    this.name,
+    this.image,
+    this.slug,
+    this.parentId,
+    this.order,
+    this.keyword,
+    this.metaDescription,
+    this.status,
+    // this.product,
+    this.createdAt,
+    this.updatedAt,
+  });
 
   factory ProductCategory.fromJson(Map<String, dynamic> json) =>
       ProductCategory(
@@ -56,20 +56,20 @@ class ProductCategory {
       );
 
   Map<String, dynamic> toJson() => <String, dynamic>{
-        'id': id,
-        // 'app': app,
-        // 'is_hot': isHot,
-        // 'is_new': isNew,
-        'name': name,
-        'image': image,
-        'slug': slug,
-        'parent_id': parentId,
-        'order': order,
-        'keyword': keyword,
-        'meta_description': metaDescription,
-        'status': status,
-        // 'product': product,
-        'created_at': createdAt,
-        'updated_at': updatedAt,
-      };
+    'id': id,
+    // 'app': app,
+    // 'is_hot': isHot,
+    // 'is_new': isNew,
+    'name': name,
+    'image': image,
+    'slug': slug,
+    'parent_id': parentId,
+    'order': order,
+    'keyword': keyword,
+    'meta_description': metaDescription,
+    'status': status,
+    // 'product': product,
+    'created_at': createdAt,
+    'updated_at': updatedAt,
+  };
 }

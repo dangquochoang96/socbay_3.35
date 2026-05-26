@@ -41,7 +41,8 @@ class _RentTaskTabSale extends State<RentTaskTabSale> {
     _scrollController.addListener(() {
       scrollPaginationListener(
         scrollController: _scrollController,
-        condition: (_scrollController.hasClients &&
+        condition:
+            (_scrollController.hasClients &&
                 _scrollController.position.pixels ==
                     _scrollController.position.maxScrollExtent) ||
             _bloc.isLoading,
@@ -77,14 +78,17 @@ class _RentTaskTabSale extends State<RentTaskTabSale> {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<RentTaskScreenSaleBloc, RentTaskScreenState>(
-        builder: _builder, listener: _listener);
+      builder: _builder,
+      listener: _listener,
+    );
   }
 
   void _listener(BuildContext context, state) {
     if (state is BookingDeleteSuccessState) {
       _bloc.add(const StaffTaskScreenGetTaskByDayEvent(isRefresh: true));
       _bloc.add(
-          const StaffTaskScreenGetTaskAssigedEvent(isRefresh: true, page: 0));
+        const StaffTaskScreenGetTaskAssigedEvent(isRefresh: true, page: 0),
+      );
       _feedbackController.clear();
     }
     if (state is BookingDeleteErrorState) {
@@ -94,28 +98,31 @@ class _RentTaskTabSale extends State<RentTaskTabSale> {
 
   Widget _builder(BuildContext context, state) {
     return LoadingIndicator(
-        isLoading: _bloc.isLoading,
-        child: RefreshIndicator(
-          onRefresh: () async {
-            _isRefresh = true;
-            _bloc.add(StaffTaskScreenGetTaskByDayEvent(isRefresh: _isRefresh));
-          },
-          child: _bloc.staffListTaskBydayModel.isEmpty && !_bloc.isLoading
-              ? const Center(child: Text("Chưa có công việc"))
-              : ListView.separated(
-                  //controller: _scrollController,
-                  itemBuilder: _itemBuilder,
-                  itemCount: _bloc.staffListTaskBydayModel.length,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: paddingHorizontal,
-                    vertical: paddingVertical,
-                  ),
-                  separatorBuilder: (BuildContext context, int index) {
-                    return const Divider(
-                        thickness: 1, color: ColorUtil.bangladeshGreen);
-                  },
+      isLoading: _bloc.isLoading,
+      child: RefreshIndicator(
+        onRefresh: () async {
+          _isRefresh = true;
+          _bloc.add(StaffTaskScreenGetTaskByDayEvent(isRefresh: _isRefresh));
+        },
+        child: _bloc.staffListTaskBydayModel.isEmpty && !_bloc.isLoading
+            ? const Center(child: Text("Chưa có công việc"))
+            : ListView.separated(
+                //controller: _scrollController,
+                itemBuilder: _itemBuilder,
+                itemCount: _bloc.staffListTaskBydayModel.length,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: paddingHorizontal,
+                  vertical: paddingVertical,
                 ),
-        ));
+                separatorBuilder: (BuildContext context, int index) {
+                  return const Divider(
+                    thickness: 1,
+                    color: ColorUtil.bangladeshGreen,
+                  );
+                },
+              ),
+      ),
+    );
   }
 
   Widget _itemBuilder(BuildContext context, int index) {
@@ -157,13 +164,15 @@ class _RentTaskTabSale extends State<RentTaskTabSale> {
                     ),
                     const SizedBox(width: 8), // Adjust spacing if needed
                     Align(
-                        alignment: Alignment.centerRight,
-                        child: _buildButton(
-                            text: 'Hủy',
-                            isPositive: false,
-                            action: () {
-                              _cancelTask(taskModel);
-                            })),
+                      alignment: Alignment.centerRight,
+                      child: _buildButton(
+                        text: 'Hủy',
+                        isPositive: false,
+                        action: () {
+                          _cancelTask(taskModel);
+                        },
+                      ),
+                    ),
                   ],
                 ),
             ],
@@ -211,11 +220,12 @@ class _RentTaskTabSale extends State<RentTaskTabSale> {
               isHighlight: false,
             ),
             _buildTableRow(
-                title: 'Thông báo:',
-                content: taskModel.noti ?? '',
-                isHighlight: false),
+              title: 'Thông báo:',
+              content: taskModel.noti ?? '',
+              isHighlight: false,
+            ),
           ],
-        )
+        ),
       ],
     );
   }
@@ -231,20 +241,24 @@ class _RentTaskTabSale extends State<RentTaskTabSale> {
         Text(
           title,
           style: const TextStyle(
-              color: ColorUtil.raisinBlack, fontWeight: FontWeight.bold),
+            color: ColorUtil.raisinBlack,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         Text(
           "$content",
-          style: TextStyle(
-              color: isHighlight ? Colors.red : Colors.black),
+          style: TextStyle(color: isHighlight ? Colors.red : Colors.black),
         ),
       ],
     );
   }
 
   void _detailTask(TaskModel taskModel) {
-    Navigator.pushNamed(context, Routes.detailRentBookingScreen,
-        arguments: {'id': taskModel.id});
+    Navigator.pushNamed(
+      context,
+      Routes.detailRentBookingScreen,
+      arguments: {'id': taskModel.id},
+    );
   }
 
   Widget _buildButton({text, isPositive, action}) {
@@ -293,14 +307,19 @@ class _RentTaskTabSale extends State<RentTaskTabSale> {
             child: Text(
               text,
               style: const TextStyle(
-                  color: ColorUtil.bangladeshGreen, fontSize: 15),
+                color: ColorUtil.bangladeshGreen,
+                fontSize: 15,
+              ),
             ),
           );
   }
 
   void _editBooking(TaskModel taskModel) {
-    Navigator.pushNamed(context, Routes.editRentServiceScreen,
-        arguments: {'id': taskModel.id}).then((value) async {
+    Navigator.pushNamed(
+      context,
+      Routes.editRentServiceScreen,
+      arguments: {'id': taskModel.id},
+    ).then((value) async {
       if (value == null) {
         return;
       } else {
@@ -315,43 +334,51 @@ class _RentTaskTabSale extends State<RentTaskTabSale> {
 
   Future<void> _cancelTask(TaskModel taskModel) async {
     return showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: const Text(
-              'Vui lòng cho biết lý do bạn hủy dịch vụ',
-              textAlign: TextAlign.center,
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text(
+            'Vui lòng cho biết lý do bạn hủy dịch vụ',
+            textAlign: TextAlign.center,
+          ),
+          content: TextFieldDefault(
+            controller: _feedbackController,
+            maxLines: 5,
+          ),
+          actions: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _buildButtonDialog(
+                  isPositive: false,
+                  text: 'Hủy',
+                  action: () {
+                    Navigator.pop(context);
+                    _feedbackController.clear();
+                  },
+                ),
+                const SizedBox(width: 16),
+                _buildButtonDialog(
+                  isPositive: true,
+                  text: 'Gửi',
+                  action: () {
+                    _bloc.add(
+                      BookingDeleteTaskEvent(
+                        taskModel.id ?? 0,
+                        taskModel.name!,
+                        _feedbackController.text,
+                      ),
+                    );
+                    Navigator.pop(context);
+                    _feedbackController.clear();
+                  },
+                ),
+              ],
             ),
-            content: TextFieldDefault(
-              controller: _feedbackController,
-              maxLines: 5,
-            ),
-            actions: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _buildButtonDialog(
-                      isPositive: false,
-                      text: 'Hủy',
-                      action: () {
-                        Navigator.pop(context);
-                        _feedbackController.clear();
-                      }),
-                  const SizedBox(width: 16),
-                  _buildButtonDialog(
-                      isPositive: true,
-                      text: 'Gửi',
-                      action: () {
-                        _bloc.add(BookingDeleteTaskEvent(taskModel.id ?? 0,
-                            taskModel.name!, _feedbackController.text));
-                        Navigator.pop(context);
-                        _feedbackController.clear();
-                      }),
-                ],
-              )
-            ],
-          );
-        });
+          ],
+        );
+      },
+    );
   }
 
   Widget _buildButtonDialog({isPositive, action, text}) {
@@ -360,20 +387,21 @@ class _RentTaskTabSale extends State<RentTaskTabSale> {
 
   StatelessWidget _button(isPositive, action, text) {
     return ButtonWidget(
-        color: isPositive ? ColorUtil.bangladeshGreen : Colors.grey,
-        borderRadius: BorderRadius.circular(30),
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        onTap: () {
-          if (action == null) {
-            Navigator.pop(context);
-          } else {
-            action();
-          }
-        },
-        child: Text(
-          text,
-          textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 16, color: Colors.white),
-        ));
+      color: isPositive ? ColorUtil.bangladeshGreen : Colors.grey,
+      borderRadius: BorderRadius.circular(30),
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      onTap: () {
+        if (action == null) {
+          Navigator.pop(context);
+        } else {
+          action();
+        }
+      },
+      child: Text(
+        text,
+        textAlign: TextAlign.center,
+        style: const TextStyle(fontSize: 16, color: Colors.white),
+      ),
+    );
   }
 }

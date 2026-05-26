@@ -1,5 +1,4 @@
 class UserAddressRequest {
-
   UserAddressRequest({
     required this.name,
     required this.phone,

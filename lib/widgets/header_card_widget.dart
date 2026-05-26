@@ -20,11 +20,16 @@ class HeaderCardWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(
-          horizontal: paddingHorizontal, vertical: 8),
+        horizontal: paddingHorizontal,
+        vertical: 8,
+      ),
       decoration: const BoxDecoration(
-          color: ColorUtil.bangladeshGreen,
-          borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(10), topRight: Radius.circular(10))),
+        color: ColorUtil.bangladeshGreen,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(10),
+          topRight: Radius.circular(10),
+        ),
+      ),
       child: Row(
         children: [
           Expanded(
@@ -32,9 +37,10 @@ class HeaderCardWidget extends StatelessWidget {
               text,
               maxLines: 1,
               style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  overflow: TextOverflow.ellipsis),
+                color: Colors.white,
+                fontSize: 18,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           ),
           const SizedBox(width: 6),
@@ -42,13 +48,16 @@ class HeaderCardWidget extends StatelessWidget {
             ButtonWidget(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
               onTap: onViewMore,
-              child: const Text("Xem thêm",
-                  style: TextStyle(
-                      fontWeight: FontWeight.w300,
-                      fontStyle: FontStyle.italic,
-                      fontSize: 13,
-                      color: Colors.white)),
-            )
+              child: const Text(
+                "Xem thêm",
+                style: TextStyle(
+                  fontWeight: FontWeight.w300,
+                  fontStyle: FontStyle.italic,
+                  fontSize: 13,
+                  color: Colors.white,
+                ),
+              ),
+            ),
         ],
       ),
     );

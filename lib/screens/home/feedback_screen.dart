@@ -41,11 +41,7 @@ class _FeedbackScreenState extends State<FeedbackScreen>
   @override
   void initState() {
     _bloc = BlocProvider.of(context);
-    _tabController = TabController(
-      length: 2,
-      initialIndex: 0,
-      vsync: this,
-    );
+    _tabController = TabController(length: 2, initialIndex: 0, vsync: this);
     if (_tabController.index == 0) {
       _bloc.add(FeedbackScreenTabPressEvent(_tabController.index));
     }
@@ -71,7 +67,9 @@ class _FeedbackScreenState extends State<FeedbackScreen>
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<FeedbackScreenBloc, FeedbackScreenState>(
-        builder: _builder, listener: _listener);
+      builder: _builder,
+      listener: _listener,
+    );
   }
 
   void _listener(BuildContext context, FeedbackScreenState state) {
@@ -113,17 +111,14 @@ class _FeedbackScreenState extends State<FeedbackScreen>
           TabBar(
             controller: _tabController,
             indicatorColor: ColorUtil.bangladeshGreen,
-            tabs: [
-              _buildTab('Tạo mới'),
-              _buildTab('Đã gửi'),
-            ],
+            tabs: [_buildTab('Tạo mới'), _buildTab('Đã gửi')],
           ),
           Expanded(
             child: IndexedStack(
               index: _tabController.index,
               children: [_buildCreateFeedback(), _buildListFeedback()],
             ),
-          )
+          ),
         ],
       ),
     );
@@ -131,47 +126,51 @@ class _FeedbackScreenState extends State<FeedbackScreen>
 
   Tab _buildTab(text) {
     return Tab(
-        height: 36,
-        child: Text(
-          text,
-          style:
-              const TextStyle(color: ColorUtil.bangladeshGreen, fontSize: 20),
-        ));
+      height: 36,
+      child: Text(
+        text,
+        style: const TextStyle(color: ColorUtil.bangladeshGreen, fontSize: 20),
+      ),
+    );
   }
 
   Widget _buildCreateFeedback() {
     return LoadingIndicator(
-        isLoading: _bloc.isLoading,
-        child: ListView(
-          padding: const EdgeInsets.symmetric(
-              horizontal: paddingHorizontal, vertical: paddingVertical),
-          children: [
-            _buildField(Icons.feedback_outlined, null,
-                value: "Góp ý và khiếu nại", onTap: () {}),
-            const SizedBox(
-              height: 10,
-            ),
-            _buildDropdownFieldOrders(),
-            const SizedBox(
-              height: 10,
-            ),
-            _buildFormDescribe('Mô tả yêu cầu', describeRequestTxtController,
-                Icons.description_outlined, null),
-            const SizedBox(
-              height: 10,
-            ),
-            _buildSectionMedia(),
-            const SizedBox(
-              height: 10,
-            ),
-            _buildButton(
-                text: 'GỬI',
-                isPositive: true,
-                action: () {
-                  _onCreateFeedBack();
-                })
-          ],
-        ));
+      isLoading: _bloc.isLoading,
+      child: ListView(
+        padding: const EdgeInsets.symmetric(
+          horizontal: paddingHorizontal,
+          vertical: paddingVertical,
+        ),
+        children: [
+          _buildField(
+            Icons.feedback_outlined,
+            null,
+            value: "Góp ý và khiếu nại",
+            onTap: () {},
+          ),
+          const SizedBox(height: 10),
+          _buildDropdownFieldOrders(),
+          const SizedBox(height: 10),
+          _buildFormDescribe(
+            'Mô tả yêu cầu',
+            describeRequestTxtController,
+            Icons.description_outlined,
+            null,
+          ),
+          const SizedBox(height: 10),
+          _buildSectionMedia(),
+          const SizedBox(height: 10),
+          _buildButton(
+            text: 'GỬI',
+            isPositive: true,
+            action: () {
+              _onCreateFeedBack();
+            },
+          ),
+        ],
+      ),
+    );
   }
 
   Future _onCreateFeedBack() async {
@@ -179,101 +178,132 @@ class _FeedbackScreenState extends State<FeedbackScreen>
       context.showSnackBar("Đơn hàng không hợp lệ!");
       return;
     }
-    _bloc.add(FeedbackCreateEvent(
+    _bloc.add(
+      FeedbackCreateEvent(
         orderId: _selectedValue ?? "",
         description: describeRequestTxtController.text,
-        images: _listFile));
+        images: _listFile,
+      ),
+    );
   }
 
   Widget _buildListFeedback() {
     if (_bloc.feedBacksModel.isNotEmpty) {
       return LoadingIndicator(
-          isLoading: _bloc.isLoading,
-          child: ListView.separated(
-              itemBuilder: _buildItemServiceHistory,
-              separatorBuilder: separatorBuilder,
-              itemCount: _bloc.feedBacksModel.length));
+        isLoading: _bloc.isLoading,
+        child: ListView.separated(
+          itemBuilder: _buildItemServiceHistory,
+          separatorBuilder: separatorBuilder,
+          itemCount: _bloc.feedBacksModel.length,
+        ),
+      );
     }
     return const Center(child: Text('Lịch sử máy'));
   }
 
   Widget _buildItemServiceHistory(BuildContext context, int index) {
-    return Column(children: [
-      ButtonWidget(
+    return Column(
+      children: [
+        ButtonWidget(
           onTap: () {
-            Navigator.pushNamed(context, Routes.detailFeedBackScreen,
-                arguments: {
-                  "fbId": _bloc.feedBacksModel[index].id.toString(),
-                  "orderId": "0"
-                });
+            Navigator.pushNamed(
+              context,
+              Routes.detailFeedBackScreen,
+              arguments: {
+                "fbId": _bloc.feedBacksModel[index].id.toString(),
+                "orderId": "0",
+              },
+            );
           },
           child: Padding(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: paddingHorizontal, vertical: 8),
-              child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+            padding: const EdgeInsets.symmetric(
+              horizontal: paddingHorizontal,
+              vertical: 8,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                                padding: const EdgeInsets.only(
-                                  bottom: 1, // space between underline and text
-                                ),
-                                decoration: const BoxDecoration(
-                                    border: Border(
-                                        bottom: BorderSide(
-                                  color:
-                                      ColorUtil.raisinBlack, // Text colour here
-                                  width: 1.0, // Underline width
-                                ))),
-                                child: Text(
-                                    'Mã đơn hàng: ĐH_${_bloc.feedBacksModel[index].orderId}',
-                                    style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        color: ColorUtil.raisinBlack,
-                                        fontSize: 16)))
-                          ],
+                        Container(
+                          padding: const EdgeInsets.only(
+                            bottom: 1, // space between underline and text
+                          ),
+                          decoration: const BoxDecoration(
+                            border: Border(
+                              bottom: BorderSide(
+                                color:
+                                    ColorUtil.raisinBlack, // Text colour here
+                                width: 1.0, // Underline width
+                              ),
+                            ),
+                          ),
+                          child: Text(
+                            'Mã đơn hàng: ĐH_${_bloc.feedBacksModel[index].orderId}',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: ColorUtil.raisinBlack,
+                              fontSize: 16,
+                            ),
+                          ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 3)
-                  ]))),
-      Padding(
-        padding: const EdgeInsets.only(left: 20, top: 0, bottom: 10, right: 8),
-        child: Table(
-          columnWidths: const {1: FlexColumnWidth(2)},
-          children: [
-            TableRow(
-              children: [
-                const Text(
-                  "Trạng thái dịch vụ: ",
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+                  ],
                 ),
-                Text(_bloc.feedBacksModel[index].getStatus())
+                const SizedBox(height: 3),
               ],
             ),
-            TableRow(children: [
-              const Text('Mô tả: ',
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
-              Text(_bloc.feedBacksModel[index].description ?? '',
-                  style: const TextStyle(fontSize: 15)),
-            ]),
-          ],
+          ),
         ),
-      )
-    ]);
+        Padding(
+          padding: const EdgeInsets.only(
+            left: 20,
+            top: 0,
+            bottom: 10,
+            right: 8,
+          ),
+          child: Table(
+            columnWidths: const {1: FlexColumnWidth(2)},
+            children: [
+              TableRow(
+                children: [
+                  const Text(
+                    "Trạng thái dịch vụ: ",
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+                  ),
+                  Text(_bloc.feedBacksModel[index].getStatus()),
+                ],
+              ),
+              TableRow(
+                children: [
+                  const Text(
+                    'Mô tả: ',
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+                  ),
+                  Text(
+                    _bloc.feedBacksModel[index].description ?? '',
+                    style: const TextStyle(fontSize: 15),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 
   Widget separatorBuilder(BuildContext context, int index) {
     return Container(
-        decoration: const BoxDecoration(
-            border: Border(
-      bottom: BorderSide(width: 1.0, color: Colors.black26),
-    )));
+      decoration: const BoxDecoration(
+        border: Border(bottom: BorderSide(width: 1.0, color: Colors.black26)),
+      ),
+    );
   }
 
   Widget _buildButton({text, isPositive, action}) {
@@ -285,21 +315,22 @@ class _FeedbackScreenState extends State<FeedbackScreen>
 
   StatelessWidget _button(isPositive, action, text) {
     return ButtonWidget(
-        color: isPositive ? ColorUtil.bangladeshGreen : Colors.grey,
-        borderRadius: BorderRadius.circular(30),
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        onTap: () {
-          if (action == null) {
-            Navigator.pop(context);
-          } else {
-            action();
-          }
-        },
-        child: Text(
-          text,
-          textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 16, color: Colors.white),
-        ));
+      color: isPositive ? ColorUtil.bangladeshGreen : Colors.grey,
+      borderRadius: BorderRadius.circular(30),
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      onTap: () {
+        if (action == null) {
+          Navigator.pop(context);
+        } else {
+          action();
+        }
+      },
+      child: Text(
+        text,
+        textAlign: TextAlign.center,
+        style: const TextStyle(fontSize: 16, color: Colors.white),
+      ),
+    );
   }
 
   Widget _buildField(
@@ -311,50 +342,44 @@ class _FeedbackScreenState extends State<FeedbackScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(
-          height: 5,
-        ),
+        const SizedBox(height: 5),
         GestureDetector(
           onTap: onTap,
           child: Container(
-              height: 40,
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8.0),
-                  border:
-                      Border.all(color: ColorUtil.bangladeshGreen, width: 0.5)),
-              child: Row(
-                mainAxisSize: MainAxisSize.max,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(left: 10.0),
-                    child: Icon(
-                      iconPrefix,
-                      color: ColorUtil.spanishGray,
+            height: 40,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8.0),
+              border: Border.all(color: ColorUtil.bangladeshGreen, width: 0.5),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.max,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(left: 10.0),
+                  child: Icon(iconPrefix, color: ColorUtil.spanishGray),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    value,
+                    style: TextStyle(
+                      color: value.isEmpty
+                          ? ColorUtil.silverChalice
+                          : ColorUtil.raisinBlack,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(
-                    width: 10,
-                  ),
-                  Expanded(
-                    child: Text(value,
-                        style: TextStyle(
-                            color: value.isEmpty
-                                ? ColorUtil.silverChalice
-                                : ColorUtil.raisinBlack),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis),
-                  ),
-                  const Spacer(),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Icon(
-                      iconSuffix,
-                      color: ColorUtil.spanishGray,
-                    ),
-                  ),
-                ],
-              )),
+                ),
+                const Spacer(),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Icon(iconSuffix, color: ColorUtil.spanishGray),
+                ),
+              ],
+            ),
+          ),
         ),
       ],
     );
@@ -422,46 +447,59 @@ class _FeedbackScreenState extends State<FeedbackScreen>
         Container(
           padding: const EdgeInsets.only(top: 5),
           child: TextFormField(
-              readOnly: isReadOnly,
-              keyboardType: TextInputType.multiline,
-                  // isNumberType ? TextInputType.phone : TextInputType.text,
-              controller: controller,
-              maxLines: 5,
-              cursorColor: ColorUtil.bangladeshGreen,
-              decoration: InputDecoration(
-                prefixIcon: SizedBox(
-                  width: 20,
-                  height: 100,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8.0, vertical: 5.0),
-                        child: Icon(iconPrefix),
+            readOnly: isReadOnly,
+            keyboardType: TextInputType.multiline,
+            // isNumberType ? TextInputType.phone : TextInputType.text,
+            controller: controller,
+            maxLines: 5,
+            cursorColor: ColorUtil.bangladeshGreen,
+            decoration: InputDecoration(
+              prefixIcon: SizedBox(
+                width: 20,
+                height: 100,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8.0,
+                        vertical: 5.0,
                       ),
-                    ],
-                  ),
+                      child: Icon(iconPrefix),
+                    ),
+                  ],
                 ),
-                suffixIcon: haveSuffixIcon ? Icon(iconSuffix) : null,
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                  borderSide: const BorderSide(
-                      color: ColorUtil.bangladeshGreen, width: 0.5),
+              ),
+              suffixIcon: haveSuffixIcon ? Icon(iconSuffix) : null,
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.0),
+                borderSide: const BorderSide(
+                  color: ColorUtil.bangladeshGreen,
+                  width: 0.5,
                 ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                  borderSide: const BorderSide(
-                      color: ColorUtil.bangladeshGreen, width: 0.5),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.0),
+                borderSide: const BorderSide(
+                  color: ColorUtil.bangladeshGreen,
+                  width: 0.5,
                 ),
-                hintText: placeHolder,
-                hintStyle: const TextStyle(
-                    color: ColorUtil.silverChalice, fontSize: 13),
-                contentPadding:
-                    const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
-                suffixIconConstraints:
-                    const BoxConstraints(minHeight: 20, minWidth: 20),
-              )),
+              ),
+              hintText: placeHolder,
+              hintStyle: const TextStyle(
+                color: ColorUtil.silverChalice,
+                fontSize: 13,
+              ),
+              contentPadding: const EdgeInsets.symmetric(
+                vertical: 5,
+                horizontal: 15,
+              ),
+              suffixIconConstraints: const BoxConstraints(
+                minHeight: 20,
+                minWidth: 20,
+              ),
+            ),
+          ),
         ),
       ],
     );
@@ -470,8 +508,9 @@ class _FeedbackScreenState extends State<FeedbackScreen>
   Widget _buildSectionMedia() {
     return Container(
       decoration: BoxDecoration(
-          border: Border.all(color: ColorUtil.bangladeshGreen, width: 0.5),
-          borderRadius: BorderRadius.circular(8.0)),
+        border: Border.all(color: ColorUtil.bangladeshGreen, width: 0.5),
+        borderRadius: BorderRadius.circular(8.0),
+      ),
       padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 5.0),
       child: Column(
         children: [
@@ -479,31 +518,30 @@ class _FeedbackScreenState extends State<FeedbackScreen>
             children: const [
               Padding(
                 padding: EdgeInsets.all(8.0),
-                child: Icon(
-                  Icons.upload_file,
-                  color: ColorUtil.spanishGray,
-                ),
+                child: Icon(Icons.upload_file, color: ColorUtil.spanishGray),
               ),
               Flexible(
-                  child: Text(
-                'Up ảnh (tối đa 4 ảnh) và video (tối đa 15s) để kỹ thuật xem xét.',
-                style: TextStyle(color: ColorUtil.spanishGray),
-              ))
+                child: Text(
+                  'Up ảnh (tối đa 4 ảnh) và video (tối đa 15s) để kỹ thuật xem xét.',
+                  style: TextStyle(color: ColorUtil.spanishGray),
+                ),
+              ),
             ],
           ),
           SizedBox(
-              height: 200,
-              width: double.infinity,
-              child: ListView.builder(
-                itemCount: _listFile.length + 1,
-                shrinkWrap: true,
-                scrollDirection: Axis.horizontal,
-                itemBuilder: (BuildContext context, int index) {
-                  return index < _listFile.length
-                      ? _buildItemMedia(_listFile[index])
-                      : _buildDefaultItemMedia();
-                },
-              )),
+            height: 200,
+            width: double.infinity,
+            child: ListView.builder(
+              itemCount: _listFile.length + 1,
+              shrinkWrap: true,
+              scrollDirection: Axis.horizontal,
+              itemBuilder: (BuildContext context, int index) {
+                return index < _listFile.length
+                    ? _buildItemMedia(_listFile[index])
+                    : _buildDefaultItemMedia();
+              },
+            ),
+          ),
         ],
       ),
     );
@@ -526,28 +564,29 @@ class _FeedbackScreenState extends State<FeedbackScreen>
 
   void _showModalBottomSheetMedia() {
     showModalBottomSheet(
-        useSafeArea: true,
-        context: context,
-        builder: (BuildContext context) {
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: const Icon(Icons.image),
-                title: const Text('Image'),
-                onTap: _onChooseImages,
-              ),
-              ListTile(
-                leading: const Icon(Icons.photo_camera),
-                title: const Text('Camera'),
-                onTap: () {
-                  getImage(ImageSource.camera);
-                  Navigator.of(context).pop();
-                },
-              )
-            ],
-          );
-        });
+      useSafeArea: true,
+      context: context,
+      builder: (BuildContext context) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.image),
+              title: const Text('Image'),
+              onTap: _onChooseImages,
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_camera),
+              title: const Text('Camera'),
+              onTap: () {
+                getImage(ImageSource.camera);
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   // Widget _buildDefaultItemMedia() {
@@ -573,37 +612,37 @@ class _FeedbackScreenState extends State<FeedbackScreen>
             ClipRRect(
               borderRadius: BorderRadius.circular(8.0),
               child: ImageUtil.loadNetWorkImage(
-                  url: "$protocol${AppConfig.instance.values.apiUrl}$path",
-                  width: 120,
-                  height: 200),
+                url: "$protocol${AppConfig.instance.values.apiUrl}$path",
+                width: 120,
+                height: 200,
+              ),
             ),
             Positioned(
-                top: 0,
-                right: 0,
-                child: GestureDetector(
-                  child: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.grey,
-                      borderRadius: BorderRadius.circular(60),
-                    ),
-                    child: const Icon(
-                      Icons.delete,
-                      color: Colors.white,
-                      size: 25,
-                    ),
+              top: 0,
+              right: 0,
+              child: GestureDetector(
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.grey,
+                    borderRadius: BorderRadius.circular(60),
                   ),
-                  onTap: () {
-                    setState(() {
-                      _listFile.remove(path);
-                    });
-                  },
-                ))
+                  child: const Icon(
+                    Icons.delete,
+                    color: Colors.white,
+                    size: 25,
+                  ),
+                ),
+                onTap: () {
+                  setState(() {
+                    _listFile.remove(path);
+                  });
+                },
+              ),
+            ),
           ],
         ),
-        const SizedBox(
-          width: 5.0,
-        ),
+        const SizedBox(width: 5.0),
       ],
     );
   }
@@ -613,20 +652,27 @@ class _FeedbackScreenState extends State<FeedbackScreen>
       builder: (FormFieldState<String> state) {
         return InputDecorator(
           decoration: InputDecoration(
-              errorStyle:
-                  const TextStyle(color: Colors.redAccent, fontSize: 16.0),
-              hintText: 'Please select expense',
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8.0),
-                borderSide: const BorderSide(
-                    color: ColorUtil.bangladeshGreen, width: 0.5),
+            errorStyle: const TextStyle(
+              color: Colors.redAccent,
+              fontSize: 16.0,
+            ),
+            hintText: 'Please select expense',
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8.0),
+              borderSide: const BorderSide(
+                color: ColorUtil.bangladeshGreen,
+                width: 0.5,
               ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8.0),
-                borderSide: const BorderSide(
-                    color: ColorUtil.bangladeshGreen, width: 0.5),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8.0),
+              borderSide: const BorderSide(
+                color: ColorUtil.bangladeshGreen,
+                width: 0.5,
               ),
-              prefixIcon: const Icon(Icons.account_box_outlined)),
+            ),
+            prefixIcon: const Icon(Icons.account_box_outlined),
+          ),
           isEmpty: false,
           child: DropdownButtonHideUnderline(
             child: DropdownButton<String>(
@@ -640,12 +686,15 @@ class _FeedbackScreenState extends State<FeedbackScreen>
               },
               items: _listOrders.map((OrderFilterCoreModel sv) {
                 return DropdownMenuItem<String>(
-                    value: sv.id.toString(),
-                    child: Text(sv.id == 0
+                  value: sv.id.toString(),
+                  child: Text(
+                    sv.id == 0
                         ? "--Chọn--"
                         :
-                        //"${sv.product!=null?"${sv.product}:":""}${sv.id! > 0 ? sv.id.toString() : ""}-${sv.name}"),
-                        "${sv.product} - ${_createdDateConvert(sv.createdAt)}: Mã đơn ${sv.id}"));
+                          //"${sv.product!=null?"${sv.product}:":""}${sv.id! > 0 ? sv.id.toString() : ""}-${sv.name}"),
+                          "${sv.product} - ${_createdDateConvert(sv.createdAt)}: Mã đơn ${sv.id}",
+                  ),
+                );
               }).toList(),
             ),
           ),
@@ -678,7 +727,10 @@ class _FeedbackScreenState extends State<FeedbackScreen>
   void _onChooseImages() async {
     Navigator.of(context).pop();
     List<File>? files = await onGetMultiPhoto(
-        context: context, funcPermission: () {}, picker: _picker);
+      context: context,
+      funcPermission: () {},
+      picker: _picker,
+    );
     if (files != null && files.isNotEmpty) {
       if ((_listFile.length + files.length) <= 4) {
         _bloc.add(UploadImageEvent(files));
@@ -689,9 +741,7 @@ class _FeedbackScreenState extends State<FeedbackScreen>
     }
   }
 
-  Future getImage(
-    ImageSource img,
-  ) async {
+  Future getImage(ImageSource img) async {
     if (await Permission.camera.request().isGranted) {
       if (_listFile.length >= 4) {
         context.showSnackBar('Chỉ được chọn tối đa 4 ảnh!');
@@ -699,16 +749,20 @@ class _FeedbackScreenState extends State<FeedbackScreen>
       } else {
         final picker = ImagePicker();
         File? galleryFile;
-        final pickedFile =
-            await picker.pickImage(source: img, imageQuality: 30);
+        final pickedFile = await picker.pickImage(
+          source: img,
+          imageQuality: 30,
+        );
         List<File>? files = [];
         if (pickedFile != null) {
           galleryFile = File(pickedFile.path);
           files.add(galleryFile);
           _bloc.add(UploadImageEvent(files));
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(// is this context <<<
-              const SnackBar(content: Text('Nothing is selected')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            // is this context <<<
+            const SnackBar(content: Text('Nothing is selected')),
+          );
         }
       }
     } else {

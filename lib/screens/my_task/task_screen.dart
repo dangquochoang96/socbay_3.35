@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:socbay/blocs/task/task_screen_bloc.dart';
@@ -9,7 +8,6 @@ import 'package:socbay/screens/my_task/rent_task_available/rent_task_available_k
 import 'package:socbay/screens/my_task/task_available/task_available_tab.dart';
 import 'package:socbay/utils/color_util.dart';
 import 'package:socbay/widgets/my_app_bar.dart';
-
 
 class TaskScreen extends StatefulWidget {
   const TaskScreen({super.key});
@@ -25,18 +23,16 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<TaskScreenBloc, TaskScreenState>(
-        builder: _builder, listener: _listener);
+      builder: _builder,
+      listener: _listener,
+    );
   }
 
   @override
   void initState() {
     super.initState();
 
-    _tabController = TabController(
-      length: 4,
-      initialIndex: 0,
-      vsync: this,
-    );
+    _tabController = TabController(length: 4, initialIndex: 0, vsync: this);
     _tabController.addListener(() {
       if (_tabController.indexIsChanging) {
         setState(() {
@@ -45,17 +41,13 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
       }
     });
   }
-  void _listener(BuildContext context, state) {
 
-  }
+  void _listener(BuildContext context, state) {}
 
   Widget _builder(BuildContext context, TaskScreenState state) {
     return Scaffold(
-      appBar: MyAppBar(
-        title: "Công việc",
-        isBackNavigation: false,
-      ),
-      body:Column(
+      appBar: MyAppBar(title: "Công việc", isBackNavigation: false),
+      body: Column(
         children: [
           TabBar(
             controller: _tabController,
@@ -78,11 +70,9 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
                 _buildTaskAvailableRent(),
               ],
             ),
-          )
+          ),
         ],
-      )
-
-
+      ),
     );
   }
 
@@ -103,9 +93,11 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
   Widget _buildTaskAvailable() {
     return const TaskAvailableTab();
   }
+
   Widget _buildMyTaskRent() {
     return const RentTaskTab();
   }
+
   Widget _buildTaskAvailableRent() {
     return const RentTaskAvailableTab();
   }

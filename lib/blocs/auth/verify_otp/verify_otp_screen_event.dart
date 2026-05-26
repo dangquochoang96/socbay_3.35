@@ -3,11 +3,14 @@ abstract class VerifyOtpScreenEvent {
 }
 
 class VerifyOtpScreenStartedEvent extends VerifyOtpScreenEvent {}
+
 class VerifyOtpScreenSetOtpEvent extends VerifyOtpScreenEvent {}
+
 class VerifyOtpScreenRegisterEvent extends VerifyOtpScreenEvent {
   final String otp;
   const VerifyOtpScreenRegisterEvent({required this.otp});
 }
+
 class VerifyOtpScreenLoginEvent extends VerifyOtpScreenEvent {
   final String phone;
   final String password;

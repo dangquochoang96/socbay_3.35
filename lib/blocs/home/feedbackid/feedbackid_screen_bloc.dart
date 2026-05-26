@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:socbay/application.dart';
 import 'package:socbay/config/app_config.dart';
+import 'package:socbay/constants/api_endpoints.dart';
 import 'package:socbay/data/model/feed_back_model.dart';
 import 'package:socbay/data/model/order_filter_core_model.dart';
 import 'package:socbay/data/repository/auth/api_repository.dart';
@@ -27,7 +28,7 @@ class FeedbackScreenidBloc
   int currentOrderId = 0;
   List<String> paths = [];
   FeedbackScreenidBloc({required this.apiRepository, required this.args})
-      : super(FeedbackScreenInitialidState()) {
+    : super(FeedbackScreenInitialidState()) {
     on<FeedbackScreenTabPressidEvent>(_mapTabPressEventToState);
     on<FeedbackCreateidEvent>(_mapCreateNewFeedbackEvent);
     on<UploadImageidEvent>(_mapUploadImageEventToState);
@@ -38,8 +39,9 @@ class FeedbackScreenidBloc
   }
 
   Future<FutureOr<void>> _mapTabPressEventToState(
-      FeedbackScreenTabPressidEvent event,
-      Emitter<FeedbackScreenidState> emit) async {
+    FeedbackScreenTabPressidEvent event,
+    Emitter<FeedbackScreenidState> emit,
+  ) async {
     if (event.index == 0) {
       currentOrderId = int.parse(args["orderId"]);
       await _getListOrderByCustomer();
@@ -50,8 +52,9 @@ class FeedbackScreenidBloc
   }
 
   Future<FutureOr<void>> _mapListFeedbackOfStaffEventToState(
-      FeedbackScreenListOfStaffidEvent event,
-      Emitter<FeedbackScreenidState> emit) async {
+    FeedbackScreenListOfStaffidEvent event,
+    Emitter<FeedbackScreenidState> emit,
+  ) async {
     await _mapTabListFeedPressEventToState("STAFF");
     emit(FeedbackScreenStaffInitialidState());
   }
@@ -59,36 +62,46 @@ class FeedbackScreenidBloc
   Future<FutureOr<void>> _mapTabListFeedPressEventToState(String type) async {
     Uri url;
     if (type == "CST") {
-      url = Uri.http(AppConfig.instance.values.apiUrl, "/api/feedbacks",
-          {"customer_id": args["id"].toString()});
+      url = AppConfig.instance.apiUri(ApiEndpoints.feedbacks, {
+        "customer_id": args["id"].toString(),
+      });
     } else {
-      url = Uri.http(AppConfig.instance.values.apiUrl,
-          "/api/feedbacks/get-list-feddback-by-staff/${(args["id"])}");
+      url = AppConfig.instance.apiUri(
+        ApiEndpoints.feedbacksByStaff(args["id"]),
+      );
     }
     var res = await http.get(url);
     if (res.statusCode == HttpStatus.ok) {
       var l = Map<String, dynamic>.from(json.decode(res.body));
       feedBacksModel.clear();
-      feedBacksModel.addAll(List<FeedBackModel>.from(
-          l["data"].map((model) => FeedBackModel.fromJson(model))));
+      feedBacksModel.addAll(
+        List<FeedBackModel>.from(
+          l["data"].map((model) => FeedBackModel.fromJson(model)),
+        ),
+      );
       // feedBacksModel.sort((a,b)=>a.createdAt!.compareTo(b.createdAt!));
     }
     //emit(const FeedbackScreenChangeTabState(1));
   }
 
   Future<void> _mapCreateNewFeedbackEvent(
-      FeedbackCreateidEvent event, Emitter<FeedbackScreenidState> emit) async {
+    FeedbackCreateidEvent event,
+    Emitter<FeedbackScreenidState> emit,
+  ) async {
     List<String>? images = event.images;
-    var url = Uri.http(AppConfig.instance.values.apiUrl, "/api/feedbacks");
+    var url = AppConfig.instance.apiUri(ApiEndpoints.feedbacks);
     Map<String, dynamic> args = {
       "order_id": event.orderId.toString(),
       "description": event.description.toString(),
       "customer_id": App.instance.userApp?.id.toString(),
-      "images": images
+      "images": images,
     };
     var body = json.encode(args);
-    var res = await http
-        .post(url, body: body, headers: {'Content-type': 'application/json'});
+    var res = await http.post(
+      url,
+      body: body,
+      headers: {'Content-type': 'application/json'},
+    );
     if (res.statusCode == HttpStatus.ok) {
       var l = Map<String, dynamic>.from(json.decode(res.body));
       if (l["code"] == 1) {
@@ -102,41 +115,49 @@ class FeedbackScreenidBloc
   }
 
   Future<void> _getListOrderByCustomer() async {
-    var url = Uri.http(AppConfig.instance.values.apiUrl,
-        "/api/order/list-order-by-customer/${App.instance.userApp?.id}");
+    var url = AppConfig.instance.apiUri(
+      ApiEndpoints.orderListByCustomer(App.instance.userApp?.id),
+    );
     var res = await http.get(url);
     if (res.statusCode == HttpStatus.ok) {
       var l = Map<String, dynamic>.from(json.decode(res.body));
       ordersModel.clear();
       ordersModel = List<OrderFilterCoreModel>.from(
-          l["data"].map((model) => OrderFilterCoreModel.fromJson(model)));
+        l["data"].map((model) => OrderFilterCoreModel.fromJson(model)),
+      );
       // ordersModel.sort((a,b)=>a.createdAt!.compareTo(b.createdAt!));
       // ordersModel = ordersModel.reversed.toList();
     }
   }
 
   Future<void> _mapUploadImageEventToState(
-      UploadImageidEvent event, Emitter<FeedbackScreenidState> emit) async {
+    UploadImageidEvent event,
+    Emitter<FeedbackScreenidState> emit,
+  ) async {
     isLoading = true;
     try {
       paths.clear();
-      var uri = Uri.parse(
-          "$protocol${AppConfig.instance.values.apiUrl}/api/order/upload-image");
+      var uri = AppConfig.instance.apiSecureUri(ApiEndpoints.orderUploadImage);
       for (var file in event.files) {
         if (await file.length() > 2000000) {
           emit(FeedbackUploadImagesErroridState('Error'));
           continue;
         }
         var request = http.MultipartRequest('POST', uri);
-        request.files.add(http.MultipartFile.fromBytes(
-            'image', file.readAsBytesSync(),
-            filename: basename(file.path)));
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            'image',
+            file.readAsBytesSync(),
+            filename: basename(file.path),
+          ),
+        );
         // add file to multipart
         var res = await request.send();
         if (res.statusCode == HttpStatus.ok) {
           //var url = await res.stream.bytesToString();
           var l = Map<String, dynamic>.from(
-              json.decode(await res.stream.bytesToString()));
+            json.decode(await res.stream.bytesToString()),
+          );
           if (l["data"]["image_link"] != "") {
             paths.add(l["data"]["image_link"]);
           }
@@ -154,13 +175,16 @@ class FeedbackScreenidBloc
   }
 
   Future<void> _mapGetDetailFeedBackEventToState(
-      FeedbackDetailidEvent event, Emitter<FeedbackScreenidState> emit) async {
+    FeedbackDetailidEvent event,
+    Emitter<FeedbackScreenidState> emit,
+  ) async {
     isLoading = true;
     emit(FeedbackScreenStaffInitialidState());
     feedbackDetailId = int.parse(args["fbId"]);
     try {
-      var uri = Uri.http(AppConfig.instance.values.apiUrl,
-          "/api/feedbacks/$feedbackDetailId");
+      var uri = AppConfig.instance.apiUri(
+        ApiEndpoints.feedbackById(feedbackDetailId),
+      );
       var res = await http.get(uri);
       if (res.statusCode == HttpStatus.ok) {
         var l = Map<String, dynamic>.from(json.decode(res.body));
@@ -174,16 +198,18 @@ class FeedbackScreenidBloc
   }
 
   Future<void> _mapGetUpdateFeedBackEventToState(
-      FeedbackUpdateidEvent event, Emitter<FeedbackScreenidState> emit) async {
+    FeedbackUpdateidEvent event,
+    Emitter<FeedbackScreenidState> emit,
+  ) async {
     isLoading = true;
     emit(FeedbackScreenStaffInitialidState());
     try {
-      var url = Uri.http(AppConfig.instance.values.apiUrl,
-          "/api/feedbacks/update/$feedbackDetailId", {
-        "status": "2",
-        "description": event.description.toString(),
-        "user_id": App.instance.userApp?.id.toString()
-      });
+      var url = AppConfig.instance
+          .apiUri(ApiEndpoints.feedbackUpdate(feedbackDetailId), {
+            "status": "2",
+            "description": event.description.toString(),
+            "user_id": App.instance.userApp?.id.toString(),
+          });
       var res = await http.post(url);
       if (res.statusCode == HttpStatus.ok) {
         var l = Map<String, dynamic>.from(json.decode(res.body));
@@ -202,15 +228,16 @@ class FeedbackScreenidBloc
   }
 
   Future<void> _mapGetProcessedFeedBackEventToState(
-      FeedbackProcessedidEvent event,
-      Emitter<FeedbackScreenidState> emit) async {
+    FeedbackProcessedidEvent event,
+    Emitter<FeedbackScreenidState> emit,
+  ) async {
     isLoading = true;
     emit(FeedbackScreenStaffInitialidState());
     try {
-      var url = Uri.http(
-          AppConfig.instance.values.apiUrl,
-          "/api/feedbacks/update/$feedbackDetailId",
-          {"status": "2", "user_id": App.instance.userApp?.id.toString()});
+      var url = AppConfig.instance.apiUri(
+        ApiEndpoints.feedbackUpdate(feedbackDetailId),
+        {"status": "2", "user_id": App.instance.userApp?.id.toString()},
+      );
       var res = await http.post(url);
       if (res.statusCode == HttpStatus.ok) {
         var l = Map<String, dynamic>.from(json.decode(res.body));

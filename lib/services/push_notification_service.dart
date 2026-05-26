@@ -11,9 +11,7 @@ import 'package:socbay/utils/secure_storage_utils.dart';
 
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 }
 
 class PushNotificationService {
@@ -55,8 +53,9 @@ class PushNotificationService {
       _handleNotificationTap(initialMessage);
     }
 
-    _localNotificationService.onNotificationClick.stream
-        .listen(_handleLocalNotificationTap);
+    _localNotificationService.onNotificationClick.stream.listen(
+      _handleLocalNotificationTap,
+    );
 
     _isInitialized = true;
   }
@@ -75,8 +74,9 @@ class PushNotificationService {
   }
 
   Future<void> clearAuthenticatedUser() async {
-    final currentTopic =
-        await SecureStorageUtil.shared.readData(_currentTopicStorageKey);
+    final currentTopic = await SecureStorageUtil.shared.readData(
+      _currentTopicStorageKey,
+    );
     if (currentTopic != null && currentTopic.isNotEmpty) {
       await _messaging.unsubscribeFromTopic(currentTopic);
       await SecureStorageUtil.shared.deleteKey(_currentTopicStorageKey);
@@ -138,8 +138,9 @@ class PushNotificationService {
 
   Future<void> _subscribeToUserTopic(String userId) async {
     final topic = 'user_$userId';
-    final currentTopic =
-        await SecureStorageUtil.shared.readData(_currentTopicStorageKey);
+    final currentTopic = await SecureStorageUtil.shared.readData(
+      _currentTopicStorageKey,
+    );
 
     if (currentTopic == topic) {
       return;

@@ -9,7 +9,7 @@ import 'package:socbay/data/repository/auth/api_repository.dart';
 
 class GiftScreenBloc extends Bloc<GiftScreenEvent, GiftScreenState> {
   GiftScreenBloc({required this.apiRepository})
-      : super(GiftScreenInitialState()) {
+    : super(GiftScreenInitialState()) {
     on<GiftScreenStartedEvent>(_mapStartedEventToState);
     on<GiftScreenTabPressEvent>(_mapTabPressEventToState);
   }
@@ -20,7 +20,9 @@ class GiftScreenBloc extends Bloc<GiftScreenEvent, GiftScreenState> {
   bool isLoading = false;
 
   FutureOr<void> _mapStartedEventToState(
-      GiftScreenStartedEvent event, Emitter<GiftScreenState> emit) async {
+    GiftScreenStartedEvent event,
+    Emitter<GiftScreenState> emit,
+  ) async {
     isLoading = true;
     emit(GiftScreenInitialState());
     final resGift = await apiRepository.getGiftList();
@@ -36,7 +38,9 @@ class GiftScreenBloc extends Bloc<GiftScreenEvent, GiftScreenState> {
   }
 
   FutureOr<void> _mapTabPressEventToState(
-      GiftScreenTabPressEvent event, Emitter<GiftScreenState> emit) {
+    GiftScreenTabPressEvent event,
+    Emitter<GiftScreenState> emit,
+  ) {
     emit(GiftScreenChangeTabState(event.index));
   }
 }

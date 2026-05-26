@@ -26,11 +26,11 @@ class NotificationResponse {
       );
 
   Map<String, dynamic> toJson() => <String, dynamic>{
-        'app': app,
-        'name': name,
-        'img': image,
-        'shortdes': shortdes,
-        'des': des,
-        'created_at': createdAt,
-      };
+    'app': app,
+    'name': name,
+    'img': image,
+    'shortdes': shortdes,
+    'des': des,
+    'created_at': createdAt,
+  };
 }

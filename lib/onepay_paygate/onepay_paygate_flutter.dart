@@ -15,7 +15,7 @@ enum OnePayErrorCase {
   MOBILE_NOT_APP_BANKING, // app mobile banking doesn't install or not config in LSApplicationQueriesSchemes
   NOT_CONNECT_WEB_ONEPAY, // app not connect web onepay.Please check the information set onepay sent.
   NOT_FOUND_APP_BANKING, // App banking isn't exist. Contact the onepay developer with information of the message field in error.
-  WEB_ONEPAY_STATUS_500 // app not connect web onepay.Contact onepay for support.
+  WEB_ONEPAY_STATUS_500, // app not connect web onepay.Contact onepay for support.
 }
 
 class OPErrorResult {
@@ -46,17 +46,18 @@ class OPPaymentEntity {
   static const LINK_PAYGATE = "https://onepay.vn/paygate/vpcpay.op";
   static const VPC_THEME = "general";
 
-  OPPaymentEntity(
-      {required this.amount,
-      required this.orderInformation,
-      required this.currency,
-      required this.accessCode,
-      required this.merchant,
-      required this.hashKey,
-      required this.urlSchemes,
-      this.customerPhone,
-      this.customerEmail,
-      this.customerId});
+  OPPaymentEntity({
+    required this.amount,
+    required this.orderInformation,
+    required this.currency,
+    required this.accessCode,
+    required this.merchant,
+    required this.hashKey,
+    required this.urlSchemes,
+    this.customerPhone,
+    this.customerEmail,
+    this.customerId,
+  });
 
   String createUrlPayment() {
     var code = "${DateTime.now().millisecondsSinceEpoch}";
@@ -80,7 +81,7 @@ class OPPaymentEntity {
       "Title": title,
       "vpc_Currency": currency.name.toUpperCase(),
       "vpc_Theme": VPC_THEME,
-      "AgainLink": AGAIN_LINK
+      "AgainLink": AGAIN_LINK,
     };
     if (customerPhone != null) {
       queries["vpc_Customer_Phone"] = customerPhone!;
@@ -92,14 +93,17 @@ class OPPaymentEntity {
       queries["vpc_Customer_Id"] = customerId!;
     }
     queries["vpc_SecureHash"] = secureHashQueries(queries, hashKey);
-    var queryString =
-        queries.entries.map((e) => "${e.key}=${e.value}").join("&");
+    var queryString = queries.entries
+        .map((e) => "${e.key}=${e.value}")
+        .join("&");
     var uri = Uri.encodeFull("$LINK_PAYGATE?$queryString");
     return uri;
   }
 
   String secureHashQueries(
-      Map<String, String> queries, String hashKeyCustomer) {
+    Map<String, String> queries,
+    String hashKeyCustomer,
+  ) {
     var key = <int>[];
     var hashKeyCharacters = hashKeyCustomer.characters;
     for (var i = 0; i < hashKeyCharacters.length; i += 2) {
@@ -112,8 +116,10 @@ class OPPaymentEntity {
     // var key = utf8.encode(hashKeyCustomer);
     print("$hashKeyCustomer: $key");
     // print(int.parse(hashKeyCustomer, radix: 16));
-    var mapQueries =
-        SplayTreeMap<String, String>.from(queries, (a, b) => a.compareTo(b));
+    var mapQueries = SplayTreeMap<String, String>.from(
+      queries,
+      (a, b) => a.compareTo(b),
+    );
     var queryString = mapQueries.entries
         .map((e) {
           if (e.key.startsWith("vpc_")) {
@@ -146,19 +152,20 @@ class OPPaymentResult {
   String? transactionNo;
   String? version;
 
-  OPPaymentResult(
-      {required this.isSuccess,
-      this.amount,
-      this.card,
-      this.cardNumber,
-      this.command,
-      this.merchTxnRef,
-      this.merchant,
-      this.message,
-      this.orderInfo,
-      this.payChannel,
-      this.transactionNo,
-      this.version});
+  OPPaymentResult({
+    required this.isSuccess,
+    this.amount,
+    this.card,
+    this.cardNumber,
+    this.command,
+    this.merchTxnRef,
+    this.merchant,
+    this.message,
+    this.orderInfo,
+    this.payChannel,
+    this.transactionNo,
+    this.version,
+  });
 }
 
 typedef OnPayResult = void Function(OPPaymentResult result);
@@ -176,18 +183,21 @@ class OnePayPaygate {
     return await _channel.invokeMethod("openCustomURL", [url]);
   }
 
-  static void open(
-      {required BuildContext context,
-      required OPPaymentEntity entity,
-      OnPayResult? onPayResult,
-      OnPayFail? onPayFail}) {
+  static void open({
+    required BuildContext context,
+    required OPPaymentEntity entity,
+    OnPayResult? onPayResult,
+    OnPayFail? onPayFail,
+  }) {
     Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => OnePayPaygateView(
-                  paymentEntity: entity,
-                  onPayResult: onPayResult,
-                  onPayFail: onPayFail,
-                )));
+      context,
+      MaterialPageRoute(
+        builder: (context) => OnePayPaygateView(
+          paymentEntity: entity,
+          onPayResult: onPayResult,
+          onPayFail: onPayFail,
+        ),
+      ),
+    );
   }
 }

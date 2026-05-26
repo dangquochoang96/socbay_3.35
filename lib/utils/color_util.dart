@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class ColorUtil {
-  static const Color bangladeshGreen= Color(0xffc26d03);
+  static const Color bangladeshGreen = Color(0xffc26d03);
   static const Color primary = Color(0xFF1E2336);
   static const Color secondary = Color(0xFFFFCC00);
 

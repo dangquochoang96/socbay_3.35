@@ -55,7 +55,9 @@ class _StaffInfoScreenState extends State<StaffInfoScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<StaffInfoScreenBloc, StaffInfoScreenState>(
-        builder: _builder, listener: _listener);
+      builder: _builder,
+      listener: _listener,
+    );
   }
 
   void _listener(BuildContext context, StaffInfoScreenState state) {
@@ -152,7 +154,8 @@ class _StaffInfoScreenState extends State<StaffInfoScreen> {
                         : ClipRRect(
                             borderRadius: BorderRadius.circular(14),
                             child: ImageUtil.loadNetWorkImage(
-                              url: "$protocol${AppConfig.instance.values.apiUrl}/product_images/ktv-avatar.jpg",
+                              url:
+                                  "$protocol${AppConfig.instance.values.apiUrl}/product_images/ktv-avatar.jpg",
                               height: 100,
                               width: 100,
                             ),
@@ -325,10 +328,7 @@ class _StaffInfoScreenState extends State<StaffInfoScreen> {
                         _saveFavouriteStaff();
                       },
                       icon: _bloc.isFavourite
-                          ? const Icon(
-                              Icons.favorite,
-                              color: ColorUtil.red,
-                            )
+                          ? const Icon(Icons.favorite, color: ColorUtil.red)
                           : const Icon(Icons.favorite_border_outlined),
                     ),
                   ],
@@ -380,7 +380,10 @@ class _StaffInfoScreenState extends State<StaffInfoScreen> {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(16),
           child: ImageUtil.loadNetWorkImage(
-              url: img, height: 100, fit: BoxFit.contain),
+            url: img,
+            height: 100,
+            fit: BoxFit.contain,
+          ),
         ),
       ),
     );
@@ -408,7 +411,7 @@ class _StaffInfoScreenState extends State<StaffInfoScreen> {
               itemBuilder: _itemBuilder,
               separatorBuilder: _separateView,
             ),
-            const SizedBox(height: 10)
+            const SizedBox(height: 10),
           ],
         ),
       ],
@@ -418,67 +421,76 @@ class _StaffInfoScreenState extends State<StaffInfoScreen> {
   Widget _itemBuilder(BuildContext context, int index) {
     return Wrap(
       children: [
-        Row(mainAxisSize: MainAxisSize.min, children: [
-          FullScreenWidget(
-            child: Hero(
-              tag: "staffImage$index",
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: ImageUtil.loadNetWorkImage(
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            FullScreenWidget(
+              child: Hero(
+                tag: "staffImage$index",
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: ImageUtil.loadNetWorkImage(
                     url: _lstOrder?[index].user?.avatar != null
                         ? ("$protocol${AppConfig.instance.values.apiUrl}/${_lstOrder![index].user!.avatar!}")
                         : "",
                     height: MediaQuery.of(context).size.width * 0.12 - 15,
                     width: MediaQuery.of(context).size.width * 0.12 - 15,
-                    fit: BoxFit.contain),
-              ),
-            ),
-          ),
-          SizedBox(
-            width: MediaQuery.of(context).size.width * 0.75,
-            child: Column(
-              children: [
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 30, vertical: 3.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        _lstOrder?[index].user?.username ?? "",
-                        style: const TextStyle(
-                            fontSize: 15, fontWeight: FontWeight.bold),
-                      ),
-                      RatingBarIndicator(
-                        rating: _lstOrder?[index].rate != null
-                            ? double.parse(_lstOrder![index].rate!)
-                            : 0.0,
-                        direction: Axis.horizontal,
-                        unratedColor: Colors.amber.withAlpha(60),
-                        itemCount: 5,
-                        itemSize: 10.0,
-                        itemPadding:
-                            const EdgeInsets.symmetric(horizontal: 3.0),
-                        itemBuilder: (context, _) => const Icon(
-                          Icons.star,
-                          color: Colors.amber,
-                        ),
-                      ),
-                      const SizedBox(height: 5),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(_lstOrder?[index].comment ?? "",
-                            overflow: TextOverflow.ellipsis, // default is .clip
-                            maxLines: 2),
-                      ),
-                    ],
+                    fit: BoxFit.contain,
                   ),
                 ),
-              ],
+              ),
             ),
-          ),
-        ]),
+            SizedBox(
+              width: MediaQuery.of(context).size.width * 0.75,
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 30,
+                      vertical: 3.0,
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          _lstOrder?[index].user?.username ?? "",
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        RatingBarIndicator(
+                          rating: _lstOrder?[index].rate != null
+                              ? double.parse(_lstOrder![index].rate!)
+                              : 0.0,
+                          direction: Axis.horizontal,
+                          unratedColor: Colors.amber.withAlpha(60),
+                          itemCount: 5,
+                          itemSize: 10.0,
+                          itemPadding: const EdgeInsets.symmetric(
+                            horizontal: 3.0,
+                          ),
+                          itemBuilder: (context, _) =>
+                              const Icon(Icons.star, color: Colors.amber),
+                        ),
+                        const SizedBox(height: 5),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            _lstOrder?[index].comment ?? "",
+                            overflow: TextOverflow.ellipsis, // default is .clip
+                            maxLines: 2,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
         Align(
           alignment: Alignment.center,
           child: Container(
@@ -490,7 +502,7 @@ class _StaffInfoScreenState extends State<StaffInfoScreen> {
               ),
             ),
           ),
-        )
+        ),
       ],
     );
   }

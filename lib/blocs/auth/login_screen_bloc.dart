@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:socbay/application.dart';
 import 'package:socbay/config/app_config.dart';
+import 'package:socbay/constants/api_endpoints.dart';
 import 'package:socbay/data/model/user_profile.dart';
 import 'package:socbay/data/repository/auth/api_repository.dart';
 import 'package:socbay/db/database.dart';
@@ -31,9 +32,11 @@ class LoginScreenBloc extends Bloc<LoginScreenEvent, LoginScreenState> {
     try {
       var dio = Dio();
       final Response resJson = await dio.post(
-        "$protocol${AppConfig.instance.values.apiUrl}/api/user/login",
+        AppConfig.instance.apiUrl(ApiEndpoints.login),
         data: {"phone": event.phone, "pass": event.password},
       );
+      print("------LoginResponse------");
+      print(resJson);
       var map = Map<String, dynamic>.from(json.decode(resJson.toString()));
       if (map['code'] == 1) {
         UserProfile userProfile = UserProfile.fromJson(map['data']);
@@ -63,6 +66,7 @@ class LoginScreenBloc extends Bloc<LoginScreenEvent, LoginScreenState> {
     } on DioException catch (e) {
       print("------LoginError------");
       print(e);
+      print(AppConfig.instance.apiUrl(ApiEndpoints.login));
       LoggerUtil.error(jsonEncode(e));
     }
     isLoading = false;

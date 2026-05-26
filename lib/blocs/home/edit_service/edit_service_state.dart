@@ -1,5 +1,3 @@
-
-
 abstract class EditServiceState {
   const EditServiceState();
 }
@@ -29,6 +27,7 @@ class EditServiceUploadFileFailedState extends EditServiceState {
 
   const EditServiceUploadFileFailedState(this.message);
 }
+
 class EditServiceSuccessState extends EditServiceState {}
 
 class EditServiceFailedState extends EditServiceState {}

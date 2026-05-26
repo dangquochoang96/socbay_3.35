@@ -53,7 +53,9 @@ class _AccountInfoScreenState extends State<AccountInfoScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<AccountInfoBloc, AccountInfoState>(
-        builder: _builder, listener: _listener);
+      builder: _builder,
+      listener: _listener,
+    );
   }
 
   void _listener(BuildContext context, AccountInfoState state) {
@@ -71,12 +73,13 @@ class _AccountInfoScreenState extends State<AccountInfoScreen> {
     if (state is UploadImageSuccessState) {
       avatarFile = state.path;
     }
-    
+
     if (state is AccountInfoGetDetailState) {
       if (_bloc.user?.birthday?.isNotEmpty == true &&
           _bloc.user!.birthday != "0000-00-00 00:00:00") {
-        selectedDate =
-            DateTime.parse(_bloc.user!.birthday!.replaceAll("/", "-"));
+        selectedDate = DateTime.parse(
+          _bloc.user!.birthday!.replaceAll("/", "-"),
+        );
       }
 
       setState(() {
@@ -87,8 +90,9 @@ class _AccountInfoScreenState extends State<AccountInfoScreen> {
         addressTxtController = TextEditingController(text: _bloc.user?.address);
         emailTxtController = TextEditingController(text: _bloc.user?.email);
         avatarFile = _bloc.user?.avatar;
-        phoneNumberTxtController =
-            TextEditingController(text: _bloc.user?.phone);
+        phoneNumberTxtController = TextEditingController(
+          text: _bloc.user?.phone,
+        );
         idNumberTxtController = TextEditingController(text: _bloc.user?.cmt);
       });
     }
@@ -103,17 +107,23 @@ class _AccountInfoScreenState extends State<AccountInfoScreen> {
       ),
       body: ListView(
         padding: const EdgeInsets.symmetric(
-            horizontal: paddingHorizontal, vertical: paddingVertical),
+          horizontal: paddingHorizontal,
+          vertical: paddingVertical,
+        ),
         children: [
           ///AVATAR
           _buildAvatar(),
 
           ///FORM
           Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              child: Center(
-                  child: Text("${_bloc.user?.username}",
-                      style: const TextStyle(fontSize: 16)))),
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Center(
+              child: Text(
+                "${_bloc.user?.username}",
+                style: const TextStyle(fontSize: 16),
+              ),
+            ),
+          ),
           _buildDivider(),
           _buildTextField(
             placeHolder: "Số điện thoại",
@@ -123,10 +133,11 @@ class _AccountInfoScreenState extends State<AccountInfoScreen> {
             maxLength: 10,
           ),
           _buildField(
-              placeHolder: "Ngày sinh",
-              value: birthday,
-              icon: Icons.calendar_today,
-              onTap: _selectDateOfBirth),
+            placeHolder: "Ngày sinh",
+            value: birthday,
+            icon: Icons.calendar_today,
+            onTap: _selectDateOfBirth,
+          ),
           _buildTextField(
             placeHolder: "Địa chỉ",
             controller: addressTxtController,
@@ -149,18 +160,17 @@ class _AccountInfoScreenState extends State<AccountInfoScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(
-                  child: DefaultButton(
-                onPressed: _onEditInfo,
-                text: "Lưu",
-              )),
+                child: DefaultButton(onPressed: _onEditInfo, text: "Lưu"),
+              ),
               const SizedBox(width: 16),
               Expanded(
                 child: DefaultOutlinedButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    text: 'Hủy'),
-              )
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  text: 'Hủy',
+                ),
+              ),
             ],
           ),
           const HotlineWidget(),
@@ -179,35 +189,35 @@ class _AccountInfoScreenState extends State<AccountInfoScreen> {
         child: Stack(
           children: [
             ClipRRect(
-                borderRadius: BorderRadius.circular(140),
-                child: avatarFile != null
-                    ? Image.network(
-                        "$protocol${AppConfig.instance.values.apiUrl}${avatarFile!}",
-                        height: 160,
-                        width: 160,
-                        fit: BoxFit.cover)
-                    : ImageUtil.loadNetWorkImage(
-                        url: _bloc.user?.avatar ?? "",
-                        width: 160,
-                        height: 160)),
+              borderRadius: BorderRadius.circular(140),
+              child: avatarFile != null
+                  ? Image.network(
+                      "$protocol${AppConfig.instance.values.apiUrl}${avatarFile!}",
+                      height: 160,
+                      width: 160,
+                      fit: BoxFit.cover,
+                    )
+                  : ImageUtil.loadNetWorkImage(
+                      url: _bloc.user?.avatar ?? "",
+                      width: 160,
+                      height: 160,
+                    ),
+            ),
             Positioned(
-                bottom: 16,
-                right: 16,
-                child: GestureDetector(
-                  child: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.grey,
-                      borderRadius: BorderRadius.circular(60),
-                    ),
-                    child: const Icon(
-                      Icons.edit,
-                      color: Colors.white,
-                      size: 25,
-                    ),
+              bottom: 16,
+              right: 16,
+              child: GestureDetector(
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.grey,
+                    borderRadius: BorderRadius.circular(60),
                   ),
-                  onTap: () {},
-                ))
+                  child: const Icon(Icons.edit, color: Colors.white, size: 25),
+                ),
+                onTap: () {},
+              ),
+            ),
           ],
         ),
       ),
@@ -252,12 +262,16 @@ class _AccountInfoScreenState extends State<AccountInfoScreen> {
                 ),
                 hintText: placeHolder,
                 hintStyle: const TextStyle(
-                    color: ColorUtil.silverChalice, fontSize: 13),
-                contentPadding:
-                    const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
+                  color: ColorUtil.silverChalice,
+                  fontSize: 13,
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  vertical: 5,
+                  horizontal: 15,
+                ),
               ),
             ),
-          )
+          ),
         ],
       ),
     );
@@ -283,10 +297,11 @@ class _AccountInfoScreenState extends State<AccountInfoScreen> {
             Text(
               isEmpty ? placeHolder : value,
               style: TextStyle(
-                  color: isEmpty
-                      ? ColorUtil.silverChalice
-                      : ColorUtil.raisinBlack),
-            )
+                color: isEmpty
+                    ? ColorUtil.silverChalice
+                    : ColorUtil.raisinBlack,
+              ),
+            ),
           ],
         ),
       ),
@@ -295,11 +310,12 @@ class _AccountInfoScreenState extends State<AccountInfoScreen> {
 
   Future<void> _selectDateOfBirth() async {
     final DateTime? picked = await showDatePicker(
-        context: context,
-        locale: const Locale("vi","VN"),
-        initialDate: selectedDate ?? DateTime.now(),
-        firstDate: DateTime(1900, 1),
-        lastDate: DateTime.now());
+      context: context,
+      locale: const Locale("vi", "VN"),
+      initialDate: selectedDate ?? DateTime.now(),
+      firstDate: DateTime(1900, 1),
+      lastDate: DateTime.now(),
+    );
     if (picked != null && picked != selectedDate) {
       selectedDate = picked;
       setState(() {
@@ -307,9 +323,13 @@ class _AccountInfoScreenState extends State<AccountInfoScreen> {
       });
     }
   }
+
   void _onEditAvatar() async {
     File? file = await onGetPhotoFromGallery(
-        context: context, funcPermission: () {}, picker: _picker);
+      context: context,
+      funcPermission: () {},
+      picker: _picker,
+    );
     if (file != null) {
       setState(() {
         _bloc.add(UploadImageEvent(file));
@@ -328,12 +348,13 @@ class _AccountInfoScreenState extends State<AccountInfoScreen> {
       return;
     }
     var data = UserInfoRequest(
-        phone: phoneNumberTxtController.text,
-        birthday: birthday,
-        address: addressTxtController.text,
-        email: emailTxtController.text,
-        avatar: avatarFile,
-        cmt: idNumberTxtController.text);
+      phone: phoneNumberTxtController.text,
+      birthday: birthday,
+      address: addressTxtController.text,
+      email: emailTxtController.text,
+      avatar: avatarFile,
+      cmt: idNumberTxtController.text,
+    );
     _bloc.add(AccountInfoUpdateUserEvent(data));
   }
 }

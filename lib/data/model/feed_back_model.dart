@@ -17,21 +17,21 @@ class FeedBackModel {
   final OrderDetailModel? orderInfo;
   final List<String>? images;
 
-  FeedBackModel(
-      {this.id,
-        this.orderId,
-        this.userId,
-        this.customerId,
-        this.description,
-        this.status,
-        this.type,
-        this.createdAt,
-        this.updatedAt,
-        this.user,
-        this.customer,
-        this.orderInfo,
-        this.images
-      });
+  FeedBackModel({
+    this.id,
+    this.orderId,
+    this.userId,
+    this.customerId,
+    this.description,
+    this.status,
+    this.type,
+    this.createdAt,
+    this.updatedAt,
+    this.user,
+    this.customer,
+    this.orderInfo,
+    this.images,
+  });
 
   factory FeedBackModel.fromJson(Map<String, dynamic> json) => FeedBackModel(
     id: json['id'] as int?,
@@ -52,7 +52,7 @@ class FeedBackModel {
     orderInfo: json['order_info'] != null
         ? OrderDetailModel.fromJson(json['order_info'] as Map<String, dynamic>)
         : null,
-      images: getImages(json["images"] as List<dynamic>?)
+    images: getImages(json["images"] as List<dynamic>?),
   );
 
   Map<String, dynamic> toJson() => <String, dynamic>{
@@ -78,14 +78,15 @@ class FeedBackModel {
     }
     return "";
   }
-  static List<String> getImages(List<dynamic>? images){
+
+  static List<String> getImages(List<dynamic>? images) {
     List<String> imgs = [];
-    if(images == null) {
+    if (images == null) {
       return imgs;
     }
-    try{
+    try {
       imgs = List<String>.from(images.map((e) => e["image_link"]));
-    }catch(exception){
+    } catch (exception) {
       LoggerUtil.log(exception.toString());
     }
     return imgs;

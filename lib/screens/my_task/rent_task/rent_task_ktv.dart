@@ -27,7 +27,6 @@ class _RentTaskTabState extends State<RentTaskTab> {
   late RentTaskScreenKTVBloc _bloc;
   late ScrollController _scrollController;
 
-
   late TextEditingController _feedbackController;
   var _isRefresh = true;
   String _dateStart = '';
@@ -45,10 +44,14 @@ class _RentTaskTabState extends State<RentTaskTab> {
     _scrollController = ScrollController();
     _feedbackController = TextEditingController();
     _scrollController.addListener(() {
-      if(_bloc.isClosed)_bloc = BlocProvider.of(context);
+      if (_bloc.isClosed) _bloc = BlocProvider.of(context);
       scrollPaginationListener(
         scrollController: _scrollController,
-        condition:(_scrollController.hasClients && _scrollController.position.pixels == _scrollController.position.maxScrollExtent)||_bloc.isLoading,
+        condition:
+            (_scrollController.hasClients &&
+                _scrollController.position.pixels ==
+                    _scrollController.position.maxScrollExtent) ||
+            _bloc.isLoading,
         paginationFunction: () {
           _bloc.add(StaffTaskScreenGetTaskByDayEvent(isRefresh: _isRefresh));
         },
@@ -76,56 +79,62 @@ class _RentTaskTabState extends State<RentTaskTab> {
       });
     }
   }
+
   @override
-  void dispose(){
+  void dispose() {
     _bloc.close();
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<RentTaskScreenKTVBloc, RentTaskScreenState>(
-        builder: _builder, listener: _listener);
+      builder: _builder,
+      listener: _listener,
+    );
   }
 
   void _listener(BuildContext context, state) {
-    if(state is BookingUpdateSuccessState){
+    if (state is BookingUpdateSuccessState) {
       context.showSnackBar("Cập nhật thành công!");
       _bloc.add(const StaffTaskScreenGetTaskByDayEvent(isRefresh: true));
-      _bloc.add(const StaffTaskScreenGetTaskAssigedEvent(
-          isRefresh: true, page: 0));
+      _bloc.add(
+        const StaffTaskScreenGetTaskAssigedEvent(isRefresh: true, page: 0),
+      );
     }
-    if(state is BookingUpdateErrorState){
+    if (state is BookingUpdateErrorState) {
       context.showSnackBar("Cập nhật thất bại!");
     }
   }
 
   Widget _builder(BuildContext context, state) {
     return LoadingIndicator(
-        isLoading: _bloc.isLoading,
-        child: RefreshIndicator(
-          onRefresh: () async {
-            _isRefresh = true;
-            _bloc.add(StaffTaskScreenGetTaskByDayEvent(isRefresh: _isRefresh));
-          },
-          child: _bloc.staffListTaskBydayModel.isEmpty && !_bloc.isLoading
-              ? const Center(child: Text("Chưa có công việc"))
-              : ListView.separated(
-                  //controller: _scrollController,
-                  itemBuilder: _itemBuilder,
-                  itemCount: _bloc.staffListTaskBydayModel.length,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: paddingHorizontal,
-                    vertical: paddingVertical,
-                  ),
-                  separatorBuilder: (BuildContext context, int index) {
-                    return const Divider(
-                        thickness: 1, color: ColorUtil.bangladeshGreen);
-                  },
+      isLoading: _bloc.isLoading,
+      child: RefreshIndicator(
+        onRefresh: () async {
+          _isRefresh = true;
+          _bloc.add(StaffTaskScreenGetTaskByDayEvent(isRefresh: _isRefresh));
+        },
+        child: _bloc.staffListTaskBydayModel.isEmpty && !_bloc.isLoading
+            ? const Center(child: Text("Chưa có công việc"))
+            : ListView.separated(
+                //controller: _scrollController,
+                itemBuilder: _itemBuilder,
+                itemCount: _bloc.staffListTaskBydayModel.length,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: paddingHorizontal,
+                  vertical: paddingVertical,
                 ),
-        ));
+                separatorBuilder: (BuildContext context, int index) {
+                  return const Divider(
+                    thickness: 1,
+                    color: ColorUtil.bangladeshGreen,
+                  );
+                },
+              ),
+      ),
+    );
   }
-
-
 
   Widget _itemBuilder(BuildContext context, int index) {
     if (index >= _bloc.staffListTaskBydayModel.length) {
@@ -150,16 +159,19 @@ class _RentTaskTabState extends State<RentTaskTab> {
                   fontSize: 16,
                 ),
               ),
-              if((taskModel.status == '1'||taskModel.status == '2'||taskModel.status == '5')   )
-                  Align(
-                      alignment: Alignment.centerRight,
-                      child: _buildButton(
-                          text: 'Cập nhật',
-                          isPositive: false,
-                          action: () {
-                            _updateTask(taskModel);
-                          })),
-
+              if ((taskModel.status == '1' ||
+                  taskModel.status == '2' ||
+                  taskModel.status == '5'))
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: _buildButton(
+                    text: 'Cập nhật',
+                    isPositive: false,
+                    action: () {
+                      _updateTask(taskModel);
+                    },
+                  ),
+                ),
             ],
           ),
         ),
@@ -187,104 +199,135 @@ class _RentTaskTabState extends State<RentTaskTab> {
               isHighlight: false,
             ),
             _buildTableRow(
-                title: 'Trạng thái dịch vụ:',
-                content: taskModel.getStatus(),
-                isHighlight: false),
+              title: 'Trạng thái dịch vụ:',
+              content: taskModel.getStatus(),
+              isHighlight: false,
+            ),
             _buildTableRow(
-                title: 'Công việc:', content: taskModel.name, isHighlight: false),
+              title: 'Công việc:',
+              content: taskModel.name,
+              isHighlight: false,
+            ),
             _buildTableRow(
-                title: 'Nội dung:', content: taskModel.des??'', isHighlight: false),
+              title: 'Nội dung:',
+              content: taskModel.des ?? '',
+              isHighlight: false,
+            ),
             _buildTableRow(
-                title: 'Thông báo:',
-                content: taskModel.noti??'',
-                contentColor: Colors.red,
-                isHighlight: false),
+              title: 'Thông báo:',
+              content: taskModel.noti ?? '',
+              contentColor: Colors.red,
+              isHighlight: false,
+            ),
           ],
-        )
+        ),
       ],
     );
   }
 
   TableRow _buildTableRow({
-  required String title,
-  required String? content,
-  required bool isHighlight,
-  Color? contentColor, 
-}) {
-  return TableRow(
-    children: [
-      Text(
-        title,
-        style: const TextStyle(
-            color: ColorUtil.raisinBlack, fontWeight: FontWeight.bold),
-      ),
-      Text(
-        "$content",
-        style: TextStyle(
-          color: contentColor ?? (isHighlight ? ColorUtil.bangladeshGreen : Colors.black),
-        ),
-      ),
-    ],
-  );
-}
-  void _detailTask(TaskModel taskModel) {
-    Navigator.pushNamed(context, Routes.detailRentBookingScreen,
-        arguments: {'id': taskModel.id});
-  }
-   Widget _buildButton({text, isPositive, action}) {
-  return isPositive
-      ? ButtonWidget(
-          color: isPositive ? ColorUtil.bangladeshGreen : Colors.grey,
-          borderRadius: BorderRadius.circular(20), // Decreased border radius
-          onTap: () {
-            if (action == null) {
-              Navigator.pop(context);
-            } else {
-              action();
-            }
-          },
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6), // Adjust padding
-            child: Text(
-              text,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 8, color: Colors.white), // Decreased font size
-            ),
+    required String title,
+    required String? content,
+    required bool isHighlight,
+    Color? contentColor,
+  }) {
+    return TableRow(
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            color: ColorUtil.raisinBlack,
+            fontWeight: FontWeight.bold,
           ),
-        )
-      : ElevatedButton(
-          style: ButtonStyle(
-            backgroundColor: WidgetStateProperty.all<Color>(ColorUtil.white),
-            shape: WidgetStateProperty.all<RoundedRectangleBorder>(
-              RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-                side: const BorderSide(
-                  color: ColorUtil.bangladeshGreen,
-                  width: 1,
+        ),
+        Text(
+          "$content",
+          style: TextStyle(
+            color:
+                contentColor ??
+                (isHighlight ? ColorUtil.bangladeshGreen : Colors.black),
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _detailTask(TaskModel taskModel) {
+    Navigator.pushNamed(
+      context,
+      Routes.detailRentBookingScreen,
+      arguments: {'id': taskModel.id},
+    );
+  }
+
+  Widget _buildButton({text, isPositive, action}) {
+    return isPositive
+        ? ButtonWidget(
+            color: isPositive ? ColorUtil.bangladeshGreen : Colors.grey,
+            borderRadius: BorderRadius.circular(20), // Decreased border radius
+            onTap: () {
+              if (action == null) {
+                Navigator.pop(context);
+              } else {
+                action();
+              }
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 6,
+              ), // Adjust padding
+              child: Text(
+                text,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 8,
+                  color: Colors.white,
+                ), // Decreased font size
+              ),
+            ),
+          )
+        : ElevatedButton(
+            style: ButtonStyle(
+              backgroundColor: WidgetStateProperty.all<Color>(ColorUtil.white),
+              shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+                RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  side: const BorderSide(
+                    color: ColorUtil.bangladeshGreen,
+                    width: 1,
+                  ),
                 ),
               ),
             ),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 1), // Adjust padding
-            child: Text(
-              text,
-              style: const TextStyle(fontSize: 10, color: ColorUtil.bangladeshGreen), // Decreased font size
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 2,
+                vertical: 1,
+              ), // Adjust padding
+              child: Text(
+                text,
+                style: const TextStyle(
+                  fontSize: 10,
+                  color: ColorUtil.bangladeshGreen,
+                ), // Decreased font size
+              ),
             ),
-          ),
-          onPressed: () {
-            if (action == null) {
-              Navigator.pop(context);
-            } else {
-              action();
-            }
-          },
-        );
-}
+            onPressed: () {
+              if (action == null) {
+                Navigator.pop(context);
+              } else {
+                action();
+              }
+            },
+          );
+  }
 
-   Future<void> _updateTask(TaskModel taskModel) async {
+  Future<void> _updateTask(TaskModel taskModel) async {
     int? selectedOption = 5;
-    DateTime tempDateTime = DateTime.parse(taskModel.timeStar ?? DateTime.now().toString());
+    DateTime tempDateTime = DateTime.parse(
+      taskModel.timeStar ?? DateTime.now().toString(),
+    );
 
     showDialog(
       context: context,
@@ -292,10 +335,7 @@ class _RentTaskTabState extends State<RentTaskTab> {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              title: const Text(
-                'Lý do hẹn lại',
-                textAlign: TextAlign.center,
-              ),
+              title: const Text('Lý do hẹn lại', textAlign: TextAlign.center),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -312,11 +352,14 @@ class _RentTaskTabState extends State<RentTaskTab> {
                         locale: const Locale("vi", "VN"),
                         initialDate: selectedDate ?? DateTime.now(),
                         firstDate: DateTime.now(),
-                        lastDate: DateTime.now().add(const Duration(days: 365)));
+                        lastDate: DateTime.now().add(const Duration(days: 365)),
+                      );
                       if (picked != null && picked != selectedDate) {
                         selectedDate = picked;
                         setState(() {
-                          _dateStart = selectedDate!.toDateString(format: "dd/MM/yyyy");
+                          _dateStart = selectedDate!.toDateString(
+                            format: "dd/MM/yyyy",
+                          );
                           tempDateTime = DateTime(
                             picked.year,
                             picked.month,
@@ -336,7 +379,10 @@ class _RentTaskTabState extends State<RentTaskTab> {
                         selectedTime = picked;
                         setState(() {
                           final hour = picked.hour.toString().padLeft(2, "0");
-                          final minute = picked.minute.toString().padLeft(2, "0");
+                          final minute = picked.minute.toString().padLeft(
+                            2,
+                            "0",
+                          );
                           _timeStart = "$hour:$minute";
                           tempDateTime = DateTime(
                             tempDateTime.year,
@@ -350,7 +396,6 @@ class _RentTaskTabState extends State<RentTaskTab> {
                         });
                       }
                     },
-
                   ),
                   const SizedBox(height: 16),
                   TextFieldDefault(
@@ -440,33 +485,38 @@ class _RentTaskTabState extends State<RentTaskTab> {
                       isPositive: true,
                       text: 'Gửi',
                       action: () {
-                        if(_bloc.isClosed) _bloc = BlocProvider.of(context);
+                        if (_bloc.isClosed) _bloc = BlocProvider.of(context);
                         if (selectedOption == 1 || selectedOption == 2) {
-                          _bloc.add(StaffTaskScreenUpdateTaskDoneEvent(
-                            taskModel.id ?? 0,
-                            taskModel.name!,
-                            _feedbackController.text,
-                            taskModel.des??'',
-                            selectedOption.toString(),
-                            taskModel.priority ?? "1",
-                            tempDateTime.toString(),
+                          _bloc.add(
+                            StaffTaskScreenUpdateTaskDoneEvent(
+                              taskModel.id ?? 0,
+                              taskModel.name!,
+                              _feedbackController.text,
+                              taskModel.des ?? '',
+                              selectedOption.toString(),
+                              taskModel.priority ?? "1",
+                              tempDateTime.toString(),
+                            ),
+                          );
 
-                          ));
-
-                          _bloc.staffListTaskBydayModel.removeWhere((element) => element.id == taskModel.id);
+                          _bloc.staffListTaskBydayModel.removeWhere(
+                            (element) => element.id == taskModel.id,
+                          );
 
                           Navigator.pop(context);
                           _feedbackController.clear();
                         } else {
-                          _bloc.add(StaffTaskScreenUpdateTaskDoneEvent(
-                            taskModel.id ?? 0,
-                            taskModel.name!,
-                            _feedbackController.text,
-                            taskModel.des??'',
-                            selectedOption.toString(),
-                            taskModel.priority ?? "1",
-                            tempDateTime.toString(),
-                          ));
+                          _bloc.add(
+                            StaffTaskScreenUpdateTaskDoneEvent(
+                              taskModel.id ?? 0,
+                              taskModel.name!,
+                              _feedbackController.text,
+                              taskModel.des ?? '',
+                              selectedOption.toString(),
+                              taskModel.priority ?? "1",
+                              tempDateTime.toString(),
+                            ),
+                          );
 
                           Navigator.pop(context);
                           _feedbackController.clear();
@@ -483,37 +533,39 @@ class _RentTaskTabState extends State<RentTaskTab> {
     );
   }
 
-
   Widget _buildButtonDialog({isPositive, action, text}) {
     return Expanded(child: _button(isPositive, action, text));
   }
+
   StatelessWidget _button(isPositive, action, text) {
     return ButtonWidget(
-        color: isPositive ? ColorUtil.bangladeshGreen : Colors.grey,
-        borderRadius: BorderRadius.circular(30),
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        onTap: () {
-          if (action == null) {
-            Navigator.pop(context);
-          } else {
-            action();
-          }
-        },
-        child: Text(
-          text,
-          textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 16, color: Colors.white),
-        ));
+      color: isPositive ? ColorUtil.bangladeshGreen : Colors.grey,
+      borderRadius: BorderRadius.circular(30),
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      onTap: () {
+        if (action == null) {
+          Navigator.pop(context);
+        } else {
+          action();
+        }
+      },
+      child: Text(
+        text,
+        textAlign: TextAlign.center,
+        style: const TextStyle(fontSize: 16, color: Colors.white),
+      ),
+    );
   }
+
   Widget _buildFormDoubleHorizontal(
-      String titleTextField,
-      IconData iconPrefixFirst,
-      IconData iconPrefixSecond, {
-        required String firstValue,
-        required String secondValue,
-        required void Function() onTapFirst,
-        required void Function() onTapSecond,
-      }) {
+    String titleTextField,
+    IconData iconPrefixFirst,
+    IconData iconPrefixSecond, {
+    required String firstValue,
+    required String secondValue,
+    required void Function() onTapFirst,
+    required void Function() onTapSecond,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -521,83 +573,92 @@ class _RentTaskTabState extends State<RentTaskTab> {
           titleTextField,
           style: const TextStyle(color: ColorUtil.raisinBlack, fontSize: 15),
         ),
-        const SizedBox(
-          height: 5,
-        ),
-        Row(children: [
-          Expanded(
+        const SizedBox(height: 5),
+        Row(
+          children: [
+            Expanded(
               flex: 2,
               child: Container(
                 height: 40,
                 decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8.0),
-                    border: Border.all(
-                        color: ColorUtil.bangladeshGreen, width: 0.5)),
+                  borderRadius: BorderRadius.circular(8.0),
+                  border: Border.all(
+                    color: ColorUtil.bangladeshGreen,
+                    width: 0.5,
+                  ),
+                ),
                 child: GestureDetector(
-                    onTap: onTapFirst,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(left: 10.0),
-                          child: Icon(
-                            iconPrefixFirst,
-                            color: ColorUtil.spanishGray,
+                  onTap: onTapFirst,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(left: 10.0),
+                        child: Icon(
+                          iconPrefixFirst,
+                          color: ColorUtil.spanishGray,
+                        ),
+                      ),
+                      const SizedBox(width: 5),
+                      Flexible(
+                        child: Text(
+                          firstValue.isEmpty ? 'dd/MM/yyyy' : firstValue,
+                          style: TextStyle(
+                            color: firstValue.isEmpty
+                                ? ColorUtil.silverChalice
+                                : ColorUtil.raisinBlack,
                           ),
                         ),
-                        const SizedBox(
-                          width: 5,
-                        ),
-                        Flexible(
-                            child: Text(
-                                firstValue.isEmpty ? 'dd/MM/yyyy' : firstValue,
-                                style: TextStyle(
-                                    color: firstValue.isEmpty
-                                        ? ColorUtil.silverChalice
-                                        : ColorUtil.raisinBlack)))
-                      ],
-                    )),
-              )),
-          const SizedBox(
-            width: 5,
-          ),
-          Expanded(
-            flex: 1,
-            child: Container(
-              height: 40,
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8.0),
-                  border:
-                  Border.all(color: ColorUtil.bangladeshGreen, width: 0.5)),
-              child: GestureDetector(
-                onTap: onTapSecond,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(left: 2.0),
-                      child: Icon(
-                        iconPrefixSecond,
-                        color: ColorUtil.spanishGray,
                       ),
-                    ),
-                    const SizedBox(
-                      width: 5,
-                    ),
-                    Flexible(
-                        child: Text(secondValue.isEmpty ? 'hh:mm' : secondValue,
-                            style: TextStyle(
-                                color: secondValue.isEmpty
-                                    ? ColorUtil.silverChalice
-                                    : ColorUtil.raisinBlack)))
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
-          )
-        ])
+            const SizedBox(width: 5),
+            Expanded(
+              flex: 1,
+              child: Container(
+                height: 40,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8.0),
+                  border: Border.all(
+                    color: ColorUtil.bangladeshGreen,
+                    width: 0.5,
+                  ),
+                ),
+                child: GestureDetector(
+                  onTap: onTapSecond,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(left: 2.0),
+                        child: Icon(
+                          iconPrefixSecond,
+                          color: ColorUtil.spanishGray,
+                        ),
+                      ),
+                      const SizedBox(width: 5),
+                      Flexible(
+                        child: Text(
+                          secondValue.isEmpty ? 'hh:mm' : secondValue,
+                          style: TextStyle(
+                            color: secondValue.isEmpty
+                                ? ColorUtil.silverChalice
+                                : ColorUtil.raisinBlack,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ],
     );
   }

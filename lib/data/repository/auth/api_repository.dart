@@ -34,7 +34,8 @@ class ApiRepository extends BaseApiRepository {
 
   @override
   Future<DefaultResponse> forgotPassword(
-      NewPasswordRequest newPasswordRequest) {
+    NewPasswordRequest newPasswordRequest,
+  ) {
     return _apiProvider.forgotPassword(newPasswordRequest);
   }
 
@@ -45,7 +46,9 @@ class ApiRepository extends BaseApiRepository {
 
   @override
   Future<DefaultResponse<LoginResponse>> loginAccount(
-      String phone, String password) {
+    String phone,
+    String password,
+  ) {
     return _apiProvider.login(phone, password);
   }
 
@@ -83,13 +86,16 @@ class ApiRepository extends BaseApiRepository {
   Future<DefaultResponse<List<ProductModel>>> getProducts({int isLike = 0}) {
     return _apiProvider.getListProduct(isLike: isLike);
   }
+
   @override
   Future<DefaultResponse<List<ProductModel>>> getProductsInUse() {
     return _apiProvider.getProductsInUse();
   }
+
   @override
-  Future<DefaultResponse<ProductModel>> getProductDetail(
-      {required ProductModel product}) {
+  Future<DefaultResponse<ProductModel>> getProductDetail({
+    required ProductModel product,
+  }) {
     return _apiProvider.getProductDetail(product);
   }
 
@@ -105,16 +111,17 @@ class ApiRepository extends BaseApiRepository {
 
   @override
   Future<DefaultResponse<List<NotificationResponse>>> getNotifications() {
-   try{
-     return _apiProvider.getNotifications();
-   }catch(e){
-     return _apiProvider.getNotifications();
-   }
+    try {
+      return _apiProvider.getNotifications();
+    } catch (e) {
+      return _apiProvider.getNotifications();
+    }
   }
 
   @override
-  Future<DefaultResponse<List<GiftResponse>>> getGiftList(
-      {bool isReceive = false}) {
+  Future<DefaultResponse<List<GiftResponse>>> getGiftList({
+    bool isReceive = false,
+  }) {
     return _apiProvider.getGiftsList(isReceiveList: isReceive);
   }
 
@@ -134,17 +141,18 @@ class ApiRepository extends BaseApiRepository {
 
   @override
   Future<DefaultResponse<UserProfile>> updateUserInfo(
-          UserInfoRequest userInfoRequest) =>
-      _apiProvider.updateUserInfo(userInfoRequest);
+    UserInfoRequest userInfoRequest,
+  ) => _apiProvider.updateUserInfo(userInfoRequest);
 
   @override
   Future<DefaultResponse<UserProfile>> updateStaff(
-          UpdateStaffRequestModel updateStaffRequestModel) =>
-      _apiProvider.updateStaff(updateStaffRequestModel);
+    UpdateStaffRequestModel updateStaffRequestModel,
+  ) => _apiProvider.updateStaff(updateStaffRequestModel);
 
   @override
   Future<DefaultResponse<UserProfile>> changePassword(
-      ChangePasswordRequest changePasswordRequest) {
+    ChangePasswordRequest changePasswordRequest,
+  ) {
     return _apiProvider.changePassword(changePasswordRequest);
   }
 
@@ -164,14 +172,17 @@ class ApiRepository extends BaseApiRepository {
   }
 
   @override
-  Future<DefaultResponse> likeProduct(
-      {required int productId, required bool isLike}) {
+  Future<DefaultResponse> likeProduct({
+    required int productId,
+    required bool isLike,
+  }) {
     return _apiProvider.likeProduct(productId, isLike);
   }
 
   @override
   Future<DefaultResponse<List<UserProfile>>> getListStaffByDistance(
-      StaffByDistanceRequest staffByDistanceRequest) {
+    StaffByDistanceRequest staffByDistanceRequest,
+  ) {
     return _apiProvider.getListStaffByDistance(staffByDistanceRequest);
   }
 
@@ -182,7 +193,9 @@ class ApiRepository extends BaseApiRepository {
 
   @override
   Future<DefaultResponse> updateTask(
-      int id, UpdateTaskRequest updateTaskRequest) {
+    int id,
+    UpdateTaskRequest updateTaskRequest,
+  ) {
     return _apiProvider.updateTask(id, updateTaskRequest);
   }
 
@@ -203,13 +216,15 @@ class ApiRepository extends BaseApiRepository {
 
   @override
   Future<DefaultResponse> createUserAddress(
-      UserAddressRequest userAddressRequest) {
+    UserAddressRequest userAddressRequest,
+  ) {
     return _apiProvider.createUserAddress(userAddressRequest);
   }
 
   @override
   Future<DefaultResponse> updateUserAddress(
-      UserAddressRequest userAddressRequest) {
+    UserAddressRequest userAddressRequest,
+  ) {
     return _apiProvider.updateUserAddress(userAddressRequest);
   }
 

@@ -6,11 +6,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:socbay/blocs/home/hotline/hotline_screen_event.dart';
 import 'package:socbay/blocs/home/hotline/hotline_screen_state.dart';
 import 'package:socbay/config/app_config.dart';
+import 'package:socbay/constants/api_endpoints.dart';
 import 'package:socbay/data/model/user_profile.dart';
 import 'package:socbay/data/repository/auth/api_repository.dart';
 import 'package:http/http.dart' as http;
-
-
 
 class HotlineScreenBloc extends Bloc<HotlineScreenEvent, HotlineScreenState> {
   HotlineScreenBloc(this.apiRepository) : super(HotlineScreenInitialState()) {
@@ -22,14 +21,18 @@ class HotlineScreenBloc extends Bloc<HotlineScreenEvent, HotlineScreenState> {
   bool isLoading = false;
 
   FutureOr<void> _mapStartedEventToState(
-      HotlineScreenStartedEvent event, Emitter<HotlineScreenState> emit) async {
+    HotlineScreenStartedEvent event,
+    Emitter<HotlineScreenState> emit,
+  ) async {
     isLoading = true;
     emit(HotlineScreenInitialState());
-    var url = Uri.http(AppConfig.instance.values.apiUrl,"/api/user/support");
+    var url = AppConfig.instance.apiUri(ApiEndpoints.userSupport);
     var res = await http.get(url);
     if (res.statusCode == HttpStatus.ok) {
-      var l = Map<String,dynamic>.from(json.decode(res.body));
-      users = List<UserProfile>.from(l["data"].map((model)=> UserProfile.fromJson(model)));
+      var l = Map<String, dynamic>.from(json.decode(res.body));
+      users = List<UserProfile>.from(
+        l["data"].map((model) => UserProfile.fromJson(model)),
+      );
     }
     // final res = await apiRepository.getListSupporters();
     // if(res.data!=null){

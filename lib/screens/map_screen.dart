@@ -55,10 +55,7 @@ class MapScreenState extends State<MapScreen> {
       final lat = _locationData?.latitude ?? defaultLat;
       final long = _locationData?.longitude ?? defaultLng;
       setState(() {
-        _kGooglePlex = CameraPosition(
-          target: LatLng(lat, long),
-          zoom: 17,
-        );
+        _kGooglePlex = CameraPosition(target: LatLng(lat, long), zoom: 17);
         _myLocation = CameraPosition(target: LatLng(lat, long), zoom: 14);
       });
 
@@ -120,28 +117,36 @@ class MapScreenState extends State<MapScreen> {
                 setState(() {});
               },
               decoration: InputDecoration(
-                  counterText: "",
-                  floatingLabelBehavior: FloatingLabelBehavior.always,
-                  labelStyle: const TextStyle(
-                      color: ColorUtil.bangladeshGreen,
-                      fontSize: 18,
-                      fontWeight: MyFontWeight.bold),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.0),
-                    borderSide: const BorderSide(
-                        color: ColorUtil.bangladeshGreen, width: 0.5),
+                counterText: "",
+                floatingLabelBehavior: FloatingLabelBehavior.always,
+                labelStyle: const TextStyle(
+                  color: ColorUtil.bangladeshGreen,
+                  fontSize: 18,
+                  fontWeight: MyFontWeight.bold,
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                  borderSide: const BorderSide(
+                    color: ColorUtil.bangladeshGreen,
+                    width: 0.5,
                   ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.0),
-                    borderSide: const BorderSide(
-                        color: ColorUtil.bangladeshGreen, width: 0.5),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                  borderSide: const BorderSide(
+                    color: ColorUtil.bangladeshGreen,
+                    width: 0.5,
                   ),
-                  contentPadding:
-                      const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
-                  suffixIcon: IconButton(
-                    icon: const Icon(Icons.search),
-                    onPressed: _onSearch,
-                  )),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  vertical: 5,
+                  horizontal: 15,
+                ),
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.search),
+                  onPressed: _onSearch,
+                ),
+              ),
             ),
           ),
           const SizedBox(width: 8),
@@ -215,7 +220,8 @@ class MapScreenState extends State<MapScreen> {
     String addressFromLatLong =
         "${placeMark.street}, ${placeMark.subAdministrativeArea} - ${placeMark.administrativeArea} - ${placeMark.country}";
     LoggerUtil.log(
-        "addressFromLatLong: $addressFromLatLong - isoCountryCode:${placeMark.isoCountryCode} -postalCode:${placeMark.postalCode} ");
+      "addressFromLatLong: $addressFromLatLong - isoCountryCode:${placeMark.isoCountryCode} -postalCode:${placeMark.postalCode} ",
+    );
     return addressFromLatLong;
   }
 
@@ -239,10 +245,10 @@ class MapScreenState extends State<MapScreen> {
       infoWindow: InfoWindow(title: address, snippet: '*'),
       onTap: () {},
       draggable: true,
-        onDragEnd: ((newPosition) {
-          markLat = newPosition.latitude;
-          markLng = newPosition.longitude;
-        })
+      onDragEnd: ((newPosition) {
+        markLat = newPosition.latitude;
+        markLng = newPosition.longitude;
+      }),
     );
     markers.clear();
     setState(() {
@@ -255,8 +261,9 @@ class MapScreenState extends State<MapScreen> {
       setState(() {
         isLoading = true;
       });
-      List<Location> locations =
-          await locationFromAddress(_addressTextController.text);
+      List<Location> locations = await locationFromAddress(
+        _addressTextController.text,
+      );
 
       if (locations.isNotEmpty) {
         Location location = locations.first;

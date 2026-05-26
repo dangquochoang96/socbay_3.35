@@ -51,7 +51,9 @@ class _TaskProcessedScreenState extends State<TaskProcessedScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<DetailTaskProcessedBloc, DetailTaskProcessedState>(
-        builder: _builder, listener: _listener);
+      builder: _builder,
+      listener: _listener,
+    );
   }
 
   void _listener(BuildContext context, DetailTaskProcessedState state) {}
@@ -59,7 +61,10 @@ class _TaskProcessedScreenState extends State<TaskProcessedScreen> {
     var staffName = _bloc.taskProcessedModel?.staff?.username;
     return Scaffold(
       appBar: MyAppBar(
-          title: "Chi tiết dịch vụ", isBackNavigation: true, centerTitle: true),
+        title: "Chi tiết dịch vụ",
+        isBackNavigation: true,
+        centerTitle: true,
+      ),
       body: Center(
         child: Column(
           children: [
@@ -75,29 +80,34 @@ class _TaskProcessedScreenState extends State<TaskProcessedScreen> {
               ),
             ),
             Container(
-                margin: const EdgeInsets.only(left: 15, right: 15),
-                decoration: const BoxDecoration(
-                    border: Border(
+              margin: const EdgeInsets.only(left: 15, right: 15),
+              decoration: const BoxDecoration(
+                border: Border(
                   bottom: BorderSide(width: 1.0, color: Colors.black26),
-                )),
-                child: _tablePrice()),
+                ),
+              ),
+              child: _tablePrice(),
+            ),
             Container(
               margin: const EdgeInsets.only(left: 15, top: 5),
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: RichText(
-                  text: TextSpan(children: [
-                    const TextSpan(text: "Thông tin kỹ thuật viên: "),
-                    TextSpan(
-                      text: staffName ?? 'NoStaff',
-                      style: const TextStyle(
+                  text: TextSpan(
+                    children: [
+                      const TextSpan(text: "Thông tin kỹ thuật viên: "),
+                      TextSpan(
+                        text: staffName ?? 'NoStaff',
+                        style: const TextStyle(
                           fontWeight: FontWeight.w600,
                           color: ColorUtil.bangladeshGreen,
                           decorationThickness: 1,
                           decoration: TextDecoration.underline,
-                          fontSize: 13),
-                    )
-                  ]),
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -109,8 +119,9 @@ class _TaskProcessedScreenState extends State<TaskProcessedScreen> {
               ),
             ),
             Container(
-                margin: const EdgeInsets.only(left: 15, top: 5),
-                child: _buildMediaRow()),
+              margin: const EdgeInsets.only(left: 15, top: 5),
+              child: _buildMediaRow(),
+            ),
             const SizedBox(height: 10.0),
             Align(
               alignment: Alignment.bottomCenter,
@@ -120,9 +131,10 @@ class _TaskProcessedScreenState extends State<TaskProcessedScreen> {
             Container(
               margin: const EdgeInsets.only(left: 15, right: 15),
               decoration: const BoxDecoration(
-                  border: Border(
-                bottom: BorderSide(width: 1.0, color: Colors.black26),
-              )),
+                border: Border(
+                  bottom: BorderSide(width: 1.0, color: Colors.black26),
+                ),
+              ),
               child: Text(_bloc.des),
             ),
             Container(
@@ -150,58 +162,67 @@ class _TaskProcessedScreenState extends State<TaskProcessedScreen> {
       ),
       children: [
         TableRow(
-            decoration: BoxDecoration(
-                border: Border.all(color: ColorUtil.bangladeshGreen),
-                borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(10),
-                    topRight: Radius.circular(10)),
-                color: ColorUtil.bangladeshGreen),
-            children: const [
-              TableCell(
-                  child: Align(
+          decoration: BoxDecoration(
+            border: Border.all(color: ColorUtil.bangladeshGreen),
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(10),
+              topRight: Radius.circular(10),
+            ),
+            color: ColorUtil.bangladeshGreen,
+          ),
+          children: const [
+            TableCell(
+              child: Align(
                 alignment: Alignment.center,
-                child: Text("Ngày",
-                    style: TextStyle(
-                      color: ColorUtil.white,
-                    )),
-              )),
-              TableCell(
-                  child: Align(
+                child: Text("Ngày", style: TextStyle(color: ColorUtil.white)),
+              ),
+            ),
+            TableCell(
+              child: Align(
                 alignment: Alignment.center,
-                child:
-                    Text("Tên lõi", style: TextStyle(color: ColorUtil.white)),
-              )),
-              TableCell(
-                  child: Align(
+                child: Text(
+                  "Tên lõi",
+                  style: TextStyle(color: ColorUtil.white),
+                ),
+              ),
+            ),
+            TableCell(
+              child: Align(
                 alignment: Alignment.center,
-                child: Text("Thành tiền",
-                    style: TextStyle(color: ColorUtil.white)),
-              ))
-            ]),
+                child: Text(
+                  "Thành tiền",
+                  style: TextStyle(color: ColorUtil.white),
+                ),
+              ),
+            ),
+          ],
+        ),
         if (_bloc.taskProcessedModel != null &&
             _bloc.taskProcessedModel!.progress != null &&
             _bloc.taskProcessedModel!.progress!.isNotEmpty)
           for (var item in _bloc.taskProcessedModel!.progress!)
-            TableRow(children: [
-              TableCell(
-                child: Align(
-                  alignment: Alignment.center,
-                  child: Text(_formatDatetime(item.createAt.toString())),
+            TableRow(
+              children: [
+                TableCell(
+                  child: Align(
+                    alignment: Alignment.center,
+                    child: Text(_formatDatetime(item.createAt.toString())),
+                  ),
                 ),
-              ),
-              TableCell(
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(item.name!),
+                TableCell(
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(item.name!),
+                  ),
                 ),
-              ),
-              TableCell(
-                child: Align(
-                  alignment: Alignment.center,
-                  child: Text(item.price.toString()),
+                TableCell(
+                  child: Align(
+                    alignment: Alignment.center,
+                    child: Text(item.price.toString()),
+                  ),
                 ),
-              )
-            ])
+              ],
+            ),
       ],
     );
   }
@@ -213,22 +234,30 @@ class _TaskProcessedScreenState extends State<TaskProcessedScreen> {
     var totalPriced = _bloc.taskProcessedModel?.totalPriced;
     return Table(
       children: [
-        TableRow(children: [
-          const TableCell(child: Text("Tổng tiền:")),
-          TableCell(child: Text("${totalPrice ?? '0'}"))
-        ]),
-        TableRow(children: [
-          const TableCell(child: Text("Chiết khấu:")),
-          TableCell(child: Text("${discount ?? '0'}"))
-        ]),
-        TableRow(children: [
-          const TableCell(child: Text("Trừ tích điểm:")),
-          TableCell(child: Text("${subPoint ?? '0'}"))
-        ]),
-        TableRow(children: [
-          const TableCell(child: Text("Tổng tiền thanh toán:")),
-          TableCell(child: Text("${totalPriced ?? '0'}"))
-        ])
+        TableRow(
+          children: [
+            const TableCell(child: Text("Tổng tiền:")),
+            TableCell(child: Text("${totalPrice ?? '0'}")),
+          ],
+        ),
+        TableRow(
+          children: [
+            const TableCell(child: Text("Chiết khấu:")),
+            TableCell(child: Text("${discount ?? '0'}")),
+          ],
+        ),
+        TableRow(
+          children: [
+            const TableCell(child: Text("Trừ tích điểm:")),
+            TableCell(child: Text("${subPoint ?? '0'}")),
+          ],
+        ),
+        TableRow(
+          children: [
+            const TableCell(child: Text("Tổng tiền thanh toán:")),
+            TableCell(child: Text("${totalPriced ?? '0'}")),
+          ],
+        ),
       ],
     );
   }
@@ -241,47 +270,59 @@ class _TaskProcessedScreenState extends State<TaskProcessedScreen> {
       ),
       children: [
         TableRow(
-            decoration: BoxDecoration(
-                border: Border.all(color: ColorUtil.bangladeshGreen),
-                borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(10),
-                    topRight: Radius.circular(10)),
-                color: ColorUtil.bangladeshGreen),
-            children: const [
-              TableCell(
-                  child: Align(
+          decoration: BoxDecoration(
+            border: Border.all(color: ColorUtil.bangladeshGreen),
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(10),
+              topRight: Radius.circular(10),
+            ),
+            color: ColorUtil.bangladeshGreen,
+          ),
+          children: const [
+            TableCell(
+              child: Align(
                 alignment: Alignment.center,
-                child: Text("Dịch vụ",
-                    style: TextStyle(
-                      color: ColorUtil.white,
-                    )),
-              )),
-              TableCell(
-                  child: Align(
+                child: Text(
+                  "Dịch vụ",
+                  style: TextStyle(color: ColorUtil.white),
+                ),
+              ),
+            ),
+            TableCell(
+              child: Align(
                 alignment: Alignment.center,
-                child: Text("Lịch kiểm tra bảo dưỡng tiếp theo",
-                    style: TextStyle(color: ColorUtil.white)),
-              )),
-            ]),
+                child: Text(
+                  "Lịch kiểm tra bảo dưỡng tiếp theo",
+                  style: TextStyle(color: ColorUtil.white),
+                ),
+              ),
+            ),
+          ],
+        ),
         if (_bloc.taskProcessedModel != null &&
             _bloc.taskProcessedModel!.progress != null &&
             _bloc.taskProcessedModel!.progress!.isNotEmpty)
           for (var item in _bloc.taskProcessedModel!.progress!)
-            TableRow(children: [
-              TableCell(
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(item.name!),
+            TableRow(
+              children: [
+                TableCell(
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(item.name!),
+                  ),
                 ),
-              ),
-              TableCell(
-                child: Align(
-                  alignment: Alignment.center,
-                  child: Text(_formatDatetime(item.updateAt.toString())
-                      .substring(0, 10)),
+                TableCell(
+                  child: Align(
+                    alignment: Alignment.center,
+                    child: Text(
+                      _formatDatetime(
+                        item.updateAt.toString(),
+                      ).substring(0, 10),
+                    ),
+                  ),
                 ),
-              )
-            ])
+              ],
+            ),
       ],
     );
   }
@@ -301,9 +342,11 @@ class _TaskProcessedScreenState extends State<TaskProcessedScreen> {
                 scrollDirection: Axis.horizontal,
                 itemBuilder: (BuildContext context, int index) {
                   return _buildItemMedia(
-                      _bloc.taskProcessedModel!.images![index].replaceAll(
-                          "/$protocol${AppConfig.instance.values.apiUrl}/",
-                          "/"));
+                    _bloc.taskProcessedModel!.images![index].replaceAll(
+                      "/$protocol${AppConfig.instance.values.apiUrl}/",
+                      "/",
+                    ),
+                  );
                 },
               ),
             ),
@@ -318,8 +361,11 @@ class _TaskProcessedScreenState extends State<TaskProcessedScreen> {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(8.0),
-              child:
-                  ImageUtil.loadNetWorkImage(url: url, width: 120, height: 200),
+              child: ImageUtil.loadNetWorkImage(
+                url: url,
+                width: 120,
+                height: 200,
+              ),
             ),
           ],
         ),
@@ -329,27 +375,28 @@ class _TaskProcessedScreenState extends State<TaskProcessedScreen> {
   }
 
   Widget _heading(String text) => Padding(
-      padding: const EdgeInsets.only(left: 15),
-      child: Row(
-        children: [
-          Text(
-            text,
-            style: const TextStyle(
-              fontWeight: FontWeight.w400,
-              fontSize: 13.0,
-              color: ColorUtil.bangladeshGreen,
-            ),
+    padding: const EdgeInsets.only(left: 15),
+    child: Row(
+      children: [
+        Text(
+          text,
+          style: const TextStyle(
+            fontWeight: FontWeight.w400,
+            fontSize: 13.0,
+            color: ColorUtil.bangladeshGreen,
           ),
-          IconButton(
-            icon: const Icon(Icons.bookmark),
-            color: ColorUtil.graniteGray,
-            onPressed: () {
-              /* Your code */
-              _ratingAndNote();
-            },
-          ),
-        ],
-      ));
+        ),
+        IconButton(
+          icon: const Icon(Icons.bookmark),
+          color: ColorUtil.graniteGray,
+          onPressed: () {
+            /* Your code */
+            _ratingAndNote();
+          },
+        ),
+      ],
+    ),
+  );
   Widget _ratingBar() {
     return RatingBar.builder(
       initialRating: _bloc.rating,
@@ -360,10 +407,8 @@ class _TaskProcessedScreenState extends State<TaskProcessedScreen> {
       itemCount: 5,
       itemSize: 30.0,
       itemPadding: const EdgeInsets.symmetric(horizontal: 0.0),
-      itemBuilder: (context, _) => Icon(
-        _selectedIcon ?? Icons.star,
-        color: Colors.amber,
-      ),
+      itemBuilder: (context, _) =>
+          Icon(_selectedIcon ?? Icons.star, color: Colors.amber),
       onRatingUpdate: (rating) {
         setState(() {
           _rating = rating;
@@ -382,60 +427,61 @@ class _TaskProcessedScreenState extends State<TaskProcessedScreen> {
       itemCount: 5,
       itemSize: 30.0,
       itemPadding: const EdgeInsets.symmetric(horizontal: 4.0),
-      itemBuilder: (context, _) => Icon(
-        _selectedIcon ?? Icons.star,
-        color: Colors.amber,
-      ),
+      itemBuilder: (context, _) =>
+          Icon(_selectedIcon ?? Icons.star, color: Colors.amber),
     );
   }
 
   Future<void> _ratingAndNote() async {
     return showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            scrollable: true,
-            title: const Text(
-              'Đánh giá và nhận xét',
-              textAlign: TextAlign.center,
-            ),
-            content: Column(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          scrollable: true,
+          title: const Text(
+            'Đánh giá và nhận xét',
+            textAlign: TextAlign.center,
+          ),
+          content: Column(
+            children: [
+              _ratingBar(),
+              TextFieldDefault(controller: _feedbackController, maxLines: 3),
+            ],
+          ),
+          actions: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _ratingBar(),
-                TextFieldDefault(
-                  controller: _feedbackController,
-                  maxLines: 3,
-                )
+                _buildButtonDialog(
+                  isPositive: false,
+                  text: 'Hủy',
+                  action: () {
+                    Navigator.pop(context);
+                    _feedbackController.clear();
+                  },
+                ),
+                const SizedBox(width: 16),
+                _buildButtonDialog(
+                  isPositive: true,
+                  text: 'Gửi',
+                  action: () {
+                    _bloc.add(
+                      FeedbackTaskProcessedEvent(
+                        _bloc.taskProcessedModel!.id!,
+                        _feedbackController.text,
+                        _rating,
+                      ),
+                    );
+                    Navigator.pop(context);
+                    _feedbackController.clear();
+                  },
+                ),
               ],
             ),
-            actions: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _buildButtonDialog(
-                      isPositive: false,
-                      text: 'Hủy',
-                      action: () {
-                        Navigator.pop(context);
-                        _feedbackController.clear();
-                      }),
-                  const SizedBox(width: 16),
-                  _buildButtonDialog(
-                      isPositive: true,
-                      text: 'Gửi',
-                      action: () {
-                        _bloc.add(FeedbackTaskProcessedEvent(
-                            _bloc.taskProcessedModel!.id!,
-                            _feedbackController.text,
-                            _rating));
-                        Navigator.pop(context);
-                        _feedbackController.clear();
-                      }),
-                ],
-              )
-            ],
-          );
-        });
+          ],
+        );
+      },
+    );
   }
 
   Widget _buildButtonDialog({isPositive, action, text}) {
@@ -444,21 +490,22 @@ class _TaskProcessedScreenState extends State<TaskProcessedScreen> {
 
   StatelessWidget _button(isPositive, action, text) {
     return ButtonWidget(
-        color: isPositive ? ColorUtil.bangladeshGreen : Colors.grey,
-        borderRadius: BorderRadius.circular(30),
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        onTap: () {
-          if (action == null) {
-            Navigator.pop(context);
-          } else {
-            action();
-          }
-        },
-        child: Text(
-          text,
-          textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 16, color: Colors.white),
-        ));
+      color: isPositive ? ColorUtil.bangladeshGreen : Colors.grey,
+      borderRadius: BorderRadius.circular(30),
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      onTap: () {
+        if (action == null) {
+          Navigator.pop(context);
+        } else {
+          action();
+        }
+      },
+      child: Text(
+        text,
+        textAlign: TextAlign.center,
+        style: const TextStyle(fontSize: 16, color: Colors.white),
+      ),
+    );
   }
 
   String _formatDatetime(String? dateTimeString) {

@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
-import 'package:socbay/application.dart';
 import 'package:socbay/blocs/root/root_bloc.dart';
 import 'package:socbay/config/app_config.dart';
 import 'package:socbay/config/app_localization.dart';
@@ -28,29 +27,11 @@ class BaseAPI {
 
   // PROPERTIES
   Dio _dio = Dio();
-  final String _baseUrl = _buildBaseUrl(
-    host: AppConfig.instance.values.apiUrl,
-    version: App.versionApi,
-  );
+  final String _baseUrl = AppConfig.instance.apiBaseUrl;
   late RootBloc _rootBloc;
 
-  static String _buildBaseUrl({
-    required String host,
-    required String version,
-  }) {
-    final normalizedHost = host.trim().replaceAll(RegExp(r'/+$'), '');
-    final normalizedVersion =
-        version.trim().replaceAll(RegExp(r'^/+|/+$'), '');
-    final hasScheme =
-        normalizedHost.startsWith('http://') || normalizedHost.startsWith('https://');
-    final url = hasScheme ? normalizedHost : '$protocol$normalizedHost';
-    return normalizedVersion.isEmpty ? url : '$url/$normalizedVersion';
-  }
-
   // INIT
-  BaseAPI({
-    required RootBloc rootBloc,
-  }) {
+  BaseAPI({required RootBloc rootBloc}) {
     final BaseOptions options = BaseOptions(
       receiveTimeout: Duration(milliseconds: receiveTimeout),
       connectTimeout: Duration(milliseconds: connectTimeout),
@@ -99,8 +80,9 @@ class BaseAPI {
       );
 
       // Setup custom path
-      final String path =
-          optionalPath != null ? (config.path + optionalPath) : config.path;
+      final String path = optionalPath != null
+          ? (config.path + optionalPath)
+          : config.path;
 
       Response response;
       switch (config.method) {
@@ -108,16 +90,25 @@ class BaseAPI {
           response = await _dio.get(path, queryParameters: queryParams ?? {});
           break;
         case HttpMethod.post:
-          response = await _dio.post(path,
-              data: bodyParams ?? {}, queryParameters: queryParams ?? {});
+          response = await _dio.post(
+            path,
+            data: bodyParams ?? {},
+            queryParameters: queryParams ?? {},
+          );
           break;
         case HttpMethod.put:
-          response = await _dio.put(path,
-              data: bodyParams ?? {}, queryParameters: queryParams ?? {});
+          response = await _dio.put(
+            path,
+            data: bodyParams ?? {},
+            queryParameters: queryParams ?? {},
+          );
           break;
         case HttpMethod.del:
-          response = await _dio.delete(path,
-              data: bodyParams ?? {}, queryParameters: queryParams ?? {});
+          response = await _dio.delete(
+            path,
+            data: bodyParams ?? {},
+            queryParameters: queryParams ?? {},
+          );
           break;
       }
 
@@ -128,7 +119,9 @@ class BaseAPI {
       if (exception.response != null) {
         if (exception.response?.data is! String) {
           final String? message = exception.response?.data['message'];
-          if (isUseAccessToken && message != null && message == 'Unauthorized') {
+          if (isUseAccessToken &&
+              message != null &&
+              message == 'Unauthorized') {
             _rootBloc.add(AccessTokenExpired());
             return null;
           }
@@ -140,9 +133,7 @@ class BaseAPI {
           );
         }
       }
-      return _errorJson(
-        message: exception.message ?? '',
-      );
+      return _errorJson(message: exception.message ?? '');
     }
     LoggerUtil.info(
       '${manager.getConfig().method} - $_baseUrl${manager.getConfig().path} response: $responseData',
@@ -156,7 +147,7 @@ class BaseAPI {
       InterceptorsWrapper(
         onRequest: (options, handler) {
           LoggerUtil.log('----> ${options.method} ${options.uri}');
-          if(options.headers.isNotEmpty) {
+          if (options.headers.isNotEmpty) {
             LoggerUtil.info('Headers ${options.headers}', tag: tag);
           }
           LoggerUtil.log('Data ${options.data}');
@@ -179,7 +170,9 @@ class BaseAPI {
     required bool isUseAccessToken,
   }) async {
     _dio.options.headers = config.headers;
-    final String? token = await SecureStorageUtil.shared.readData(SecureStorageUtil.tokenStorageKey);
+    final String? token = await SecureStorageUtil.shared.readData(
+      SecureStorageUtil.tokenStorageKey,
+    );
     print('token là $token');
     if (isUseAccessToken) {
       _dio.options.headers['Authorization'] = 'Bearer $token';
@@ -193,7 +186,7 @@ class BaseAPI {
     return DefaultResponse(
       data: null,
       status: status,
-      message: message
+      message: message,
     ).toJson();
   }
 

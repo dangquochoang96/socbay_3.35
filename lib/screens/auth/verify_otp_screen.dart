@@ -17,7 +17,6 @@ import 'package:socbay/widgets/loading_indicator.dart';
 import 'package:socbay/widgets/my_app_bar.dart';
 import 'package:socbay/widgets/my_button.dart';
 
-
 import '../../blocs/root/root_event.dart';
 import '../../constants/constants.dart';
 import '../../paths/images.dart';
@@ -80,10 +79,11 @@ class _VerifyOTPScreenState extends State<VerifyOTPScreen> {
       return;
     }
     if (_bloc.args["type"] == VerifyOtpType.forgotPassword) {
-      Navigator.pushNamed(context, Routes.newPasswordScreen, arguments: {
-        "phone": _bloc.args["phone"],
-        "otp": _bloc.otp,
-      });
+      Navigator.pushNamed(
+        context,
+        Routes.newPasswordScreen,
+        arguments: {"phone": _bloc.args["phone"], "otp": _bloc.otp},
+      );
     } else {
       _bloc.add(VerifyOtpScreenRegisterEvent(otp: _otpFieldController.text));
     }
@@ -94,24 +94,23 @@ class _VerifyOTPScreenState extends State<VerifyOTPScreen> {
     setState(() {
       _countdownSecond = 60;
     });
-    _timer = Timer.periodic(
-      const Duration(seconds: 1),
-      (Timer timer) {
-        if (_countdownSecond == 0) {
-          timer.cancel();
-        } else {
-          setState(() {
-            _countdownSecond = _countdownSecond - 1;
-          });
-        }
-      },
-    );
+    _timer = Timer.periodic(const Duration(seconds: 1), (Timer timer) {
+      if (_countdownSecond == 0) {
+        timer.cancel();
+      } else {
+        setState(() {
+          _countdownSecond = _countdownSecond - 1;
+        });
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<VerifyOtpScreenBloc, VerifyOtpScreenState>(
-        builder: _builder, listener: _listener);
+      builder: _builder,
+      listener: _listener,
+    );
   }
 
   void _listener(BuildContext context, VerifyOtpScreenState state) {
@@ -127,8 +126,12 @@ class _VerifyOTPScreenState extends State<VerifyOTPScreen> {
           backListener: () {},
           isShowTitle: false,
           leftAction: () {
-            _bloc.add(VerifyOtpScreenLoginEvent(
-                phone: _bloc.args['phone'], password: _bloc.args['password']));
+            _bloc.add(
+              VerifyOtpScreenLoginEvent(
+                phone: _bloc.args['phone'],
+                password: _bloc.args['password'],
+              ),
+            );
           },
         );
       }
@@ -147,74 +150,78 @@ class _VerifyOTPScreenState extends State<VerifyOTPScreen> {
 
   Widget _builder(BuildContext context, VerifyOtpScreenState state) {
     return SafeArea(
-        child: Scaffold(
-      appBar: MyAppBar(
-        isBackNavigation: true,
-        leadColor: ColorUtil.bangladeshGreen,
-        backgroundColor: Colors.white,
-        systemOverlayStyle: systemUiWhiteStyle,
-      ),
-      bottomNavigationBar: const HotlineWidget(),
-      body: LoadingIndicator(
-        isLoading: _bloc.isLoading,
-        child: ListView(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          children: [
-            Column(
-              children: [
-                ImageUtil.loadAssetsImage(
-                    fileName: Images.iconApp1, width: 150),
-                const SizedBox(
-                  height: 100,
-                ),
-                Row(
-                  children: [
-                    Expanded(child: _buildFormVerify(context)),
-                    const SizedBox(width: 10),
-                    DefaultButton(
-                      onPressed: verifyCode,
-                      text: "Xác nhận",
-                      width: 111,
-                      borderRadius: BorderRadius.circular(50),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                const Text(
-                  "Nhập mã OTP được gửi về máy của bạn để xác nhận",
-                  style: TextStyle(
+      child: Scaffold(
+        appBar: MyAppBar(
+          isBackNavigation: true,
+          leadColor: ColorUtil.bangladeshGreen,
+          backgroundColor: Colors.white,
+          systemOverlayStyle: systemUiWhiteStyle,
+        ),
+        bottomNavigationBar: const HotlineWidget(),
+        body: LoadingIndicator(
+          isLoading: _bloc.isLoading,
+          child: ListView(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            children: [
+              Column(
+                children: [
+                  ImageUtil.loadAssetsImage(
+                    fileName: Images.iconApp1,
+                    width: 150,
+                  ),
+                  const SizedBox(height: 100),
+                  Row(
+                    children: [
+                      Expanded(child: _buildFormVerify(context)),
+                      const SizedBox(width: 10),
+                      DefaultButton(
+                        onPressed: verifyCode,
+                        text: "Xác nhận",
+                        width: 111,
+                        borderRadius: BorderRadius.circular(50),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    "Nhập mã OTP được gửi về máy của bạn để xác nhận",
+                    style: TextStyle(
                       fontSize: 15,
                       fontWeight: MyFontWeight.bold,
-                      color: ColorUtil.spanishGray),
-                ),
-                const SizedBox(height: 15),
-                Text(
-                  "Thời gian còn lại: ${_countdownSecond}s",
-                  style: const TextStyle(
-                      fontSize: 15, color: ColorUtil.spanishGray),
-                ),
-                const SizedBox(height: 50),
-                DefaultButton(
-                  height: 40,
-                  width: 200,
-                  color: _countdownSecond <= 0
-                      ? ColorUtil.bangladeshGreen
-                      : ColorUtil.graniteGray,
-                  onPressed: _countdownSecond <= 0
-                      ? () {
-                          _bloc.add(VerifyOtpScreenStartedEvent());
-                          startCountdownRevert();
-                        }
-                      : null,
-                  text: "Gửi lại mã OTP",
-                  borderRadius: BorderRadius.circular(50),
-                ),
-              ],
-            ),
-          ],
+                      color: ColorUtil.spanishGray,
+                    ),
+                  ),
+                  const SizedBox(height: 15),
+                  Text(
+                    "Thời gian còn lại: ${_countdownSecond}s",
+                    style: const TextStyle(
+                      fontSize: 15,
+                      color: ColorUtil.spanishGray,
+                    ),
+                  ),
+                  const SizedBox(height: 50),
+                  DefaultButton(
+                    height: 40,
+                    width: 200,
+                    color: _countdownSecond <= 0
+                        ? ColorUtil.bangladeshGreen
+                        : ColorUtil.graniteGray,
+                    onPressed: _countdownSecond <= 0
+                        ? () {
+                            _bloc.add(VerifyOtpScreenStartedEvent());
+                            startCountdownRevert();
+                          }
+                        : null,
+                    text: "Gửi lại mã OTP",
+                    borderRadius: BorderRadius.circular(50),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
-    ));
+    );
   }
 
   Widget _buildFormVerify(BuildContext context) {
@@ -222,46 +229,56 @@ class _VerifyOTPScreenState extends State<VerifyOTPScreen> {
       controller: _otpFieldController,
       keyboardType: TextInputType.number,
       inputFormatters: <TextInputFormatter>[
-        FilteringTextInputFormatter.digitsOnly
+        FilteringTextInputFormatter.digitsOnly,
       ],
       maxLength: 6,
       cursorColor: ColorUtil.bangladeshGreen,
       decoration: InputDecoration(
-          counterText: "",
-          floatingLabelBehavior: FloatingLabelBehavior.always,
-          labelText: "Nhập mã OTP",
-          labelStyle: const TextStyle(
-              color: ColorUtil.bangladeshGreen,
-              fontSize: 18,
-              fontWeight: MyFontWeight.bold),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8.0),
-            borderSide:
-                const BorderSide(color: ColorUtil.bangladeshGreen, width: 0.5),
+        counterText: "",
+        floatingLabelBehavior: FloatingLabelBehavior.always,
+        labelText: "Nhập mã OTP",
+        labelStyle: const TextStyle(
+          color: ColorUtil.bangladeshGreen,
+          fontSize: 18,
+          fontWeight: MyFontWeight.bold,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8.0),
+          borderSide: const BorderSide(
+            color: ColorUtil.bangladeshGreen,
+            width: 0.5,
           ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8.0),
-            borderSide:
-                const BorderSide(color: ColorUtil.bangladeshGreen, width: 0.5),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8.0),
+          borderSide: const BorderSide(
+            color: ColorUtil.bangladeshGreen,
+            width: 0.5,
           ),
-          contentPadding:
-              const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
-          suffixIconConstraints:
-              const BoxConstraints(minHeight: 10, minWidth: 10),
-          suffixIcon: isHaveData
-              ? GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _otpFieldController.text = "";
-                    });
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.all(8),
-                    child: ImageUtil.loadAssetsImage(
-                        fileName: Images.iconClose, width: 16, height: 16),
+        ),
+        contentPadding: const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
+        suffixIconConstraints: const BoxConstraints(
+          minHeight: 10,
+          minWidth: 10,
+        ),
+        suffixIcon: isHaveData
+            ? GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _otpFieldController.text = "";
+                  });
+                },
+                child: Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: ImageUtil.loadAssetsImage(
+                    fileName: Images.iconClose,
+                    width: 16,
+                    height: 16,
                   ),
-                )
-              : null),
+                ),
+              )
+            : null,
+      ),
     );
   }
 }

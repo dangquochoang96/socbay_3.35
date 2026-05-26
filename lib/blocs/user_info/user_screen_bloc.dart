@@ -20,14 +20,16 @@ class UserScreenBloc extends Bloc<UserScreenEvent, UserScreenState> {
   List<AccountDb> accounts = [];
 
   UserScreenBloc({required this.apiRepository})
-      : super(UserScreenInitialState()) {
+    : super(UserScreenInitialState()) {
     on<UserScreenStartedEvent>(_mapStartedEventToState);
     on<UserScreenLogoutEvent>(_mapLogoutEventToState);
     on<UserScreenChangeAvatarEvent>(_mapChangeAvatarEventToState);
   }
 
   FutureOr<void> _mapStartedEventToState(
-      UserScreenStartedEvent event, Emitter<UserScreenState> emit) async {
+    UserScreenStartedEvent event,
+    Emitter<UserScreenState> emit,
+  ) async {
     // accounts = await DbManager.instance.getAccounts();
 
     final DefaultResponse res = await apiRepository.getUserInfo();
@@ -39,7 +41,9 @@ class UserScreenBloc extends Bloc<UserScreenEvent, UserScreenState> {
   }
 
   FutureOr<void> _mapLogoutEventToState(
-      UserScreenLogoutEvent event, Emitter<UserScreenState> emit) async {
+    UserScreenLogoutEvent event,
+    Emitter<UserScreenState> emit,
+  ) async {
     isLoading = true;
     emit(UserScreenInitialState());
     try {
@@ -49,8 +53,9 @@ class UserScreenBloc extends Bloc<UserScreenEvent, UserScreenState> {
     } finally {
       if (defaultTargetPlatform == TargetPlatform.android ||
           defaultTargetPlatform == TargetPlatform.iOS) {
-        final database =
-            await $FloorAppDatabase.databaseBuilder('socbay.db').build();
+        final database = await $FloorAppDatabase
+            .databaseBuilder('socbay.db')
+            .build();
         await database.userDao.deleteAllUser();
         await database.close();
       }
@@ -61,7 +66,9 @@ class UserScreenBloc extends Bloc<UserScreenEvent, UserScreenState> {
   }
 
   FutureOr<void> _mapChangeAvatarEventToState(
-      UserScreenChangeAvatarEvent event, Emitter<UserScreenState> emit) async {
+    UserScreenChangeAvatarEvent event,
+    Emitter<UserScreenState> emit,
+  ) async {
     isLoading = true;
     emit(UserScreenInitialState());
 

@@ -1,4 +1,3 @@
 abstract class DetailTaskProcessedState {}
 
-class DetailTaskProcessedInitialState extends DetailTaskProcessedState {
-}
+class DetailTaskProcessedInitialState extends DetailTaskProcessedState {}

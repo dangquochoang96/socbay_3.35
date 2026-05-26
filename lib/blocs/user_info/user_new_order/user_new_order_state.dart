@@ -3,15 +3,20 @@ abstract class UserNewOrderState {
 }
 
 class UserNewOrderInitialState extends UserNewOrderState {}
+
 class UserNewOrderGetListProductsSuccessState extends UserNewOrderState {}
+
 class UserNewOrderGetListProductsAllSuccessState extends UserNewOrderState {}
+
 class UserNewOrderGetListProductsFailState extends UserNewOrderState {}
-class UserCreateOrderCoresSuccessState extends UserNewOrderState {
-}
+
+class UserCreateOrderCoresSuccessState extends UserNewOrderState {}
+
 class UserCreateOrderCoresFailState extends UserNewOrderState {
   final String message;
   UserCreateOrderCoresFailState(this.message);
 }
+
 class ServiceScreenUploadImageSuccessState extends UserNewOrderState {
   final List<String> paths;
 
@@ -23,4 +28,5 @@ class ServiceScreenUploadImageFailedState extends UserNewOrderState {
 
   const ServiceScreenUploadImageFailedState(this.message);
 }
+
 class OrderHadCreated extends UserNewOrderState {}

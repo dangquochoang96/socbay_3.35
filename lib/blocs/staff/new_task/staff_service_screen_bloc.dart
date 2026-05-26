@@ -7,6 +7,7 @@ import 'package:socbay/application.dart';
 import 'package:socbay/blocs/staff/new_task/staff_service_screen_event.dart';
 import 'package:socbay/blocs/staff/new_task/staff_service_screen_state.dart';
 import 'package:socbay/config/app_config.dart';
+import 'package:socbay/constants/api_endpoints.dart';
 import 'package:socbay/data/model/home_service_model.dart';
 import 'package:socbay/data/model/order_model.dart';
 import 'package:socbay/data/model/task_model.dart';
@@ -30,9 +31,10 @@ class StaffServiceScreenBloc
   List<String> paths = [];
   UserProfile? customerInfor;
   StaffServiceScreenBloc({required this.apiRepository, required this.args})
-      : super(StaffServiceScreenInitialState()) {
+    : super(StaffServiceScreenInitialState()) {
     on<StaffServiceScreenChangeTypeServiceEvent>(
-        _mapChangeTypeServiceEventToState);
+      _mapChangeTypeServiceEventToState,
+    );
     on<StaffServiceScreenCreateTaskEvent>(_mapCreateTaskEventToState);
     on<StaffServiceScreenUploadImageEvent>(_mapUploadImageEventToState);
     on<StaffServiceScreenCheckCustomerEvent>(_mapCheckCustomerEventToState);
@@ -40,13 +42,13 @@ class StaffServiceScreenBloc
   }
 
   FutureOr<void> _mapChangeTypeServiceEventToState(
-      StaffServiceScreenChangeTypeServiceEvent event,
-      Emitter<StaffServiceScreenState> emit) {
+    StaffServiceScreenChangeTypeServiceEvent event,
+    Emitter<StaffServiceScreenState> emit,
+  ) {
     try {
       emit(StaffServiceScreenChangeTypeServiceState(event.typeService));
     } catch (ex) {
-      LoggerUtil.error(
-          "---_mapChangeTypeServiceEventToState--- \n$ex");
+      LoggerUtil.error("---_mapChangeTypeServiceEventToState--- \n$ex");
     }
   }
 
@@ -61,7 +63,11 @@ class StaffServiceScreenBloc
       if (event.createTaskRequest.customerId == null ||
           event.createTaskRequest.customerId == 0 ||
           App.instance.userApp == null) {
-        emit(const StaffServiceScreenCreateTaskFailedState("Chưa có khách hàng"));
+        emit(
+          const StaffServiceScreenCreateTaskFailedState(
+            "ChÃƒâ€ Ã‚Â°a cÃƒÆ’Ã‚Â³ khÃƒÆ’Ã‚Â¡ch hÃƒÆ’Ã‚Â ng",
+          ),
+        );
         isLoading = false;
         return;
       }
@@ -81,23 +87,31 @@ class StaffServiceScreenBloc
             : event.createTaskRequest.productId,
         "images": images,
         "address": event.createTaskRequest.address.toString(),
-        "request_user_id": App.instance.userApp!.id.toString()
+        "request_user_id": App.instance.userApp!.id.toString(),
       };
-      var url = Uri.http(AppConfig.instance.values.apiUrl, "/api/tasks/them");
+      var url = AppConfig.instance.apiUri(ApiEndpoints.taskCreate);
       var body = json.encode(args);
 
       try {
-        final response = await http.post(url,
-            body: body, headers: {'Content-type': 'application/json'});
+        final response = await http.post(
+          url,
+          body: body,
+          headers: {'Content-type': 'application/json'},
+        );
         if (response.statusCode == HttpStatus.ok) {
           var l = Map<String, dynamic>.from(json.decode(response.body));
           if (l["code"] == 1) {
             var task = TaskModel.fromJson(l["data"]);
-            emit(StaffServiceScreenCreateTaskSuccessState(
-                task.id!, event.isSearch));
+            emit(
+              StaffServiceScreenCreateTaskSuccessState(
+                task.id!,
+                event.isSearch,
+              ),
+            );
           } else {
-            emit(StaffServiceScreenCreateTaskFailedState(
-                l["message"] ?? "Error"));
+            emit(
+              StaffServiceScreenCreateTaskFailedState(l["message"] ?? "Error"),
+            );
           }
         }
       } catch (ex) {
@@ -112,19 +126,25 @@ class StaffServiceScreenBloc
   }
 
   FutureOr<void> _mapUploadImageEventToState(
-      StaffServiceScreenUploadImageEvent event,
-      Emitter<StaffServiceScreenState> emit) async {
+    StaffServiceScreenUploadImageEvent event,
+    Emitter<StaffServiceScreenState> emit,
+  ) async {
     isLoading = true;
     try {
       emit(StaffServiceScreenInitialState());
       paths.clear();
       var uri = Uri.parse(
-          "$protocol${AppConfig.instance.values.apiUrl}/api/order/upload-image");
+        AppConfig.instance.apiUrl(ApiEndpoints.orderUploadImage),
+      );
       for (var file in event.files) {
         var request = http.MultipartRequest('POST', uri);
-        request.files.add(http.MultipartFile.fromBytes(
-            'image', file.readAsBytesSync(),
-            filename: basename(file.path)));
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            'image',
+            file.readAsBytesSync(),
+            filename: basename(file.path),
+          ),
+        );
         // add file to multipart
         var resStream = await request.send();
         var response = await http.Response.fromStream(resStream);
@@ -138,8 +158,9 @@ class StaffServiceScreenBloc
       if (paths.isNotEmpty) {
         emit(StaffServiceScreenUploadImageSuccessState(paths));
       } else {
-        emit(const StaffServiceScreenUploadImageFailedState(
-            'No images uploaded'));
+        emit(
+          const StaffServiceScreenUploadImageFailedState('No images uploaded'),
+        );
       }
     } catch (ex) {
       LoggerUtil.error(jsonEncode(ex));
@@ -149,13 +170,15 @@ class StaffServiceScreenBloc
   }
 
   Future<void> _mapCheckCustomerEventToState(
-      StaffServiceScreenCheckCustomerEvent event,
-      Emitter<StaffServiceScreenState> emit) async {
+    StaffServiceScreenCheckCustomerEvent event,
+    Emitter<StaffServiceScreenState> emit,
+  ) async {
     isLoading = true;
     try {
       emit(StaffServiceScreenInitialState());
-      var url = Uri.http(AppConfig.instance.values.apiUrl, "/api/order/phone",
-          {'phone': event.phone});
+      var url = AppConfig.instance.apiUri(ApiEndpoints.orderByPhone, {
+        'phone': event.phone,
+      });
       var res = await http.post(url);
       if (res.statusCode == HttpStatus.ok) {
         var l = Map<String, dynamic>.from(json.decode(res.body));
@@ -163,11 +186,15 @@ class StaffServiceScreenBloc
           var m = Map<String, dynamic>.from(l["data"]);
           customerInfor = UserProfile.fromJson(m['users']);
           await _getProductByUser(customerInfor?.id ?? 0);
-          emit(StaffServiceScreenCheckCustomerSuccessState(
-              l['message'].toString()));
+          emit(
+            StaffServiceScreenCheckCustomerSuccessState(
+              l['message'].toString(),
+            ),
+          );
         } else {
-          emit(StaffServiceScreenCheckCustomerFailedState(
-              l['message'].toString()));
+          emit(
+            StaffServiceScreenCheckCustomerFailedState(l['message'].toString()),
+          );
         }
       } else {
         emit(const StaffServiceScreenCheckCustomerFailedState('Error'));
@@ -182,14 +209,16 @@ class StaffServiceScreenBloc
 
   Future<void> _getProductByUser(int id) async {
     try {
-      var url = Uri.http(AppConfig.instance.values.apiUrl,
-          "/api/user/listProduct/${id.toString()}");
+      var url = AppConfig.instance.apiUri(
+        ApiEndpoints.userProducts(id.toString()),
+      );
       var res = await http.get(url);
       if (res.statusCode == HttpStatus.ok) {
         var l = Map<String, dynamic>.from(json.decode(res.body));
         var m = Map<String, dynamic>.from(l["data"]);
         listProducts = List<OrderModel>.from(
-            m["listProducts"].map((model) => OrderModel.fromJson(model)));
+          m["listProducts"].map((model) => OrderModel.fromJson(model)),
+        );
       }
     } catch (exception) {
       LoggerUtil.log(exception.toString());
@@ -197,8 +226,9 @@ class StaffServiceScreenBloc
   }
 
   FutureOr<void> _mapCreateUserAddressToState(
-      UserAddressScreenCreateUserAddressEvent event,
-      Emitter<StaffServiceScreenState> emit) async {
+    UserAddressScreenCreateUserAddressEvent event,
+    Emitter<StaffServiceScreenState> emit,
+  ) async {
     isLoading = true;
     emit(StaffServiceScreenInitialState());
     final res = await apiRepository.createUserAddress(event.userAddressRequest);
@@ -207,9 +237,7 @@ class StaffServiceScreenBloc
       emit(const UserAddressScreenCreateAddressSuccessState());
     } else {
       emit(
-        UserAddressScreenCreateAddressFailState(
-          error: res.message.toString(),
-        ),
+        UserAddressScreenCreateAddressFailState(error: res.message.toString()),
       );
     }
     // emit(StaffServiceScreenInitialState());

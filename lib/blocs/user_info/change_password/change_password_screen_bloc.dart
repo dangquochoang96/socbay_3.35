@@ -11,7 +11,7 @@ import 'package:socbay/db/object_mapper/object_mapper.dart';
 class ChangePasswordScreenBloc
     extends Bloc<ChangePasswordScreenEvent, ChangePasswordScreenState> {
   ChangePasswordScreenBloc({required this.apiRepository})
-      : super(ChangePasswordScreenInitialState()) {
+    : super(ChangePasswordScreenInitialState()) {
     on<ChangePasswordScreenSubmitChangeEvent>(_mapChangePasswordEventToState);
   }
 
@@ -19,8 +19,9 @@ class ChangePasswordScreenBloc
   bool isLoading = false;
 
   FutureOr<void> _mapChangePasswordEventToState(
-      ChangePasswordScreenSubmitChangeEvent event,
-      Emitter<ChangePasswordScreenState> emit) async {
+    ChangePasswordScreenSubmitChangeEvent event,
+    Emitter<ChangePasswordScreenState> emit,
+  ) async {
     isLoading = true;
     emit(ChangePasswordScreenInitialState());
     final res = await apiRepository.changePassword(event.changePasswordRequest);

@@ -26,13 +26,14 @@ import 'package:socbay/widgets/my_app_bar.dart';
 
 const double defaultLat = 21.0278; // HaNoi
 const double defaultLng = 105.8342; // HaNoi
-class FindStaffScreen extends StatefulWidget{
+
+class FindStaffScreen extends StatefulWidget {
   const FindStaffScreen({super.key});
   @override
   State<FindStaffScreen> createState() => _SearchStaffScreenState();
 }
 
-class _SearchStaffScreenState extends State<FindStaffScreen>{
+class _SearchStaffScreenState extends State<FindStaffScreen> {
   late FindStaffBloc _bloc;
   final Completer<GoogleMapController> _controller = Completer();
   late TextEditingController _addressController;
@@ -49,96 +50,115 @@ class _SearchStaffScreenState extends State<FindStaffScreen>{
     _initGetGeoLocationPosition();
     super.initState();
   }
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<FindStaffBloc, FindStaffState>(
-        builder: _builder, listener: _listener);
+      builder: _builder,
+      listener: _listener,
+    );
   }
-  void _listener(BuildContext context, FindStaffState state){
-    if(state is FindStartGetUserAddressSuccessState){
-      _userAddress = _bloc.listUserAddress.firstWhere((element) => element.isDefaultAddress(), orElse: () => UserAddress());
+
+  void _listener(BuildContext context, FindStaffState state) {
+    if (state is FindStartGetUserAddressSuccessState) {
+      _userAddress = _bloc.listUserAddress.firstWhere(
+        (element) => element.isDefaultAddress(),
+        orElse: () => UserAddress(),
+      );
     }
     if (_bloc.staffsInfo.isNotEmpty) {
       for (int i = 0; i < _bloc.staffsInfo.length; i++) {
-        _markers.add(Marker(
-          markerId: MarkerId(_bloc.staffsInfo[i].id.toString()),
-          position: LatLng(_bloc.staffsInfo[i].lat!.toDouble(),
-              _bloc.staffsInfo[i].lng!.toDouble()),
-          infoWindow:
-          InfoWindow(title: _bloc.staffsInfo[i].address, snippet: '*'),
-        ));
+        _markers.add(
+          Marker(
+            markerId: MarkerId(_bloc.staffsInfo[i].id.toString()),
+            position: LatLng(
+              _bloc.staffsInfo[i].lat!.toDouble(),
+              _bloc.staffsInfo[i].lng!.toDouble(),
+            ),
+            infoWindow: InfoWindow(
+              title: _bloc.staffsInfo[i].address,
+              snippet: '*',
+            ),
+          ),
+        );
       }
     }
   }
-  Widget _builder(BuildContext context, FindStaffState state){
+
+  Widget _builder(BuildContext context, FindStaffState state) {
     return Scaffold(
       appBar: MyAppBar(
         isBackNavigation: false,
         title: 'Tìm thợ',
-        centerTitle: true
+        centerTitle: true,
       ),
       body: LoadingIndicator(
-          isLoading: _bloc.isLoading,
-          child: Padding(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: paddingHorizontal, vertical: paddingVertical),
-              child: Column(
+        isLoading: _bloc.isLoading,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: paddingHorizontal,
+            vertical: paddingVertical,
+          ),
+          child: Column(
+            children: [
+              _buildInfoField(
+                onTap: () {
+                  _onTapEditInfo();
+                },
+              ),
+              const SizedBox(height: 10),
+              Stack(
                 children: [
-                  _buildInfoField(onTap: () {
-                    _onTapEditInfo();
-                  }),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  Stack(
-                    children: [
-                      ///MAP
-                      _buildMap(),
-                    ],
-                  ),
-                  // const SizedBox(
-                  //   height: 10,
-                  // ),
-                  // Expanded(
-                  //   child: _bloc.staffsInfo.isNotEmpty
-                  //       ? _buildListStaff()
-                  //       : Container(
-                  //           padding: const EdgeInsets.symmetric(
-                  //               horizontal: 16.0),
-                  //           decoration: BoxDecoration(
-                  //               borderRadius: BorderRadius.circular(14),
-                  //               border: Border.all(
-                  //                   color: ColorUtil.bangladeshGreen)
-                  //           ),
-                  //         child: Column(
-                  //           mainAxisAlignment: MainAxisAlignment.center,
-                  //           crossAxisAlignment:
-                  //           CrossAxisAlignment.stretch,
-                  //           children: [
-                  //             const Text(
-                  //               "Tạm thời không có thợ nào quanh đây.Chúng tôi sẽ sắp xếp và liên hệ tới bạn sớm nhất",
-                  //               style: TextStyle(
-                  //                   fontWeight: FontWeight.bold,
-                  //                   color: ColorUtil.red),
-                  //             ),
-                  //             Flexible(
-                  //                 child: DefaultButton(
-                  //                   onPressed: () {
-                  //                     App.instance.eventBus.fire(
-                  //                         EventBusFinishSearchStaffEvent());
-                  //                     Navigator.popUntil(
-                  //                         context, (route) => route.isFirst);
-                  //                   },
-                  //                   text: "Hoàn thành",
-                  //                 )),
-                  //           ],
-                  //         ),
-                  //   ),
-                  // )
+                  ///MAP
+                  _buildMap(),
                 ],
-              ))),
+              ),
+              // const SizedBox(
+              //   height: 10,
+              // ),
+              // Expanded(
+              //   child: _bloc.staffsInfo.isNotEmpty
+              //       ? _buildListStaff()
+              //       : Container(
+              //           padding: const EdgeInsets.symmetric(
+              //               horizontal: 16.0),
+              //           decoration: BoxDecoration(
+              //               borderRadius: BorderRadius.circular(14),
+              //               border: Border.all(
+              //                   color: ColorUtil.bangladeshGreen)
+              //           ),
+              //         child: Column(
+              //           mainAxisAlignment: MainAxisAlignment.center,
+              //           crossAxisAlignment:
+              //           CrossAxisAlignment.stretch,
+              //           children: [
+              //             const Text(
+              //               "Tạm thời không có thợ nào quanh đây.Chúng tôi sẽ sắp xếp và liên hệ tới bạn sớm nhất",
+              //               style: TextStyle(
+              //                   fontWeight: FontWeight.bold,
+              //                   color: ColorUtil.red),
+              //             ),
+              //             Flexible(
+              //                 child: DefaultButton(
+              //                   onPressed: () {
+              //                     App.instance.eventBus.fire(
+              //                         EventBusFinishSearchStaffEvent());
+              //                     Navigator.popUntil(
+              //                         context, (route) => route.isFirst);
+              //                   },
+              //                   text: "Hoàn thành",
+              //                 )),
+              //           ],
+              //         ),
+              //   ),
+              // )
+            ],
+          ),
+        ),
+      ),
     );
   }
+
   // Widget _buildListStaff() {
   //   return ListView.separated(
   //       itemBuilder: _itemBuilder,
@@ -219,10 +239,10 @@ class _SearchStaffScreenState extends State<FindStaffScreen>{
                       isLoading = true;
                       _markers = [];
                       _markers.add(
-                          Marker(
-                            markerId: MarkerId(latLng.toString()),
-                            position: latLng
-                          )
+                        Marker(
+                          markerId: MarkerId(latLng.toString()),
+                          position: latLng,
+                        ),
                       );
                     });
                     String? addressFromLatLong = await getAddressFromLatLong(
@@ -239,7 +259,6 @@ class _SearchStaffScreenState extends State<FindStaffScreen>{
                   },
 
                   initialCameraPosition: _kGooglePlex!,
-
                 ),
               ),
               GestureDetector(
@@ -247,20 +266,29 @@ class _SearchStaffScreenState extends State<FindStaffScreen>{
                 child: Padding(
                   padding: const EdgeInsets.all(8),
                   child: ImageUtil.loadAssetsImage(
-                      fileName: Images.iconReset, width: 30, height: 30),
+                    fileName: Images.iconReset,
+                    width: 30,
+                    height: 30,
+                  ),
                 ),
-              )
+              ),
             ],
-    )
+          )
         : const IndicatorLoadMore();
   }
 
   Future _onSearchStaff() async {
-    _bloc.add(FindStaffScreenGetStaffEvent(StaffByDistanceRequest(
-        lat: _userAddress?.lat ?? defaultLat,
-        lng: _userAddress?.lng ?? defaultLng,
-        distance: 2000)));
+    _bloc.add(
+      FindStaffScreenGetStaffEvent(
+        StaffByDistanceRequest(
+          lat: _userAddress?.lat ?? defaultLat,
+          lng: _userAddress?.lng ?? defaultLng,
+          distance: 2000,
+        ),
+      ),
+    );
   }
+
   Future<String?> getAddressFromLatLong(double lat, double lng) async {
     Placemark? placeMark = await getPlaceMarkFromLatLong(lat, lng);
     if (placeMark == null) {
@@ -273,6 +301,7 @@ class _SearchStaffScreenState extends State<FindStaffScreen>{
     LoggerUtil.log("ADDRESS_TAP $addressFromLatLong");
     return addressFromLatLong;
   }
+
   Future<Placemark?> getPlaceMarkFromLatLong(double lat, double lng) async {
     List<Placemark> placeMarks = await placemarkFromCoordinates(lat, lng);
     if (placeMarks.isEmpty) {
@@ -281,29 +310,38 @@ class _SearchStaffScreenState extends State<FindStaffScreen>{
     }
     return placeMarks.first;
   }
+
   Widget _buildInfoField({required void Function() onTap}) {
-    _userAddress = _bloc.listUserAddress.firstWhere((element) => element.isDefaultAddress(), orElse: () => UserAddress());
+    _userAddress = _bloc.listUserAddress.firstWhere(
+      (element) => element.isDefaultAddress(),
+      orElse: () => UserAddress(),
+    );
     return GestureDetector(
-        onTap: onTap,
-        child: TextFormField(
-          controller: _addressController
-            ..text =
-                "${_userAddress?.name ?? ""}\n${_userAddress?.phone ?? ""}\n${_userAddress?.address ?? ""}",
-          enableInteractiveSelection: false,
-          enabled: false,
-          minLines: 3,
-          maxLines: 5,
-          decoration: InputDecoration(
-              labelText: 'Thông tin công việc\n(chọn để sửa)',
-              labelStyle: const TextStyle(color: ColorUtil.bangladeshGreen),
-              disabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8.0),
-                borderSide: const BorderSide(
-                    color: ColorUtil.bangladeshGreen, width: 0.5),
-              ),
-              floatingLabelBehavior: FloatingLabelBehavior.always),
-        ));
+      onTap: onTap,
+      child: TextFormField(
+        controller: _addressController
+          ..text =
+              "${_userAddress?.name ?? ""}\n${_userAddress?.phone ?? ""}\n${_userAddress?.address ?? ""}",
+        enableInteractiveSelection: false,
+        enabled: false,
+        minLines: 3,
+        maxLines: 5,
+        decoration: InputDecoration(
+          labelText: 'Thông tin công việc\n(chọn để sửa)',
+          labelStyle: const TextStyle(color: ColorUtil.bangladeshGreen),
+          disabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8.0),
+            borderSide: const BorderSide(
+              color: ColorUtil.bangladeshGreen,
+              width: 0.5,
+            ),
+          ),
+          floatingLabelBehavior: FloatingLabelBehavior.always,
+        ),
+      ),
+    );
   }
+
   void _onTapEditInfo() async {
     // await Navigator.of(context).pushNamed(Routes.editServiceScreen,
     //     arguments: {"id": _bloc.args['id']}).then((value) async {
@@ -325,21 +363,22 @@ class _SearchStaffScreenState extends State<FindStaffScreen>{
     // });
   }
   Future _initGetGeoLocationPosition() async {
-    _userAddress = _bloc.listUserAddress.firstWhere((element) => element.isDefaultAddress(), orElse: () => UserAddress());
+    _userAddress = _bloc.listUserAddress.firstWhere(
+      (element) => element.isDefaultAddress(),
+      orElse: () => UserAddress(),
+    );
     if (await requestPermission()) {
       final lat = _userAddress?.lat ?? defaultLat;
       final long = _userAddress?.lat ?? defaultLng;
       setState(() {
-        _kGooglePlex = CameraPosition(
-          target: LatLng(lat, long),
-          zoom: 17,
-        );
+        _kGooglePlex = CameraPosition(target: LatLng(lat, long), zoom: 17);
         // _myLocation = CameraPosition(target: LatLng(lat, long), zoom: 14);
       });
     } else {
       context.showSnackBar("Vui lòng cấp quyền chia sẻ vị trí.");
     }
   }
+
   Future<bool> requestPermission() async {
     if (await Permission.location.request().isGranted == true) {
       LoggerUtil.log("request true");
@@ -359,6 +398,7 @@ class _SearchStaffScreenState extends State<FindStaffScreen>{
       return false;
     }
   }
+
   // Future<bool> _onWillPop() async {
   //   final shouldPop = await showDialog(
   //       context: context,
@@ -411,6 +451,4 @@ class _SearchStaffScreenState extends State<FindStaffScreen>{
   //         style: const TextStyle(fontSize: 16, color: Colors.white),
   //       ));
   // }
-
-
 }

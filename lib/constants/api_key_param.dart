@@ -13,5 +13,4 @@ class ApiKeyParam {
   static const String limit = 'limit';
   static const String blocProvider = 'bloc_provider';
   static const String data = 'data';
-
 }

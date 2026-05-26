@@ -17,21 +17,22 @@ class ProductModel {
   final MachineModel? machineModel;
   final String? address;
 
-  ProductModel(
-      {this.id,
-        this.userId,
-        this.name,
-        this.productCode,
-        this.soCapLoc,
-        this.slug,
-        this.lng,
-        this.meta,
-        this.content,
-        this.createdAt,
-        this.updatedAt,
-        this.machineModel,
-        this.address,
-        this.images});
+  ProductModel({
+    this.id,
+    this.userId,
+    this.name,
+    this.productCode,
+    this.soCapLoc,
+    this.slug,
+    this.lng,
+    this.meta,
+    this.content,
+    this.createdAt,
+    this.updatedAt,
+    this.machineModel,
+    this.address,
+    this.images,
+  });
 
   factory ProductModel.fromJson(Map<String, dynamic> json) => ProductModel(
     id: json['id'] as int?,

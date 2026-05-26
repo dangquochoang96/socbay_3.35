@@ -3,7 +3,6 @@ class ChangePasswordRequest {
   String password;
   String rePassword;
 
-
   ChangePasswordRequest({
     required this.oldPassword,
     required this.password,

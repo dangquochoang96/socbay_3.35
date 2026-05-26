@@ -8,6 +8,7 @@ import 'package:socbay/application.dart';
 import 'package:socbay/blocs/task/task_screen_event.dart';
 import 'package:socbay/blocs/task/task_screen_state.dart';
 import 'package:socbay/config/app_config.dart';
+import 'package:socbay/constants/api_endpoints.dart';
 import 'package:socbay/data/model/task_model.dart';
 import 'package:socbay/data/repository/auth/api_repository.dart';
 import 'package:socbay/db/db_manager.dart';
@@ -17,7 +18,7 @@ import 'package:http/http.dart' as http;
 
 class TaskScreenSaleBloc extends Bloc<TaskScreenEvent, TaskScreenState> {
   TaskScreenSaleBloc({required this.apiRepository})
-      : super(MyTaskScreenInitialState()) {
+    : super(MyTaskScreenInitialState()) {
     on<TaskScreenGetTaskAvailableEvent>(_mapGetTaskAvailableEventToState);
     on<TaskScreenGetTaskEvent>(_mapGetTaskEventToState);
     on<StaffTaskScreenGetTaskByDayEvent>(_mapGetTaskByDayEventToState);
@@ -40,24 +41,28 @@ class TaskScreenSaleBloc extends Bloc<TaskScreenEvent, TaskScreenState> {
   int pageTaskByday = 0;
 
   FutureOr<void> _mapGetTaskAvailableEventToState(
-      TaskScreenGetTaskAvailableEvent event,
-      Emitter<TaskScreenState> emit) async {}
+    TaskScreenGetTaskAvailableEvent event,
+    Emitter<TaskScreenState> emit,
+  ) async {}
 
   FutureOr<void> _mapGetTaskEventToState(
-      TaskScreenGetTaskEvent event, Emitter<TaskScreenState> emit) async {
+    TaskScreenGetTaskEvent event,
+    Emitter<TaskScreenState> emit,
+  ) async {
     isLoading = true;
     emit(MyTaskScreenInitialState());
     var userAccount = await DbManager.instance.getAccounts();
     try {
-      var url = Uri.http(
-          AppConfig.instance.values.apiUrl,
-          "/api/tasks/customer/${userAccount.first.id}",
-          {'page': event.isRefresh ? 0 : page});
+      var url = AppConfig.instance.apiUri(
+        ApiEndpoints.tasksByCustomer(userAccount.first.id),
+        {'page': event.isRefresh ? 0 : page},
+      );
       var res = await http.get(url);
       if (res.statusCode == HttpStatus.ok) {
         var l = Map<String, dynamic>.from(json.decode(res.body));
         List<TaskModel> newlistTaskModel = List<TaskModel>.from(
-            l["data"].map((model) => TaskModel.fromJson(model)));
+          l["data"].map((model) => TaskModel.fromJson(model)),
+        );
         if (event.isRefresh) {
           listTaskModel.clear();
           page = 0;
@@ -73,21 +78,23 @@ class TaskScreenSaleBloc extends Bloc<TaskScreenEvent, TaskScreenState> {
   }
 
   FutureOr<void> _mapGetTaskByDayEventToState(
-      StaffTaskScreenGetTaskByDayEvent event,
-      Emitter<TaskScreenState> emit) async {
+    StaffTaskScreenGetTaskByDayEvent event,
+    Emitter<TaskScreenState> emit,
+  ) async {
     isLoading = true;
     emit(MyTaskScreenInitialState());
     try {
-      var url = Uri.http(AppConfig.instance.values.apiUrl, "/api/tasks", {
+      var url = AppConfig.instance.apiUri(ApiEndpoints.tasks, {
         'page': event.isRefresh ? "0" : pageTaskByday.toString(),
         'sale_id': App.instance.userApp?.id.toString(),
-        'start': DateFormat("yyyy-MM-dd").format(DateTime.now())
+        'start': DateFormat("yyyy-MM-dd").format(DateTime.now()),
       });
       var res = await http.get(url);
       if (res.statusCode == HttpStatus.ok) {
         var l = Map<String, dynamic>.from(json.decode(res.body));
         List<TaskModel> newlistTaskModel = List<TaskModel>.from(
-            l["data"].map((model) => TaskModel.fromJson(model)));
+          l["data"].map((model) => TaskModel.fromJson(model)),
+        );
         if (event.isRefresh) {
           staffListTaskBydayModel.clear();
           pageTaskByday = 0;
@@ -105,12 +112,13 @@ class TaskScreenSaleBloc extends Bloc<TaskScreenEvent, TaskScreenState> {
   }
 
   FutureOr<void> _mapGetTaskAssigedEventToState(
-      StaffTaskScreenGetTaskAssigedEvent event,
-      Emitter<TaskScreenState> emit) async {
+    StaffTaskScreenGetTaskAssigedEvent event,
+    Emitter<TaskScreenState> emit,
+  ) async {
     isLoading = true;
     emit(MyTaskScreenInitialState());
     try {
-      var url = Uri.http(AppConfig.instance.values.apiUrl, "/api/tasks/ton-dong", {
+      var url = AppConfig.instance.apiUri(ApiEndpoints.tasksPending, {
         'sale_id': App.instance.userApp?.id.toString(),
       });
       // Fetch data from the new API endpoint
@@ -118,7 +126,8 @@ class TaskScreenSaleBloc extends Bloc<TaskScreenEvent, TaskScreenState> {
       if (res.statusCode == HttpStatus.ok) {
         var responseMap = Map<String, dynamic>.from(json.decode(res.body));
         List<TaskModel> newTaskModelList = List<TaskModel>.from(
-            responseMap["data"].map((model) => TaskModel.fromJson(model)));
+          responseMap["data"].map((model) => TaskModel.fromJson(model)),
+        );
 
         // Clear the list before adding new data, as we're fetching all data at once
         staffListTaskAssigedModel.clear();
@@ -131,11 +140,10 @@ class TaskScreenSaleBloc extends Bloc<TaskScreenEvent, TaskScreenState> {
     emit(MyTaskScreenInitialState());
   }
 
-
-
   Future<void> _mapUpdateTaskEventToState(
-      StaffTaskScreenUpdateTaskDoneEvent event,
-      Emitter<TaskScreenState> emit) async {
+    StaffTaskScreenUpdateTaskDoneEvent event,
+    Emitter<TaskScreenState> emit,
+  ) async {
     isLoading = true;
     emit(MyTaskScreenInitialState());
     Map<String, dynamic> params = {
@@ -151,15 +159,20 @@ class TaskScreenSaleBloc extends Bloc<TaskScreenEvent, TaskScreenState> {
       "user_id": event.status == '1' || event.status == '2'
           ? null
           : App.instance.userApp!.id.toString(),
-      "time_star": DateFormat('dd/MM/yyyy HH:mm')
-          .format(DateTime.parse(event.timeStart.toString())),
+      "time_star": DateFormat(
+        'dd/MM/yyyy HH:mm',
+      ).format(DateTime.parse(event.timeStart.toString())),
     };
 
-    var url = Uri.http(AppConfig.instance.values.apiUrl,
-        "/api/tasks/editt/${event.taskId.toString()}");
+    var url = AppConfig.instance.apiUri(
+      ApiEndpoints.taskEditDone(event.taskId.toString()),
+    );
     var body = json.encode(params);
-    var res = await http
-        .post(url, body: body, headers: {'Content-type': 'application/json'});
+    var res = await http.post(
+      url,
+      body: body,
+      headers: {'Content-type': 'application/json'},
+    );
     if (res.statusCode == HttpStatus.ok) {
       var l = Map<String, dynamic>.from(json.decode(res.body));
       if (l["code"] == 1) {
@@ -174,8 +187,9 @@ class TaskScreenSaleBloc extends Bloc<TaskScreenEvent, TaskScreenState> {
   }
 
   Future<void> _mapUpdateTaskEventDayToState(
-      StaffTaskScreenUpdateTaskDayDoneEvent event,
-      Emitter<TaskScreenState> emit) async {
+    StaffTaskScreenUpdateTaskDayDoneEvent event,
+    Emitter<TaskScreenState> emit,
+  ) async {
     isLoading = true;
     emit(MyTaskScreenInitialState());
 
@@ -191,14 +205,19 @@ class TaskScreenSaleBloc extends Bloc<TaskScreenEvent, TaskScreenState> {
       "user_id": event.status == '1' || event.status == '2'
           ? null
           : App.instance.userApp!.id.toString(),
-      "time_star": DateFormat('dd/MM/yyyy HH:mm')
-          .format(DateTime.parse(event.timeStart.toString())),
+      "time_star": DateFormat(
+        'dd/MM/yyyy HH:mm',
+      ).format(DateTime.parse(event.timeStart.toString())),
     };
-    var url = Uri.http(AppConfig.instance.values.apiUrl,
-        "/api/tasks/edit/${event.taskId.toString()}");
+    var url = AppConfig.instance.apiUri(
+      ApiEndpoints.taskEdit(event.taskId.toString()),
+    );
     var body = json.encode(params);
-    var res = await http
-        .post(url, body: body, headers: {'Content-type': 'application/json'});
+    var res = await http.post(
+      url,
+      body: body,
+      headers: {'Content-type': 'application/json'},
+    );
     if (res.statusCode == HttpStatus.ok) {
       var l = Map<String, dynamic>.from(json.decode(res.body));
       if (l["code"] == 1) {
@@ -213,15 +232,20 @@ class TaskScreenSaleBloc extends Bloc<TaskScreenEvent, TaskScreenState> {
   }
 
   FutureOr<void> _mapGetTaskDoneEventToState(
-      StaffTaskScreenGetTaskDoneEvent event,
-      Emitter<TaskScreenState> emit) async {}
+    StaffTaskScreenGetTaskDoneEvent event,
+    Emitter<TaskScreenState> emit,
+  ) async {}
 
   FutureOr<void> _mapBookingDeleteTaskEventToState(
-      BookingDeleteTaskEvent event, Emitter<TaskScreenState> emit) async {
+    BookingDeleteTaskEvent event,
+    Emitter<TaskScreenState> emit,
+  ) async {
     isLoading = true;
     emit(MyTaskScreenInitialState());
-    var url = Uri.http(AppConfig.instance.values.apiUrl, "/api/tasks/xoa",
-        {'txt-uid': event.taskId.toString(), 'des': event.des});
+    var url = AppConfig.instance.apiUri(ApiEndpoints.taskDelete, {
+      'txt-uid': event.taskId.toString(),
+      'des': event.des,
+    });
     var res1 = await http.post(url);
     if (res1.statusCode == HttpStatus.ok) {
       var l = Map<String, dynamic>.from(json.decode(res1.body));
@@ -236,11 +260,15 @@ class TaskScreenSaleBloc extends Bloc<TaskScreenEvent, TaskScreenState> {
   }
 
   FutureOr<void> _mapBookingDeleteTaskToDayEventToState(
-      BookingDeleteTaskToDayEvent event, Emitter<TaskScreenState> emit) async {
+    BookingDeleteTaskToDayEvent event,
+    Emitter<TaskScreenState> emit,
+  ) async {
     isLoading = true;
     emit(MyTaskScreenInitialState());
-    var url = Uri.http(AppConfig.instance.values.apiUrl, "/api/tasks/xoa",
-        {'txt-uid': event.taskId.toString(), 'des': event.des});
+    var url = AppConfig.instance.apiUri(ApiEndpoints.taskDelete, {
+      'txt-uid': event.taskId.toString(),
+      'des': event.des,
+    });
     var res1 = await http.post(url);
     if (res1.statusCode == HttpStatus.ok) {
       var l = Map<String, dynamic>.from(json.decode(res1.body));

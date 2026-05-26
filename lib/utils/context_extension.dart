@@ -16,26 +16,25 @@ extension MediaQueryValues on BuildContext {
     Duration? duration,
     TextStyle? style,
   }) {
-    ScaffoldMessenger.of(this).showSnackBar(SnackBar(
-      content: Text(
-        title,
-        style: const TextStyle(fontWeight: MyFontWeight.medium),
-        textAlign: TextAlign.center,
+    ScaffoldMessenger.of(this).showSnackBar(
+      SnackBar(
+        content: Text(
+          title,
+          style: const TextStyle(fontWeight: MyFontWeight.medium),
+          textAlign: TextAlign.center,
+        ),
+        duration: duration ?? const Duration(milliseconds: 1500),
+        width: 280.0,
+        backgroundColor: color?.withOpacity(0.85),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10.0),
+        ),
       ),
-      duration: duration ?? const Duration(milliseconds: 1500),
-      width: 280.0,
-      backgroundColor: color?.withOpacity(0.85),
-      behavior: SnackBarBehavior.floating,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10.0),
-      ),
-    ));
+    );
   }
 
-  void showSnackBarError(
-    String message, {
-    Duration? duration,
-  }) {
+  void showSnackBarError(String message, {Duration? duration}) {
     showSnackBar(
       message,
       color: ColorUtil.red,
@@ -44,10 +43,7 @@ extension MediaQueryValues on BuildContext {
     );
   }
 
-  void showSnackBarSuccess(
-    String message, {
-    Duration? duration,
-  }) {
+  void showSnackBarSuccess(String message, {Duration? duration}) {
     showSnackBar(
       message,
       color: ColorUtil.bangladeshGreen,

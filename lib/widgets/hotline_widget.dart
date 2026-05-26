@@ -11,24 +11,28 @@ class HotlineWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-        height: 70,
-        child: Center(
-          child: MyRichText(
-              firstText: "${l("Hotline")}: ",
-              secondText: l("0963456911"),
-              firstTextStyle: const TextStyle(
-                  color: Colors.grey,
-                  fontSize: 15,
-                  fontWeight: FontWeight.w500),
-              secondTextStyle: const TextStyle(
-                  color: ColorUtil.bangladeshGreen,
-                  fontSize: 15,
-                  decoration: TextDecoration.underline,
-                  fontWeight: FontWeight.bold),
-              onTapSecond: () async {
-                const url = "tel:0963456911";
-                await launchUrl(Uri.parse(url));
-              }),
-        ));
+      height: 70,
+      child: Center(
+        child: MyRichText(
+          firstText: "${l("Hotline")}: ",
+          secondText: l("0963456911"),
+          firstTextStyle: const TextStyle(
+            color: Colors.grey,
+            fontSize: 15,
+            fontWeight: FontWeight.w500,
+          ),
+          secondTextStyle: const TextStyle(
+            color: ColorUtil.bangladeshGreen,
+            fontSize: 15,
+            decoration: TextDecoration.underline,
+            fontWeight: FontWeight.bold,
+          ),
+          onTapSecond: () async {
+            const url = "tel:0963456911";
+            await launchUrl(Uri.parse(url));
+          },
+        ),
+      ),
+    );
   }
 }

@@ -61,7 +61,7 @@ class DbManager {
     required String username,
     required String password,
   }) async {
-    if(username.isEmpty||password.isEmpty){
+    if (username.isEmpty || password.isEmpty) {
       return 0;
     }
     await openDb();
@@ -77,7 +77,7 @@ class DbManager {
       LoggerUtil.error("OpenDb InsertAccount Error : $ex");
     }
     LoggerUtil.info('insertAccount : $tableUser - result: $result', tag: tag);
-    if(result ==0){
+    if (result == 0) {
       await updatePassword(username: username, password: password);
     }
     await closeDb();
@@ -95,18 +95,22 @@ class DbManager {
     await closeDb();
   }
 
-  Future<bool> updatePassword(
-      {required String username, required String password}) async {
+  Future<bool> updatePassword({
+    required String username,
+    required String password,
+  }) async {
     await openDb();
 
-    final Map<String, dynamic> data = {
-      columnPassword: password,
-    };
+    final Map<String, dynamic> data = {columnPassword: password};
     const where = '$columnUserName = ?';
     int? result;
     try {
-      result = await db
-          ?.update(tableUser, data, where: where, whereArgs: [username]);
+      result = await db?.update(
+        tableUser,
+        data,
+        where: where,
+        whereArgs: [username],
+      );
     } catch (ex) {
       LoggerUtil.error("OpenDb UpdatePassword Error : $ex");
     }
@@ -119,9 +123,7 @@ class DbManager {
     await openDb();
     List<Map>? maps = [];
     try {
-      maps = await db?.query(
-        tableUser,
-      );
+      maps = await db?.query(tableUser);
       LoggerUtil.info("OpenDb GetAccounts Infor : $maps");
     } catch (ex) {
       LoggerUtil.error("OpenDb GetAccounts Error : $ex");

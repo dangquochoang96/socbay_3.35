@@ -31,7 +31,8 @@ class _ProductScreenState extends State<ProductScreen> {
     super.initState();
     _bloc = BlocProvider.of(context);
     _bloc.add(
-        ProductScreenGetProductCategoryEvent(offSet: offSet, refresh: true));
+      ProductScreenGetProductCategoryEvent(offSet: offSet, refresh: true),
+    );
   }
 
   @override
@@ -42,7 +43,9 @@ class _ProductScreenState extends State<ProductScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<ProductScreenBloc, ProductScreenState>(
-        builder: _builder, listener: listener);
+      builder: _builder,
+      listener: listener,
+    );
   }
 
   void listener(BuildContext context, ProductScreenState state) {}
@@ -57,7 +60,8 @@ class _ProductScreenState extends State<ProductScreen> {
         child: RefreshIndicator(
           onRefresh: () async {
             _bloc.add(
-                ProductScreenGetProductCategoryEvent(offSet: 0, refresh: true));
+              ProductScreenGetProductCategoryEvent(offSet: 0, refresh: true),
+            );
           },
           child: ListView.builder(
             shrinkWrap: true,
@@ -84,7 +88,9 @@ class _ProductScreenState extends State<ProductScreen> {
 
     return Container(
       margin: const EdgeInsets.symmetric(
-          horizontal: paddingHorizontal, vertical: paddingVertical),
+        horizontal: paddingHorizontal,
+        vertical: paddingVertical,
+      ),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: const BorderRadius.all(Radius.circular(10.0)),
@@ -115,7 +121,7 @@ class _ProductScreenState extends State<ProductScreen> {
                 return _itemProduct(productInfo);
               },
             ),
-          )
+          ),
         ],
       ),
     );
@@ -124,8 +130,11 @@ class _ProductScreenState extends State<ProductScreen> {
   Widget _itemProduct(ProductModel productInfo) {
     return GestureDetector(
       onTap: () {
-        Navigator.pushNamed(context, Routes.productDetail,
-            arguments: productInfo);
+        Navigator.pushNamed(
+          context,
+          Routes.productDetail,
+          arguments: productInfo,
+        );
       },
       child: Card(
         elevation: 2,
@@ -135,20 +144,23 @@ class _ProductScreenState extends State<ProductScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               ImageUtil.loadNetWorkImage(
-                  url: productInfo.images!.isNotEmpty &&
-                          productInfo.images![0].link != null
-                      ? "$protocol${AppConfig.instance.values.apiUrl}${productInfo.images![0].link!}"
-                      : "",
-                  height: context.width / 3,
-                  width: double.infinity),
+                url:
+                    productInfo.images!.isNotEmpty &&
+                        productInfo.images![0].link != null
+                    ? "$protocol${AppConfig.instance.values.apiUrl}${productInfo.images![0].link!}"
+                    : "",
+                height: context.width / 3,
+                width: double.infinity,
+              ),
               const SizedBox(height: 8),
               Text(
                 productInfo.name ?? "",
                 maxLines: 2,
                 style: const TextStyle(
-                    overflow: TextOverflow.ellipsis,
-                    fontSize: 13,
-                    color: ColorUtil.bangladeshGreen),
+                  overflow: TextOverflow.ellipsis,
+                  fontSize: 13,
+                  color: ColorUtil.bangladeshGreen,
+                ),
               ),
               const SizedBox(height: 5),
               // Row(

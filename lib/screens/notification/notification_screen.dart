@@ -39,7 +39,9 @@ class _NotificationScreenState extends State<NotificationScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<NotificationScreenBloc, NotificationScreenState>(
-        builder: _builder, listener: _listener);
+      builder: _builder,
+      listener: _listener,
+    );
   }
 
   void _listener(BuildContext context, NotificationScreenState state) {}
@@ -64,18 +66,18 @@ class _NotificationScreenState extends State<NotificationScreen> {
   }
 
   Widget _buildSeparated(BuildContext context, int index) {
-    return const Divider(
-      color: Colors.grey,
-      height: 24,
-    );
+    return const Divider(color: Colors.grey, height: 24);
   }
 
   Widget _buildItem(BuildContext context, int index) {
     final NotificationResponse item = _bloc.notifications[index];
     return ButtonWidget(
       onTap: () {
-        Navigator.pushNamed(context, Routes.notificationDetailScreen,
-            arguments: item);
+        Navigator.pushNamed(
+          context,
+          Routes.notificationDetailScreen,
+          arguments: item,
+        );
       },
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -83,11 +85,12 @@ class _NotificationScreenState extends State<NotificationScreen> {
           ClipRRect(
             borderRadius: BorderRadius.circular(10.0),
             child: ImageUtil.loadNetWorkImage(
-                url: item.image != null
-                    ? '$protocol${AppConfig.instance.values.apiUrl}${item.image}'
-                    : "",
-                height: 80,
-                width: 120),
+              url: item.image != null
+                  ? '$protocol${AppConfig.instance.values.apiUrl}${item.image}'
+                  : "",
+              height: 80,
+              width: 120,
+            ),
           ),
           const SizedBox(width: 10),
           Expanded(
@@ -100,14 +103,15 @@ class _NotificationScreenState extends State<NotificationScreen> {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                      color: ColorUtil.bangladeshGreen),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    color: ColorUtil.bangladeshGreen,
+                  ),
                 ),
                 Html(data: item.shortdes ?? ''),
               ],
             ),
-          )
+          ),
         ],
       ),
     );

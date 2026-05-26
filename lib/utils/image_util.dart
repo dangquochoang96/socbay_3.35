@@ -4,12 +4,13 @@ import 'package:flutter_svg/svg.dart';
 import '../constants/assets_path.dart';
 
 class ImageUtil {
-  static Widget loadNetWorkImage(
-      {required String url,
-      BoxFit fit = BoxFit.cover,
-      required double height,
-      double? width,
-      String placeHolder = AssetsPath.imgPlaceholder}) {
+  static Widget loadNetWorkImage({
+    required String url,
+    BoxFit fit = BoxFit.cover,
+    required double height,
+    double? width,
+    String placeHolder = AssetsPath.imgPlaceholder,
+  }) {
     Widget placeholder;
     if (placeHolder.endsWith('.svg')) {
       placeholder = SvgPicture.asset(
@@ -92,7 +93,6 @@ class ImageUtil {
       );
     }
   }
-
 }
 
 String assetImg(String fileName) {

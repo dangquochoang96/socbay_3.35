@@ -30,7 +30,6 @@ class _TaskWaitState extends State<TaskWaitTab> {
   int _page = 0;
   UserProfile? _favouriteStaff;
 
-
   @override
   void initState() {
     super.initState();
@@ -41,9 +40,10 @@ class _TaskWaitState extends State<TaskWaitTab> {
     _scrollController.addListener(() {
       scrollPaginationListener(
         scrollController: _scrollController,
-        condition: (_scrollController.hasClients &&
-            _scrollController.position.pixels ==
-                _scrollController.position.maxScrollExtent) ||
+        condition:
+            (_scrollController.hasClients &&
+                _scrollController.position.pixels ==
+                    _scrollController.position.maxScrollExtent) ||
             _bloc.isLoading,
         paginationFunction: () {
           _page++;
@@ -54,30 +54,35 @@ class _TaskWaitState extends State<TaskWaitTab> {
   }
 
   @override
-  void dispose(){
+  void dispose() {
     _scrollController.dispose();
     _feedbackController.dispose();
-    _page =0;
+    _page = 0;
     _bloc.listTaskModel.clear();
     _bloc.close();
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<TaskScreenBloc, TaskScreenState>(
-        builder: _builder, listener: _listener);
+      builder: _builder,
+      listener: _listener,
+    );
   }
 
   void _listener(BuildContext context, state) {
-    if(state is BookingDeleteSuccessState){
+    if (state is BookingDeleteSuccessState) {
       context.showSnackBar("Hủy thành công!");
-      _bloc.add(const StaffTaskScreenGetTaskAssigedEvent(
-          isRefresh: true, page: 0));
+      _bloc.add(
+        const StaffTaskScreenGetTaskAssigedEvent(isRefresh: true, page: 0),
+      );
     }
-    if(state is BookingDeleteErrorState){
+    if (state is BookingDeleteErrorState) {
       context.showSnackBar("Hủy thắt bại!");
     }
   }
+
   List<TaskModel> taskList = [
     TaskModel(
       id: 1,
@@ -97,10 +102,9 @@ class _TaskWaitState extends State<TaskWaitTab> {
       isLoading: _bloc.isLoading,
       child: RefreshIndicator(
         onRefresh: () async {
-          _bloc.add(const StaffTaskScreenGetTaskAssigedEvent(
-            isRefresh: true,
-            page: 0,
-          ));
+          _bloc.add(
+            const StaffTaskScreenGetTaskAssigedEvent(isRefresh: true, page: 0),
+          );
         },
         child: ListView.separated(
           controller: _scrollController,
@@ -179,7 +183,8 @@ class _TaskWaitState extends State<TaskWaitTab> {
           child: ElevatedButton(
             onPressed: () {
               if (!isProcessing) {
-                _showInputDialog(context, () {setState(() {
+                _showInputDialog(context, () {
+                  setState(() {
                     isProcessing = true;
                   });
                 });
@@ -199,7 +204,9 @@ class _TaskWaitState extends State<TaskWaitTab> {
   }
 
   void _showInputDialog(BuildContext context, Function() onConfirm) {
-    TextEditingController usernameController = TextEditingController(text: _favouriteStaff?.username);
+    TextEditingController usernameController = TextEditingController(
+      text: _favouriteStaff?.username,
+    );
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -208,7 +215,9 @@ class _TaskWaitState extends State<TaskWaitTab> {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              _buildField('', 'Chọn KTV',
+              _buildField(
+                '',
+                'Chọn KTV',
                 Icons.person_outlined,
                 null,
                 value: _favouriteStaff?.username ?? "",
@@ -242,14 +251,15 @@ class _TaskWaitState extends State<TaskWaitTab> {
       },
     );
   }
+
   Widget _buildField(
-      String titleTextField,
-      String hint,
-      IconData iconPrefix,
-      IconData? iconSuffix, {
-        required String value,
-        required void Function() onTap,
-      }) {
+    String titleTextField,
+    String hint,
+    IconData iconPrefix,
+    IconData? iconSuffix, {
+    required String value,
+    required void Function() onTap,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -260,9 +270,7 @@ class _TaskWaitState extends State<TaskWaitTab> {
             style: const TextStyle(color: ColorUtil.raisinBlack, fontSize: 15),
           ),
         ),
-        const SizedBox(
-          height: 5,
-        ),
+        const SizedBox(height: 5),
         GestureDetector(
           onTap: onTap,
           child: Container(
@@ -277,19 +285,16 @@ class _TaskWaitState extends State<TaskWaitTab> {
               children: [
                 Padding(
                   padding: const EdgeInsets.only(left: 10.0),
-                  child: Icon(
-                    iconPrefix,
-                    color: ColorUtil.spanishGray,
-                  ),
+                  child: Icon(iconPrefix, color: ColorUtil.spanishGray),
                 ),
-                const SizedBox(
-                  width: 10,
-                ),
+                const SizedBox(width: 10),
                 Expanded(
                   child: Text(
                     value.isEmpty ? hint : value,
                     style: TextStyle(
-                      color: value.isEmpty ? ColorUtil.silverChalice : ColorUtil.raisinBlack,
+                      color: value.isEmpty
+                          ? ColorUtil.silverChalice
+                          : ColorUtil.raisinBlack,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -297,40 +302,39 @@ class _TaskWaitState extends State<TaskWaitTab> {
                 ),
                 Padding(
                   padding: const EdgeInsets.only(right: 8.0),
-                  child: Icon(
-                    iconSuffix,
-                    color: ColorUtil.spanishGray,
-                  ),
+                  child: Icon(iconSuffix, color: ColorUtil.spanishGray),
                 ),
               ],
             ),
           ),
         ),
-        const SizedBox(
-          height: 10,
-        ),
+        const SizedBox(height: 10),
       ],
     );
-
   }
+
   Future<UserProfile?> _onChooseFavouriteStaff() async {
-    Navigator.of(context).push(MaterialPageRoute(
-      builder: (context) => TechniqueScreen(
-        initialTabIndex: 1,
-        favoriteStaff: _favouriteStaff,
-      ),
-    )).then((value) {
-      Map<String, dynamic>? result = {};
-      result = value as Map<String, dynamic>?;
-      if (result != null) {
-        setState(() {
-          _favouriteStaff = result!['favouriteStaff'];
+    Navigator.of(context)
+        .push(
+          MaterialPageRoute(
+            builder: (context) => TechniqueScreen(
+              initialTabIndex: 1,
+              favoriteStaff: _favouriteStaff,
+            ),
+          ),
+        )
+        .then((value) {
+          Map<String, dynamic>? result = {};
+          result = value as Map<String, dynamic>?;
+          if (result != null) {
+            setState(() {
+              _favouriteStaff = result!['favouriteStaff'];
+            });
+          }
         });
-      }
-    });
     return null;
   }
-  
+
   TableRow _buildTableRow({
     required String title,
     required String? content,
@@ -341,19 +345,25 @@ class _TaskWaitState extends State<TaskWaitTab> {
         Text(
           title,
           style: const TextStyle(
-              color: ColorUtil.raisinBlack, fontWeight: FontWeight.bold),
+            color: ColorUtil.raisinBlack,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         Text(
           "$content",
           style: TextStyle(
-              color: isHighlight ? ColorUtil.bangladeshGreen : Colors.black),
+            color: isHighlight ? ColorUtil.bangladeshGreen : Colors.black,
+          ),
         ),
       ],
     );
   }
 
   void _detailTask(TaskModel taskModel) {
-    Navigator.pushNamed(context, Routes.detailBookingScreen,
-        arguments: {'id': taskModel.id});
+    Navigator.pushNamed(
+      context,
+      Routes.detailBookingScreen,
+      arguments: {'id': taskModel.id},
+    );
   }
 }

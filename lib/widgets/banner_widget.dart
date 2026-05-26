@@ -22,21 +22,27 @@ class _SliderWidget extends State<BannerSliderWidget> {
     return Visibility(
       visible: widget.banners.length > 1,
       replacement: ImageUtil.loadNetWorkImage(
-          url: widget.banners[0].image ?? '',
-          width: width,
-          height: 200,
-          fit: BoxFit.cover),
+        url: widget.banners[0].image ?? '',
+        width: width,
+        height: 200,
+        fit: BoxFit.cover,
+      ),
       child: CarouselSlider(
         options: CarouselOptions(
-            height: 200.0,
-            autoPlay: true,
-            initialPage: 0,
-            viewportFraction: 1.0,
-            enlargeCenterPage: false,
-            autoPlayAnimationDuration: const Duration(microseconds: 500)),
+          height: 200.0,
+          autoPlay: true,
+          initialPage: 0,
+          viewportFraction: 1.0,
+          enlargeCenterPage: false,
+          autoPlayAnimationDuration: const Duration(microseconds: 500),
+        ),
         items: widget.banners.map((i) {
           return ImageUtil.loadNetWorkImage(
-              url: i.image ?? '', width: width, height: 150, fit: BoxFit.cover);
+            url: i.image ?? '',
+            width: width,
+            height: 150,
+            fit: BoxFit.cover,
+          );
         }).toList(),
       ),
     );

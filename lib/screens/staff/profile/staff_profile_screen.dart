@@ -54,7 +54,9 @@ class _StaffProfileScreenState extends State<StaffProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<StaffInfoScreenBloc, StaffInfoScreenState>(
-        builder: _builder, listener: _listener);
+      builder: _builder,
+      listener: _listener,
+    );
   }
 
   void _listener(BuildContext context, StaffInfoScreenState state) {
@@ -86,7 +88,7 @@ class _StaffProfileScreenState extends State<StaffProfileScreen> {
         context,
         title: "Thông báo",
         content:
-        "Yêu cầu của bạn đã được tiếp nhận kỹ thuật viên sẽ liên hệ với bạn ngay",
+            "Yêu cầu của bạn đã được tiếp nhận kỹ thuật viên sẽ liên hệ với bạn ngay",
         leftText: "OK",
         isLeftPositive: true,
         backListener: () {},
@@ -106,7 +108,7 @@ class _StaffProfileScreenState extends State<StaffProfileScreen> {
         context,
         title: "Thông báo",
         content:
-        "Rất tiếc kỹ thuật viên không thể nhận được yêu cầu dịch vụ của bạn ngay lúc này. Vui lòng lựa chọn kỹ thuật viên khác",
+            "Rất tiếc kỹ thuật viên không thể nhận được yêu cầu dịch vụ của bạn ngay lúc này. Vui lòng lựa chọn kỹ thuật viên khác",
         leftText: "OK",
         isLeftPositive: true,
         backListener: () {},
@@ -131,7 +133,9 @@ class _StaffProfileScreenState extends State<StaffProfileScreen> {
       body: Center(
         child: ListView(
           padding: const EdgeInsets.symmetric(
-              horizontal: paddingHorizontal, vertical: paddingVertical),
+            horizontal: paddingHorizontal,
+            vertical: paddingVertical,
+          ),
           children: [
             Row(
               children: [
@@ -152,17 +156,19 @@ class _StaffProfileScreenState extends State<StaffProfileScreen> {
                     Text(
                       '${staffInfo.username}',
                       style: const TextStyle(
-                          color: ColorUtil.bangladeshGreen,
-                          fontSize: 20,
-                          fontWeight: MyFontWeight.extraBold),
+                        color: ColorUtil.bangladeshGreen,
+                        fontSize: 20,
+                        fontWeight: MyFontWeight.extraBold,
+                      ),
                     ),
                     Text(
                       '${staffInfo.phone}',
                       style: const TextStyle(
-                          color: ColorUtil.raisinBlack,
-                          fontWeight: MyFontWeight.ultraBold,
-                          decoration: TextDecoration.underline),
-                    )
+                        color: ColorUtil.raisinBlack,
+                        fontWeight: MyFontWeight.ultraBold,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
                   ],
                 ),
               ],
@@ -171,89 +177,99 @@ class _StaffProfileScreenState extends State<StaffProfileScreen> {
             const Text(
               'Thông tin kỹ thuật',
               style: TextStyle(
-                  color: ColorUtil.raisinBlack,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold),
+                color: ColorUtil.raisinBlack,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             const SizedBox(height: 5),
             Row(
               children: [
                 ImageUtil.loadAssetsImage(
-                    fileName: staffInfo.phone!.isNotEmpty
-                        ? Images.iconCheck
-                        : Images.iconCancel,
-                    width: 16,
-                    height: 16),
+                  fileName: staffInfo.phone!.isNotEmpty
+                      ? Images.iconCheck
+                      : Images.iconCancel,
+                  width: 16,
+                  height: 16,
+                ),
                 const SizedBox(width: 4),
-                const Text('Đã xác minh số điện thoại')
+                const Text('Đã xác minh số điện thoại'),
               ],
             ),
             const SizedBox(height: 5),
             Row(
               children: [
                 ImageUtil.loadAssetsImage(
-                    fileName: staffInfo.cmt != null
-                        ? Images.iconCheck
-                        : Images.iconCancel,
-                    width: 16,
-                    height: 16),
+                  fileName: staffInfo.cmt != null
+                      ? Images.iconCheck
+                      : Images.iconCancel,
+                  width: 16,
+                  height: 16,
+                ),
                 const SizedBox(width: 4),
-                const Text('Đã xác minh chứng minh thư')
+                const Text('Đã xác minh chứng minh thư'),
               ],
             ),
             const SizedBox(height: 10),
             const Text(
               'Dịch vụ cung cấp',
               style: TextStyle(
-                  color: ColorUtil.raisinBlack,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold),
+                color: ColorUtil.raisinBlack,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             const SizedBox(height: 5),
             _services.isNotEmpty
                 ? Wrap(
-              children: _services
-                  .map((service) =>
-                  Container(
-                    margin: const EdgeInsets.only(left: 3.0),
-                    child: TextButton(
-                        onPressed: () {},
-                        style: OutlinedButton.styleFrom(
-                          //<-- SEE HERE
-                            side: const BorderSide(
-                                width: 1.0, color: ColorUtil.bangladeshGreen),
-                            padding: const EdgeInsets.all(10.0)
-                        ),
-                        child: Text(service)
-                    ),)
-              )
-                  .toList(),
-            )
+                    children: _services
+                        .map(
+                          (service) => Container(
+                            margin: const EdgeInsets.only(left: 3.0),
+                            child: TextButton(
+                              onPressed: () {},
+                              style: OutlinedButton.styleFrom(
+                                //<-- SEE HERE
+                                side: const BorderSide(
+                                  width: 1.0,
+                                  color: ColorUtil.bangladeshGreen,
+                                ),
+                                padding: const EdgeInsets.all(10.0),
+                              ),
+                              child: Text(service),
+                            ),
+                          ),
+                        )
+                        .toList(),
+                  )
                 : const Text(
-              'Trống!',
-              style: TextStyle(
-                  color: ColorUtil.bangladeshGreen,
-                  fontWeight: FontWeight.bold),
-            ),
+                    'Trống!',
+                    style: TextStyle(
+                      color: ColorUtil.bangladeshGreen,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
             const SizedBox(height: 10),
             const Text(
               'Khu vực',
               style: TextStyle(
-                  color: ColorUtil.raisinBlack,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold),
+                color: ColorUtil.raisinBlack,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             const SizedBox(height: 5),
             Text(
               _localte,
               style: const TextStyle(
-                  color: ColorUtil.bangladeshGreen,
-                  fontWeight: FontWeight.bold),
+                color: ColorUtil.bangladeshGreen,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             const SizedBox(height: 10),
           ],
         ),
-      )
+      ),
     );
   }
 
@@ -272,33 +288,35 @@ class _StaffProfileScreenState extends State<StaffProfileScreen> {
         child: Stack(
           children: [
             ClipRRect(
-                borderRadius: BorderRadius.circular(140),
-                child: staffInfo.avatar != null
-                    ? Image.network(
-                    "$protocol${AppConfig.instance.values.apiUrl}${staffInfo.avatar!}",
-                    height: 160, width: 160, fit: BoxFit.cover)
-                    : ImageUtil.loadAssetsImage(
-                    fileName: Images.iconAdvise,
-                    width: 160,
-                    height: 160)),
+              borderRadius: BorderRadius.circular(140),
+              child: staffInfo.avatar != null
+                  ? Image.network(
+                      "$protocol${AppConfig.instance.values.apiUrl}${staffInfo.avatar!}",
+                      height: 160,
+                      width: 160,
+                      fit: BoxFit.cover,
+                    )
+                  : ImageUtil.loadAssetsImage(
+                      fileName: Images.iconAdvise,
+                      width: 160,
+                      height: 160,
+                    ),
+            ),
             Positioned(
-                bottom: 16,
-                right: 16,
-                child: GestureDetector(
-                  child: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.grey,
-                      borderRadius: BorderRadius.circular(60),
-                    ),
-                    child: const Icon(
-                      Icons.edit,
-                      color: Colors.white,
-                      size: 25,
-                    ),
+              bottom: 16,
+              right: 16,
+              child: GestureDetector(
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.grey,
+                    borderRadius: BorderRadius.circular(60),
                   ),
-                  onTap: () {},
-                ))
+                  child: const Icon(Icons.edit, color: Colors.white, size: 25),
+                ),
+                onTap: () {},
+              ),
+            ),
           ],
         ),
       ),
@@ -307,7 +325,10 @@ class _StaffProfileScreenState extends State<StaffProfileScreen> {
 
   void _onEditAvatar() async {
     File? file = await onGetPhotoFromGallery(
-        context: context, funcPermission: () {}, picker: _picker);
+      context: context,
+      funcPermission: () {},
+      picker: _picker,
+    );
     if (file != null) {
       setState(() {
         // _bloc.add(UploadImageEvent(file));
@@ -322,7 +343,7 @@ class _StaffProfileScreenState extends State<StaffProfileScreen> {
         context,
         title: "Thông báo",
         content:
-        "Rất tiếc kỹ thuật viên không thể nhận được yêu cầu dịch vụ của bạn ngay lúc này. Vui lòng lựa chọn kỹ thuật viên khác",
+            "Rất tiếc kỹ thuật viên không thể nhận được yêu cầu dịch vụ của bạn ngay lúc này. Vui lòng lựa chọn kỹ thuật viên khác",
         leftText: "OK",
         isLeftPositive: true,
         backListener: () {},
@@ -344,7 +365,10 @@ class _StaffProfileScreenState extends State<StaffProfileScreen> {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(16),
           child: ImageUtil.loadNetWorkImage(
-              url: img, height: 100, fit: BoxFit.contain),
+            url: img,
+            height: 100,
+            fit: BoxFit.contain,
+          ),
           //fit: BoxFit.cover,
         ),
       ),

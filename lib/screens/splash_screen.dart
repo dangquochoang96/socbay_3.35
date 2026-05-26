@@ -35,7 +35,9 @@ class _SplashState extends State<SplashScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   ImageUtil.loadAssetsImage(
-                      fileName: Images.iconApp, width: context.width / 1.7),
+                    fileName: Images.iconApp,
+                    width: context.width / 1.7,
+                  ),
                 ],
               ),
             ],

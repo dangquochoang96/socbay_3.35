@@ -73,7 +73,9 @@ class _EditRentServiceScreenState extends State<EditRentServiceScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<EditRentServiceBloc, EditServiceState>(
-        builder: _builder, listener: _listener);
+      builder: _builder,
+      listener: _listener,
+    );
   }
 
   void _listener(BuildContext context, EditServiceState state) {
@@ -81,8 +83,10 @@ class _EditRentServiceScreenState extends State<EditRentServiceScreen> {
       _currentSelectedValue = _bloc.taskModel?.type;
       if (_bloc.taskModel?.timeStar != null) {
         _parsedDate = DateTime.parse(_bloc.taskModel!.timeStar!);
-        _dateStart = "${_parsedDate.day}/${_parsedDate.month}/${_parsedDate.year}";
-        _timeStart = "${_parsedDate.hour.toString().padLeft(2, "0")}:${_parsedDate.minute.toString().padLeft(2, "0")}";
+        _dateStart =
+            "${_parsedDate.day}/${_parsedDate.month}/${_parsedDate.year}";
+        _timeStart =
+            "${_parsedDate.hour.toString().padLeft(2, "0")}:${_parsedDate.minute.toString().padLeft(2, "0")}";
       }
       _favouriteStaff = _bloc.taskModel?.staff;
       _listPath = _bloc.taskModel?.images ?? [];
@@ -107,112 +111,124 @@ class _EditRentServiceScreenState extends State<EditRentServiceScreen> {
 
   Widget _builder(BuildContext context, EditServiceState state) {
     return Scaffold(
-        appBar: MyAppBar(
-          isBackNavigation: true,
-          title: 'Sửa thông tin',
-          centerTitle: true,
-        ),
-        body: LoadingIndicator(
-          isLoading: _bloc.isLoading,
-          child: SafeArea(
-            child: Scaffold(
-              body: ListView(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: paddingHorizontal, vertical: paddingVertical),
-                children: [
-                  RichText(
-                    text: TextSpan(
-                      children: [
-                        const TextSpan(
-                            text: "SĐT Khách hàng: ",
-                            style: TextStyle(
-                                color: ColorUtil.raisinBlack, fontSize: 15)),
-                        TextSpan(
-                            text: _bloc.taskModel?.customer?.phone ?? "",
-                            style: const TextStyle(
-                                fontSize: 16,
-                                color: Colors.red,
-                                fontWeight: FontWeight.w600))
-                      ],
-                    ),
+      appBar: MyAppBar(
+        isBackNavigation: true,
+        title: 'Sửa thông tin',
+        centerTitle: true,
+      ),
+      body: LoadingIndicator(
+        isLoading: _bloc.isLoading,
+        child: SafeArea(
+          child: Scaffold(
+            body: ListView(
+              padding: const EdgeInsets.symmetric(
+                horizontal: paddingHorizontal,
+                vertical: paddingVertical,
+              ),
+              children: [
+                RichText(
+                  text: TextSpan(
+                    children: [
+                      const TextSpan(
+                        text: "SĐT Khách hàng: ",
+                        style: TextStyle(
+                          color: ColorUtil.raisinBlack,
+                          fontSize: 15,
+                        ),
+                      ),
+                      TextSpan(
+                        text: _bloc.taskModel?.customer?.phone ?? "",
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: Colors.red,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(
-                    height: 8,
+                ),
+                const SizedBox(height: 8),
+                RichText(
+                  text: TextSpan(
+                    children: [
+                      const TextSpan(
+                        text: "Tên máy: ",
+                        style: TextStyle(
+                          color: ColorUtil.raisinBlack,
+                          fontSize: 15,
+                        ),
+                      ),
+                      TextSpan(
+                        text:
+                            _bloc.taskModel?.productInfo?.machineModel?.name ??
+                            "",
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: Color.fromARGB(255, 7, 7, 7),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
                   ),
-                  RichText(
-                    text: TextSpan(
-                      children: [
-                        const TextSpan(
-                            text: "Tên máy: ",
-                            style: TextStyle(
-                                color: ColorUtil.raisinBlack, fontSize: 15)),
-                        TextSpan(
-                            text: _bloc.taskModel?.productInfo?.machineModel
-                                    ?.name ??
-                                "",
-                            style: const TextStyle(
-                                fontSize: 16,
-                                color: Color.fromARGB(255, 7, 7, 7),
-                                fontWeight: FontWeight.w600))
-                      ],
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 8,
-                  ),
-                  _buildDropdownField(),
-                  const SizedBox(
-                    height: 8,
-                  ),
-                  _buildFormDoubleHorizontal(
-                      'Hẹn lịch', Icons.calendar_today, Icons.av_timer_sharp,
-                      firstValue: _dateStart ?? "",
-                      secondValue: _timeStart ?? "",
-                      onTapFirst: _onTapDateStart,
-                      onTapSecond: _onTapTimeStart),
-                  const SizedBox(
-                    height: 8,
-                  ),
-                  _buildField('', 'Thợ ưa thích', Icons.person_outlined, null,
-                      value: _favouriteStaff?.username ?? "", onTap: () {
+                ),
+                const SizedBox(height: 8),
+                _buildDropdownField(),
+                const SizedBox(height: 8),
+                _buildFormDoubleHorizontal(
+                  'Hẹn lịch',
+                  Icons.calendar_today,
+                  Icons.av_timer_sharp,
+                  firstValue: _dateStart ?? "",
+                  secondValue: _timeStart ?? "",
+                  onTapFirst: _onTapDateStart,
+                  onTapSecond: _onTapTimeStart,
+                ),
+                const SizedBox(height: 8),
+                _buildField(
+                  '',
+                  'Thợ ưa thích',
+                  Icons.person_outlined,
+                  null,
+                  value: _favouriteStaff?.username ?? "",
+                  onTap: () {
                     setState(() {
                       desDraft = describeRequestTxtController.text;
                     });
                     _onChooseFavouriteStaff();
-                  }),
-                  const SizedBox(
-                    height: 8,
-                  ),
-                  _buildFormDescribe(
-                      'Mô tả yêu cầu',
-                      describeRequestTxtController..text = desDraft ?? "",
-                      Icons.description_outlined,
-                      null),
-                  const SizedBox(
-                    height: 8,
-                  ),
-                  _buildSectionMedia(),
-                  const SizedBox(
-                    height: 8,
-                  ),
-                  Row(
-                    children: [
-                      Expanded(
-                          child: Padding(
+                  },
+                ),
+                const SizedBox(height: 8),
+                _buildFormDescribe(
+                  'Mô tả yêu cầu',
+                  describeRequestTxtController..text = desDraft ?? "",
+                  Icons.description_outlined,
+                  null,
+                ),
+                const SizedBox(height: 8),
+                _buildSectionMedia(),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Padding(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 8.0, vertical: 16.0),
+                          horizontal: 8.0,
+                          vertical: 16.0,
+                        ),
                         child: DefaultButton(
                           onPressed: _onEditDone,
                           text: "LƯU",
                         ),
-                      )),
-                    ],
-                  )
-                ],
-              ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
-        ));
+        ),
+      ),
+    );
   }
 
   void _onEditDone() {
@@ -222,20 +238,25 @@ class _EditRentServiceScreenState extends State<EditRentServiceScreen> {
         serviceName = i.name;
       }
     }
-    _bloc.add(EditServiceUpdateTaskEvent(UpdateTaskRequest(
-        type: int.parse(_currentSelectedValue ?? "1"),
-        name: serviceName,
-        des: describeRequestTxtController.text,
-        status: _favouriteStaff?.id == null ? 1 : 5,
-        priority: int.parse(_bloc.taskModel?.priority ?? "1"),
-        serviceId: int.parse(_currentSelectedValue ?? "1"),
-        timeStart: '$_dateStart $_timeStart',
-        timeEnd: "",
-        staffId: _favouriteStaff?.id,
-        saleId: 1,
-        customerId: App.instance.userApp?.id,
-        orderId: 1,
-        images: _listPath)));
+    _bloc.add(
+      EditServiceUpdateTaskEvent(
+        UpdateTaskRequest(
+          type: int.parse(_currentSelectedValue ?? "1"),
+          name: serviceName,
+          des: describeRequestTxtController.text,
+          status: _favouriteStaff?.id == null ? 1 : 5,
+          priority: int.parse(_bloc.taskModel?.priority ?? "1"),
+          serviceId: int.parse(_currentSelectedValue ?? "1"),
+          timeStart: '$_dateStart $_timeStart',
+          timeEnd: "",
+          staffId: _favouriteStaff?.id,
+          saleId: 1,
+          customerId: App.instance.userApp?.id,
+          orderId: 1,
+          images: _listPath,
+        ),
+      ),
+    );
   }
 
   Widget _buildDropdownField() {
@@ -243,20 +264,27 @@ class _EditRentServiceScreenState extends State<EditRentServiceScreen> {
       builder: (FormFieldState<String> state) {
         return InputDecorator(
           decoration: InputDecoration(
-              errorStyle:
-                  const TextStyle(color: Colors.redAccent, fontSize: 16.0),
-              hintText: 'Please select expense',
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8.0),
-                borderSide: const BorderSide(
-                    color: ColorUtil.bangladeshGreen, width: 0.5),
+            errorStyle: const TextStyle(
+              color: Colors.redAccent,
+              fontSize: 16.0,
+            ),
+            hintText: 'Please select expense',
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8.0),
+              borderSide: const BorderSide(
+                color: ColorUtil.bangladeshGreen,
+                width: 0.5,
               ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8.0),
-                borderSide: const BorderSide(
-                    color: ColorUtil.bangladeshGreen, width: 0.5),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8.0),
+              borderSide: const BorderSide(
+                color: ColorUtil.bangladeshGreen,
+                width: 0.5,
               ),
-              prefixIcon: const Icon(Icons.account_box_outlined)),
+            ),
+            prefixIcon: const Icon(Icons.account_box_outlined),
+          ),
           isEmpty: _currentSelectedValue == null,
           child: DropdownButtonHideUnderline(
             child: DropdownButton<String>(
@@ -282,21 +310,23 @@ class _EditRentServiceScreenState extends State<EditRentServiceScreen> {
 
   void _onChooseFavouriteStaff() {
     Navigator.of(context)
-        .push(MaterialPageRoute(
-      builder: (context) => TechniqueScreen(
-        initialTabIndex: 1,
-        favoriteStaff: _favouriteStaff,
-      ),
-    ))
+        .push(
+          MaterialPageRoute(
+            builder: (context) => TechniqueScreen(
+              initialTabIndex: 1,
+              favoriteStaff: _favouriteStaff,
+            ),
+          ),
+        )
         .then((value) {
-      Map<String, dynamic>? result = {};
-      result = value as Map<String, dynamic>?;
-      if (result != null) {
-        setState(() {
-          _favouriteStaff = result!['favouriteStaff'];
+          Map<String, dynamic>? result = {};
+          result = value as Map<String, dynamic>?;
+          if (result != null) {
+            setState(() {
+              _favouriteStaff = result!['favouriteStaff'];
+            });
+          }
         });
-      }
-    });
   }
 
   Widget _buildFormDoubleHorizontal(
@@ -315,83 +345,92 @@ class _EditRentServiceScreenState extends State<EditRentServiceScreen> {
           titleTextField,
           style: const TextStyle(color: ColorUtil.raisinBlack, fontSize: 15),
         ),
-        const SizedBox(
-          height: 5,
-        ),
-        Row(children: [
-          Expanded(
+        const SizedBox(height: 5),
+        Row(
+          children: [
+            Expanded(
               flex: 2,
               child: Container(
                 height: 40,
                 decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8.0),
-                    border: Border.all(
-                        color: ColorUtil.bangladeshGreen, width: 0.5)),
+                  borderRadius: BorderRadius.circular(8.0),
+                  border: Border.all(
+                    color: ColorUtil.bangladeshGreen,
+                    width: 0.5,
+                  ),
+                ),
                 child: GestureDetector(
-                    onTap: onTapFirst,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(left: 10.0),
-                          child: Icon(
-                            iconPrefixFirst,
-                            color: ColorUtil.spanishGray,
+                  onTap: onTapFirst,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(left: 10.0),
+                        child: Icon(
+                          iconPrefixFirst,
+                          color: ColorUtil.spanishGray,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Flexible(
+                        child: Text(
+                          firstValue.isEmpty ? 'dd/MM/yyyy' : firstValue,
+                          style: TextStyle(
+                            color: firstValue.isEmpty
+                                ? ColorUtil.silverChalice
+                                : ColorUtil.raisinBlack,
                           ),
                         ),
-                        const SizedBox(
-                          width: 10,
-                        ),
-                        Flexible(
-                            child: Text(
-                                firstValue.isEmpty ? 'dd/MM/yyyy' : firstValue,
-                                style: TextStyle(
-                                    color: firstValue.isEmpty
-                                        ? ColorUtil.silverChalice
-                                        : ColorUtil.raisinBlack)))
-                      ],
-                    )),
-              )),
-          const SizedBox(
-            width: 5,
-          ),
-          Expanded(
-            flex: 1,
-            child: Container(
-              height: 40,
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8.0),
-                  border:
-                      Border.all(color: ColorUtil.bangladeshGreen, width: 0.5)),
-              child: GestureDetector(
-                onTap: onTapSecond,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(left: 10.0),
-                      child: Icon(
-                        iconPrefixSecond,
-                        color: ColorUtil.spanishGray,
                       ),
-                    ),
-                    const SizedBox(
-                      width: 10,
-                    ),
-                    Flexible(
-                        child: Text(secondValue.isEmpty ? 'hh:mm' : secondValue,
-                            style: TextStyle(
-                                color: secondValue.isEmpty
-                                    ? ColorUtil.silverChalice
-                                    : ColorUtil.raisinBlack)))
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
-          )
-        ])
+            const SizedBox(width: 5),
+            Expanded(
+              flex: 1,
+              child: Container(
+                height: 40,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8.0),
+                  border: Border.all(
+                    color: ColorUtil.bangladeshGreen,
+                    width: 0.5,
+                  ),
+                ),
+                child: GestureDetector(
+                  onTap: onTapSecond,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(left: 10.0),
+                        child: Icon(
+                          iconPrefixSecond,
+                          color: ColorUtil.spanishGray,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Flexible(
+                        child: Text(
+                          secondValue.isEmpty ? 'hh:mm' : secondValue,
+                          style: TextStyle(
+                            color: secondValue.isEmpty
+                                ? ColorUtil.silverChalice
+                                : ColorUtil.raisinBlack,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ],
     );
   }
@@ -406,11 +445,12 @@ class _EditRentServiceScreenState extends State<EditRentServiceScreen> {
 
   Future<void> _selectDate() async {
     final DateTime? picked = await showDatePicker(
-        context: context,
-        locale: const Locale("vi", "VN"),
-        initialDate: _parsedDate ?? DateTime.now(),
-        firstDate: DateTime.now(),
-        lastDate: DateTime.now().add(const Duration(days: 365)));
+      context: context,
+      locale: const Locale("vi", "VN"),
+      initialDate: _parsedDate ?? DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(const Duration(days: 365)),
+    );
     if (picked != null && picked != selectedDate) {
       selectedDate = picked;
       setState(() {
@@ -451,46 +491,59 @@ class _EditRentServiceScreenState extends State<EditRentServiceScreen> {
         Container(
           padding: const EdgeInsets.only(top: 5),
           child: TextFormField(
-              readOnly: isReadOnly,
-              keyboardType: TextInputType.multiline,
-                  // isNumberType ? TextInputType.phone : TextInputType.text,
-              controller: controller,
-              maxLines: 5,
-              cursorColor: ColorUtil.bangladeshGreen,
-              decoration: InputDecoration(
-                prefixIcon: SizedBox(
-                  width: 20,
-                  height: 100,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8.0, vertical: 5.0),
-                        child: Icon(iconPrefix),
+            readOnly: isReadOnly,
+            keyboardType: TextInputType.multiline,
+            // isNumberType ? TextInputType.phone : TextInputType.text,
+            controller: controller,
+            maxLines: 5,
+            cursorColor: ColorUtil.bangladeshGreen,
+            decoration: InputDecoration(
+              prefixIcon: SizedBox(
+                width: 20,
+                height: 100,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8.0,
+                        vertical: 5.0,
                       ),
-                    ],
-                  ),
+                      child: Icon(iconPrefix),
+                    ),
+                  ],
                 ),
-                suffixIcon: haveSuffixIcon ? Icon(iconSuffix) : null,
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                  borderSide: const BorderSide(
-                      color: ColorUtil.bangladeshGreen, width: 0.5),
+              ),
+              suffixIcon: haveSuffixIcon ? Icon(iconSuffix) : null,
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.0),
+                borderSide: const BorderSide(
+                  color: ColorUtil.bangladeshGreen,
+                  width: 0.5,
                 ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                  borderSide: const BorderSide(
-                      color: ColorUtil.bangladeshGreen, width: 0.5),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.0),
+                borderSide: const BorderSide(
+                  color: ColorUtil.bangladeshGreen,
+                  width: 0.5,
                 ),
-                hintText: placeHolder,
-                hintStyle: const TextStyle(
-                    color: ColorUtil.silverChalice, fontSize: 13),
-                contentPadding:
-                    const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
-                suffixIconConstraints:
-                    const BoxConstraints(minHeight: 20, minWidth: 20),
-              )),
+              ),
+              hintText: placeHolder,
+              hintStyle: const TextStyle(
+                color: ColorUtil.silverChalice,
+                fontSize: 13,
+              ),
+              contentPadding: const EdgeInsets.symmetric(
+                vertical: 5,
+                horizontal: 15,
+              ),
+              suffixIconConstraints: const BoxConstraints(
+                minHeight: 20,
+                minWidth: 20,
+              ),
+            ),
+          ),
         ),
       ],
     );
@@ -508,55 +561,49 @@ class _EditRentServiceScreenState extends State<EditRentServiceScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Visibility(
-            visible: titleTextField == '' ? false : true,
-            child: Text(
-              titleTextField,
-              style:
-                  const TextStyle(color: ColorUtil.raisinBlack, fontSize: 15),
-            )),
-        const SizedBox(
-          height: 5,
+          visible: titleTextField == '' ? false : true,
+          child: Text(
+            titleTextField,
+            style: const TextStyle(color: ColorUtil.raisinBlack, fontSize: 15),
+          ),
         ),
+        const SizedBox(height: 5),
         GestureDetector(
           onTap: onTap,
           child: Container(
-              height: 40,
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8.0),
-                  border:
-                      Border.all(color: ColorUtil.bangladeshGreen, width: 0.5)),
-              child: Row(
-                mainAxisSize: MainAxisSize.max,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(left: 10.0),
-                    child: Icon(
-                      iconPrefix,
-                      color: ColorUtil.spanishGray,
+            height: 40,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8.0),
+              border: Border.all(color: ColorUtil.bangladeshGreen, width: 0.5),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.max,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(left: 10.0),
+                  child: Icon(iconPrefix, color: ColorUtil.spanishGray),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    value.isEmpty ? hint : value,
+                    style: TextStyle(
+                      color: value.isEmpty
+                          ? ColorUtil.silverChalice
+                          : ColorUtil.raisinBlack,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(
-                    width: 10,
-                  ),
-                  Expanded(
-                    child: Text(value.isEmpty ? hint : value,
-                        style: TextStyle(
-                            color: value.isEmpty
-                                ? ColorUtil.silverChalice
-                                : ColorUtil.raisinBlack),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Icon(
-                      iconSuffix,
-                      color: ColorUtil.spanishGray,
-                    ),
-                  ),
-                ],
-              )),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Icon(iconSuffix, color: ColorUtil.spanishGray),
+                ),
+              ],
+            ),
+          ),
         ),
       ],
     );
@@ -565,8 +612,9 @@ class _EditRentServiceScreenState extends State<EditRentServiceScreen> {
   Widget _buildSectionMedia() {
     return Container(
       decoration: BoxDecoration(
-          border: Border.all(color: ColorUtil.bangladeshGreen, width: 0.5),
-          borderRadius: BorderRadius.circular(8.0)),
+        border: Border.all(color: ColorUtil.bangladeshGreen, width: 0.5),
+        borderRadius: BorderRadius.circular(8.0),
+      ),
       padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 5.0),
       child: Column(
         children: [
@@ -574,31 +622,30 @@ class _EditRentServiceScreenState extends State<EditRentServiceScreen> {
             children: const [
               Padding(
                 padding: EdgeInsets.all(8.0),
-                child: Icon(
-                  Icons.upload_file,
-                  color: ColorUtil.spanishGray,
-                ),
+                child: Icon(Icons.upload_file, color: ColorUtil.spanishGray),
               ),
               Flexible(
-                  child: Text(
-                'Up ảnh (tối đa 4 ảnh) và video (tối đa 15s) để kỹ thuật xem xét.',
-                style: TextStyle(color: ColorUtil.spanishGray),
-              ))
+                child: Text(
+                  'Up ảnh (tối đa 4 ảnh) và video (tối đa 15s) để kỹ thuật xem xét.',
+                  style: TextStyle(color: ColorUtil.spanishGray),
+                ),
+              ),
             ],
           ),
           SizedBox(
-              height: 200,
-              width: double.infinity,
-              child: ListView.builder(
-                itemCount: _listPath.length + 1,
-                shrinkWrap: true,
-                scrollDirection: Axis.horizontal,
-                itemBuilder: (BuildContext context, int index) {
-                  return index < _listPath.length
-                      ? _buildItemMedia(_listPath[index])
-                      : _buildDefaultItemMedia();
-                },
-              )),
+            height: 200,
+            width: double.infinity,
+            child: ListView.builder(
+              itemCount: _listPath.length + 1,
+              shrinkWrap: true,
+              scrollDirection: Axis.horizontal,
+              itemBuilder: (BuildContext context, int index) {
+                return index < _listPath.length
+                    ? _buildItemMedia(_listPath[index])
+                    : _buildDefaultItemMedia();
+              },
+            ),
+          ),
         ],
       ),
     );
@@ -627,74 +674,78 @@ class _EditRentServiceScreenState extends State<EditRentServiceScreen> {
             ClipRRect(
               borderRadius: BorderRadius.circular(8.0),
               child: ImageUtil.loadNetWorkImage(
-                  url: "$protocol${AppConfig.instance.values.apiUrl}$path",
-                  width: 120,
-                  height: 200),
+                url: "$protocol${AppConfig.instance.values.apiUrl}$path",
+                width: 120,
+                height: 200,
+              ),
             ),
             Positioned(
-                top: 0,
-                right: 0,
-                child: GestureDetector(
-                  child: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.grey,
-                      borderRadius: BorderRadius.circular(60),
-                    ),
-                    child: const Icon(
-                      Icons.delete,
-                      color: Colors.white,
-                      size: 25,
-                    ),
+              top: 0,
+              right: 0,
+              child: GestureDetector(
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.grey,
+                    borderRadius: BorderRadius.circular(60),
                   ),
-                  onTap: () {
-                    setState(() {
-                      _listPath.remove(path);
-                      desDraft = describeRequestTxtController.text;
-                    });
-                  },
-                ))
+                  child: const Icon(
+                    Icons.delete,
+                    color: Colors.white,
+                    size: 25,
+                  ),
+                ),
+                onTap: () {
+                  setState(() {
+                    _listPath.remove(path);
+                    desDraft = describeRequestTxtController.text;
+                  });
+                },
+              ),
+            ),
           ],
         ),
-        const SizedBox(
-          width: 5.0,
-        ),
+        const SizedBox(width: 5.0),
       ],
     );
   }
 
   void _showModalBottomSheetMedia() {
     showModalBottomSheet(
-        useSafeArea: true,
-        context: context,
-        builder: (BuildContext context) {
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: const Icon(Icons.image),
-                title: const Text('Image'),
-                onTap: _onChooseImages,
-              ),
-              ListTile(
-                leading: const Icon(Icons.photo_camera),
-                title: const Text('Camera'),
-                onTap: () {
-                  getImage(ImageSource.camera);
-                  Navigator.of(context).pop();
-                  // Navigator.pop(context);
-                },
-              )
-            ],
-          );
-        });
+      useSafeArea: true,
+      context: context,
+      builder: (BuildContext context) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.image),
+              title: const Text('Image'),
+              onTap: _onChooseImages,
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_camera),
+              title: const Text('Camera'),
+              onTap: () {
+                getImage(ImageSource.camera);
+                Navigator.of(context).pop();
+                // Navigator.pop(context);
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void _onChooseImages() async {
     Navigator.of(context).pop();
 
     List<File>? files = await onGetMultiPhoto(
-        context: context, funcPermission: () {}, picker: _picker);
+      context: context,
+      funcPermission: () {},
+      picker: _picker,
+    );
     if (files != null && files.isNotEmpty) {
       if (_listPath.length + files.length <= 4) {
         _bloc.add(EditServiceUploadImageEvent(files));
@@ -709,9 +760,7 @@ class _EditRentServiceScreenState extends State<EditRentServiceScreen> {
     // Navigator.of(context).pop();
   }
 
-  Future getImage(
-    ImageSource img,
-  ) async {
+  Future getImage(ImageSource img) async {
     if (await Permission.camera.request().isGranted) {
       if (_listPath.length >= 4) {
         context.showSnackBar('Chỉ được chọn tối đa 4 ảnh!');
@@ -719,8 +768,10 @@ class _EditRentServiceScreenState extends State<EditRentServiceScreen> {
       } else {
         final picker = ImagePicker();
         File? galleryFile;
-        final pickedFile =
-            await picker.pickImage(source: img, imageQuality: 30);
+        final pickedFile = await picker.pickImage(
+          source: img,
+          imageQuality: 30,
+        );
         List<File>? files = [];
         if (pickedFile != null) {
           galleryFile = File(pickedFile.path);
@@ -731,8 +782,10 @@ class _EditRentServiceScreenState extends State<EditRentServiceScreen> {
             _bloc.add(EditServiceUploadImageEvent(files));
           }
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(// is this context <<<
-              const SnackBar(content: Text('Nothing is selected')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            // is this context <<<
+            const SnackBar(content: Text('Nothing is selected')),
+          );
         }
       }
     } else {

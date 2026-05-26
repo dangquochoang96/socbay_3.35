@@ -29,10 +29,12 @@ class StaffServiceScreenUploadImageEvent extends StaffServiceScreenEvent {
 }
 
 class StaffServiceScreenUploadFileEvent extends StaffServiceScreenEvent {}
+
 class StaffServiceScreenCheckCustomerEvent extends StaffServiceScreenEvent {
   final String phone;
   StaffServiceScreenCheckCustomerEvent(this.phone);
 }
+
 class UserAddressScreenCreateUserAddressEvent extends StaffServiceScreenEvent {
   final UserAddressRequest userAddressRequest;
 

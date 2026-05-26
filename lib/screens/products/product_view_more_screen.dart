@@ -31,7 +31,9 @@ class _ProductViewMoreScreenState extends State<ProductViewMoreScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<ProductViewMoreScreenBloc, ProductViewMoreScreenState>(
-        builder: _builder, listener: _listener);
+      builder: _builder,
+      listener: _listener,
+    );
   }
 
   void _listener(BuildContext context, ProductViewMoreScreenState state) {}

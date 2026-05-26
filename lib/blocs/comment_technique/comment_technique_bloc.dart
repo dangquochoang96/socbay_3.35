@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:socbay/config/app_config.dart';
+import 'package:socbay/constants/api_endpoints.dart';
 import 'package:socbay/data/model/order_detail_model.dart';
 import 'package:socbay/data/model/user_profile.dart';
 import 'package:socbay/data/repository/auth/api_repository.dart';
@@ -39,10 +40,7 @@ class CommentTechniqueBloc
   }
 
   Future<void> _getProfile() async {
-    var url = Uri.http(
-      AppConfig.instance.values.apiUrl,
-      "/api/user/${(args["id"])}",
-    );
+    var url = AppConfig.instance.apiUri(ApiEndpoints.userById(args["id"]));
     try {
       var res = await http.get(url);
       if (res.statusCode == HttpStatus.ok) {
@@ -56,11 +54,9 @@ class CommentTechniqueBloc
 
   Future<void> _getRating() async {
     int diem = 0;
-    var url = Uri.http(
-      AppConfig.instance.values.apiUrl,
-      "/api/order/get-list-order-rating-by-staff",
-      {'user_id': args["id"].toString()},
-    );
+    var url = AppConfig.instance.apiUri(ApiEndpoints.listOrderRatingByStaff, {
+      'user_id': args["id"].toString(),
+    });
     try {
       var res = await http.get(url);
       if (res.statusCode == HttpStatus.ok) {

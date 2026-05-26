@@ -33,7 +33,7 @@ class DefaultResponse<T> extends BaseResponse {
       data = json['data'] as T;
     }
     if (json['message'] != null) {
-      message = json['message'] ;
+      message = json['message'];
     }
     // if (json['total'] != null) {
     //   total = Parse.toIntValue(json['total']);
@@ -54,20 +54,15 @@ class DefaultResponse<T> extends BaseResponse {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      ApiKeyParam.result: data,
-      'code': status,
-    };
+    return {ApiKeyParam.result: data, 'code': status};
   }
 }
+
 class Error {
   String message = '';
   int code = 0;
 
-  Error({
-    required this.message,
-    code = 0,
-  });
+  Error({required this.message, code = 0});
 
   Error.fromJson(Map<String, dynamic> json) {
     message = json['message'] ?? '';
@@ -75,9 +70,6 @@ class Error {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'message': message,
-      'code': code,
-    };
+    return {'message': message, 'code': code};
   }
 }

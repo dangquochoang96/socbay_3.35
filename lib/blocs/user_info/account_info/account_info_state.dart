@@ -3,14 +3,16 @@ abstract class AccountInfoState {
 }
 
 class AccountInfoInitialState extends AccountInfoState {}
-class AccountInfoGetDetailState extends AccountInfoState {
-}
+
+class AccountInfoGetDetailState extends AccountInfoState {}
+
 class AccountInfoUpdateDoneState extends AccountInfoState {
   final bool isSuccess;
   final String? error;
 
   const AccountInfoUpdateDoneState({required this.isSuccess, this.error});
 }
+
 class UploadImageSuccessState extends AccountInfoState {
   final String path;
 

@@ -9,7 +9,7 @@ import '../../user_info/update_staff/update_staff_screen_state.dart';
 
 class UpdateStaffScreenBloc extends Bloc<UpdateStaffEvent, UpdateStaffState> {
   UpdateStaffScreenBloc({required this.apiRepository})
-      : super(UpdateStaffScreenInitialState()) {
+    : super(UpdateStaffScreenInitialState()) {
     on<UpdateStaffScreenEvent>(_mapUpdateStaffEventToState);
   }
 
@@ -17,11 +17,14 @@ class UpdateStaffScreenBloc extends Bloc<UpdateStaffEvent, UpdateStaffState> {
   bool isLoading = false;
 
   Future _mapUpdateStaffEventToState(
-      UpdateStaffScreenEvent event, Emitter<UpdateStaffState> emit) async {
+    UpdateStaffScreenEvent event,
+    Emitter<UpdateStaffState> emit,
+  ) async {
     isLoading = true;
     emit(UpdateStaffScreenInitialState());
-    final DefaultResponse res =
-        await apiRepository.updateStaff(event.updateStaffRequestModel);
+    final DefaultResponse res = await apiRepository.updateStaff(
+      event.updateStaffRequestModel,
+    );
     if (res.status == 200) {
       emit(UpdateStaffScreenSuccessState());
     }

@@ -49,12 +49,10 @@ class _RootState extends State<Root> {
         body: BlocConsumer<RootBloc, RootState>(
           listener: (ctx, state) {
             LoggerUtil.info('blocListener => $state');
-            if(state is ShowAccessTokenExpiredAlert){
+            if (state is ShowAccessTokenExpiredAlert) {
               _showAccessTokenExpiredAlert();
             }
-            if(state is Authenticated){
-
-            }
+            if (state is Authenticated) {}
           },
           buildWhen: (preState, nextState) {
             LoggerUtil.info('build when $preState => $nextState');
@@ -63,7 +61,7 @@ class _RootState extends State<Root> {
           builder: (context, state) {
             if (state is Unauthenticated) {
               return const LoginScreen();
-            }else if (state is Authenticated) {
+            } else if (state is Authenticated) {
               return const TabBarScreen();
             }
             return const SplashScreen();

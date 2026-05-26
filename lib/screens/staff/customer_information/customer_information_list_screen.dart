@@ -76,7 +76,9 @@ class _CustomerInformationListScreenState
 
     for (int i = 0; i < diacritics.length; i++) {
       input = input.replaceAll(
-          RegExp(diacritics[i], caseSensitive: false), plainChars[i]);
+        RegExp(diacritics[i], caseSensitive: false),
+        plainChars[i],
+      );
     }
     input = input.replaceAll(RegExp(r'[^\x00-\x7F]'), '');
     return input;
@@ -91,10 +93,12 @@ class _CustomerInformationListScreenState
       _bloc.add(CustomerInformationListSearchEvent(name: _nameController.text));
     } else if (_phoneController.text.isNotEmpty) {
       _bloc.add(
-          CustomerInformationListSearchEvent(phone: _phoneController.text));
+        CustomerInformationListSearchEvent(phone: _phoneController.text),
+      );
     } else if (_addressController.text.isNotEmpty) {
       _bloc.add(
-          CustomerInformationListSearchEvent(address: _addressController.text));
+        CustomerInformationListSearchEvent(address: _addressController.text),
+      );
     }
     _filterUsers();
   }
@@ -110,8 +114,10 @@ class _CustomerInformationListScreenState
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<CustomerInformationListBloc,
-        CustomerInformationListState>(builder: _builder, listener: _listener);
+    return BlocConsumer<
+      CustomerInformationListBloc,
+      CustomerInformationListState
+    >(builder: _builder, listener: _listener);
   }
 
   void _listener(BuildContext context, CustomerInformationListState state) {
@@ -122,10 +128,7 @@ class _CustomerInformationListScreenState
 
   Widget _builder(BuildContext context, CustomerInformationListState state) {
     return Scaffold(
-      appBar: MyAppBar(
-        title: "Thông tin khách hàng",
-        isBackNavigation: true,
-      ),
+      appBar: MyAppBar(title: "Thông tin khách hàng", isBackNavigation: true),
       body: RefreshIndicator(
         onRefresh: () async {
           _bloc.add(CustomerInformationListStartEvent());
@@ -240,11 +243,13 @@ class _CustomerInformationListScreenState
                     child: TextButton(
                       onPressed: () async {
                         Clipboard.setData(
-                                ClipboardData(text: "${item.username}"))
-                            .then((_) {
+                          ClipboardData(text: "${item.username}"),
+                        ).then((_) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                  content: Text("copied to clipboard")));
+                            const SnackBar(
+                              content: Text("copied to clipboard"),
+                            ),
+                          );
                         });
                       },
                       child: Text(
@@ -265,11 +270,14 @@ class _CustomerInformationListScreenState
                     padding: const EdgeInsets.all(8.0),
                     child: TextButton(
                       onPressed: () async {
-                        Clipboard.setData(ClipboardData(text: "${item.phone}"))
-                            .then((_) {
+                        Clipboard.setData(
+                          ClipboardData(text: "${item.phone}"),
+                        ).then((_) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                  content: Text("copied to clipboard")));
+                            const SnackBar(
+                              content: Text("copied to clipboard"),
+                            ),
+                          );
                         });
                       },
                       child: Text(
@@ -298,11 +306,13 @@ class _CustomerInformationListScreenState
                     child: TextButton(
                       onPressed: () async {
                         Clipboard.setData(
-                                ClipboardData(text: "${item.address}"))
-                            .then((_) {
+                          ClipboardData(text: "${item.address}"),
+                        ).then((_) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                  content: Text("copied to clipboard")));
+                            const SnackBar(
+                              content: Text("copied to clipboard"),
+                            ),
+                          );
                         });
                       },
                       child: Text(
@@ -332,8 +342,11 @@ class _CustomerInformationListScreenState
                       onTap: () {
                         int? seclt = _filteredUsers[index].id;
                         String? phonee = _filteredUsers[index].phone;
-                        Navigator.pushNamed(context, Routes.histoyridCScreen,
-                            arguments: {'id': seclt, 'phone': phonee});
+                        Navigator.pushNamed(
+                          context,
+                          Routes.histoyridCScreen,
+                          arguments: {'id': seclt, 'phone': phonee},
+                        );
                       },
                       child: const Text(
                         "Xem Chi tiết",
@@ -365,9 +378,8 @@ class _CustomerInformationListScreenState
         width: MediaQuery.of(context).size.width * 0.5,
         height: MediaQuery.of(context).size.width * 0.01,
         child: Row(
-            //height: 300,
-
-            ),
+          //height: 300,
+        ),
       ),
     );
   }
@@ -392,48 +404,64 @@ class _CustomerInformationListScreenState
         3: FixedColumnWidth(95.0),
       },
       border: TableBorder.symmetric(
-        inside:
-            const BorderSide(width: 1, color: Color.fromRGBO(4, 107, 80, 1)),
+        inside: const BorderSide(
+          width: 1,
+          color: Color.fromRGBO(4, 107, 80, 1),
+        ),
         //outside: const BorderSide(width: 1),
       ),
       children: [
         TableRow(
-            decoration: BoxDecoration(
-                border: Border.all(color: const Color.fromRGBO(4, 107, 80, 1)),
-                borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(10),
-                    topRight: Radius.circular(10)),
-                color: ColorUtil.bangladeshGreen),
-            children: const [
-              TableCell(
-                  child: Align(
+          decoration: BoxDecoration(
+            border: Border.all(color: const Color.fromRGBO(4, 107, 80, 1)),
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(10),
+              topRight: Radius.circular(10),
+            ),
+            color: ColorUtil.bangladeshGreen,
+          ),
+          children: const [
+            TableCell(
+              child: Align(
                 alignment: Alignment.center,
                 child: Text("STT", style: TextStyle(color: ColorUtil.white)),
-              )),
-              TableCell(
-                  child: Align(
+              ),
+            ),
+            TableCell(
+              child: Align(
                 alignment: Alignment.center,
                 child: Text("Họ tên", style: TextStyle(color: ColorUtil.white)),
-              )),
-              TableCell(
-                  child: Align(
+              ),
+            ),
+            TableCell(
+              child: Align(
                 alignment: Alignment.center,
-                child: Text("Số điện thoại",
-                    style: TextStyle(color: ColorUtil.white)),
-              )),
-              TableCell(
-                  child: Align(
+                child: Text(
+                  "Số điện thoại",
+                  style: TextStyle(color: ColorUtil.white),
+                ),
+              ),
+            ),
+            TableCell(
+              child: Align(
                 alignment: Alignment.center,
-                child:
-                    Text("Địa chỉ", style: TextStyle(color: ColorUtil.white)),
-              )),
-              TableCell(
-                  child: Align(
+                child: Text(
+                  "Địa chỉ",
+                  style: TextStyle(color: ColorUtil.white),
+                ),
+              ),
+            ),
+            TableCell(
+              child: Align(
                 alignment: Alignment.center,
-                child:
-                    Text("Lịch sử", style: TextStyle(color: ColorUtil.white)),
-              )),
-            ]),
+                child: Text(
+                  "Lịch sử",
+                  style: TextStyle(color: ColorUtil.white),
+                ),
+              ),
+            ),
+          ],
+        ),
       ],
     );
   }
@@ -454,9 +482,7 @@ class _CustomerInformationListScreenState
         decoration: InputDecoration(
           hintText: placeHolder,
           prefixIcon: Icon(icon),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10.0),
-          ),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
         ),
       ),
     );
@@ -478,9 +504,7 @@ class _CustomerInformationListScreenState
         decoration: InputDecoration(
           hintText: placeHolder,
           prefixIcon: Icon(icon),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10.0),
-          ),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
         ),
       ),
     );
@@ -502,9 +526,7 @@ class _CustomerInformationListScreenState
         decoration: InputDecoration(
           hintText: placeHolder,
           prefixIcon: Icon(icon),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10.0),
-          ),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
         ),
       ),
     );

@@ -11,4 +11,3 @@ class HomeScreenGetListBannerEvent extends HomeEvent {}
 class HomeScreenGetProductsEvent extends HomeEvent {}
 
 class HomeScreenGetUserProductEvent extends HomeEvent {}
-

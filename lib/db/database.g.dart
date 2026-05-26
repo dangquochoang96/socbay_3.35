@@ -47,11 +47,7 @@ class _$AppDatabaseBuilder {
         ? await sqfliteDatabaseFactory.getDatabasePath(name!)
         : ':memory:';
     final database = _$AppDatabase();
-    database.database = await database.open(
-      path,
-      _migrations,
-      _callback,
-    );
+    database.database = await database.open(path, _migrations, _callback);
     return database;
   }
 }
@@ -79,13 +75,18 @@ class _$AppDatabase extends AppDatabase {
       },
       onUpgrade: (database, startVersion, endVersion) async {
         await MigrationAdapter.runMigrations(
-            database, startVersion, endVersion, migrations);
+          database,
+          startVersion,
+          endVersion,
+          migrations,
+        );
 
         await callback?.onUpgrade?.call(database, startVersion, endVersion);
       },
       onCreate: (database, version) async {
         await database.execute(
-            'CREATE TABLE IF NOT EXISTS `User` (`id` INTEGER NOT NULL, `username` TEXT, `avatar` TEXT, `email` TEXT, `phone` TEXT, `address` TEXT, `password` TEXT, `type` TEXT, `otp` INTEGER, `birthday` TEXT, `status` INTEGER, `isAgency` INTEGER, `isAdmin` INTEGER, `sex` INTEGER, `point` INTEGER, `lat` REAL, `lng` REAL, `distance` REAL, `createdAt` TEXT, `certification` TEXT, `idCard` TEXT, `idCardImageFront` TEXT, `idCardImageBack` TEXT, `cmt` TEXT, PRIMARY KEY (`id`))');
+          'CREATE TABLE IF NOT EXISTS `User` (`id` INTEGER NOT NULL, `username` TEXT, `avatar` TEXT, `email` TEXT, `phone` TEXT, `address` TEXT, `password` TEXT, `type` TEXT, `otp` INTEGER, `birthday` TEXT, `status` INTEGER, `isAgency` INTEGER, `isAdmin` INTEGER, `sex` INTEGER, `point` INTEGER, `lat` REAL, `lng` REAL, `distance` REAL, `createdAt` TEXT, `certification` TEXT, `idCard` TEXT, `idCardImageFront` TEXT, `idCardImageBack` TEXT, `cmt` TEXT, PRIMARY KEY (`id`))',
+        );
 
         await callback?.onCreate?.call(database, version);
       },
@@ -100,37 +101,36 @@ class _$AppDatabase extends AppDatabase {
 }
 
 class _$UserDao extends UserDao {
-  _$UserDao(
-    this.database,
-    this.changeListener,
-  )   : _queryAdapter = QueryAdapter(database, changeListener),
-        _userInsertionAdapter = InsertionAdapter(
-            database,
-            'User',
-            (User item) => <String, Object?>{
-                  'id': item.id,
-                  'username': item.username,
-                  'avatar': item.avatar,
-                  'email': item.email,
-                  'phone': item.phone,
-                  'address': item.address,
-                  'password': item.password,
-                  'type': item.type,
-                  'otp': item.otp,
-                  'birthday': item.birthday,
-                  'status': item.status,
-                  'isAgency': item.isAgency,
-                  'isAdmin': item.isAdmin,
-                  'sex': item.sex,
-                  'point': item.point,
-                  'lat': item.lat,
-                  'lng': item.lng,
-                  'distance': item.distance,
-                  'createdAt': item.createdAt,
-                  'certification': item.certification,
-                  'cmt': item.cmt
-                },
-            changeListener);
+  _$UserDao(this.database, this.changeListener)
+    : _queryAdapter = QueryAdapter(database, changeListener),
+      _userInsertionAdapter = InsertionAdapter(
+        database,
+        'User',
+        (User item) => <String, Object?>{
+          'id': item.id,
+          'username': item.username,
+          'avatar': item.avatar,
+          'email': item.email,
+          'phone': item.phone,
+          'address': item.address,
+          'password': item.password,
+          'type': item.type,
+          'otp': item.otp,
+          'birthday': item.birthday,
+          'status': item.status,
+          'isAgency': item.isAgency,
+          'isAdmin': item.isAdmin,
+          'sex': item.sex,
+          'point': item.point,
+          'lat': item.lat,
+          'lng': item.lng,
+          'distance': item.distance,
+          'createdAt': item.createdAt,
+          'certification': item.certification,
+          'cmt': item.cmt,
+        },
+        changeListener,
+      );
 
   final sqflite.DatabaseExecutor database;
 
@@ -142,67 +142,75 @@ class _$UserDao extends UserDao {
 
   @override
   Future<List<User>> findAllUsers() async {
-    return _queryAdapter.queryList('SELECT * FROM User',
-        mapper: (Map<String, Object?> row) => User(
-            row['username'] as String?,
-            row['avatar'] as String?,
-            row['email'] as String?,
-            row['phone'] as String?,
-            row['address'] as String?,
-            row['password'] as String?,
-            row['type'] as String?,
-            row['otp'] as int?,
-            row['id'] as int,
-            row['birthday'] as String?,
-            row['status'] as int?,
-            row['isAgency'] as int?,
-            row['isAdmin'] as int?,
-            row['sex'] as int?,
-            row['point'] as int?,
-            row['lat'] as double?,
-            row['lng'] as double?,
-            row['distance'] as double?,
-            row['createdAt'] as String?,
-            row['certification'] as String?,
-            row['cmt'] as String?));
+    return _queryAdapter.queryList(
+      'SELECT * FROM User',
+      mapper: (Map<String, Object?> row) => User(
+        row['username'] as String?,
+        row['avatar'] as String?,
+        row['email'] as String?,
+        row['phone'] as String?,
+        row['address'] as String?,
+        row['password'] as String?,
+        row['type'] as String?,
+        row['otp'] as int?,
+        row['id'] as int,
+        row['birthday'] as String?,
+        row['status'] as int?,
+        row['isAgency'] as int?,
+        row['isAdmin'] as int?,
+        row['sex'] as int?,
+        row['point'] as int?,
+        row['lat'] as double?,
+        row['lng'] as double?,
+        row['distance'] as double?,
+        row['createdAt'] as String?,
+        row['certification'] as String?,
+        row['cmt'] as String?,
+      ),
+    );
   }
 
   @override
   Stream<List<String>> findAllUserName() {
-    return _queryAdapter.queryListStream('SELECT name FROM User',
-        mapper: (Map<String, Object?> row) => row.values.first as String,
-        queryableName: 'User',
-        isView: false);
+    return _queryAdapter.queryListStream(
+      'SELECT name FROM User',
+      mapper: (Map<String, Object?> row) => row.values.first as String,
+      queryableName: 'User',
+      isView: false,
+    );
   }
 
   @override
   Stream<User?> findUserById(int id) {
-    return _queryAdapter.queryStream('SELECT * FROM User WHERE id = ?1',
-        mapper: (Map<String, Object?> row) => User(
-            row['username'] as String?,
-            row['avatar'] as String?,
-            row['email'] as String?,
-            row['phone'] as String?,
-            row['address'] as String?,
-            row['password'] as String?,
-            row['type'] as String?,
-            row['otp'] as int?,
-            row['id'] as int,
-            row['birthday'] as String?,
-            row['status'] as int?,
-            row['isAgency'] as int?,
-            row['isAdmin'] as int?,
-            row['sex'] as int?,
-            row['point'] as int?,
-            row['lat'] as double?,
-            row['lng'] as double?,
-            row['distance'] as double?,
-            row['createdAt'] as String?,
-            row['certification'] as String?,
-            row['cmt'] as String?),
-        arguments: [id],
-        queryableName: 'User',
-        isView: false);
+    return _queryAdapter.queryStream(
+      'SELECT * FROM User WHERE id = ?1',
+      mapper: (Map<String, Object?> row) => User(
+        row['username'] as String?,
+        row['avatar'] as String?,
+        row['email'] as String?,
+        row['phone'] as String?,
+        row['address'] as String?,
+        row['password'] as String?,
+        row['type'] as String?,
+        row['otp'] as int?,
+        row['id'] as int,
+        row['birthday'] as String?,
+        row['status'] as int?,
+        row['isAgency'] as int?,
+        row['isAdmin'] as int?,
+        row['sex'] as int?,
+        row['point'] as int?,
+        row['lat'] as double?,
+        row['lng'] as double?,
+        row['distance'] as double?,
+        row['createdAt'] as String?,
+        row['certification'] as String?,
+        row['cmt'] as String?,
+      ),
+      arguments: [id],
+      queryableName: 'User',
+      isView: false,
+    );
   }
 
   @override
@@ -212,8 +220,10 @@ class _$UserDao extends UserDao {
 
   @override
   Future<int?> countAllUser() async {
-    return _queryAdapter.query('SELECT COUNT(*) FROM User',
-        mapper: (Map<String, Object?> row) => row.values.first as int);
+    return _queryAdapter.query(
+      'SELECT COUNT(*) FROM User',
+      mapper: (Map<String, Object?> row) => row.values.first as int,
+    );
   }
 
   @override

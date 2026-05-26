@@ -45,28 +45,28 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<BookingBloc, BookingState>(
-        builder: _builder, listener: _listener);
+      builder: _builder,
+      listener: _listener,
+    );
   }
 
   void _listener(BuildContext context, BookingState state) {}
 
   Widget _builder(BuildContext context, BookingState state) {
     return Scaffold(
-      appBar: MyAppBar(
-        title: "Đặt lịch",
-        isBackNavigation: false,
-      ),
+      appBar: MyAppBar(title: "Đặt lịch", isBackNavigation: false),
       body: LoadingIndicator(
-          isLoading: _bloc.isLoading,
-          child: RefreshIndicator(
-            onRefresh: _onRefresh,
-            child: ListView.separated(
-              padding: const EdgeInsets.symmetric(vertical: paddingVertical),
-              itemBuilder: _itemBuilder,
-              separatorBuilder: _buildSeparator,
-              itemCount: _bloc.listTaskModel.length,
-            ),
-          )),
+        isLoading: _bloc.isLoading,
+        child: RefreshIndicator(
+          onRefresh: _onRefresh,
+          child: ListView.separated(
+            padding: const EdgeInsets.symmetric(vertical: paddingVertical),
+            itemBuilder: _itemBuilder,
+            separatorBuilder: _buildSeparator,
+            itemCount: _bloc.listTaskModel.length,
+          ),
+        ),
+      ),
     );
   }
 
@@ -76,48 +76,59 @@ class _SearchScreenState extends State<SearchScreen> {
 
   Future<void> _cancelTask(TaskModel taskModel) async {
     return showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: const Text(
-              'Vui lòng cho biết lý do bạn hủy dịch vụ',
-              textAlign: TextAlign.center,
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text(
+            'Vui lòng cho biết lý do bạn hủy dịch vụ',
+            textAlign: TextAlign.center,
+          ),
+          content: TextFieldDefault(
+            controller: _feedbackController,
+            maxLines: 5,
+          ),
+          actions: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _buildButtonDialog(
+                  isPositive: false,
+                  text: 'Hủy',
+                  action: () {
+                    Navigator.pop(context);
+                    _feedbackController.clear();
+                  },
+                ),
+                const SizedBox(width: 16),
+                _buildButtonDialog(
+                  isPositive: true,
+                  text: 'Gửi',
+                  action: () {
+                    _bloc.add(
+                      BookingDeleteTaskEvent(
+                        taskModel.id ?? 0,
+                        taskModel.name!,
+                        _feedbackController.text,
+                      ),
+                    );
+                    Navigator.pop(context);
+                    _feedbackController.clear();
+                  },
+                ),
+              ],
             ),
-            content: TextFieldDefault(
-              controller: _feedbackController,
-              maxLines: 5,
-            ),
-            actions: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _buildButtonDialog(
-                      isPositive: false,
-                      text: 'Hủy',
-                      action: () {
-                        Navigator.pop(context);
-                        _feedbackController.clear();
-                      }),
-                  const SizedBox(width: 16),
-                  _buildButtonDialog(
-                      isPositive: true,
-                      text: 'Gửi',
-                      action: () {
-                        _bloc.add(BookingDeleteTaskEvent(taskModel.id ?? 0,
-                            taskModel.name!, _feedbackController.text));
-                        Navigator.pop(context);
-                        _feedbackController.clear();
-                      }),
-                ],
-              )
-            ],
-          );
-        });
+          ],
+        );
+      },
+    );
   }
 
   void _detailTask(TaskModel taskModel) {
-    Navigator.pushNamed(context, Routes.detailBookingScreen,
-        arguments: {'id': taskModel.id});
+    Navigator.pushNamed(
+      context,
+      Routes.detailBookingScreen,
+      arguments: {'id': taskModel.id},
+    );
   }
 
   Widget _itemBuilder(BuildContext context, int index) {
@@ -128,7 +139,9 @@ class _SearchScreenState extends State<SearchScreen> {
       },
       child: Padding(
         padding: const EdgeInsets.symmetric(
-            horizontal: paddingHorizontal, vertical: 8),
+          horizontal: paddingHorizontal,
+          vertical: 8,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -136,13 +149,15 @@ class _SearchScreenState extends State<SearchScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
-                    child: Text(
-                  'Mã dịch vụ: ${taskModel.id}',
-                  style: const TextStyle(
+                  child: Text(
+                    'Mã dịch vụ: ${taskModel.id}',
+                    style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       color: ColorUtil.raisinBlack,
-                      fontSize: 16),
-                )),
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
                 Text(
                   taskModel.getStatus(),
                   style: const TextStyle(color: ColorUtil.bangladeshGreen),
@@ -150,8 +165,10 @@ class _SearchScreenState extends State<SearchScreen> {
               ],
             ),
             const SizedBox(height: 10),
-            Text('Dịch vụ: ${taskModel.name ?? ''}',
-                style: const TextStyle(fontSize: 15)),
+            Text(
+              'Dịch vụ: ${taskModel.name ?? ''}',
+              style: const TextStyle(fontSize: 15),
+            ),
             const SizedBox(height: 5),
             Row(
               children: [
@@ -171,13 +188,15 @@ class _SearchScreenState extends State<SearchScreen> {
             ),
             const SizedBox(height: 32),
             Align(
-                alignment: Alignment.centerRight,
-                child: _buildButton(
-                    text: 'Hủy',
-                    isPositive: false,
-                    action: () {
-                      _cancelTask(taskModel);
-                    }))
+              alignment: Alignment.centerRight,
+              child: _buildButton(
+                text: 'Hủy',
+                isPositive: false,
+                action: () {
+                  _cancelTask(taskModel);
+                },
+              ),
+            ),
           ],
         ),
       ),
@@ -185,10 +204,7 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   Widget _buildSeparator(BuildContext context, int index) {
-    return const Divider(
-      color: Colors.grey,
-      height: 24,
-    );
+    return const Divider(color: Colors.grey, height: 24);
   }
 
   Widget _buildButton({text, isPositive, action}) {
@@ -207,11 +223,11 @@ class _SearchScreenState extends State<SearchScreen> {
               text,
               textAlign: TextAlign.center,
               style: const TextStyle(fontSize: 16, color: Colors.white),
-            ))
+            ),
+          )
         : ElevatedButton(
             style: ButtonStyle(
-              backgroundColor:
-                  WidgetStateProperty.all<Color>(ColorUtil.white),
+              backgroundColor: WidgetStateProperty.all<Color>(ColorUtil.white),
               shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                 RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -242,20 +258,21 @@ class _SearchScreenState extends State<SearchScreen> {
 
   StatelessWidget _button(isPositive, action, text) {
     return ButtonWidget(
-        color: isPositive ? ColorUtil.bangladeshGreen : Colors.grey,
-        borderRadius: BorderRadius.circular(30),
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        onTap: () {
-          if (action == null) {
-            Navigator.pop(context);
-          } else {
-            action();
-          }
-        },
-        child: Text(
-          text,
-          textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 16, color: Colors.white),
-        ));
+      color: isPositive ? ColorUtil.bangladeshGreen : Colors.grey,
+      borderRadius: BorderRadius.circular(30),
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      onTap: () {
+        if (action == null) {
+          Navigator.pop(context);
+        } else {
+          action();
+        }
+      },
+      child: Text(
+        text,
+        textAlign: TextAlign.center,
+        style: const TextStyle(fontSize: 16, color: Colors.white),
+      ),
+    );
   }
 }

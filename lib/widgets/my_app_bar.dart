@@ -43,8 +43,9 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.onTapTitleWidget,
     this.borderRadius = BorderRadius.zero,
     this.systemOverlayStyle = systemUiOverlayStyle,
-  })  : barSize = Size.fromHeight(
-            kToolbarHeight + (bottom?.preferredSize.height ?? 0.0));
+  }) : barSize = Size.fromHeight(
+         kToolbarHeight + (bottom?.preferredSize.height ?? 0.0),
+       );
 
   @override
   Size get preferredSize => Size.fromHeight(barSize.height);
@@ -54,9 +55,7 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
     return PreferredSize(
       preferredSize: const Size.fromHeight(100),
       child: AppBar(
-        shape: RoundedRectangleBorder(
-          borderRadius: borderRadius,
-        ),
+        shape: RoundedRectangleBorder(borderRadius: borderRadius),
         title: _buildAppTitle(context),
         leading: _buildLeadButton(context),
         systemOverlayStyle: systemOverlayStyle,
@@ -74,15 +73,9 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   Widget _buildAppTitle(BuildContext context) {
     if (titleWidget != null) {
-      return GestureDetector(
-        onTap: onTapTitleWidget,
-        child: titleWidget,
-      );
+      return GestureDetector(onTap: onTapTitleWidget, child: titleWidget);
     } else {
-      return Text(
-        title,
-        style: const TextStyle(fontSize: 18),
-      );
+      return Text(title, style: const TextStyle(fontSize: 18));
     }
   }
 

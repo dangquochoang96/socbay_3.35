@@ -52,7 +52,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<UserScreenBloc, UserScreenState>(
-        builder: _builder, listener: _listener);
+      builder: _builder,
+      listener: _listener,
+    );
   }
 
   void _listener(BuildContext context, state) {
@@ -70,12 +72,11 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
           children: [
             const SizedBox(height: 15),
             _buildAvatar(),
-            const SizedBox(
-              height: 20,
-            ),
+            const SizedBox(height: 20),
             buildSection("Thông tin tài khoản", Icons.account_circle, () {
-              Navigator.pushNamed(context, Routes.accountInfoScreen)
-                  .then((value) {
+              Navigator.pushNamed(context, Routes.accountInfoScreen).then((
+                value,
+              ) {
                 _bloc.user = App.instance.userApp;
                 setState(() {});
               });
@@ -104,11 +105,11 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
             ],
             if (App.instance.userApp?.isUserCustomer() != true) ...[
               buildDeleteAcc(),
-              buildPolicy()
+              buildPolicy(),
             ],
             buildSection("Đăng xuất", Icons.logout, _onLogout, Colors.red),
             const HotlineWidget(),
-            const SizedBox(height: 40)
+            const SizedBox(height: 40),
           ],
         ),
       ),
@@ -117,7 +118,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
 
   Future<void> _launchURL() async {
     final Uri url = Uri.parse(
-        'https://geysereco.com/chinh-sach-bao-mat-thong-tin-khach-hang');
+      'https://geysereco.com/chinh-sach-bao-mat-thong-tin-khach-hang',
+    );
     if (!await launchUrl(url)) {
       throw Exception('Could not launch $url');
     }
@@ -129,13 +131,15 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         child: Stack(
           children: [
             ClipRRect(
-                borderRadius: BorderRadius.circular(140),
-                child: ImageUtil.loadNetWorkImage(
-                    url: _bloc.user != null && _bloc.user!.avatar != null
-                        ? "$protocol${AppConfig.instance.values.apiUrl}${_bloc.user!.avatar!}"
-                        : '',
-                    width: 160,
-                    height: 160)),
+              borderRadius: BorderRadius.circular(140),
+              child: ImageUtil.loadNetWorkImage(
+                url: _bloc.user != null && _bloc.user!.avatar != null
+                    ? "$protocol${AppConfig.instance.values.apiUrl}${_bloc.user!.avatar!}"
+                    : '',
+                width: 160,
+                height: 160,
+              ),
+            ),
           ],
         ),
       ),
@@ -155,7 +159,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
       children: [
         ButtonWidget(
           padding: const EdgeInsets.symmetric(
-              horizontal: paddingHorizontal, vertical: 12),
+            horizontal: paddingHorizontal,
+            vertical: 12,
+          ),
           onTap: onTap,
           child: Column(
             children: [
@@ -163,18 +169,16 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(title, style: TextStyle(fontSize: 15, color: color)),
-                  Icon(icon, color: color)
+                  Icon(icon, color: color),
                 ],
               ),
             ],
           ),
         ),
         const Padding(
-            padding: EdgeInsets.symmetric(horizontal: paddingHorizontal),
-            child: Divider(
-              color: Colors.grey,
-              height: 0,
-            ))
+          padding: EdgeInsets.symmetric(horizontal: paddingHorizontal),
+          child: Divider(color: Colors.grey, height: 0),
+        ),
       ],
     );
   }
@@ -184,62 +188,68 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
       children: [
         ButtonWidget(
           padding: const EdgeInsets.symmetric(
-              horizontal: paddingHorizontal, vertical: 12),
+            horizontal: paddingHorizontal,
+            vertical: 12,
+          ),
           onTap: () {
             showDialog(
-                context: context,
-                builder: (context) {
-                  return AlertDialog(
-                    scrollable: true,
-                    title: const Text(
-                      'Xóa tài khoản ',
-                      textAlign: TextAlign.center,
+              context: context,
+              builder: (context) {
+                return AlertDialog(
+                  scrollable: true,
+                  title: const Text(
+                    'Xóa tài khoản ',
+                    textAlign: TextAlign.center,
+                  ),
+                  content: const Text(
+                    "Tài khoản của bạn sẽ bị xóa sau 15 ngày, bạn có đồng ý xóa tài khoản?",
+                  ),
+                  actions: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        _buildButtonDialog(
+                          isPositive: false,
+                          text: 'Hủy',
+                          action: () {
+                            Navigator.pop(context);
+                          },
+                        ),
+                        const SizedBox(width: 16),
+                        _buildButtonDialog(
+                          isPositive: true,
+                          text: 'Đồng ý',
+                          action: () {
+                            _bloc.add(UserScreenLogoutEvent());
+                            Navigator.pop(context);
+                          },
+                        ),
+                      ],
                     ),
-                    content: const Text(
-                        "Tài khoản của bạn sẽ bị xóa sau 15 ngày, bạn có đồng ý xóa tài khoản?"),
-                    actions: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          _buildButtonDialog(
-                              isPositive: false,
-                              text: 'Hủy',
-                              action: () {
-                                Navigator.pop(context);
-                              }),
-                          const SizedBox(width: 16),
-                          _buildButtonDialog(
-                              isPositive: true,
-                              text: 'Đồng ý',
-                              action: () {
-                                _bloc.add(UserScreenLogoutEvent());
-                                Navigator.pop(context);
-                              }),
-                        ],
-                      )
-                    ],
-                  );
-                });
+                  ],
+                );
+              },
+            );
           },
           child: Column(
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: const [
-                  Text("Xóa tài khoản",
-                      style: TextStyle(fontSize: 15, color: Colors.grey)),
-                  Icon(Icons.auto_delete, color: Colors.grey)
+                  Text(
+                    "Xóa tài khoản",
+                    style: TextStyle(fontSize: 15, color: Colors.grey),
+                  ),
+                  Icon(Icons.auto_delete, color: Colors.grey),
                 ],
               ),
             ],
           ),
         ),
         const Padding(
-            padding: EdgeInsets.symmetric(horizontal: paddingHorizontal),
-            child: Divider(
-              color: Colors.grey,
-              height: 0,
-            ))
+          padding: EdgeInsets.symmetric(horizontal: paddingHorizontal),
+          child: Divider(color: Colors.grey, height: 0),
+        ),
       ],
     );
   }
@@ -249,27 +259,29 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
       children: [
         ButtonWidget(
           padding: const EdgeInsets.symmetric(
-              horizontal: paddingHorizontal, vertical: 12),
+            horizontal: paddingHorizontal,
+            vertical: 12,
+          ),
           onTap: _launchURL,
           child: Column(
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: const [
-                  Text("Chính sách quyền riêng tư",
-                      style: TextStyle(fontSize: 15, color: Colors.grey)),
-                  Icon(Icons.policy, color: Colors.grey)
+                  Text(
+                    "Chính sách quyền riêng tư",
+                    style: TextStyle(fontSize: 15, color: Colors.grey),
+                  ),
+                  Icon(Icons.policy, color: Colors.grey),
                 ],
               ),
             ],
           ),
         ),
         const Padding(
-            padding: EdgeInsets.symmetric(horizontal: paddingHorizontal),
-            child: Divider(
-              color: Colors.grey,
-              height: 0,
-            ))
+          padding: EdgeInsets.symmetric(horizontal: paddingHorizontal),
+          child: Divider(color: Colors.grey, height: 0),
+        ),
       ],
     );
   }
@@ -280,21 +292,22 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
 
   StatelessWidget _button(isPositive, action, text) {
     return ButtonWidget(
-        color: isPositive ? ColorUtil.bangladeshGreen : Colors.grey,
-        borderRadius: BorderRadius.circular(30),
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        onTap: () {
-          if (action == null) {
-            Navigator.pop(context);
-          } else {
-            action();
-          }
-        },
-        child: Text(
-          text,
-          textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 16, color: Colors.white),
-        ));
+      color: isPositive ? ColorUtil.bangladeshGreen : Colors.grey,
+      borderRadius: BorderRadius.circular(30),
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      onTap: () {
+        if (action == null) {
+          Navigator.pop(context);
+        } else {
+          action();
+        }
+      },
+      child: Text(
+        text,
+        textAlign: TextAlign.center,
+        style: const TextStyle(fontSize: 16, color: Colors.white),
+      ),
+    );
   }
 
   Widget buildPointWidget(String title, String point, onTap) {
@@ -302,30 +315,32 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
       children: [
         ButtonWidget(
           padding: const EdgeInsets.symmetric(
-              horizontal: paddingHorizontal, vertical: 12),
+            horizontal: paddingHorizontal,
+            vertical: 12,
+          ),
           onTap: onTap,
           child: Column(
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(title,
-                      style: const TextStyle(fontSize: 15, color: Colors.grey)),
+                  Text(
+                    title,
+                    style: const TextStyle(fontSize: 15, color: Colors.grey),
+                  ),
                   Text(
                     point,
                     style: const TextStyle(fontSize: 15, color: Colors.grey),
-                  )
+                  ),
                 ],
               ),
             ],
           ),
         ),
         const Padding(
-            padding: EdgeInsets.symmetric(horizontal: paddingHorizontal),
-            child: Divider(
-              color: Colors.grey,
-              height: 0,
-            ))
+          padding: EdgeInsets.symmetric(horizontal: paddingHorizontal),
+          child: Divider(color: Colors.grey, height: 0),
+        ),
       ],
     );
   }

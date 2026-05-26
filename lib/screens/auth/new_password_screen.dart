@@ -42,7 +42,9 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<NewPasswordScreenBloc, NewPasswordScreenState>(
-        builder: _builder, listener: _listener);
+      builder: _builder,
+      listener: _listener,
+    );
   }
 
   void _listener(BuildContext context, NewPasswordScreenState state) {
@@ -70,34 +72,49 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           physics: const BouncingScrollPhysics(),
-          child: Column(children: [
-            Center(
+          child: Column(
+            children: [
+              Center(
                 child: ImageUtil.loadAssetsImage(
-                    fileName: Images.iconApp1, width: 150)),
-            const SizedBox(height: 100),
+                  fileName: Images.iconApp1,
+                  width: 150,
+                ),
+              ),
+              const SizedBox(height: 100),
 
-            const SizedBox(height: 5),
-            _buildForm("Mật khẩu mới", "Nhập mật khẩu mới", _passwordController,
-                type: _passwordType),
-            const SizedBox(height: 15),
-            _buildForm("Nhập lại mật khẩu mới", "Nhập lại mật khẩu mới",
+              const SizedBox(height: 5),
+              _buildForm(
+                "Mật khẩu mới",
+                "Nhập mật khẩu mới",
+                _passwordController,
+                type: _passwordType,
+              ),
+              const SizedBox(height: 15),
+              _buildForm(
+                "Nhập lại mật khẩu mới",
+                "Nhập lại mật khẩu mới",
                 _rePasswordController,
-                type: _rePasswordType),
-            const SizedBox(height: 32),
-            DefaultButton(
-              onPressed: _onPress,
-              text: "Lưu",
-              width: double.infinity,
-            )
-          ]),
+                type: _rePasswordType,
+              ),
+              const SizedBox(height: 32),
+              DefaultButton(
+                onPressed: _onPress,
+                text: "Lưu",
+                width: double.infinity,
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildForm(String titleTextField, String placeHolder,
-      TextEditingController controller,
-      {required String type}) {
+  Widget _buildForm(
+    String titleTextField,
+    String placeHolder,
+    TextEditingController controller, {
+    required String type,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -115,8 +132,8 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
             obscureText: type == _rePasswordType
                 ? isSecureRePassword
                 : type == _passwordType
-                    ? isSecurePassword
-                    : true,
+                ? isSecurePassword
+                : true,
             keyboardType: TextInputType.text,
             controller: controller,
             cursorColor: ColorUtil.bangladeshGreen,
@@ -124,20 +141,30 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8.0),
                 borderSide: const BorderSide(
-                    color: ColorUtil.bangladeshGreen, width: 0.5),
+                  color: ColorUtil.bangladeshGreen,
+                  width: 0.5,
+                ),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8.0),
                 borderSide: const BorderSide(
-                    color: ColorUtil.bangladeshGreen, width: 0.5),
+                  color: ColorUtil.bangladeshGreen,
+                  width: 0.5,
+                ),
               ),
               hintText: placeHolder,
-              hintStyle:
-                  const TextStyle(color: ColorUtil.silverChalice, fontSize: 13),
-              contentPadding:
-                  const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
-              suffixIconConstraints:
-                  const BoxConstraints(minHeight: 20, minWidth: 20),
+              hintStyle: const TextStyle(
+                color: ColorUtil.silverChalice,
+                fontSize: 13,
+              ),
+              contentPadding: const EdgeInsets.symmetric(
+                vertical: 5,
+                horizontal: 15,
+              ),
+              suffixIconConstraints: const BoxConstraints(
+                minHeight: 20,
+                minWidth: 20,
+              ),
               suffixIcon: GestureDetector(
                 onTap: () {
                   setState(() {
@@ -156,11 +183,11 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
                   child: ImageUtil.loadAssetsImage(
                     fileName: type == _rePasswordType
                         ? isSecureRePassword
-                            ? Images.iconSecurePassword
-                            : Images.iconNotSecurePassword
+                              ? Images.iconSecurePassword
+                              : Images.iconNotSecurePassword
                         : isSecurePassword
-                            ? Images.iconSecurePassword
-                            : Images.iconNotSecurePassword,
+                        ? Images.iconSecurePassword
+                        : Images.iconNotSecurePassword,
                     width: 15,
                     height: 15,
                   ),
@@ -168,7 +195,7 @@ class _NewPasswordScreenState extends State<NewPasswordScreen> {
               ),
             ),
           ),
-        )
+        ),
       ],
     );
   }

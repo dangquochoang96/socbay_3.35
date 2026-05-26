@@ -92,10 +92,12 @@ class _ServiceScreenState extends State<StaffServiceScreen> {
     listenToNotification();
     _listService = HomeServiceModel.taskServiceList;
     _listProducts.add(
-        OrderModel(id: 0, product: MachineModel(id: 0, name: "--Chọn máy--")));
+      OrderModel(id: 0, product: MachineModel(id: 0, name: "--Chọn máy--")),
+    );
     //_listNameService = _listService.map((e) => e.name).toList();
-    _currentSelectedValue =
-        _listService[int.tryParse(_bloc.args['index']) ?? 0].id.toString();
+    _currentSelectedValue = _listService[int.tryParse(_bloc.args['index']) ?? 0]
+        .id
+        .toString();
     _picker = ImagePicker();
 
     if (selectedDate != null) {
@@ -137,14 +139,17 @@ class _ServiceScreenState extends State<StaffServiceScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<StaffServiceScreenBloc, StaffServiceScreenState>(
-        builder: _builder, listener: _listener);
+      builder: _builder,
+      listener: _listener,
+    );
   }
 
   void _listener(BuildContext context, StaffServiceScreenState state) {
     if (state is StaffServiceScreenCheckCustomerSuccessState) {
       _listProducts.clear();
-      _listProducts.add(OrderModel(
-          id: 0, product: MachineModel(id: 0, name: "--Chọn máy--")));
+      _listProducts.add(
+        OrderModel(id: 0, product: MachineModel(id: 0, name: "--Chọn máy--")),
+      );
       for (var element in _bloc.listProducts) {
         if (element.product != null) {
           _listProducts.add(element);
@@ -175,9 +180,11 @@ class _ServiceScreenState extends State<StaffServiceScreen> {
         isShowTitle: false,
         leftAction: () async {
           _tabBarBloc.add(const TabBarPressed(index: 1));
-          Navigator.pushReplacementNamed(context, Routes.root).then((value) =>
-              context.read<TaskScreenBloc>().add(
-                  const StaffTaskScreenGetTaskByDayEvent(isRefresh: true)));
+          Navigator.pushReplacementNamed(context, Routes.root).then(
+            (value) => context.read<TaskScreenBloc>().add(
+              const StaffTaskScreenGetTaskByDayEvent(isRefresh: true),
+            ),
+          );
         },
       );
     }
@@ -208,76 +215,79 @@ class _ServiceScreenState extends State<StaffServiceScreen> {
 
   Widget _builder(BuildContext context, StaffServiceScreenState state) {
     return Scaffold(
-        appBar: MyAppBar(
-          isBackNavigation: true,
-          title: 'Đăng ký công việc',
-          centerTitle: true,
-        ),
-        body: LoadingIndicator(
-            isLoading: _bloc.isLoading,
-            child: SafeArea(
-              child: SafeArea(
-                child: Scaffold(
-                  body: ListView(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: paddingHorizontal,
-                        vertical: paddingVertical),
-                    children: [
-                      _buildDropdownField(),
-                      _buildSearchCustomer(),
-                      if (App.instance.userApp?.isUserSale() == true) ...[
-                        _buildField(
-                            '', 'Thợ ưa thích', Icons.person_outlined, null,
-                            value: _favouriteStaff?.username ?? "", onTap: () {
-                          _onChooseFavouriteStaff();
-                        }),
-                      ],
-                      _buildDropdownFieldPruducts(),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      _buildFormDoubleHorizontal('Hẹn lịch',
-                          Icons.calendar_today, Icons.av_timer_sharp,
-                          firstValue: _dateStart,
-                          secondValue: _timeStart,
-                          onTapFirst: _onTapDateStart,
-                          onTapSecond: _onTapTimeStart),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      _buildFormDescribe(
-                          'Mô tả yêu cầu',
-                          describeRequestTxtController,
-                          Icons.description_outlined,
-                          null),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      _buildSectionMedia(),
-                      const SizedBox(
-                        height: 34,
-                      ),
-                    ],
-                  ),
-                  bottomSheet: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Row(
-                      children: [
-                        _buildButton(
-                            text: 'ĐẶT LỊCH',
-                            isPositive: true,
-                            action: () {
-                              _onCreateTask(_notificationIndex ?? 0);
-                            }),
-                        const SizedBox(
-                          width: 16,
-                        ),
-                      ],
+      appBar: MyAppBar(
+        isBackNavigation: true,
+        title: 'Đăng ký công việc',
+        centerTitle: true,
+      ),
+      body: LoadingIndicator(
+        isLoading: _bloc.isLoading,
+        child: SafeArea(
+          child: SafeArea(
+            child: Scaffold(
+              body: ListView(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: paddingHorizontal,
+                  vertical: paddingVertical,
+                ),
+                children: [
+                  _buildDropdownField(),
+                  _buildSearchCustomer(),
+                  if (App.instance.userApp?.isUserSale() == true) ...[
+                    _buildField(
+                      '',
+                      'Thợ ưa thích',
+                      Icons.person_outlined,
+                      null,
+                      value: _favouriteStaff?.username ?? "",
+                      onTap: () {
+                        _onChooseFavouriteStaff();
+                      },
                     ),
+                  ],
+                  _buildDropdownFieldPruducts(),
+                  const SizedBox(height: 10),
+                  _buildFormDoubleHorizontal(
+                    'Hẹn lịch',
+                    Icons.calendar_today,
+                    Icons.av_timer_sharp,
+                    firstValue: _dateStart,
+                    secondValue: _timeStart,
+                    onTapFirst: _onTapDateStart,
+                    onTapSecond: _onTapTimeStart,
                   ),
+                  const SizedBox(height: 10),
+                  _buildFormDescribe(
+                    'Mô tả yêu cầu',
+                    describeRequestTxtController,
+                    Icons.description_outlined,
+                    null,
+                  ),
+                  const SizedBox(height: 10),
+                  _buildSectionMedia(),
+                  const SizedBox(height: 34),
+                ],
+              ),
+              bottomSheet: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: Row(
+                  children: [
+                    _buildButton(
+                      text: 'ĐẶT LỊCH',
+                      isPositive: true,
+                      action: () {
+                        _onCreateTask(_notificationIndex ?? 0);
+                      },
+                    ),
+                    const SizedBox(width: 16),
+                  ],
                 ),
               ),
-            )));
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _buildSearchCustomer() {
@@ -291,25 +301,29 @@ class _ServiceScreenState extends State<StaffServiceScreen> {
               "SĐT Khách hàng",
               style: TextStyle(color: ColorUtil.raisinBlack, fontSize: 15),
             ),
-            const SizedBox(
-              height: 5,
-            ),
+            const SizedBox(height: 5),
             Row(
               children: [
                 Expanded(
-                    child: TextField(
-                  keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
+                  child: TextField(
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8.0),
                         borderSide: const BorderSide(
-                            color: ColorUtil.bangladeshGreen, width: 0.5),
+                          color: ColorUtil.bangladeshGreen,
+                          width: 0.5,
+                        ),
                       ),
-                      floatingLabelBehavior: FloatingLabelBehavior.always),
-                  controller: customerController,
-                  style: const TextStyle(
-                      color: ColorUtil.raisinBlack, fontSize: 15),
-                )),
+                      floatingLabelBehavior: FloatingLabelBehavior.always,
+                    ),
+                    controller: customerController,
+                    style: const TextStyle(
+                      color: ColorUtil.raisinBlack,
+                      fontSize: 15,
+                    ),
+                  ),
+                ),
                 //Container(child: IconButton(onPressed: _addCustomer, icon:const Icon(Icons.add),color: Colors.white, ),color: Colors.green,),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
@@ -322,9 +336,9 @@ class _ServiceScreenState extends State<StaffServiceScreen> {
                   onPressed: () {
                     _addCustomer();
                   },
-                )
+                ),
               ],
-            )
+            ),
           ],
         ),
       );
@@ -338,22 +352,25 @@ class _ServiceScreenState extends State<StaffServiceScreen> {
               "SĐT Khách hàng",
               style: TextStyle(color: ColorUtil.raisinBlack, fontSize: 15),
             ),
-            const SizedBox(
-              height: 5,
-            ),
+            const SizedBox(height: 5),
             TextField(
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.0),
-                    borderSide: const BorderSide(
-                        color: ColorUtil.bangladeshGreen, width: 0.5),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                  borderSide: const BorderSide(
+                    color: ColorUtil.bangladeshGreen,
+                    width: 0.5,
                   ),
-                  floatingLabelBehavior: FloatingLabelBehavior.always),
+                ),
+                floatingLabelBehavior: FloatingLabelBehavior.always,
+              ),
               controller: customerController,
-              style:
-                  const TextStyle(color: ColorUtil.raisinBlack, fontSize: 15),
-            )
+              style: const TextStyle(
+                color: ColorUtil.raisinBlack,
+                fontSize: 15,
+              ),
+            ),
           ],
         ),
       );
@@ -379,30 +396,37 @@ class _ServiceScreenState extends State<StaffServiceScreen> {
         .where((element) => element.id == _currentSelectedProductValue)
         .first
         .id;
-    _bloc.add(StaffServiceScreenCreateTaskEvent(
+    _bloc.add(
+      StaffServiceScreenCreateTaskEvent(
         CreateTaskRequest(
-            type: 1,
-            name: serviceName,
-            des: describeRequestTxtController.text,
-            status: _favouriteStaff?.id == null ? 1 : 5,
-            priority: 1,
-            serviceId: int.parse(_currentSelectedValue ?? "1"),
-            //NOTE
-            timeStart: '$_dateStart $_timeStart',
-            timeEnd: '',
-            customerId: _bloc.customerInfor?.id ?? 0,
-            staffId: _favouriteStaff?.id,
-            video: '',
-            productId: orderDetailId,
-            address: addressSPRequestTxtController.text,
-            images: _listPath),
-        false));
+          type: 1,
+          name: serviceName,
+          des: describeRequestTxtController.text,
+          status: _favouriteStaff?.id == null ? 1 : 5,
+          priority: 1,
+          serviceId: int.parse(_currentSelectedValue ?? "1"),
+          //NOTE
+          timeStart: '$_dateStart $_timeStart',
+          timeEnd: '',
+          customerId: _bloc.customerInfor?.id ?? 0,
+          staffId: _favouriteStaff?.id,
+          video: '',
+          productId: orderDetailId,
+          address: addressSPRequestTxtController.text,
+          images: _listPath,
+        ),
+        false,
+      ),
+    );
     if (_bloc.listTaskModel.isEmpty) {
       return const Center(child: Text('no model'));
     }
     TaskModel orderModel = _bloc.listTaskModel[index];
     await service.showNotification(
-        id: 0, title: "Bạn có đơn mới", body: "Mã đơn là:  ${orderModel.id}");
+      id: 0,
+      title: "Bạn có đơn mới",
+      body: "Mã đơn là:  ${orderModel.id}",
+    );
   }
 
   void _onSearchCustomer() {
@@ -417,35 +441,37 @@ class _ServiceScreenState extends State<StaffServiceScreen> {
 
   void _showModalBottomSheetMedia() {
     showModalBottomSheet(
-        useSafeArea: true,
-        context: context,
-        builder: (BuildContext context) {
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: const Icon(Icons.image),
-                title: const Text('Image'),
-                onTap: _onChooseImages,
-              ),
-              ListTile(
-                leading: const Icon(Icons.photo_camera),
-                title: const Text('Camera'),
-                onTap: () {
-                  getImage(ImageSource.camera);
-                  Navigator.of(context).pop();
-                },
-              )
-            ],
-          );
-        });
+      useSafeArea: true,
+      context: context,
+      builder: (BuildContext context) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.image),
+              title: const Text('Image'),
+              onTap: _onChooseImages,
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_camera),
+              title: const Text('Camera'),
+              onTap: () {
+                getImage(ImageSource.camera);
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Widget _buildSectionMedia() {
     return Container(
       decoration: BoxDecoration(
-          border: Border.all(color: ColorUtil.bangladeshGreen, width: 0.5),
-          borderRadius: BorderRadius.circular(8.0)),
+        border: Border.all(color: ColorUtil.bangladeshGreen, width: 0.5),
+        borderRadius: BorderRadius.circular(8.0),
+      ),
       padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 5.0),
       child: Column(
         children: [
@@ -453,31 +479,30 @@ class _ServiceScreenState extends State<StaffServiceScreen> {
             children: const [
               Padding(
                 padding: EdgeInsets.all(8.0),
-                child: Icon(
-                  Icons.upload_file,
-                  color: ColorUtil.spanishGray,
-                ),
+                child: Icon(Icons.upload_file, color: ColorUtil.spanishGray),
               ),
               Flexible(
-                  child: Text(
-                'Up ảnh (tối đa 4 ảnh) và video (tối đa 15s) để kỹ thuật xem xét.',
-                style: TextStyle(color: ColorUtil.spanishGray),
-              ))
+                child: Text(
+                  'Up ảnh (tối đa 4 ảnh) và video (tối đa 15s) để kỹ thuật xem xét.',
+                  style: TextStyle(color: ColorUtil.spanishGray),
+                ),
+              ),
             ],
           ),
           SizedBox(
-              height: 200,
-              width: double.infinity,
-              child: ListView.builder(
-                itemCount: _listPath.length + 1,
-                shrinkWrap: true,
-                scrollDirection: Axis.horizontal,
-                itemBuilder: (BuildContext context, int index) {
-                  return index < _listPath.length
-                      ? _buildItemMedia(_listPath[index])
-                      : _buildDefaultItemMedia();
-                },
-              )),
+            height: 200,
+            width: double.infinity,
+            child: ListView.builder(
+              itemCount: _listPath.length + 1,
+              shrinkWrap: true,
+              scrollDirection: Axis.horizontal,
+              itemBuilder: (BuildContext context, int index) {
+                return index < _listPath.length
+                    ? _buildItemMedia(_listPath[index])
+                    : _buildDefaultItemMedia();
+              },
+            ),
+          ),
         ],
       ),
     );
@@ -506,37 +531,37 @@ class _ServiceScreenState extends State<StaffServiceScreen> {
             ClipRRect(
               borderRadius: BorderRadius.circular(8.0),
               child: ImageUtil.loadNetWorkImage(
-                  url: "$protocol${AppConfig.instance.values.apiUrl}$path",
-                  width: 120,
-                  height: 200),
+                url: "$protocol${AppConfig.instance.values.apiUrl}$path",
+                width: 120,
+                height: 200,
+              ),
             ),
             Positioned(
-                top: 0,
-                right: 0,
-                child: GestureDetector(
-                  child: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.grey,
-                      borderRadius: BorderRadius.circular(60),
-                    ),
-                    child: const Icon(
-                      Icons.delete,
-                      color: Colors.white,
-                      size: 25,
-                    ),
+              top: 0,
+              right: 0,
+              child: GestureDetector(
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.grey,
+                    borderRadius: BorderRadius.circular(60),
                   ),
-                  onTap: () {
-                    setState(() {
-                      _listPath.remove(path);
-                    });
-                  },
-                ))
+                  child: const Icon(
+                    Icons.delete,
+                    color: Colors.white,
+                    size: 25,
+                  ),
+                ),
+                onTap: () {
+                  setState(() {
+                    _listPath.remove(path);
+                  });
+                },
+              ),
+            ),
           ],
         ),
-        const SizedBox(
-          width: 5.0,
-        ),
+        const SizedBox(width: 5.0),
       ],
     );
   }
@@ -547,18 +572,24 @@ class _ServiceScreenState extends State<StaffServiceScreen> {
       children: [
         InputDecorator(
           decoration: InputDecoration(
-            errorStyle:
-                const TextStyle(color: Colors.redAccent, fontSize: 16.0),
+            errorStyle: const TextStyle(
+              color: Colors.redAccent,
+              fontSize: 16.0,
+            ),
             hintText: 'Please select expense',
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8.0),
               borderSide: const BorderSide(
-                  color: ColorUtil.bangladeshGreen, width: 0.5),
+                color: ColorUtil.bangladeshGreen,
+                width: 0.5,
+              ),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8.0),
               borderSide: const BorderSide(
-                  color: ColorUtil.bangladeshGreen, width: 0.5),
+                color: ColorUtil.bangladeshGreen,
+                width: 0.5,
+              ),
             ),
             prefixIcon: const Icon(Icons.account_box_outlined),
           ),
@@ -574,10 +605,13 @@ class _ServiceScreenState extends State<StaffServiceScreen> {
                   onChanged: (String? newValue) {
                     setState(() {
                       _currentSelectedProductValue = int.parse(newValue ?? "0");
-                      var add = _listProducts
-                              .where((item) =>
-                                  item.id.toString() ==
-                                  _currentSelectedProductValue.toString())
+                      var add =
+                          _listProducts
+                              .where(
+                                (item) =>
+                                    item.id.toString() ==
+                                    _currentSelectedProductValue.toString(),
+                              )
                               .first
                               .address ??
                           '';
@@ -610,8 +644,10 @@ class _ServiceScreenState extends State<StaffServiceScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: const [
                   Padding(
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 8.0, vertical: 5.0),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 8.0,
+                      vertical: 5.0,
+                    ),
                     child: Icon(Icons.account_box_outlined),
                   ),
                 ],
@@ -620,18 +656,26 @@ class _ServiceScreenState extends State<StaffServiceScreen> {
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8.0),
               borderSide: const BorderSide(
-                  color: ColorUtil.bangladeshGreen, width: 0.5),
+                color: ColorUtil.bangladeshGreen,
+                width: 0.5,
+              ),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8.0),
               borderSide: const BorderSide(
-                  color: ColorUtil.bangladeshGreen, width: 0.5),
+                color: ColorUtil.bangladeshGreen,
+                width: 0.5,
+              ),
             ),
             hintText: 'Vị trí lắp đặt',
-            hintStyle:
-                const TextStyle(color: ColorUtil.silverChalice, fontSize: 13),
-            contentPadding:
-                const EdgeInsets.symmetric(vertical: 3, horizontal: 1),
+            hintStyle: const TextStyle(
+              color: ColorUtil.silverChalice,
+              fontSize: 13,
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              vertical: 3,
+              horizontal: 1,
+            ),
           ),
         ),
       ],
@@ -643,20 +687,27 @@ class _ServiceScreenState extends State<StaffServiceScreen> {
       builder: (FormFieldState<String> state) {
         return InputDecorator(
           decoration: InputDecoration(
-              errorStyle:
-                  const TextStyle(color: Colors.redAccent, fontSize: 16.0),
-              hintText: 'Please select expense',
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8.0),
-                borderSide: const BorderSide(
-                    color: ColorUtil.bangladeshGreen, width: 0.5),
+            errorStyle: const TextStyle(
+              color: Colors.redAccent,
+              fontSize: 16.0,
+            ),
+            hintText: 'Please select expense',
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8.0),
+              borderSide: const BorderSide(
+                color: ColorUtil.bangladeshGreen,
+                width: 0.5,
               ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8.0),
-                borderSide: const BorderSide(
-                    color: ColorUtil.bangladeshGreen, width: 0.5),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8.0),
+              borderSide: const BorderSide(
+                color: ColorUtil.bangladeshGreen,
+                width: 0.5,
               ),
-              prefixIcon: const Icon(Icons.account_box_outlined)),
+            ),
+            prefixIcon: const Icon(Icons.account_box_outlined),
+          ),
           isEmpty: _currentSelectedValue == '',
           child: DropdownButtonHideUnderline(
             child: DropdownButton<String>(
@@ -695,83 +746,92 @@ class _ServiceScreenState extends State<StaffServiceScreen> {
           titleTextField,
           style: const TextStyle(color: ColorUtil.raisinBlack, fontSize: 15),
         ),
-        const SizedBox(
-          height: 5,
-        ),
-        Row(children: [
-          Expanded(
+        const SizedBox(height: 5),
+        Row(
+          children: [
+            Expanded(
               flex: 2,
               child: Container(
                 height: 40,
                 decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8.0),
-                    border: Border.all(
-                        color: ColorUtil.bangladeshGreen, width: 0.5)),
+                  borderRadius: BorderRadius.circular(8.0),
+                  border: Border.all(
+                    color: ColorUtil.bangladeshGreen,
+                    width: 0.5,
+                  ),
+                ),
                 child: GestureDetector(
-                    onTap: onTapFirst,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(left: 10.0),
-                          child: Icon(
-                            iconPrefixFirst,
-                            color: ColorUtil.spanishGray,
+                  onTap: onTapFirst,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(left: 10.0),
+                        child: Icon(
+                          iconPrefixFirst,
+                          color: ColorUtil.spanishGray,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Flexible(
+                        child: Text(
+                          firstValue.isEmpty ? 'dd/MM/yyyy' : firstValue,
+                          style: TextStyle(
+                            color: firstValue.isEmpty
+                                ? ColorUtil.silverChalice
+                                : ColorUtil.raisinBlack,
                           ),
                         ),
-                        const SizedBox(
-                          width: 10,
-                        ),
-                        Flexible(
-                            child: Text(
-                                firstValue.isEmpty ? 'dd/MM/yyyy' : firstValue,
-                                style: TextStyle(
-                                    color: firstValue.isEmpty
-                                        ? ColorUtil.silverChalice
-                                        : ColorUtil.raisinBlack)))
-                      ],
-                    )),
-              )),
-          const SizedBox(
-            width: 5,
-          ),
-          Expanded(
-            flex: 1,
-            child: Container(
-              height: 40,
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8.0),
-                  border:
-                      Border.all(color: ColorUtil.bangladeshGreen, width: 0.5)),
-              child: GestureDetector(
-                onTap: onTapSecond,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(left: 10.0),
-                      child: Icon(
-                        iconPrefixSecond,
-                        color: ColorUtil.spanishGray,
                       ),
-                    ),
-                    const SizedBox(
-                      width: 10,
-                    ),
-                    Flexible(
-                        child: Text(secondValue.isEmpty ? 'hh:mm' : secondValue,
-                            style: TextStyle(
-                                color: secondValue.isEmpty
-                                    ? ColorUtil.silverChalice
-                                    : ColorUtil.raisinBlack)))
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
-          )
-        ])
+            const SizedBox(width: 5),
+            Expanded(
+              flex: 1,
+              child: Container(
+                height: 40,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8.0),
+                  border: Border.all(
+                    color: ColorUtil.bangladeshGreen,
+                    width: 0.5,
+                  ),
+                ),
+                child: GestureDetector(
+                  onTap: onTapSecond,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(left: 10.0),
+                        child: Icon(
+                          iconPrefixSecond,
+                          color: ColorUtil.spanishGray,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Flexible(
+                        child: Text(
+                          secondValue.isEmpty ? 'hh:mm' : secondValue,
+                          style: TextStyle(
+                            color: secondValue.isEmpty
+                                ? ColorUtil.silverChalice
+                                : ColorUtil.raisinBlack,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ],
     );
   }
@@ -791,46 +851,59 @@ class _ServiceScreenState extends State<StaffServiceScreen> {
         Container(
           padding: const EdgeInsets.only(top: 5),
           child: TextFormField(
-              readOnly: isReadOnly,
-              keyboardType: TextInputType.multiline,
-                  // isNumberType ? TextInputType.phone : TextInputType.text,
-              controller: controller,
-              maxLines: 5,
-              cursorColor: ColorUtil.bangladeshGreen,
-              decoration: InputDecoration(
-                prefixIcon: SizedBox(
-                  width: 20,
-                  height: 100,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8.0, vertical: 5.0),
-                        child: Icon(iconPrefix),
+            readOnly: isReadOnly,
+            keyboardType: TextInputType.multiline,
+            // isNumberType ? TextInputType.phone : TextInputType.text,
+            controller: controller,
+            maxLines: 5,
+            cursorColor: ColorUtil.bangladeshGreen,
+            decoration: InputDecoration(
+              prefixIcon: SizedBox(
+                width: 20,
+                height: 100,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8.0,
+                        vertical: 5.0,
                       ),
-                    ],
-                  ),
+                      child: Icon(iconPrefix),
+                    ),
+                  ],
                 ),
-                suffixIcon: haveSuffixIcon ? Icon(iconSuffix) : null,
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                  borderSide: const BorderSide(
-                      color: ColorUtil.bangladeshGreen, width: 0.5),
+              ),
+              suffixIcon: haveSuffixIcon ? Icon(iconSuffix) : null,
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.0),
+                borderSide: const BorderSide(
+                  color: ColorUtil.bangladeshGreen,
+                  width: 0.5,
                 ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                  borderSide: const BorderSide(
-                      color: ColorUtil.bangladeshGreen, width: 0.5),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.0),
+                borderSide: const BorderSide(
+                  color: ColorUtil.bangladeshGreen,
+                  width: 0.5,
                 ),
-                hintText: placeHolder,
-                hintStyle: const TextStyle(
-                    color: ColorUtil.silverChalice, fontSize: 13),
-                contentPadding:
-                    const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
-                suffixIconConstraints:
-                    const BoxConstraints(minHeight: 20, minWidth: 20),
-              )),
+              ),
+              hintText: placeHolder,
+              hintStyle: const TextStyle(
+                color: ColorUtil.silverChalice,
+                fontSize: 13,
+              ),
+              contentPadding: const EdgeInsets.symmetric(
+                vertical: 5,
+                horizontal: 15,
+              ),
+              suffixIconConstraints: const BoxConstraints(
+                minHeight: 20,
+                minWidth: 20,
+              ),
+            ),
+          ),
         ),
       ],
     );
@@ -838,61 +911,68 @@ class _ServiceScreenState extends State<StaffServiceScreen> {
 
   Widget _buildButton({text, isPositive, action}) {
     return Expanded(
-        child: isPositive
-            ? _button(isPositive, action, text)
-            : ElevatedButton(
-                style: ButtonStyle(
-                  padding: WidgetStateProperty.all<EdgeInsets>(
-                      const EdgeInsets.symmetric(vertical: 10)),
-                  backgroundColor:
-                      WidgetStateProperty.all<Color>(ColorUtil.white),
-                  shape: WidgetStateProperty.all<RoundedRectangleBorder>(
-                    RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                      side: const BorderSide(
-                        color: ColorUtil.bangladeshGreen,
-                        width: 2,
-                      ),
+      child: isPositive
+          ? _button(isPositive, action, text)
+          : ElevatedButton(
+              style: ButtonStyle(
+                padding: WidgetStateProperty.all<EdgeInsets>(
+                  const EdgeInsets.symmetric(vertical: 10),
+                ),
+                backgroundColor: WidgetStateProperty.all<Color>(
+                  ColorUtil.white,
+                ),
+                shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+                  RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    side: const BorderSide(
+                      color: ColorUtil.bangladeshGreen,
+                      width: 2,
                     ),
                   ),
                 ),
-                child: Text(
-                  text,
-                  style: const TextStyle(color: ColorUtil.bangladeshGreen),
-                ),
-                onPressed: () {
-                  if (action == null) {
-                    Navigator.pop(context);
-                  } else {
-                    action();
-                  }
-                },
-              ));
+              ),
+              child: Text(
+                text,
+                style: const TextStyle(color: ColorUtil.bangladeshGreen),
+              ),
+              onPressed: () {
+                if (action == null) {
+                  Navigator.pop(context);
+                } else {
+                  action();
+                }
+              },
+            ),
+    );
   }
 
   StatelessWidget _button(isPositive, action, text) {
     return ButtonWidget(
-        color: isPositive ? ColorUtil.bangladeshGreen : Colors.grey,
-        borderRadius: BorderRadius.circular(30),
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        onTap: () {
-          if (action == null) {
-            Navigator.pop(context);
-          } else {
-            action();
-          }
-        },
-        child: Text(
-          text,
-          textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 16, color: Colors.white),
-        ));
+      color: isPositive ? ColorUtil.bangladeshGreen : Colors.grey,
+      borderRadius: BorderRadius.circular(30),
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      onTap: () {
+        if (action == null) {
+          Navigator.pop(context);
+        } else {
+          action();
+        }
+      },
+      child: Text(
+        text,
+        textAlign: TextAlign.center,
+        style: const TextStyle(fontSize: 16, color: Colors.white),
+      ),
+    );
   }
 
   void _onChooseImages() async {
     Navigator.of(context).pop();
     List<File>? files = await onGetMultiPhoto(
-        context: context, funcPermission: () {}, picker: _picker);
+      context: context,
+      funcPermission: () {},
+      picker: _picker,
+    );
     if (files != null && files.isNotEmpty) {
       for (var file in files) {
         img.Image? originalImage = img.decodeImage(await file.readAsBytes());
@@ -908,9 +988,7 @@ class _ServiceScreenState extends State<StaffServiceScreen> {
     }
   }
 
-  Future getImage(
-    ImageSource img,
-  ) async {
+  Future getImage(ImageSource img) async {
     if (await Permission.camera.request().isGranted) {
       if (_listPath.length >= 4) {
         context.showSnackBar('Chỉ được chọn tối đa 4 ảnh!');
@@ -918,8 +996,10 @@ class _ServiceScreenState extends State<StaffServiceScreen> {
       } else {
         final picker = ImagePicker();
         File? galleryFile;
-        final pickedFile =
-            await picker.pickImage(source: img, imageQuality: 30);
+        final pickedFile = await picker.pickImage(
+          source: img,
+          imageQuality: 30,
+        );
         List<File>? files = [];
         if (pickedFile != null) {
           galleryFile = File(pickedFile.path);
@@ -930,8 +1010,10 @@ class _ServiceScreenState extends State<StaffServiceScreen> {
             context.showSnackBar('Chỉ được chọn tối đa 4 ảnh!');
           }
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(// is this context <<<
-              const SnackBar(content: Text('Nothing is selected')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            // is this context <<<
+            const SnackBar(content: Text('Nothing is selected')),
+          );
         }
       }
     } else {
@@ -959,11 +1041,12 @@ class _ServiceScreenState extends State<StaffServiceScreen> {
 
   Future<void> _selectDate() async {
     final DateTime? picked = await showDatePicker(
-        context: context,
-        locale: const Locale("vi", "VN"),
-        initialDate: selectedDate ?? DateTime.now(),
-        firstDate: DateTime.now(),
-        lastDate: DateTime(2050));
+      context: context,
+      locale: const Locale("vi", "VN"),
+      initialDate: selectedDate ?? DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2050),
+    );
     if (picked != null && picked != selectedDate) {
       selectedDate = picked;
       setState(() {
@@ -989,64 +1072,67 @@ class _ServiceScreenState extends State<StaffServiceScreen> {
 
   Future<void> _addCustomer() async {
     return showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            scrollable: true,
-            title: const Text(
-              'Thêm mới khách hàng',
-              textAlign: TextAlign.center,
-            ),
-            content: Column(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          scrollable: true,
+          title: const Text('Thêm mới khách hàng', textAlign: TextAlign.center),
+          content: Column(
+            children: [
+              _buildTextField(
+                controller: _nameTextController,
+                hintText: 'Họ và tên',
+              ),
+              _buildTextField(
+                controller: _addressTextController,
+                hintText: 'Địa chỉ',
+              ),
+              _buildTextField(
+                controller: customerController,
+                hintText: 'Số điện thoại',
+                isPhoneNumber: true,
+              ),
+            ],
+          ),
+          actions: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _buildTextField(
-                  controller: _nameTextController,
-                  hintText: 'Họ và tên',
+                _buildButtonDialog(
+                  isPositive: false,
+                  text: 'Hủy',
+                  action: () {
+                    //todo
+                    Navigator.pop(context);
+                  },
                 ),
-                _buildTextField(
-                    controller: _addressTextController, hintText: 'Địa chỉ'),
-                _buildTextField(
-                  controller: customerController,
-                  hintText: 'Số điện thoại',
-                  isPhoneNumber: true,
+                const SizedBox(width: 16),
+                _buildButtonDialog(
+                  isPositive: true,
+                  text: 'Gửi',
+                  action: () {
+                    //todo
+                    _bloc.add(
+                      UserAddressScreenCreateUserAddressEvent(
+                        UserAddressRequest(
+                          name: _nameTextController.text.trim(),
+                          address: _addressTextController.text.trim(),
+                          phone: customerController.text.trim(),
+                          pass: customerController.text.trim(),
+                          cityCode: "AGG",
+                          stateCode: "dt",
+                        ),
+                      ),
+                    );
+                    Navigator.pop(context);
+                  },
                 ),
               ],
             ),
-            actions: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _buildButtonDialog(
-                      isPositive: false,
-                      text: 'Hủy',
-                      action: () {
-                        //todo
-                        Navigator.pop(context);
-                      }),
-                  const SizedBox(width: 16),
-                  _buildButtonDialog(
-                      isPositive: true,
-                      text: 'Gửi',
-                      action: () {
-                        //todo
-                        _bloc.add(
-                          UserAddressScreenCreateUserAddressEvent(
-                            UserAddressRequest(
-                                name: _nameTextController.text.trim(),
-                                address: _addressTextController.text.trim(),
-                                phone: customerController.text.trim(),
-                                pass: customerController.text.trim(),
-                                cityCode: "AGG",
-                                stateCode: "dt"),
-                          ),
-                        );
-                        Navigator.pop(context);
-                      }),
-                ],
-              )
-            ],
-          );
-        });
+          ],
+        );
+      },
+    );
   }
 
   Widget _buildButtonDialog({isPositive, action, text}) {
@@ -1067,8 +1153,9 @@ class _ServiceScreenState extends State<StaffServiceScreen> {
           onChanged: (String text) {
             setState(() {});
           },
-          keyboardType:
-              isPhoneNumber ? TextInputType.phone : TextInputType.text,
+          keyboardType: isPhoneNumber
+              ? TextInputType.phone
+              : TextInputType.text,
           maxLength: isPhoneNumber ? 10 : null,
           hintText: hintText,
           label: Text(hintText),
@@ -1089,81 +1176,74 @@ class _ServiceScreenState extends State<StaffServiceScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Visibility(
-            visible: titleTextField == '' ? false : true,
-            child: Text(
-              titleTextField,
-              style:
-                  const TextStyle(color: ColorUtil.raisinBlack, fontSize: 15),
-            )),
-        const SizedBox(
-          height: 5,
+          visible: titleTextField == '' ? false : true,
+          child: Text(
+            titleTextField,
+            style: const TextStyle(color: ColorUtil.raisinBlack, fontSize: 15),
+          ),
         ),
+        const SizedBox(height: 5),
         GestureDetector(
           onTap: onTap,
           child: Container(
             height: 40,
             decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8.0),
-                border:
-                    Border.all(color: ColorUtil.bangladeshGreen, width: 0.5)),
+              borderRadius: BorderRadius.circular(8.0),
+              border: Border.all(color: ColorUtil.bangladeshGreen, width: 0.5),
+            ),
             child: Row(
               mainAxisSize: MainAxisSize.max,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Padding(
                   padding: const EdgeInsets.only(left: 10.0),
-                  child: Icon(
-                    iconPrefix,
-                    color: ColorUtil.spanishGray,
-                  ),
+                  child: Icon(iconPrefix, color: ColorUtil.spanishGray),
                 ),
-                const SizedBox(
-                  width: 10,
-                ),
+                const SizedBox(width: 10),
                 Expanded(
-                  child: Text(value.isEmpty ? hint : value,
-                      style: TextStyle(
-                          color: value.isEmpty
-                              ? ColorUtil.silverChalice
-                              : ColorUtil.raisinBlack),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis),
+                  child: Text(
+                    value.isEmpty ? hint : value,
+                    style: TextStyle(
+                      color: value.isEmpty
+                          ? ColorUtil.silverChalice
+                          : ColorUtil.raisinBlack,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
                 Padding(
                   padding: const EdgeInsets.only(right: 8.0),
-                  child: Icon(
-                    iconSuffix,
-                    color: ColorUtil.spanishGray,
-                  ),
+                  child: Icon(iconSuffix, color: ColorUtil.spanishGray),
                 ),
               ],
             ),
           ),
         ),
-        const SizedBox(
-          height: 10,
-        ),
+        const SizedBox(height: 10),
       ],
     );
   }
 
   void _onChooseFavouriteStaff() {
     Navigator.of(context)
-        .push(MaterialPageRoute(
-      builder: (context) => TechniqueScreen(
-        initialTabIndex: 1,
-        favoriteStaff: _favouriteStaff,
-      ),
-    ))
+        .push(
+          MaterialPageRoute(
+            builder: (context) => TechniqueScreen(
+              initialTabIndex: 1,
+              favoriteStaff: _favouriteStaff,
+            ),
+          ),
+        )
         .then((value) {
-      Map<String, dynamic>? result = {};
-      result = value as Map<String, dynamic>?;
-      if (result != null) {
-        setState(() {
-          _favouriteStaff = result!['favouriteStaff'];
+          Map<String, dynamic>? result = {};
+          result = value as Map<String, dynamic>?;
+          if (result != null) {
+            setState(() {
+              _favouriteStaff = result!['favouriteStaff'];
+            });
+          }
         });
-      }
-    });
   }
 
   bool isValidPhoneNumber(String string) {

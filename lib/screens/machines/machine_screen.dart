@@ -34,23 +34,26 @@ class _ProductScreenState extends State<ProductScreen> {
     _bloc.add(ProductScreenGetProductCategoryEvent(offSet: offSet));
     _scrollController = ScrollController()..addListener(_scrollListener);
   }
+
   @override
   void dispose() {
     _scrollController.removeListener(_scrollListener);
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<ProductScreenBloc, ProductScreenState>(
-        builder: _builder, listener: listener);
+      builder: _builder,
+      listener: listener,
+    );
   }
 
-  void listener(BuildContext context, ProductScreenState state) {
-
-  }
-//// ADDING THE SCROLL LISTINER
+  void listener(BuildContext context, ProductScreenState state) {}
+  //// ADDING THE SCROLL LISTINER
   void _scrollListener() {
-    if (_scrollController.offset >= _scrollController.position.maxScrollExtent &&
+    if (_scrollController.offset >=
+            _scrollController.position.maxScrollExtent &&
         !_scrollController.position.outOfRange) {
       setState(() {
         offSet = offSet + 20;
@@ -58,6 +61,7 @@ class _ProductScreenState extends State<ProductScreen> {
       });
     }
   }
+
   Widget _builder(BuildContext context, ProductScreenState state) {
     return Scaffold(
       appBar: MyAppBar(
@@ -71,7 +75,7 @@ class _ProductScreenState extends State<ProductScreen> {
           child: ListView.builder(
             shrinkWrap: true,
             controller: _scrollController,
-            itemCount: (_bloc.listProductModel.length/2).ceil(),
+            itemCount: (_bloc.listProductModel.length / 2).ceil(),
             itemBuilder: _buildItemProductCategory,
           ),
         ),
@@ -81,19 +85,21 @@ class _ProductScreenState extends State<ProductScreen> {
 
   Widget _buildItemProductCategory(BuildContext context, int index) {
     List<ProductModel> rowsItem;
-    if(_bloc.listProductModel.length - index*2 <=0){
+    if (_bloc.listProductModel.length - index * 2 <= 0) {
       rowsItem = [];
-    }else{
-      if(_bloc.listProductModel.length - index*2 <=2 ){
-        rowsItem= _bloc.listProductModel.sublist(index*2);
-      }else{
-        rowsItem= _bloc.listProductModel.sublist(index*2,index*2+2);
+    } else {
+      if (_bloc.listProductModel.length - index * 2 <= 2) {
+        rowsItem = _bloc.listProductModel.sublist(index * 2);
+      } else {
+        rowsItem = _bloc.listProductModel.sublist(index * 2, index * 2 + 2);
       }
     }
 
     return Container(
       margin: const EdgeInsets.symmetric(
-          horizontal: paddingHorizontal, vertical: paddingVertical),
+        horizontal: paddingHorizontal,
+        vertical: paddingVertical,
+      ),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: const BorderRadius.all(Radius.circular(10.0)),
@@ -124,7 +130,7 @@ class _ProductScreenState extends State<ProductScreen> {
                 return _itemProduct(productInfo);
               },
             ),
-          )
+          ),
         ],
       ),
     );
@@ -133,8 +139,11 @@ class _ProductScreenState extends State<ProductScreen> {
   Widget _itemProduct(ProductModel productInfo) {
     return GestureDetector(
       onTap: () {
-        Navigator.pushNamed(context, Routes.productDetail,
-            arguments: productInfo);
+        Navigator.pushNamed(
+          context,
+          Routes.productDetail,
+          arguments: productInfo,
+        );
       },
       child: Card(
         elevation: 2,
@@ -143,23 +152,30 @@ class _ProductScreenState extends State<ProductScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-
-              SizedBox(height: context.width / 3,width: context.width / 3,
-                  child:ClipRRect(
-                      borderRadius: BorderRadius.circular(8.0),
-                    child: ImageUtil.loadNetWorkImage(
-                        url: productInfo.images!.isNotEmpty && productInfo.images![0].link != null?"$protocol${AppConfig.instance.values.apiUrl}${productInfo.images![0].link!}":"",
-                        height: double.infinity,
-                        fit: BoxFit.contain,
-                        )),
+              SizedBox(
+                height: context.width / 3,
+                width: context.width / 3,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8.0),
+                  child: ImageUtil.loadNetWorkImage(
+                    url:
+                        productInfo.images!.isNotEmpty &&
+                            productInfo.images![0].link != null
+                        ? "$protocol${AppConfig.instance.values.apiUrl}${productInfo.images![0].link!}"
+                        : "",
+                    height: double.infinity,
+                    fit: BoxFit.contain,
                   ),
+                ),
+              ),
               Text(
                 productInfo.name ?? "",
                 maxLines: 2,
                 style: const TextStyle(
-                    overflow: TextOverflow.ellipsis,
-                    fontSize: 13,
-                    color: ColorUtil.bangladeshGreen),
+                  overflow: TextOverflow.ellipsis,
+                  fontSize: 13,
+                  color: ColorUtil.bangladeshGreen,
+                ),
               ),
               const SizedBox(height: 5),
               // Row(
@@ -205,4 +221,3 @@ class _ProductScreenState extends State<ProductScreen> {
     Navigator.pushNamed(context, Routes.productViewMoreScreen, arguments: item);
   }
 }
-

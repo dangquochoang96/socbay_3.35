@@ -82,7 +82,8 @@ class _ServiceScreenState extends State<ServiceScreen> {
     addressRequestTxtController.text = App.instance.userApp?.address ?? "";
     _listService = _bloc.listService;
     _listProducts.add(
-        OrderModel(id: 0, product: MachineModel(id: 0, name: "--Chọn máy--")));
+      OrderModel(id: 0, product: MachineModel(id: 0, name: "--Chọn máy--")),
+    );
     _currentSelectedValue = _listService.isNotEmpty
         ? _listService[int.tryParse(_bloc.args['index']) ?? 0].id.toString()
         : "0";
@@ -127,7 +128,9 @@ class _ServiceScreenState extends State<ServiceScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<ServiceScreenBloc, ServiceScreenState>(
-        builder: _builder, listener: _listener);
+      builder: _builder,
+      listener: _listener,
+    );
   }
 
   void _listener(BuildContext context, ServiceScreenState state) {
@@ -182,81 +185,85 @@ class _ServiceScreenState extends State<ServiceScreen> {
 
   Widget _builder(BuildContext context, ServiceScreenState state) {
     return Scaffold(
-        appBar: MyAppBar(
-          isBackNavigation: true,
-          title: 'Đăng ký dịch vụ',
-          centerTitle: true,
-          onBack: () {
-            // Navigator.pushNamed(context, Routes.root);
-            Navigator.pop(context);
-          },
-        ),
-        body: LoadingIndicator(
-          isLoading: _bloc.isLoading,
-          child: SafeArea(
-            child: Scaffold(
-              body: ListView(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: paddingHorizontal, vertical: paddingVertical),
-                children: [
-                  _buildDropdownField(),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  _buildDropdownFieldPruducts(),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  _buildFormDoubleHorizontal(
-                      'Hẹn lịch', Icons.calendar_today, Icons.av_timer_sharp,
-                      firstValue: _dateStart,
-                      secondValue: _timeStart,
-                      onTapFirst: _onTapDateStart,
-                      onTapSecond: _onTapTimeStart),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  _buildField('', 'Thợ ưa thích', Icons.person_outlined, null,
-                      value: _favouriteStaff?.username ?? "", onTap: () {
-                    _onChooseFavoriteStaff();
-                  }),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  _buildFormDescribe(
-                      'Mô tả yêu cầu',
-                      describeRequestTxtController,
-                      Icons.description_outlined,
-                      null),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  _buildSectionMedia(),
-                  // const SizedBox(
-                  //   height: 10,
-                  // ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 8.0, vertical: 16),
-                    child: Row(
-                      children: [
-                        _buildButton(
-                            text: 'ĐẶT LỊCH',
-                            isPositive: true,
-                            action: () {
-                              _onCreateTask();
-                            }),
-                        const SizedBox(
-                          width: 16,
-                        ),
-                      ],
-                    ),
-                  )
-                ],
+      appBar: MyAppBar(
+        isBackNavigation: true,
+        title: 'Đăng ký dịch vụ',
+        centerTitle: true,
+        onBack: () {
+          // Navigator.pushNamed(context, Routes.root);
+          Navigator.pop(context);
+        },
+      ),
+      body: LoadingIndicator(
+        isLoading: _bloc.isLoading,
+        child: SafeArea(
+          child: Scaffold(
+            body: ListView(
+              padding: const EdgeInsets.symmetric(
+                horizontal: paddingHorizontal,
+                vertical: paddingVertical,
               ),
+              children: [
+                _buildDropdownField(),
+                const SizedBox(height: 10),
+                _buildDropdownFieldPruducts(),
+                const SizedBox(height: 10),
+                _buildFormDoubleHorizontal(
+                  'Hẹn lịch',
+                  Icons.calendar_today,
+                  Icons.av_timer_sharp,
+                  firstValue: _dateStart,
+                  secondValue: _timeStart,
+                  onTapFirst: _onTapDateStart,
+                  onTapSecond: _onTapTimeStart,
+                ),
+                const SizedBox(height: 10),
+                _buildField(
+                  '',
+                  'Thợ ưa thích',
+                  Icons.person_outlined,
+                  null,
+                  value: _favouriteStaff?.username ?? "",
+                  onTap: () {
+                    _onChooseFavoriteStaff();
+                  },
+                ),
+                const SizedBox(height: 10),
+                _buildFormDescribe(
+                  'Mô tả yêu cầu',
+                  describeRequestTxtController,
+                  Icons.description_outlined,
+                  null,
+                ),
+                const SizedBox(height: 10),
+                _buildSectionMedia(),
+                // const SizedBox(
+                //   height: 10,
+                // ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8.0,
+                    vertical: 16,
+                  ),
+                  child: Row(
+                    children: [
+                      _buildButton(
+                        text: 'ĐẶT LỊCH',
+                        isPositive: true,
+                        action: () {
+                          _onCreateTask();
+                        },
+                      ),
+                      const SizedBox(width: 16),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
-        ));
+        ),
+      ),
+    );
   }
 
   Future _onCreateTask() async {
@@ -278,7 +285,8 @@ class _ServiceScreenState extends State<ServiceScreen> {
         .where((element) => element.id == _currentSelectedProductValue)
         .first
         .id;
-    _bloc.add(ServiceScreenCreateTaskEvent(
+    _bloc.add(
+      ServiceScreenCreateTaskEvent(
         CreateTaskRequest(
           type: 1,
           name: serviceName,
@@ -295,40 +303,44 @@ class _ServiceScreenState extends State<ServiceScreen> {
           images: _listPath,
           address: addressSPRequestTxtController.text,
         ),
-        false));
+        false,
+      ),
+    );
   }
 
   void _showModalBottomSheetMedia() {
     showModalBottomSheet(
-        useSafeArea: true,
-        context: context,
-        builder: (BuildContext context) {
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: const Icon(Icons.image),
-                title: const Text('Image'),
-                onTap: _onChooseImages,
-              ),
-              ListTile(
-                leading: const Icon(Icons.photo_camera),
-                title: const Text('Camera'),
-                onTap: () {
-                  getImage(ImageSource.camera);
-                  Navigator.of(context).pop();
-                },
-              )
-            ],
-          );
-        });
+      useSafeArea: true,
+      context: context,
+      builder: (BuildContext context) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.image),
+              title: const Text('Image'),
+              onTap: _onChooseImages,
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_camera),
+              title: const Text('Camera'),
+              onTap: () {
+                getImage(ImageSource.camera);
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Widget _buildSectionMedia() {
     return Container(
       decoration: BoxDecoration(
-          border: Border.all(color: ColorUtil.bangladeshGreen, width: 0.5),
-          borderRadius: BorderRadius.circular(8.0)),
+        border: Border.all(color: ColorUtil.bangladeshGreen, width: 0.5),
+        borderRadius: BorderRadius.circular(8.0),
+      ),
       padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 5.0),
       child: Column(
         children: [
@@ -336,31 +348,30 @@ class _ServiceScreenState extends State<ServiceScreen> {
             children: const [
               Padding(
                 padding: EdgeInsets.all(8.0),
-                child: Icon(
-                  Icons.upload_file,
-                  color: ColorUtil.spanishGray,
-                ),
+                child: Icon(Icons.upload_file, color: ColorUtil.spanishGray),
               ),
               Flexible(
-                  child: Text(
-                'Up ảnh (tối đa 4 ảnh) và video (tối đa 15s) để kỹ thuật xem xét.',
-                style: TextStyle(color: ColorUtil.spanishGray),
-              ))
+                child: Text(
+                  'Up ảnh (tối đa 4 ảnh) và video (tối đa 15s) để kỹ thuật xem xét.',
+                  style: TextStyle(color: ColorUtil.spanishGray),
+                ),
+              ),
             ],
           ),
           SizedBox(
-              height: 200,
-              width: double.infinity,
-              child: ListView.builder(
-                itemCount: _listPath.length + 1,
-                shrinkWrap: true,
-                scrollDirection: Axis.horizontal,
-                itemBuilder: (BuildContext context, int index) {
-                  return index < _listPath.length
-                      ? _buildItemMedia(_listPath[index])
-                      : _buildDefaultItemMedia();
-                },
-              )),
+            height: 200,
+            width: double.infinity,
+            child: ListView.builder(
+              itemCount: _listPath.length + 1,
+              shrinkWrap: true,
+              scrollDirection: Axis.horizontal,
+              itemBuilder: (BuildContext context, int index) {
+                return index < _listPath.length
+                    ? _buildItemMedia(_listPath[index])
+                    : _buildDefaultItemMedia();
+              },
+            ),
+          ),
         ],
       ),
     );
@@ -389,37 +400,37 @@ class _ServiceScreenState extends State<ServiceScreen> {
             ClipRRect(
               borderRadius: BorderRadius.circular(8.0),
               child: ImageUtil.loadNetWorkImage(
-                  url: "$protocol${AppConfig.instance.values.apiUrl}$path",
-                  width: 120,
-                  height: 200),
+                url: "$protocol${AppConfig.instance.values.apiUrl}$path",
+                width: 120,
+                height: 200,
+              ),
             ),
             Positioned(
-                top: 0,
-                right: 0,
-                child: GestureDetector(
-                  child: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.grey,
-                      borderRadius: BorderRadius.circular(60),
-                    ),
-                    child: const Icon(
-                      Icons.delete,
-                      color: Colors.white,
-                      size: 25,
-                    ),
+              top: 0,
+              right: 0,
+              child: GestureDetector(
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.grey,
+                    borderRadius: BorderRadius.circular(60),
                   ),
-                  onTap: () {
-                    setState(() {
-                      _listPath.remove(path);
-                    });
-                  },
-                ))
+                  child: const Icon(
+                    Icons.delete,
+                    color: Colors.white,
+                    size: 25,
+                  ),
+                ),
+                onTap: () {
+                  setState(() {
+                    _listPath.remove(path);
+                  });
+                },
+              ),
+            ),
           ],
         ),
-        const SizedBox(
-          width: 5.0,
-        ),
+        const SizedBox(width: 5.0),
       ],
     );
   }
@@ -430,18 +441,24 @@ class _ServiceScreenState extends State<ServiceScreen> {
       children: [
         InputDecorator(
           decoration: InputDecoration(
-            errorStyle:
-                const TextStyle(color: Colors.redAccent, fontSize: 16.0),
+            errorStyle: const TextStyle(
+              color: Colors.redAccent,
+              fontSize: 16.0,
+            ),
             hintText: 'Please select expense',
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8.0),
               borderSide: const BorderSide(
-                  color: ColorUtil.bangladeshGreen, width: 0.5),
+                color: ColorUtil.bangladeshGreen,
+                width: 0.5,
+              ),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8.0),
               borderSide: const BorderSide(
-                  color: ColorUtil.bangladeshGreen, width: 0.5),
+                color: ColorUtil.bangladeshGreen,
+                width: 0.5,
+              ),
             ),
             prefixIcon: const Icon(Icons.account_box_outlined),
           ),
@@ -457,10 +474,13 @@ class _ServiceScreenState extends State<ServiceScreen> {
                   onChanged: (String? newValue) {
                     setState(() {
                       _currentSelectedProductValue = int.parse(newValue ?? "0");
-                      var add = _listProducts
-                              .where((item) =>
-                                  item.id.toString() ==
-                                  _currentSelectedProductValue.toString())
+                      var add =
+                          _listProducts
+                              .where(
+                                (item) =>
+                                    item.id.toString() ==
+                                    _currentSelectedProductValue.toString(),
+                              )
                               .first
                               .address ??
                           '';
@@ -493,8 +513,10 @@ class _ServiceScreenState extends State<ServiceScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: const [
                   Padding(
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 8.0, vertical: 5.0),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 8.0,
+                      vertical: 5.0,
+                    ),
                     child: Icon(Icons.account_box_outlined),
                   ),
                 ],
@@ -503,18 +525,26 @@ class _ServiceScreenState extends State<ServiceScreen> {
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8.0),
               borderSide: const BorderSide(
-                  color: ColorUtil.bangladeshGreen, width: 0.5),
+                color: ColorUtil.bangladeshGreen,
+                width: 0.5,
+              ),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8.0),
               borderSide: const BorderSide(
-                  color: ColorUtil.bangladeshGreen, width: 0.5),
+                color: ColorUtil.bangladeshGreen,
+                width: 0.5,
+              ),
             ),
             hintText: 'Vị trí lắp đặt',
-            hintStyle:
-                const TextStyle(color: ColorUtil.silverChalice, fontSize: 13),
-            contentPadding:
-                const EdgeInsets.symmetric(vertical: 3, horizontal: 1),
+            hintStyle: const TextStyle(
+              color: ColorUtil.silverChalice,
+              fontSize: 13,
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              vertical: 3,
+              horizontal: 1,
+            ),
           ),
         ),
       ],
@@ -526,20 +556,27 @@ class _ServiceScreenState extends State<ServiceScreen> {
       builder: (FormFieldState<String> state) {
         return InputDecorator(
           decoration: InputDecoration(
-              errorStyle:
-                  const TextStyle(color: Colors.redAccent, fontSize: 16.0),
-              hintText: 'Please select expense',
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8.0),
-                borderSide: const BorderSide(
-                    color: ColorUtil.bangladeshGreen, width: 0.5),
+            errorStyle: const TextStyle(
+              color: Colors.redAccent,
+              fontSize: 16.0,
+            ),
+            hintText: 'Please select expense',
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8.0),
+              borderSide: const BorderSide(
+                color: ColorUtil.bangladeshGreen,
+                width: 0.5,
               ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8.0),
-                borderSide: const BorderSide(
-                    color: ColorUtil.bangladeshGreen, width: 0.5),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8.0),
+              borderSide: const BorderSide(
+                color: ColorUtil.bangladeshGreen,
+                width: 0.5,
               ),
-              prefixIcon: const Icon(Icons.account_box_outlined)),
+            ),
+            prefixIcon: const Icon(Icons.account_box_outlined),
+          ),
           isEmpty: _currentSelectedValue == '',
           child: DropdownButtonHideUnderline(
             child: DropdownButton<String>(
@@ -577,83 +614,92 @@ class _ServiceScreenState extends State<ServiceScreen> {
           titleTextField,
           style: const TextStyle(color: ColorUtil.raisinBlack, fontSize: 15),
         ),
-        const SizedBox(
-          height: 5,
-        ),
-        Row(children: [
-          Expanded(
+        const SizedBox(height: 5),
+        Row(
+          children: [
+            Expanded(
               flex: 2,
               child: Container(
                 height: 40,
                 decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8.0),
-                    border: Border.all(
-                        color: ColorUtil.bangladeshGreen, width: 0.5)),
+                  borderRadius: BorderRadius.circular(8.0),
+                  border: Border.all(
+                    color: ColorUtil.bangladeshGreen,
+                    width: 0.5,
+                  ),
+                ),
                 child: GestureDetector(
-                    onTap: onTapFirst,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(left: 10.0),
-                          child: Icon(
-                            iconPrefixFirst,
-                            color: ColorUtil.spanishGray,
+                  onTap: onTapFirst,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(left: 10.0),
+                        child: Icon(
+                          iconPrefixFirst,
+                          color: ColorUtil.spanishGray,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Flexible(
+                        child: Text(
+                          firstValue.isEmpty ? 'dd/MM/yyyy' : firstValue,
+                          style: TextStyle(
+                            color: firstValue.isEmpty
+                                ? ColorUtil.silverChalice
+                                : ColorUtil.raisinBlack,
                           ),
                         ),
-                        const SizedBox(
-                          width: 10,
-                        ),
-                        Flexible(
-                            child: Text(
-                                firstValue.isEmpty ? 'dd/MM/yyyy' : firstValue,
-                                style: TextStyle(
-                                    color: firstValue.isEmpty
-                                        ? ColorUtil.silverChalice
-                                        : ColorUtil.raisinBlack)))
-                      ],
-                    )),
-              )),
-          const SizedBox(
-            width: 5,
-          ),
-          Expanded(
-            flex: 1,
-            child: Container(
-              height: 40,
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8.0),
-                  border:
-                      Border.all(color: ColorUtil.bangladeshGreen, width: 0.5)),
-              child: GestureDetector(
-                onTap: onTapSecond,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(left: 10.0),
-                      child: Icon(
-                        iconPrefixSecond,
-                        color: ColorUtil.spanishGray,
                       ),
-                    ),
-                    const SizedBox(
-                      width: 10,
-                    ),
-                    Flexible(
-                        child: Text(secondValue.isEmpty ? 'hh:mm' : secondValue,
-                            style: TextStyle(
-                                color: secondValue.isEmpty
-                                    ? ColorUtil.silverChalice
-                                    : ColorUtil.raisinBlack)))
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
-          )
-        ])
+            const SizedBox(width: 5),
+            Expanded(
+              flex: 1,
+              child: Container(
+                height: 40,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8.0),
+                  border: Border.all(
+                    color: ColorUtil.bangladeshGreen,
+                    width: 0.5,
+                  ),
+                ),
+                child: GestureDetector(
+                  onTap: onTapSecond,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(left: 10.0),
+                        child: Icon(
+                          iconPrefixSecond,
+                          color: ColorUtil.spanishGray,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Flexible(
+                        child: Text(
+                          secondValue.isEmpty ? 'hh:mm' : secondValue,
+                          style: TextStyle(
+                            color: secondValue.isEmpty
+                                ? ColorUtil.silverChalice
+                                : ColorUtil.raisinBlack,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ],
     );
   }
@@ -670,55 +716,49 @@ class _ServiceScreenState extends State<ServiceScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Visibility(
-            visible: titleTextField == '' ? false : true,
-            child: Text(
-              titleTextField,
-              style:
-                  const TextStyle(color: ColorUtil.raisinBlack, fontSize: 15),
-            )),
-        const SizedBox(
-          height: 5,
+          visible: titleTextField == '' ? false : true,
+          child: Text(
+            titleTextField,
+            style: const TextStyle(color: ColorUtil.raisinBlack, fontSize: 15),
+          ),
         ),
+        const SizedBox(height: 5),
         GestureDetector(
           onTap: onTap,
           child: Container(
-              height: 40,
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8.0),
-                  border:
-                      Border.all(color: ColorUtil.bangladeshGreen, width: 0.5)),
-              child: Row(
-                mainAxisSize: MainAxisSize.max,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(left: 10.0),
-                    child: Icon(
-                      iconPrefix,
-                      color: ColorUtil.spanishGray,
+            height: 40,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8.0),
+              border: Border.all(color: ColorUtil.bangladeshGreen, width: 0.5),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.max,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(left: 10.0),
+                  child: Icon(iconPrefix, color: ColorUtil.spanishGray),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    value.isEmpty ? hint : value,
+                    style: TextStyle(
+                      color: value.isEmpty
+                          ? ColorUtil.silverChalice
+                          : ColorUtil.raisinBlack,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(
-                    width: 10,
-                  ),
-                  Expanded(
-                    child: Text(value.isEmpty ? hint : value,
-                        style: TextStyle(
-                            color: value.isEmpty
-                                ? ColorUtil.silverChalice
-                                : ColorUtil.raisinBlack),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(right: 8.0),
-                    child: Icon(
-                      iconSuffix,
-                      color: ColorUtil.spanishGray,
-                    ),
-                  ),
-                ],
-              )),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(right: 8.0),
+                  child: Icon(iconSuffix, color: ColorUtil.spanishGray),
+                ),
+              ],
+            ),
+          ),
         ),
       ],
     );
@@ -739,46 +779,59 @@ class _ServiceScreenState extends State<ServiceScreen> {
         Container(
           padding: const EdgeInsets.only(top: 5),
           child: TextFormField(
-              readOnly: isReadOnly,
-              keyboardType: TextInputType.multiline,
-                  // isNumberType ? TextInputType.phone : TextInputType.text,
-              controller: controller,
-              maxLines: 5,
-              cursorColor: ColorUtil.bangladeshGreen,
-              decoration: InputDecoration(
-                prefixIcon: SizedBox(
-                  width: 20,
-                  height: 100,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8.0, vertical: 5.0),
-                        child: Icon(iconPrefix),
+            readOnly: isReadOnly,
+            keyboardType: TextInputType.multiline,
+            // isNumberType ? TextInputType.phone : TextInputType.text,
+            controller: controller,
+            maxLines: 5,
+            cursorColor: ColorUtil.bangladeshGreen,
+            decoration: InputDecoration(
+              prefixIcon: SizedBox(
+                width: 20,
+                height: 100,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8.0,
+                        vertical: 5.0,
                       ),
-                    ],
-                  ),
+                      child: Icon(iconPrefix),
+                    ),
+                  ],
                 ),
-                suffixIcon: haveSuffixIcon ? Icon(iconSuffix) : null,
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                  borderSide: const BorderSide(
-                      color: ColorUtil.bangladeshGreen, width: 0.5),
+              ),
+              suffixIcon: haveSuffixIcon ? Icon(iconSuffix) : null,
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.0),
+                borderSide: const BorderSide(
+                  color: ColorUtil.bangladeshGreen,
+                  width: 0.5,
                 ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                  borderSide: const BorderSide(
-                      color: ColorUtil.bangladeshGreen, width: 0.5),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.0),
+                borderSide: const BorderSide(
+                  color: ColorUtil.bangladeshGreen,
+                  width: 0.5,
                 ),
-                hintText: placeHolder,
-                hintStyle: const TextStyle(
-                    color: ColorUtil.silverChalice, fontSize: 13),
-                contentPadding:
-                    const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
-                suffixIconConstraints:
-                    const BoxConstraints(minHeight: 20, minWidth: 20),
-              )),
+              ),
+              hintText: placeHolder,
+              hintStyle: const TextStyle(
+                color: ColorUtil.silverChalice,
+                fontSize: 13,
+              ),
+              contentPadding: const EdgeInsets.symmetric(
+                vertical: 5,
+                horizontal: 15,
+              ),
+              suffixIconConstraints: const BoxConstraints(
+                minHeight: 20,
+                minWidth: 20,
+              ),
+            ),
+          ),
         ),
       ],
     );
@@ -786,80 +839,89 @@ class _ServiceScreenState extends State<ServiceScreen> {
 
   Widget _buildButton({text, isPositive, action}) {
     return Expanded(
-        child: isPositive
-            ? _button(isPositive, action, text)
-            : ElevatedButton(
-                style: ButtonStyle(
-                  padding: WidgetStateProperty.all<EdgeInsets>(
-                      const EdgeInsets.symmetric(vertical: 10)),
-                  backgroundColor:
-                      WidgetStateProperty.all<Color>(ColorUtil.white),
-                  shape: WidgetStateProperty.all<RoundedRectangleBorder>(
-                    RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                      side: const BorderSide(
-                        color: ColorUtil.bangladeshGreen,
-                        width: 2,
-                      ),
+      child: isPositive
+          ? _button(isPositive, action, text)
+          : ElevatedButton(
+              style: ButtonStyle(
+                padding: WidgetStateProperty.all<EdgeInsets>(
+                  const EdgeInsets.symmetric(vertical: 10),
+                ),
+                backgroundColor: WidgetStateProperty.all<Color>(
+                  ColorUtil.white,
+                ),
+                shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+                  RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    side: const BorderSide(
+                      color: ColorUtil.bangladeshGreen,
+                      width: 2,
                     ),
                   ),
                 ),
-                child: Text(
-                  text,
-                  style: const TextStyle(color: ColorUtil.bangladeshGreen),
-                ),
-                onPressed: () {
-                  if (action == null) {
-                    Navigator.pop(context);
-                  } else {
-                    action();
-                  }
-                },
-              ));
+              ),
+              child: Text(
+                text,
+                style: const TextStyle(color: ColorUtil.bangladeshGreen),
+              ),
+              onPressed: () {
+                if (action == null) {
+                  Navigator.pop(context);
+                } else {
+                  action();
+                }
+              },
+            ),
+    );
   }
 
   StatelessWidget _button(isPositive, action, text) {
     return ButtonWidget(
-        color: isPositive ? ColorUtil.bangladeshGreen : Colors.grey,
-        borderRadius: BorderRadius.circular(30),
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        onTap: () {
-          if (action == null) {
-            Navigator.pop(context);
-          } else {
-            action();
-          }
-        },
-        child: Text(
-          text,
-          textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 16, color: Colors.white),
-        ));
+      color: isPositive ? ColorUtil.bangladeshGreen : Colors.grey,
+      borderRadius: BorderRadius.circular(30),
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      onTap: () {
+        if (action == null) {
+          Navigator.pop(context);
+        } else {
+          action();
+        }
+      },
+      child: Text(
+        text,
+        textAlign: TextAlign.center,
+        style: const TextStyle(fontSize: 16, color: Colors.white),
+      ),
+    );
   }
 
   void _onChooseFavoriteStaff() {
     Navigator.of(context)
-        .push(MaterialPageRoute(
-      builder: (context) => TechniqueScreen(
-        initialTabIndex: 1,
-        favoriteStaff: _favouriteStaff,
-      ),
-    ))
+        .push(
+          MaterialPageRoute(
+            builder: (context) => TechniqueScreen(
+              initialTabIndex: 1,
+              favoriteStaff: _favouriteStaff,
+            ),
+          ),
+        )
         .then((value) {
-      Map<String, dynamic>? result = {};
-      result = value as Map<String, dynamic>?;
-      if (result != null) {
-        setState(() {
-          _favouriteStaff = result!['favouriteStaff'];
+          Map<String, dynamic>? result = {};
+          result = value as Map<String, dynamic>?;
+          if (result != null) {
+            setState(() {
+              _favouriteStaff = result!['favouriteStaff'];
+            });
+          }
         });
-      }
-    });
   }
 
   void _onChooseImages() async {
     Navigator.of(context).pop();
     List<File>? files = await onGetMultiPhoto(
-        context: context, funcPermission: () {}, picker: _picker);
+      context: context,
+      funcPermission: () {},
+      picker: _picker,
+    );
     if (files != null && files.isNotEmpty) {
       for (var file in files) {
         img.Image? originalImage = img.decodeImage(await file.readAsBytes());
@@ -875,9 +937,7 @@ class _ServiceScreenState extends State<ServiceScreen> {
     }
   }
 
-  Future getImage(
-    ImageSource img,
-  ) async {
+  Future getImage(ImageSource img) async {
     if (await Permission.camera.request().isGranted) {
       if (_listPath.length >= 4) {
         context.showSnackBar('Chỉ được chọn tối đa 4 ảnh!');
@@ -885,8 +945,10 @@ class _ServiceScreenState extends State<ServiceScreen> {
       } else {
         final picker = ImagePicker();
         File? galleryFile;
-        final pickedFile =
-            await picker.pickImage(source: img, imageQuality: 30);
+        final pickedFile = await picker.pickImage(
+          source: img,
+          imageQuality: 30,
+        );
         List<File>? files = [];
         if (pickedFile != null) {
           galleryFile = File(pickedFile.path);
@@ -897,8 +959,10 @@ class _ServiceScreenState extends State<ServiceScreen> {
             _bloc.add(ServiceScreenUploadImageEvent(files));
           }
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(// is this context <<<
-              const SnackBar(content: Text('Nothing is selected')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            // is this context <<<
+            const SnackBar(content: Text('Nothing is selected')),
+          );
         }
       }
     } else {
@@ -926,11 +990,12 @@ class _ServiceScreenState extends State<ServiceScreen> {
 
   Future<void> _selectDate() async {
     final DateTime? picked = await showDatePicker(
-        context: context,
-        locale: const Locale("vi", "VN"),
-        initialDate: selectedDate ?? DateTime.now(),
-        firstDate: DateTime.now(),
-        lastDate: DateTime(2050));
+      context: context,
+      locale: const Locale("vi", "VN"),
+      initialDate: selectedDate ?? DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2050),
+    );
     if (picked != null && picked != selectedDate) {
       selectedDate = picked;
       setState(() {

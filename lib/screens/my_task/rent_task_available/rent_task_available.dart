@@ -44,7 +44,8 @@ class _RentTaskAvailableTabState extends State<RentTaskAvailableTabSale> {
     _scrollController.addListener(() {
       scrollPaginationListener(
         scrollController: _scrollController,
-        condition: (_scrollController.hasClients &&
+        condition:
+            (_scrollController.hasClients &&
                 _scrollController.position.pixels ==
                     _scrollController.position.maxScrollExtent) ||
             _bloc.isLoading,
@@ -55,16 +56,13 @@ class _RentTaskAvailableTabState extends State<RentTaskAvailableTabSale> {
       );
     });
     if (selectedDate != null) {
-      setState(() {
-      });
+      setState(() {});
     } else {
-      setState(() {
-      });
+      setState(() {});
     }
 
     if (selectedTime != null) {
-      setState(() {
-      });
+      setState(() {});
     } else {
       setState(() {
         // _timeStart = TimeOfDay.now().toTimeString();
@@ -87,7 +85,9 @@ class _RentTaskAvailableTabState extends State<RentTaskAvailableTabSale> {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<RentTaskScreenSaleBloc, RentTaskScreenState>(
-        builder: _builder, listener: _listener);
+      builder: _builder,
+      listener: _listener,
+    );
   }
 
   void _listener(BuildContext context, state) {
@@ -117,17 +117,17 @@ class _RentTaskAvailableTabState extends State<RentTaskAvailableTabSale> {
       // Filter tasks based on service ID containing the search query
       return _bloc.staffListTaskAssigedModel.where((task) {
         return (task.customer?.phone != null &&
-                task.customer!.phone!
-                    .toLowerCase()
-                    .contains(_searchQuery.toLowerCase()) ||
+                task.customer!.phone!.toLowerCase().contains(
+                  _searchQuery.toLowerCase(),
+                ) ||
             task.customer?.username != null &&
-                task.customer!.username!
-                    .toLowerCase()
-                    .contains(_searchQuery.toLowerCase()) ||
+                task.customer!.username!.toLowerCase().contains(
+                  _searchQuery.toLowerCase(),
+                ) ||
             task.customer?.address != null &&
-                task.customer!.address!
-                    .toLowerCase()
-                    .contains(_searchQuery.toLowerCase()));
+                task.customer!.address!.toLowerCase().contains(
+                  _searchQuery.toLowerCase(),
+                ));
       }).toList();
     }
   }
@@ -179,8 +179,12 @@ class _RentTaskAvailableTabState extends State<RentTaskAvailableTabSale> {
             isLoading: _bloc.isLoading,
             child: RefreshIndicator(
               onRefresh: () async {
-                _bloc.add(const StaffTaskScreenGetTaskAssigedEvent(
-                    isRefresh: true, page: 0));
+                _bloc.add(
+                  const StaffTaskScreenGetTaskAssigedEvent(
+                    isRefresh: true,
+                    page: 0,
+                  ),
+                );
               },
               child: _bloc.staffListTaskAssigedModel.isEmpty && !_bloc.isLoading
                   ? const Center(child: Text("Chưa có công việc"))
@@ -189,8 +193,9 @@ class _RentTaskAvailableTabState extends State<RentTaskAvailableTabSale> {
                       itemBuilder: _itemBuilder,
                       itemCount: _filteredTasks.length,
                       padding: const EdgeInsets.symmetric(
-                          horizontal: paddingHorizontal,
-                          vertical: paddingVertical),
+                        horizontal: paddingHorizontal,
+                        vertical: paddingVertical,
+                      ),
                       separatorBuilder: (BuildContext context, int index) {
                         return const Divider(
                           thickness: 1,
@@ -256,9 +261,10 @@ class _RentTaskAvailableTabState extends State<RentTaskAvailableTabSale> {
         Table(
           children: [
             _buildTableRow(
-                title: 'Thời gian:',
-                content: taskModel.timeStar,
-                isHighlight: true),
+              title: 'Thời gian:',
+              content: taskModel.timeStar,
+              isHighlight: true,
+            ),
             _buildTableRow(
               title: 'Khách hàng:',
               content: taskModel.customer?.username,
@@ -275,23 +281,27 @@ class _RentTaskAvailableTabState extends State<RentTaskAvailableTabSale> {
               isHighlight: false,
             ),
             _buildTableRow(
-                title: 'Trạng thái dịch vụ:',
-                content: taskModel.getStatus(),
-                isHighlight: false),
+              title: 'Trạng thái dịch vụ:',
+              content: taskModel.getStatus(),
+              isHighlight: false,
+            ),
             _buildTableRow(
-                title: 'Công việc:',
-                content: taskModel.name ?? "",
-                isHighlight: false),
+              title: 'Công việc:',
+              content: taskModel.name ?? "",
+              isHighlight: false,
+            ),
             _buildTableRow(
-                title: 'Nội dung:',
-                content: taskModel.des ?? "",
-                isHighlight: false),
+              title: 'Nội dung:',
+              content: taskModel.des ?? "",
+              isHighlight: false,
+            ),
             _buildTableRow(
-                title: 'Thông báo:',
-                content: taskModel.noti ?? '',
-                isHighlight: false),
+              title: 'Thông báo:',
+              content: taskModel.noti ?? '',
+              isHighlight: false,
+            ),
           ],
-        )
+        ),
       ],
     );
   }
@@ -306,7 +316,9 @@ class _RentTaskAvailableTabState extends State<RentTaskAvailableTabSale> {
         Text(
           title,
           style: const TextStyle(
-              color: ColorUtil.raisinBlack, fontWeight: FontWeight.bold),
+            color: ColorUtil.raisinBlack,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         Text(
           "$content",
@@ -317,13 +329,19 @@ class _RentTaskAvailableTabState extends State<RentTaskAvailableTabSale> {
   }
 
   void _detailTask(TaskModel taskModel) {
-    Navigator.pushNamed(context, Routes.detailRentBookingScreen,
-        arguments: {'id': taskModel.id});
+    Navigator.pushNamed(
+      context,
+      Routes.detailRentBookingScreen,
+      arguments: {'id': taskModel.id},
+    );
   }
 
   void _editBooking(TaskModel taskModel) {
-    Navigator.pushNamed(context, Routes.editRentServiceScreen,
-        arguments: {'id': taskModel.id}).then((value) async {
+    Navigator.pushNamed(
+      context,
+      Routes.editRentServiceScreen,
+      arguments: {'id': taskModel.id},
+    ).then((value) async {
       if (value == null) {
         return;
       } else {
@@ -331,7 +349,9 @@ class _RentTaskAvailableTabState extends State<RentTaskAvailableTabSale> {
         if (result != null) {
           setState(() {
             _blocDetail.add(DetailBookingStartedEvent());
-            _bloc.add(const StaffTaskScreenGetTaskAssigedEvent(isRefresh: true));
+            _bloc.add(
+              const StaffTaskScreenGetTaskAssigedEvent(isRefresh: true),
+            );
             _bloc.add(const StaffTaskScreenGetTaskByDayEvent(isRefresh: true));
           });
         }
@@ -355,11 +375,11 @@ class _RentTaskAvailableTabState extends State<RentTaskAvailableTabSale> {
               text,
               textAlign: TextAlign.center,
               style: const TextStyle(fontSize: 16, color: Colors.white),
-            ))
+            ),
+          )
         : ElevatedButton(
             style: ButtonStyle(
-              backgroundColor:
-                  WidgetStateProperty.all<Color>(ColorUtil.white),
+              backgroundColor: WidgetStateProperty.all<Color>(ColorUtil.white),
               shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                 RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -386,45 +406,52 @@ class _RentTaskAvailableTabState extends State<RentTaskAvailableTabSale> {
 
   Future<void> _cancelTask(TaskModel taskModel) async {
     return showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: const Text(
-              'Vui lòng cho biết lý do bạn hủy dịch vụ',
-              textAlign: TextAlign.center,
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text(
+            'Vui lòng cho biết lý do bạn hủy dịch vụ',
+            textAlign: TextAlign.center,
+          ),
+          content: TextFieldDefault(
+            controller: _feedbackController,
+            maxLines: 5,
+          ),
+          actions: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _buildButtonDialog(
+                  isPositive: false,
+                  text: 'Hủy',
+                  action: () {
+                    Navigator.pop(context);
+                    _feedbackController.clear();
+                  },
+                ),
+                const SizedBox(width: 16),
+                _buildButtonDialog(
+                  isPositive: true,
+                  text: 'Gửi',
+                  action: () {
+                    _bloc.add(
+                      BookingDeleteTaskEvent(
+                        taskModel.id ?? 0,
+                        taskModel.name!,
+                        _feedbackController.text,
+                      ),
+                    );
+                    Navigator.pop(context);
+                    _feedbackController.clear();
+                  },
+                ),
+              ],
             ),
-            content: TextFieldDefault(
-              controller: _feedbackController,
-              maxLines: 5,
-            ),
-            actions: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _buildButtonDialog(
-                      isPositive: false,
-                      text: 'Hủy',
-                      action: () {
-                        Navigator.pop(context);
-                        _feedbackController.clear();
-                      }),
-                  const SizedBox(width: 16),
-                  _buildButtonDialog(
-                      isPositive: true,
-                      text: 'Gửi',
-                      action: () {
-                        _bloc.add(BookingDeleteTaskEvent(taskModel.id ?? 0,
-                            taskModel.name!, _feedbackController.text));
-                        Navigator.pop(context);
-                        _feedbackController.clear();
-                      }),
-                ],
-              )
-            ],
-          );
-        });
+          ],
+        );
+      },
+    );
   }
-
 
   Widget _buildButtonDialog({isPositive, action, text}) {
     return Expanded(child: _button(isPositive, action, text));
@@ -432,21 +459,21 @@ class _RentTaskAvailableTabState extends State<RentTaskAvailableTabSale> {
 
   StatelessWidget _button(isPositive, action, text) {
     return ButtonWidget(
-        color: isPositive ? ColorUtil.bangladeshGreen : Colors.grey,
-        borderRadius: BorderRadius.circular(30),
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        onTap: () {
-          if (action == null) {
-            Navigator.pop(context);
-          } else {
-            action();
-          }
-        },
-        child: Text(
-          text,
-          textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 16, color: Colors.white),
-        ));
+      color: isPositive ? ColorUtil.bangladeshGreen : Colors.grey,
+      borderRadius: BorderRadius.circular(30),
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      onTap: () {
+        if (action == null) {
+          Navigator.pop(context);
+        } else {
+          action();
+        }
+      },
+      child: Text(
+        text,
+        textAlign: TextAlign.center,
+        style: const TextStyle(fontSize: 16, color: Colors.white),
+      ),
+    );
   }
-
 }

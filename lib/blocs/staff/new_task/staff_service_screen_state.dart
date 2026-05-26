@@ -23,11 +23,14 @@ class StaffServiceScreenCreateTaskFailedState extends StaffServiceScreenState {
   const StaffServiceScreenCreateTaskFailedState(this.message);
 }
 
-class StaffServiceScreenUserAddressSuccessState extends StaffServiceScreenState {}
+class StaffServiceScreenUserAddressSuccessState
+    extends StaffServiceScreenState {}
 
-class StaffServiceScreenUserAddressFailedState extends StaffServiceScreenState {}
+class StaffServiceScreenUserAddressFailedState
+    extends StaffServiceScreenState {}
 
-class StaffServiceScreenUploadImageSuccessState extends StaffServiceScreenState {
+class StaffServiceScreenUploadImageSuccessState
+    extends StaffServiceScreenState {
   final List<String> paths;
 
   const StaffServiceScreenUploadImageSuccessState(this.paths);
@@ -50,24 +53,29 @@ class StaffServiceScreenUploadFileFailedState extends StaffServiceScreenState {
 
   const StaffServiceScreenUploadFileFailedState(this.message);
 }
-class StaffServiceScreenCheckCustomerFailedState extends StaffServiceScreenState {
+
+class StaffServiceScreenCheckCustomerFailedState
+    extends StaffServiceScreenState {
   final String message;
 
   const StaffServiceScreenCheckCustomerFailedState(this.message);
 }
-class StaffServiceScreenCheckCustomerSuccessState extends StaffServiceScreenState {
+
+class StaffServiceScreenCheckCustomerSuccessState
+    extends StaffServiceScreenState {
   final String message;
 
   const StaffServiceScreenCheckCustomerSuccessState(this.message);
 }
+
 class UserAddressScreenCreateAddressSuccessState
     extends StaffServiceScreenState {
   final String error;
 
   const UserAddressScreenCreateAddressSuccessState({this.error = ""});
 }
-class UserAddressScreenCreateAddressFailState
-    extends StaffServiceScreenState {
+
+class UserAddressScreenCreateAddressFailState extends StaffServiceScreenState {
   final String error;
 
   const UserAddressScreenCreateAddressFailState({this.error = ""});

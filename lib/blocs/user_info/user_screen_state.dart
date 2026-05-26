@@ -3,4 +3,5 @@ abstract class UserScreenState {
 }
 
 class UserScreenInitialState extends UserScreenState {}
+
 class UserScreenLogoutState extends UserScreenState {}

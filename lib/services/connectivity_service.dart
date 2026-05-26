@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
 class ConnectivityService {
-
   Future<bool> hasConnection() async {
     final bool internet = await _checkConnection();
     return (internet);

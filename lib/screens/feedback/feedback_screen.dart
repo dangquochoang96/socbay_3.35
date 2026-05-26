@@ -15,8 +15,7 @@ class FeedbackkScreen extends StatefulWidget {
   const FeedbackkScreen({super.key});
 
   @override
-  State<FeedbackkScreen> createState() =>
-      _FeedbackkListState();
+  State<FeedbackkScreen> createState() => _FeedbackkListState();
 }
 
 class _FeedbackkListState extends State<FeedbackkScreen> {
@@ -32,7 +31,9 @@ class _FeedbackkListState extends State<FeedbackkScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<EvaluateScreenBloc, EvaluateScreenState>(
-        builder: _builder, listener: _listener);
+      builder: _builder,
+      listener: _listener,
+    );
   }
 
   void _listener(BuildContext context, EvaluateScreenState state) {}
@@ -42,7 +43,6 @@ class _FeedbackkListState extends State<FeedbackkScreen> {
       appBar: MyAppBar(
         title: "Góp ý và khiêu nại kỹ thuật",
         isBackNavigation: true,
-        
       ),
       body: LoadingIndicator(
         isLoading: _bloc.isLoading,
@@ -58,11 +58,12 @@ class _FeedbackkListState extends State<FeedbackkScreen> {
   Widget _itemBuilder(BuildContext context, int index) {
     final UserProfile item = _bloc.users[index];
     return GestureDetector(
-      onTap: () {Navigator.pushNamed(context, Routes.staffFeedbackListScreen, arguments: {
-        "id": item.id,
-        "name": item.username,
-        "staffInfo": item
-      });
+      onTap: () {
+        Navigator.pushNamed(
+          context,
+          Routes.staffFeedbackListScreen,
+          arguments: {"id": item.id, "name": item.username, "staffInfo": item},
+        );
       },
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 8),
@@ -76,7 +77,10 @@ class _FeedbackkListState extends State<FeedbackkScreen> {
             ClipRRect(
               borderRadius: BorderRadius.circular(50),
               child: ImageUtil.loadNetWorkImage(
-                  url: item.avatar ?? '', height: 50, width: 50),
+                url: item.avatar ?? '',
+                height: 50,
+                width: 50,
+              ),
             ),
             Expanded(
               child: Padding(
@@ -87,8 +91,9 @@ class _FeedbackkListState extends State<FeedbackkScreen> {
                     Text(
                       '${item.username}',
                       style: const TextStyle(
-                          fontWeight: MyFontWeight.bold,
-                          overflow: TextOverflow.ellipsis),
+                        fontWeight: MyFontWeight.bold,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                       maxLines: 1,
                     ),
                     Text('${item.phone}'),

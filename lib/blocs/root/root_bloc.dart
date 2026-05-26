@@ -7,6 +7,7 @@ import 'package:socbay/application.dart';
 import 'package:socbay/blocs/root/root_event.dart';
 import 'package:socbay/blocs/root/root_state.dart';
 import 'package:socbay/config/app_config.dart';
+import 'package:socbay/constants/api_endpoints.dart';
 import 'package:socbay/data/model/user_profile.dart';
 import 'package:socbay/db/database.dart';
 import 'package:socbay/db/object_mapper/object_mapper.dart';
@@ -46,7 +47,9 @@ class RootBloc extends Bloc<RootEvent, RootState> {
         try {
           var dio = Dio();
           final Response resJson = await dio.get(
-            "$protocol${AppConfig.instance.values.apiUrl}/api/user/${currentUser.first.id}",
+            AppConfig.instance.apiUrl(
+              ApiEndpoints.userById(currentUser.first.id),
+            ),
           );
           var map = Map<String, dynamic>.from(json.decode(resJson.toString()));
           if (map['code'] == 1) {
@@ -82,7 +85,7 @@ class RootBloc extends Bloc<RootEvent, RootState> {
         try {
           var dio = Dio();
           final Response resJson = await dio.get(
-            "$protocol${AppConfig.instance.values.apiUrl}/api/user/${currentUser.id}",
+            AppConfig.instance.apiUrl(ApiEndpoints.userById(currentUser.id)),
           );
           var map = Map<String, dynamic>.from(json.decode(resJson.toString()));
           if (map['code'] == 1) {

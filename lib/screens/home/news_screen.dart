@@ -62,14 +62,13 @@ class _NewsScreenState extends State<NewsScreen> {
 
   Widget _builder(BuildContext context, NewsScreenState state) {
     return Scaffold(
-      appBar: MyAppBar(
-        title: "Tin tức",
-        isBackNavigation: true,
-      ),
+      appBar: MyAppBar(title: "Tin tức", isBackNavigation: true),
       body: ListView.separated(
         controller: _scrollController,
         padding: const EdgeInsets.symmetric(
-            horizontal: paddingHorizontal, vertical: paddingVertical),
+          horizontal: paddingHorizontal,
+          vertical: paddingVertical,
+        ),
         shrinkWrap: true,
         itemCount: _bloc.blogs.length + (_bloc.isHasMore() ? 1 : 0),
         itemBuilder: _buildItemBlog,
@@ -85,19 +84,20 @@ class _NewsScreenState extends State<NewsScreen> {
     final itemBlog = _bloc.blogs[index];
     return ButtonWidget(
       onTap: () {
-        Navigator.pushNamed(context, Routes.newDetail,arguments: itemBlog);
+        Navigator.pushNamed(context, Routes.newDetail, arguments: itemBlog);
       },
       child: Row(
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(10.0),
             child: ImageUtil.loadNetWorkImage(
-                url: itemBlog.image == null
-                    ? ""
-                    : "$protocol${AppConfig.instance.values.apiUrl}${itemBlog.image!}",
-                fit: BoxFit.cover,
-                height: 100,
-                width: 100),
+              url: itemBlog.image == null
+                  ? ""
+                  : "$protocol${AppConfig.instance.values.apiUrl}${itemBlog.image!}",
+              fit: BoxFit.cover,
+              height: 100,
+              width: 100,
+            ),
           ),
           const SizedBox(width: 10),
           Expanded(
@@ -110,18 +110,17 @@ class _NewsScreenState extends State<NewsScreen> {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: ColorUtil.bangladeshGreen),
+                    fontWeight: FontWeight.bold,
+                    color: ColorUtil.bangladeshGreen,
+                  ),
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 4),
-                  child: Html(
-                    data: itemBlog.shortdes??""
-                  ),
-                )
+                  child: Html(data: itemBlog.shortdes ?? ""),
+                ),
               ],
             ),
-          )
+          ),
         ],
       ),
     );

@@ -1,4 +1,3 @@
-
 import 'dart:io';
 
 import 'package:socbay/data/model/request/create_task_request.dart';
@@ -8,7 +7,8 @@ abstract class RentBookingServiceEvent {
   const RentBookingServiceEvent();
 }
 
-class StaffServiceScreenSaleChangeTypeServiceEvent extends RentBookingServiceEvent {
+class StaffServiceScreenSaleChangeTypeServiceEvent
+    extends RentBookingServiceEvent {
   final String typeService;
 
   StaffServiceScreenSaleChangeTypeServiceEvent(this.typeService);
@@ -32,7 +32,8 @@ class StaffServiceSaleScreenCheckCustomerEvent extends RentBookingServiceEvent {
   StaffServiceSaleScreenCheckCustomerEvent(this.phone);
 }
 
-class UserAddressScreenSaleCreateUserAddressEvent extends RentBookingServiceEvent {
+class UserAddressScreenSaleCreateUserAddressEvent
+    extends RentBookingServiceEvent {
   final UserAddressRequest userAddressRequest;
 
   const UserAddressScreenSaleCreateUserAddressEvent(this.userAddressRequest);

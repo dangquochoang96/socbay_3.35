@@ -12,16 +12,17 @@ class HomeServiceModel {
   String? createdAt;
   String? updatedAt;
 
-  HomeServiceModel(
-      {this.id,
-      this.name,
-      this.image,
-      this.type,
-      this.status,
-      this.order,
-      this.des,
-      this.createdAt,
-      this.updatedAt});
+  HomeServiceModel({
+    this.id,
+    this.name,
+    this.image,
+    this.type,
+    this.status,
+    this.order,
+    this.des,
+    this.createdAt,
+    this.updatedAt,
+  });
 
   factory HomeServiceModel.fromJson(Map<String, dynamic> json) =>
       HomeServiceModel(
@@ -37,153 +38,180 @@ class HomeServiceModel {
       );
 
   Map<String, dynamic> toJson() => <String, dynamic>{
-        'id': id,
-        'name': name,
-        'image': image,
-        'type': type,
-        'status': status,
-        'order': order,
-        'des': des,
-        'createdAt': createdAt,
-        'updatedAt': updatedAt,
-      };
+    'id': id,
+    'name': name,
+    'image': image,
+    'type': type,
+    'status': status,
+    'order': order,
+    'des': des,
+    'createdAt': createdAt,
+    'updatedAt': updatedAt,
+  };
 
   static List<HomeServiceModel> serviceList = [
     HomeServiceModel(
-        image: Images.iconMaintenance,
-        des: 'Dịch vụ khách hàng',
-        name: 'ĐẶT LỊCH DỊCH VỤ'),
+      image: Images.iconMaintenance,
+      des: 'Dịch vụ khách hàng',
+      name: 'ĐẶT LỊCH DỊCH VỤ',
+    ),
     HomeServiceModel(
-        image: Images.iconAdvise,
-        des: 'Hỗ trợ & tư vấn dịch vụ',
-        name: 'TƯ VẤN'),
+      image: Images.iconAdvise,
+      des: 'Hỗ trợ & tư vấn dịch vụ',
+      name: 'TƯ VẤN',
+    ),
     HomeServiceModel(
-        // image: Images.iconFeedback,
-        image: Images.iconRemovComen,
-        des: 'Góp ý & khiếu nại',
-        name: 'GÓP Ý & KHIẾU NẠI'),
+      // image: Images.iconFeedback,
+      image: Images.iconRemovComen,
+      des: 'Góp ý & khiếu nại',
+      name: 'GÓP Ý & KHIẾU NẠI',
+    ),
     HomeServiceModel(
-        image: Images.iconHotline,
-        des: 'Liên hệ Hotline',
-        name: 'HOTLINE'),
+      image: Images.iconHotline,
+      des: 'Liên hệ Hotline',
+      name: 'HOTLINE',
+    ),
     HomeServiceModel(
-        image: Images.iconReplace,
-        des: 'Ngày thay tiếp theo',
-        name: 'NGÀY THAY TIẾP THEO'),
+      image: Images.iconReplace,
+      des: 'Ngày thay tiếp theo',
+      name: 'NGÀY THAY TIẾP THEO',
+    ),
   ];
   static List<HomeServiceModel> staffServiceList = [
     HomeServiceModel(
-        image: Images.iconAdvise,
-        des: 'Đánh giá & nhận xét',
-        name: 'Đánh giá & nhận xét'),
+      image: Images.iconAdvise,
+      des: 'Đánh giá & nhận xét',
+      name: 'Đánh giá & nhận xét',
+    ),
     HomeServiceModel(
-        image: Images.iconFeedback,
-        des: 'Đơn hàng',
-        name: 'Quản lý đơn hàng'),
+      image: Images.iconFeedback,
+      des: 'Đơn hàng',
+      name: 'Quản lý đơn hàng',
+    ),
     HomeServiceModel(
-        image: Images.iconHotline,
-        des: 'Chương trình khuyến mại',
-        name: 'Thông báo'),
+      image: Images.iconHotline,
+      des: 'Chương trình khuyến mại',
+      name: 'Thông báo',
+    ),
     HomeServiceModel(
-        image: Images.iconNews,
-        des: 'Tin tức kỹ thuật',
-        name: 'Tin tức'),
+      image: Images.iconNews,
+      des: 'Tin tức kỹ thuật',
+      name: 'Tin tức',
+    ),
     HomeServiceModel(
-        image: Images.iconinventory,
-        des: 'Góp ý & khiếu nại',
-        name: 'GÓP Ý & KHIẾU NẠI'),
+      image: Images.iconinventory,
+      des: 'Góp ý & khiếu nại',
+      name: 'GÓP Ý & KHIẾU NẠI',
+    ),
   ];
   static List<HomeServiceModel> staffServiceListSale = [
     HomeServiceModel(
-        image: Images.iconRemovComen,
-        des: 'Đánh giá & nhận xét kỹ thuật',
-        name: 'Đánh giá & nhận xét'),
-    HomeServiceModel(
-        image: Images.iconinventory,
-        des: 'Quản lý đơn hàng',
-        name: 'Đơn hàng'),
-    HomeServiceModel(
-        image: Images.iconMegaphone,
-        des: 'Chương trình khuyến mại',
-        name: 'Thông báo'),
-    HomeServiceModel(
-        image: Images.iconFeedback,
-        des: 'Góp ý & khiếu nại kỹ thuật',
-        name: 'GÓP Ý & KHIẾU NẠI'),
-    HomeServiceModel(
-        image: Images.iconCrowd,
-        des: 'Thông tin khách hàng',
-        name: 'Thông tin khách hàng'
+      image: Images.iconRemovComen,
+      des: 'Đánh giá & nhận xét kỹ thuật',
+      name: 'Đánh giá & nhận xét',
     ),
     HomeServiceModel(
-        image: Images.iconMaintenance,
-        des: 'Đặt lịch dịch vụ thuê máy lọc nước',
-        name: 'ĐẶT LỊCH THUÊ'),
+      image: Images.iconinventory,
+      des: 'Quản lý đơn hàng',
+      name: 'Đơn hàng',
+    ),
+    HomeServiceModel(
+      image: Images.iconMegaphone,
+      des: 'Chương trình khuyến mại',
+      name: 'Thông báo',
+    ),
+    HomeServiceModel(
+      image: Images.iconFeedback,
+      des: 'Góp ý & khiếu nại kỹ thuật',
+      name: 'GÓP Ý & KHIẾU NẠI',
+    ),
+    HomeServiceModel(
+      image: Images.iconCrowd,
+      des: 'Thông tin khách hàng',
+      name: 'Thông tin khách hàng',
+    ),
+    HomeServiceModel(
+      image: Images.iconMaintenance,
+      des: 'Đặt lịch dịch vụ thuê máy lọc nước',
+      name: 'ĐẶT LỊCH THUÊ',
+    ),
   ];
   static List<HomeServiceModel> taskServiceList = [
     HomeServiceModel(
+      id: 1,
+      image: Images.iconAdvise,
+      des: 'VS Bảo dưỡng',
+      name: 'VS Bảo dưỡng',
+    ),
+    HomeServiceModel(
+      id: 2,
+      image: Images.iconAdvise,
+      des: 'Thay lõi + VS',
+      name: 'Thay lõi + VS',
+    ),
+    HomeServiceModel(
+      id: 3,
+      image: Images.iconAdvise,
+      des: 'Sửa máy + VS',
+      name: 'Sửa máy + VS',
+    ),
+    HomeServiceModel(
+      id: 4,
+      image: Images.iconAdvise,
+      des: 'Lắp máy',
+      name: 'Lắp máy',
+    ),
+    HomeServiceModel(
+      id: 5,
+      image: Images.iconAdvise,
+      des: 'Chuyển máy',
+      name: 'Chuyển máy',
+    ),
+    HomeServiceModel(
+      id: 6,
+      image: Images.iconAdvise,
+      des: 'Khác',
+      name: 'Khác',
+    ),
+  ];
+  static List<HomeServiceModel> getServiceList() {
+    return [
+      HomeServiceModel(
         id: 1,
         image: Images.iconAdvise,
         des: 'VS Bảo dưỡng',
-        name: 'VS Bảo dưỡng'),
-    HomeServiceModel(
+        name: 'VS Bảo dưỡng',
+      ),
+      HomeServiceModel(
         id: 2,
         image: Images.iconAdvise,
         des: 'Thay lõi + VS',
-        name: 'Thay lõi + VS'),
-    HomeServiceModel(
+        name: 'Thay lõi + VS',
+      ),
+      HomeServiceModel(
         id: 3,
         image: Images.iconAdvise,
         des: 'Sửa máy + VS',
-        name: 'Sửa máy + VS'),
-    HomeServiceModel(
+        name: 'Sửa máy + VS',
+      ),
+      HomeServiceModel(
         id: 4,
         image: Images.iconAdvise,
         des: 'Lắp máy',
-        name: 'Lắp máy'),
-    HomeServiceModel(
+        name: 'Lắp máy',
+      ),
+      HomeServiceModel(
         id: 5,
         image: Images.iconAdvise,
         des: 'Chuyển máy',
-        name: 'Chuyển máy'),
-    HomeServiceModel(
+        name: 'Chuyển máy',
+      ),
+      HomeServiceModel(
         id: 6,
         image: Images.iconAdvise,
         des: 'Khác',
-        name: 'Khác'),
-  ];
-  static List<HomeServiceModel> getServiceList(){
-    return [
-      HomeServiceModel(
-          id: 1,
-          image: Images.iconAdvise,
-          des: 'VS Bảo dưỡng',
-          name: 'VS Bảo dưỡng'),
-      HomeServiceModel(
-          id: 2,
-          image: Images.iconAdvise,
-          des: 'Thay lõi + VS',
-          name: 'Thay lõi + VS'),
-      HomeServiceModel(
-          id: 3,
-          image: Images.iconAdvise,
-          des: 'Sửa máy + VS',
-          name: 'Sửa máy + VS'),
-      HomeServiceModel(
-          id: 4,
-          image: Images.iconAdvise,
-          des: 'Lắp máy',
-          name: 'Lắp máy'),
-      HomeServiceModel(
-          id: 5,
-          image: Images.iconAdvise,
-          des: 'Chuyển máy',
-          name: 'Chuyển máy'),
-      HomeServiceModel(
-          id: 6,
-          image: Images.iconAdvise,
-          des: 'Khác',
-          name: 'Khác')
+        name: 'Khác',
+      ),
     ];
   }
 }

@@ -30,27 +30,28 @@ class StaffCreateOrderEvent extends StaffNewOrderEvent {
   String? newAddress;
   String? newAddressSP;
   StaffCreateOrderEvent(
-      this.productId,
-      this.newProductId,
-      this.lstNew,
-      this.lstMaintain,
-      this.total,
-      this.chietKhau,
-      this.subSavePoint,
-      this.totalPay,
-      this.savePoint,
-      this.paymentType,
-      this.vatAmount,
-      this.images,
-      this.newAddress,
-      this.newAddressSP,
-      //new
-      this.monthlyRent,
-      this.rentalPeriod,
-      this.deposits,
-      this.rentalEndDate,
-      );
+    this.productId,
+    this.newProductId,
+    this.lstNew,
+    this.lstMaintain,
+    this.total,
+    this.chietKhau,
+    this.subSavePoint,
+    this.totalPay,
+    this.savePoint,
+    this.paymentType,
+    this.vatAmount,
+    this.images,
+    this.newAddress,
+    this.newAddressSP,
+    //new
+    this.monthlyRent,
+    this.rentalPeriod,
+    this.deposits,
+    this.rentalEndDate,
+  );
 }
+
 class StaffNewOrderUploadImageEvent extends StaffNewOrderEvent {
   final List<File> files;
 

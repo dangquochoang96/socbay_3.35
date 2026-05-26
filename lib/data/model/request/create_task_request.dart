@@ -32,6 +32,6 @@ class CreateTaskRequest {
     this.productId,
     this.video,
     this.images,
-    this.customerId
+    this.customerId,
   });
 }

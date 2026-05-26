@@ -27,7 +27,6 @@ import 'blocs/root/root_bloc.dart';
 import 'blocs/technique/technique_screen_bloc.dart';
 import 'data/data_provider/base_api.dart';
 
-
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
@@ -150,10 +149,11 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           ),
         ),
         BlocProvider<DetailBookingBloc>(
-            create: (context) => DetailBookingBloc(
-                  apiRepository: RepositoryProvider.of<ApiRepository>(context),
-                  args: {},
-                )),
+          create: (context) => DetailBookingBloc(
+            apiRepository: RepositoryProvider.of<ApiRepository>(context),
+            args: {},
+          ),
+        ),
         BlocProvider<StaffServiceScreenBloc>(
           create: (context) => StaffServiceScreenBloc(
             apiRepository: RepositoryProvider.of<ApiRepository>(context),
@@ -172,8 +172,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   }
 
   Widget _buildRepositoryProvider({required Widget child}) {
-    final BaseAPI baseAPI =
-        BaseAPI(rootBloc: BlocProvider.of<RootBloc>(context));
+    final BaseAPI baseAPI = BaseAPI(
+      rootBloc: BlocProvider.of<RootBloc>(context),
+    );
     return MultiRepositoryProvider(
       providers: [
         RepositoryProvider<ApiRepository>(

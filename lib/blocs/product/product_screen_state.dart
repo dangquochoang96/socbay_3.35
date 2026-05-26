@@ -1,5 +1,5 @@
-abstract class ProductScreenState{
+abstract class ProductScreenState {
   const ProductScreenState();
 }
 
-class ProductScreenInitialState extends ProductScreenState{}
+class ProductScreenInitialState extends ProductScreenState {}

@@ -8,6 +8,7 @@ import 'package:socbay/blocs/staff/rent_task_sale/rent_booking_service_state.dar
 import 'package:socbay/data/repository/auth/api_repository.dart';
 import 'package:socbay/application.dart';
 import 'package:socbay/config/app_config.dart';
+import 'package:socbay/constants/api_endpoints.dart';
 import 'package:socbay/data/model/home_service_model.dart';
 import 'package:socbay/data/model/order_model.dart';
 import 'package:socbay/data/model/task_model.dart';
@@ -30,29 +31,33 @@ class RentBookingServiceBloc
   UserProfile? customerInfo;
 
   RentBookingServiceBloc({required this.apiRepository, required this.args})
-      : super(StaffServiceScreenSaleInitialState()) {
+    : super(StaffServiceScreenSaleInitialState()) {
     on<StaffServiceScreenSaleChangeTypeServiceEvent>(
-        _mapChangeTypeServiceEventToState);
+      _mapChangeTypeServiceEventToState,
+    );
     on<StaffServiceScreenSaleCreateTaskEvent>(_mapCreateTaskEventToState);
     on<StaffServiceScreenSaleUploadImageEvent>(_mapUploadImageEventToState);
     on<StaffServiceSaleScreenCheckCustomerEvent>(_mapCheckCustomerEventToState);
     on<UserAddressScreenSaleCreateUserAddressEvent>(
-        _mapCreateUserAddressToState);
+      _mapCreateUserAddressToState,
+    );
   }
 
   FutureOr<void> _mapChangeTypeServiceEventToState(
-      StaffServiceScreenSaleChangeTypeServiceEvent event,
-      Emitter<RentBookingServiceState> emit) {
+    StaffServiceScreenSaleChangeTypeServiceEvent event,
+    Emitter<RentBookingServiceState> emit,
+  ) {
     try {
       emit(StaffServiceScreenSaleChangeTypeServiceState(event.typeService));
     } catch (ex) {
-      LoggerUtil.error(
-          "---_mapChangeTypeServiceEventToState--- \n$ex");
+      LoggerUtil.error("---_mapChangeTypeServiceEventToState--- \n$ex");
     }
   }
 
-  Future _mapCreateTaskEventToState(StaffServiceScreenSaleCreateTaskEvent event,
-      Emitter<RentBookingServiceState> emit) async {
+  Future _mapCreateTaskEventToState(
+    StaffServiceScreenSaleCreateTaskEvent event,
+    Emitter<RentBookingServiceState> emit,
+  ) async {
     isLoading = true;
     try {
       emit(StaffServiceScreenSaleInitialState());
@@ -60,8 +65,11 @@ class RentBookingServiceBloc
       if (event.createTaskRequest.customerId == null ||
           event.createTaskRequest.customerId == 0 ||
           App.instance.userApp == null) {
-        emit(const StaffServiceScreenSaleCreateTaskFailedState(
-            "Lỗi tạo công việc mới."));
+        emit(
+          const StaffServiceScreenSaleCreateTaskFailedState(
+            "LÃƒÂ¡Ã‚Â»Ã¢â‚¬â€i tÃƒÂ¡Ã‚ÂºÃ‚Â¡o cÃƒÆ’Ã‚Â´ng viÃƒÂ¡Ã‚Â»Ã¢â‚¬Â¡c mÃƒÂ¡Ã‚Â»Ã¢â‚¬Âºi.",
+          ),
+        );
         isLoading = false;
         return;
       }
@@ -81,24 +89,34 @@ class RentBookingServiceBloc
             : event.createTaskRequest.productId,
         "images": images,
         "address": event.createTaskRequest.address.toString(),
-        "request_user_id": App.instance.userApp!.id.toString()
+        "request_user_id": App.instance.userApp!.id.toString(),
       };
-      var url = Uri.http(AppConfig.instance.values.apiUrl, "/api/rent-tasks/them");
+      var url = AppConfig.instance.apiUri(ApiEndpoints.rentTaskCreate);
       var body = json.encode(args);
       print('body');
       print(body);
       try {
-        final response = await http.post(url,
-            body: body, headers: {'Content-type': 'application/json'});
+        final response = await http.post(
+          url,
+          body: body,
+          headers: {'Content-type': 'application/json'},
+        );
         if (response.statusCode == HttpStatus.ok) {
           var l = Map<String, dynamic>.from(json.decode(response.body));
           if (l["code"] == 1) {
             var task = TaskModel.fromJson(l["data"]);
-            emit(StaffServiceScreenSaleCreateTaskSuccessState(
-                task.id!, event.isSearch));
+            emit(
+              StaffServiceScreenSaleCreateTaskSuccessState(
+                task.id!,
+                event.isSearch,
+              ),
+            );
           } else {
-            emit(StaffServiceScreenSaleCreateTaskFailedState(
-                l["message"] ?? "Errorr"));
+            emit(
+              StaffServiceScreenSaleCreateTaskFailedState(
+                l["message"] ?? "Errorr",
+              ),
+            );
           }
         }
       } catch (ex) {
@@ -113,23 +131,29 @@ class RentBookingServiceBloc
   }
 
   FutureOr<void> _mapUploadImageEventToState(
-      StaffServiceScreenSaleUploadImageEvent event,
-      Emitter<RentBookingServiceState> emit) async {
+    StaffServiceScreenSaleUploadImageEvent event,
+    Emitter<RentBookingServiceState> emit,
+  ) async {
     isLoading = true;
     try {
       paths.clear();
       emit(StaffServiceScreenSaleInitialState());
       var uri = Uri.parse(
-          "$protocol${AppConfig.instance.values.apiUrl}/api/order/upload-image");
+        AppConfig.instance.apiUrl(ApiEndpoints.orderUploadImage),
+      );
       for (var file in event.files) {
         if (await file.length() > 2000000) {
           emit(const StaffServiceScreenSaleUploadImageFailedState('Error'));
           continue;
         }
         var request = http.MultipartRequest('POST', uri);
-        request.files.add(http.MultipartFile.fromBytes(
-            'image', file.readAsBytesSync(),
-            filename: basename(file.path)));
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            'image',
+            file.readAsBytesSync(),
+            filename: basename(file.path),
+          ),
+        );
         // add file to multipart
         var resStream = await request.send();
         var response = await http.Response.fromStream(resStream);
@@ -153,13 +177,15 @@ class RentBookingServiceBloc
   }
 
   Future<void> _mapCheckCustomerEventToState(
-      StaffServiceSaleScreenCheckCustomerEvent event,
-      Emitter<RentBookingServiceState> emit) async {
+    StaffServiceSaleScreenCheckCustomerEvent event,
+    Emitter<RentBookingServiceState> emit,
+  ) async {
     isLoading = true;
     try {
       emit(StaffServiceScreenSaleInitialState());
-      var url = Uri.http(AppConfig.instance.values.apiUrl, "/api/order/phone",
-          {'phone': event.phone});
+      var url = AppConfig.instance.apiUri(ApiEndpoints.orderByPhone, {
+        'phone': event.phone,
+      });
       var res = await http.post(url);
       if (res.statusCode == HttpStatus.ok) {
         var l = Map<String, dynamic>.from(json.decode(res.body));
@@ -168,11 +194,17 @@ class RentBookingServiceBloc
           customerInfo = UserProfile.fromJson(m['users']);
           print(customerInfo);
           await _getProductByUser(customerInfo?.id ?? 0);
-          emit(StaffServiceScreenSaleCheckCustomerSuccessState(
-              l['message'].toString()));
+          emit(
+            StaffServiceScreenSaleCheckCustomerSuccessState(
+              l['message'].toString(),
+            ),
+          );
         } else {
-          emit(StaffServiceScreenSaleCheckCustomerFailedState(
-              l['message'].toString()));
+          emit(
+            StaffServiceScreenSaleCheckCustomerFailedState(
+              l['message'].toString(),
+            ),
+          );
         }
       } else {
         emit(const StaffServiceScreenSaleCheckCustomerFailedState('Error'));
@@ -187,14 +219,16 @@ class RentBookingServiceBloc
 
   Future<void> _getProductByUser(int id) async {
     try {
-      var url = Uri.http(AppConfig.instance.values.apiUrl,
-          "/api/user/listProduct/${id.toString()}");
+      var url = AppConfig.instance.apiUri(
+        ApiEndpoints.userProducts(id.toString()),
+      );
       var res = await http.get(url);
       if (res.statusCode == HttpStatus.ok) {
         var l = Map<String, dynamic>.from(json.decode(res.body));
         var m = Map<String, dynamic>.from(l["data"]);
         listProducts = List<OrderModel>.from(
-            m["listProducts"].map((model) => OrderModel.fromJson(model)));
+          m["listProducts"].map((model) => OrderModel.fromJson(model)),
+        );
       }
     } catch (exception) {
       LoggerUtil.log(exception.toString());
@@ -202,8 +236,9 @@ class RentBookingServiceBloc
   }
 
   FutureOr<void> _mapCreateUserAddressToState(
-      UserAddressScreenSaleCreateUserAddressEvent event,
-      Emitter<RentBookingServiceState> emit) async {
+    UserAddressScreenSaleCreateUserAddressEvent event,
+    Emitter<RentBookingServiceState> emit,
+  ) async {
     isLoading = true;
     emit(StaffServiceScreenSaleInitialState());
     final res = await apiRepository.createUserAddress(event.userAddressRequest);

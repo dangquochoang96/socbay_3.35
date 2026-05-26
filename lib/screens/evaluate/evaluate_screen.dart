@@ -32,7 +32,9 @@ class _EvaluateScreenListState extends State<EvaluateScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<EvaluateScreenBloc, EvaluateScreenState>(
-        builder: _builder, listener: _listener);
+      builder: _builder,
+      listener: _listener,
+    );
   }
 
   void _listener(BuildContext context, EvaluateScreenState state) {}
@@ -59,12 +61,11 @@ class _EvaluateScreenListState extends State<EvaluateScreen> {
     final UserProfile item = _bloc.users[index];
     return GestureDetector(
       onTap: () {
-        Navigator.pushNamed(context, Routes.staffCommentTechniqueList,
-            arguments: {
-              "id": item.id,
-              "name": item.username,
-              "staffInfo": item
-            });
+        Navigator.pushNamed(
+          context,
+          Routes.staffCommentTechniqueList,
+          arguments: {"id": item.id, "name": item.username, "staffInfo": item},
+        );
       },
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 8),
@@ -78,7 +79,10 @@ class _EvaluateScreenListState extends State<EvaluateScreen> {
             ClipRRect(
               borderRadius: BorderRadius.circular(50),
               child: ImageUtil.loadNetWorkImage(
-                  url: item.avatar ?? '', height: 50, width: 50),
+                url: item.avatar ?? '',
+                height: 50,
+                width: 50,
+              ),
             ),
             Expanded(
               child: Padding(
@@ -89,8 +93,9 @@ class _EvaluateScreenListState extends State<EvaluateScreen> {
                     Text(
                       '${item.username}',
                       style: const TextStyle(
-                          fontWeight: MyFontWeight.bold,
-                          overflow: TextOverflow.ellipsis),
+                        fontWeight: MyFontWeight.bold,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                       maxLines: 1,
                     ),
                     Text('${item.phone}'),

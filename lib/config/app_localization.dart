@@ -7,10 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 const String _languageKey = 'language';
-final List<String> _supportedLanguages = [
-  LangCode.vi.code,
-  LangCode.en.code,
-];
+final List<String> _supportedLanguages = [LangCode.vi.code, LangCode.en.code];
 
 class AppLocalization {
   /// ----------------------------------------------------------
@@ -37,7 +34,8 @@ class AppLocalization {
       NumberFormat.simpleCurrency(locale: _locale.toString()).currencySymbol;
 
   /// return the VND currency symbol
-  String get vndSymbol => NumberFormat.simpleCurrency(locale: LangCode.vi.code).currencySymbol;
+  String get vndSymbol =>
+      NumberFormat.simpleCurrency(locale: LangCode.vi.code).currencySymbol;
 
   /// Return a list of supported language
   Iterable<Locale> supportedLocales() =>
@@ -53,9 +51,7 @@ class AppLocalization {
   /// One-time initialization
   Future init([LangCode? langCode]) async {
     if (langCode != null) {
-      await setNewLanguage(
-        langCode: langCode,
-      );
+      await setNewLanguage(langCode: langCode);
     } else {
       LangCode? langCode;
       final String currentCode = await getPreferredLanguage();
@@ -65,9 +61,7 @@ class AppLocalization {
           break;
         }
       }
-      await setNewLanguage(
-        langCode: langCode ?? LangCode.vi,
-      );
+      await setNewLanguage(langCode: langCode ?? LangCode.vi);
     }
     return null;
   }
@@ -80,7 +74,9 @@ class AppLocalization {
     _currentLangCode = langCode;
     _locale = Locale(langCode.code, '');
 
-    final String jsonContent = await rootBundle.loadString('lang/${_locale.languageCode}.json');
+    final String jsonContent = await rootBundle.loadString(
+      'lang/${_locale.languageCode}.json',
+    );
     _localizedStrings = json.decode(jsonContent);
 
     if (saveInPrefs) {
@@ -119,10 +115,7 @@ String l(String key) {
   return AppLocalization.instance.text(key);
 }
 
-enum LangCode {
-  vi,
-  en,
-}
+enum LangCode { vi, en }
 
 extension LanguageExtension on LangCode {
   String get code {

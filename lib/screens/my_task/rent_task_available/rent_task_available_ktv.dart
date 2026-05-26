@@ -44,7 +44,8 @@ class _RentTaskAvailableTabState extends State<RentTaskAvailableTab> {
       if (_bloc.isClosed) _bloc = BlocProvider.of(context);
       scrollPaginationListener(
         scrollController: _scrollController,
-        condition: (_scrollController.hasClients &&
+        condition:
+            (_scrollController.hasClients &&
                 _scrollController.position.pixels ==
                     _scrollController.position.maxScrollExtent) ||
             _bloc.isLoading,
@@ -84,7 +85,9 @@ class _RentTaskAvailableTabState extends State<RentTaskAvailableTab> {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<RentTaskScreenKTVBloc, RentTaskScreenState>(
-        builder: _builder, listener: _listener);
+      builder: _builder,
+      listener: _listener,
+    );
   }
 
   void _listener(BuildContext context, state) {
@@ -108,29 +111,33 @@ class _RentTaskAvailableTabState extends State<RentTaskAvailableTab> {
 
   Widget _builder(BuildContext context, state) {
     return LoadingIndicator(
-        isLoading: _bloc.isLoading,
-        child: RefreshIndicator(
-          onRefresh: () async {
-            print("LOADINGGGG");
-            _bloc.add(const StaffTaskScreenGetTaskAssigedEvent(
-                isRefresh: true, page: 0));
-          },
-          child: _bloc.staffListTaskAssigedModel.isEmpty && !_bloc.isLoading
-              ? const Center(child: Text("Chưa có công việc"))
-              : ListView.separated(
-                  controller: _scrollController,
-                  itemBuilder: _itemBuilder,
-                  itemCount: _bloc.staffListTaskAssigedModel.length,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: paddingHorizontal,
-                    vertical: paddingVertical,
-                  ),
-                  separatorBuilder: (BuildContext context, int index) {
-                    return const Divider(
-                        thickness: 1, color: ColorUtil.bangladeshGreen);
-                  },
+      isLoading: _bloc.isLoading,
+      child: RefreshIndicator(
+        onRefresh: () async {
+          print("LOADINGGGG");
+          _bloc.add(
+            const StaffTaskScreenGetTaskAssigedEvent(isRefresh: true, page: 0),
+          );
+        },
+        child: _bloc.staffListTaskAssigedModel.isEmpty && !_bloc.isLoading
+            ? const Center(child: Text("Chưa có công việc"))
+            : ListView.separated(
+                controller: _scrollController,
+                itemBuilder: _itemBuilder,
+                itemCount: _bloc.staffListTaskAssigedModel.length,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: paddingHorizontal,
+                  vertical: paddingVertical,
                 ),
-        ));
+                separatorBuilder: (BuildContext context, int index) {
+                  return const Divider(
+                    thickness: 1,
+                    color: ColorUtil.bangladeshGreen,
+                  );
+                },
+              ),
+      ),
+    );
   }
 
   Widget _itemBuilder(BuildContext context, int index) {
@@ -160,22 +167,25 @@ class _RentTaskAvailableTabState extends State<RentTaskAvailableTab> {
                   taskModel.status == '2' ||
                   taskModel.status == '5')
                 Align(
-                    alignment: Alignment.centerRight,
-                    child: _buildButton(
-                        text: 'Cập nhật',
-                        isPositive: false,
-                        action: () {
-                          _updateTask(taskModel);
-                        })),
+                  alignment: Alignment.centerRight,
+                  child: _buildButton(
+                    text: 'Cập nhật',
+                    isPositive: false,
+                    action: () {
+                      _updateTask(taskModel);
+                    },
+                  ),
+                ),
             ],
           ),
         ),
         Table(
           children: [
             _buildTableRow(
-                title: 'Thời gian:',
-                content: taskModel.timeStar,
-                isHighlight: true),
+              title: 'Thời gian:',
+              content: taskModel.timeStar,
+              isHighlight: true,
+            ),
             _buildTableRow(
               title: 'Khách hàng:',
               content: taskModel.customer?.username,
@@ -192,23 +202,27 @@ class _RentTaskAvailableTabState extends State<RentTaskAvailableTab> {
               isHighlight: false,
             ),
             _buildTableRow(
-                title: 'Trạng thái dịch vụ:',
-                content: taskModel.getStatus(),
-                isHighlight: false),
+              title: 'Trạng thái dịch vụ:',
+              content: taskModel.getStatus(),
+              isHighlight: false,
+            ),
             _buildTableRow(
-                title: 'Công việc:',
-                content: taskModel.name ?? "",
-                isHighlight: false),
+              title: 'Công việc:',
+              content: taskModel.name ?? "",
+              isHighlight: false,
+            ),
             _buildTableRow(
-                title: 'Nội dung:',
-                content: taskModel.des ?? "",
-                isHighlight: false),
+              title: 'Nội dung:',
+              content: taskModel.des ?? "",
+              isHighlight: false,
+            ),
             _buildTableRow(
-                title: 'Thông báo:',
-                content: taskModel.noti ?? '',
-                isHighlight: false),
+              title: 'Thông báo:',
+              content: taskModel.noti ?? '',
+              isHighlight: false,
+            ),
           ],
-        )
+        ),
       ],
     );
   }
@@ -223,20 +237,26 @@ class _RentTaskAvailableTabState extends State<RentTaskAvailableTab> {
         Text(
           title,
           style: const TextStyle(
-              color: ColorUtil.raisinBlack, fontWeight: FontWeight.bold),
+            color: ColorUtil.raisinBlack,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         Text(
           "$content",
           style: TextStyle(
-              color: isHighlight ? ColorUtil.bangladeshGreen : Colors.black),
+            color: isHighlight ? ColorUtil.bangladeshGreen : Colors.black,
+          ),
         ),
       ],
     );
   }
 
   void _detailTask(TaskModel taskModel) {
-    Navigator.pushNamed(context, Routes.detailRentBookingScreen,
-        arguments: {'id': taskModel.id});
+    Navigator.pushNamed(
+      context,
+      Routes.detailRentBookingScreen,
+      arguments: {'id': taskModel.id},
+    );
   }
 
   Widget _buildButton({text, isPositive, action}) {
@@ -253,19 +273,22 @@ class _RentTaskAvailableTabState extends State<RentTaskAvailableTab> {
             },
             child: Padding(
               padding: const EdgeInsets.symmetric(
-                  horizontal: 12, vertical: 6), // Adjust padding
+                horizontal: 12,
+                vertical: 6,
+              ), // Adjust padding
               child: Text(
                 text,
                 textAlign: TextAlign.center,
                 style: const TextStyle(
-                    fontSize: 8, color: Colors.white), // Decreased font size
+                  fontSize: 8,
+                  color: Colors.white,
+                ), // Decreased font size
               ),
             ),
           )
         : ElevatedButton(
             style: ButtonStyle(
-              backgroundColor:
-                  WidgetStateProperty.all<Color>(ColorUtil.white),
+              backgroundColor: WidgetStateProperty.all<Color>(ColorUtil.white),
               shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                 RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -278,12 +301,15 @@ class _RentTaskAvailableTabState extends State<RentTaskAvailableTab> {
             ),
             child: Padding(
               padding: const EdgeInsets.symmetric(
-                  horizontal: 8, vertical: 2), // Adjust padding
+                horizontal: 8,
+                vertical: 2,
+              ), // Adjust padding
               child: Text(
                 text,
                 style: const TextStyle(
-                    fontSize: 9,
-                    color: ColorUtil.bangladeshGreen), // Decreased font size
+                  fontSize: 9,
+                  color: ColorUtil.bangladeshGreen,
+                ), // Decreased font size
               ),
             ),
             onPressed: () {
@@ -298,8 +324,9 @@ class _RentTaskAvailableTabState extends State<RentTaskAvailableTab> {
 
   Future<void> _updateTask(TaskModel taskModel) async {
     int? selectedOption = 5;
-    DateTime tempDateTime =
-        DateTime.parse(taskModel.timeStar ?? DateTime.now().toString());
+    DateTime tempDateTime = DateTime.parse(
+      taskModel.timeStar ?? DateTime.now().toString(),
+    );
 
     showDialog(
       context: context,
@@ -307,10 +334,7 @@ class _RentTaskAvailableTabState extends State<RentTaskAvailableTab> {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              title: const Text(
-                'Lý do hẹn lại',
-                textAlign: TextAlign.center,
-              ),
+              title: const Text('Lý do hẹn lại', textAlign: TextAlign.center),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -323,17 +347,18 @@ class _RentTaskAvailableTabState extends State<RentTaskAvailableTab> {
                     secondValue: _timeStart,
                     onTapFirst: () async {
                       final DateTime? picked = await showDatePicker(
-                          context: context,
-                          locale: const Locale("vi", "VN"),
-                          initialDate: selectedDate ?? DateTime.now(),
-                          firstDate: DateTime.now(),
-                          lastDate:
-                              DateTime.now().add(const Duration(days: 365)));
+                        context: context,
+                        locale: const Locale("vi", "VN"),
+                        initialDate: selectedDate ?? DateTime.now(),
+                        firstDate: DateTime.now(),
+                        lastDate: DateTime.now().add(const Duration(days: 365)),
+                      );
                       if (picked != null && picked != selectedDate) {
                         selectedDate = picked;
                         setState(() {
-                          _dateStart =
-                              selectedDate!.toDateString(format: "dd/MM/yyyy");
+                          _dateStart = selectedDate!.toDateString(
+                            format: "dd/MM/yyyy",
+                          );
                           tempDateTime = DateTime(
                             picked.year,
                             picked.month,
@@ -353,8 +378,10 @@ class _RentTaskAvailableTabState extends State<RentTaskAvailableTab> {
                         selectedTime = picked;
                         setState(() {
                           final hour = picked.hour.toString().padLeft(2, "0");
-                          final minute =
-                              picked.minute.toString().padLeft(2, "0");
+                          final minute = picked.minute.toString().padLeft(
+                            2,
+                            "0",
+                          );
                           _timeStart = "$hour:$minute";
                           tempDateTime = DateTime(
                             tempDateTime.year,
@@ -454,31 +481,36 @@ class _RentTaskAvailableTabState extends State<RentTaskAvailableTab> {
                         if (_bloc.isClosed) _bloc = BlocProvider.of(context);
 
                         if (selectedOption == 1 || selectedOption == 2) {
-                          _bloc.add(StaffTaskScreenUpdateTaskDayDoneEvent(
-                            taskModel.id ?? 0,
-                            taskModel.name!,
-                            _feedbackController.text,
-                            taskModel.des ?? '',
-                            selectedOption.toString(),
-                            taskModel.priority ?? "1",
-                            tempDateTime.toString(),
-                          ));
+                          _bloc.add(
+                            StaffTaskScreenUpdateTaskDayDoneEvent(
+                              taskModel.id ?? 0,
+                              taskModel.name!,
+                              _feedbackController.text,
+                              taskModel.des ?? '',
+                              selectedOption.toString(),
+                              taskModel.priority ?? "1",
+                              tempDateTime.toString(),
+                            ),
+                          );
 
                           _bloc.staffListTaskAssigedModel.removeWhere(
-                              (element) => element.id == taskModel.id);
+                            (element) => element.id == taskModel.id,
+                          );
 
                           Navigator.pop(context);
                           _feedbackController.clear();
                         } else {
-                          _bloc.add(StaffTaskScreenUpdateTaskDayDoneEvent(
-                            taskModel.id ?? 0,
-                            taskModel.name!,
-                            _feedbackController.text,
-                            taskModel.des ?? '',
-                            selectedOption.toString(),
-                            taskModel.priority ?? "1",
-                            tempDateTime.toString(),
-                          ));
+                          _bloc.add(
+                            StaffTaskScreenUpdateTaskDayDoneEvent(
+                              taskModel.id ?? 0,
+                              taskModel.name!,
+                              _feedbackController.text,
+                              taskModel.des ?? '',
+                              selectedOption.toString(),
+                              taskModel.priority ?? "1",
+                              tempDateTime.toString(),
+                            ),
+                          );
 
                           Navigator.pop(context);
                           _feedbackController.clear();
@@ -501,21 +533,22 @@ class _RentTaskAvailableTabState extends State<RentTaskAvailableTab> {
 
   StatelessWidget _button(isPositive, action, text) {
     return ButtonWidget(
-        color: isPositive ? ColorUtil.bangladeshGreen : Colors.grey,
-        borderRadius: BorderRadius.circular(30),
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        onTap: () {
-          if (action == null) {
-            Navigator.pop(context);
-          } else {
-            action();
-          }
-        },
-        child: Text(
-          text,
-          textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 16, color: Colors.white),
-        ));
+      color: isPositive ? ColorUtil.bangladeshGreen : Colors.grey,
+      borderRadius: BorderRadius.circular(30),
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      onTap: () {
+        if (action == null) {
+          Navigator.pop(context);
+        } else {
+          action();
+        }
+      },
+      child: Text(
+        text,
+        textAlign: TextAlign.center,
+        style: const TextStyle(fontSize: 16, color: Colors.white),
+      ),
+    );
   }
 
   Widget _buildFormDoubleHorizontal(
@@ -534,83 +567,92 @@ class _RentTaskAvailableTabState extends State<RentTaskAvailableTab> {
           titleTextField,
           style: const TextStyle(color: ColorUtil.raisinBlack, fontSize: 15),
         ),
-        const SizedBox(
-          height: 5,
-        ),
-        Row(children: [
-          Expanded(
+        const SizedBox(height: 5),
+        Row(
+          children: [
+            Expanded(
               flex: 2,
               child: Container(
                 height: 40,
                 decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8.0),
-                    border: Border.all(
-                        color: ColorUtil.bangladeshGreen, width: 0.5)),
+                  borderRadius: BorderRadius.circular(8.0),
+                  border: Border.all(
+                    color: ColorUtil.bangladeshGreen,
+                    width: 0.5,
+                  ),
+                ),
                 child: GestureDetector(
-                    onTap: onTapFirst,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(left: 10.0),
-                          child: Icon(
-                            iconPrefixFirst,
-                            color: ColorUtil.spanishGray,
+                  onTap: onTapFirst,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(left: 10.0),
+                        child: Icon(
+                          iconPrefixFirst,
+                          color: ColorUtil.spanishGray,
+                        ),
+                      ),
+                      const SizedBox(width: 5),
+                      Flexible(
+                        child: Text(
+                          firstValue.isEmpty ? 'dd/MM/yyyy' : firstValue,
+                          style: TextStyle(
+                            color: firstValue.isEmpty
+                                ? ColorUtil.silverChalice
+                                : ColorUtil.raisinBlack,
                           ),
                         ),
-                        const SizedBox(
-                          width: 5,
-                        ),
-                        Flexible(
-                            child: Text(
-                                firstValue.isEmpty ? 'dd/MM/yyyy' : firstValue,
-                                style: TextStyle(
-                                    color: firstValue.isEmpty
-                                        ? ColorUtil.silverChalice
-                                        : ColorUtil.raisinBlack)))
-                      ],
-                    )),
-              )),
-          const SizedBox(
-            width: 5,
-          ),
-          Expanded(
-            flex: 1,
-            child: Container(
-              height: 40,
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8.0),
-                  border:
-                      Border.all(color: ColorUtil.bangladeshGreen, width: 0.5)),
-              child: GestureDetector(
-                onTap: onTapSecond,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(left: 2.0),
-                      child: Icon(
-                        iconPrefixSecond,
-                        color: ColorUtil.spanishGray,
                       ),
-                    ),
-                    const SizedBox(
-                      width: 5,
-                    ),
-                    Flexible(
-                        child: Text(secondValue.isEmpty ? 'hh:mm' : secondValue,
-                            style: TextStyle(
-                                color: secondValue.isEmpty
-                                    ? ColorUtil.silverChalice
-                                    : ColorUtil.raisinBlack)))
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
-          )
-        ])
+            const SizedBox(width: 5),
+            Expanded(
+              flex: 1,
+              child: Container(
+                height: 40,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8.0),
+                  border: Border.all(
+                    color: ColorUtil.bangladeshGreen,
+                    width: 0.5,
+                  ),
+                ),
+                child: GestureDetector(
+                  onTap: onTapSecond,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(left: 2.0),
+                        child: Icon(
+                          iconPrefixSecond,
+                          color: ColorUtil.spanishGray,
+                        ),
+                      ),
+                      const SizedBox(width: 5),
+                      Flexible(
+                        child: Text(
+                          secondValue.isEmpty ? 'hh:mm' : secondValue,
+                          style: TextStyle(
+                            color: secondValue.isEmpty
+                                ? ColorUtil.silverChalice
+                                : ColorUtil.raisinBlack,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ],
     );
   }

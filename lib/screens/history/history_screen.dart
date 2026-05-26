@@ -64,7 +64,9 @@ class _HistoryScreenState extends State<HistoryScreen>
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<HistoryScreenBloc, HistoryScreenState>(
-        builder: _builder, listener: _listener);
+      builder: _builder,
+      listener: _listener,
+    );
   }
 
   void _listener(BuildContext context, HistoryScreenState state) {
@@ -81,75 +83,68 @@ class _HistoryScreenState extends State<HistoryScreen>
 
   Widget _builder(BuildContext context, HistoryScreenState state) {
     return Scaffold(
-        floatingActionButton: FloatingActionButton(
-            heroTag: "history_screen",
-            backgroundColor: ColorUtil.brightYellow,
-            shape: const CircleBorder(
-              side: BorderSide(
-                color: Colors.white,
-                width: 3.0,
-              ),
-            ),
-            tooltip: "Thêm công việc",
-            onPressed: () {
-              Navigator.pushNamed(
-                  context,
-                  App.instance.userApp?.isUserCustomer() == true
-                      ? Routes.serviceScreen
-                      : App.instance.userApp?.isUserRole() == true
-                          ? Routes.staffServiceScreen
-                          : Routes.staffServiceScreenSale,
-                  arguments: {
-                    "listService": [],
-                    "index": "",
-                  });
-            },
-            child: const Icon(Icons.add)),
-        appBar: MyAppBar(
-          title: "Lịch sử",
-          isBackNavigation: false,
+      floatingActionButton: FloatingActionButton(
+        heroTag: "history_screen",
+        backgroundColor: ColorUtil.brightYellow,
+        shape: const CircleBorder(
+          side: BorderSide(color: Colors.white, width: 3.0),
         ),
-        body: LoadingIndicator(
-            isLoading: _bloc.isLoading,
-            child: RefreshIndicator(
-              onRefresh: () async {
-                _bloc.add(
-                    HistoryScreenTabPressEvent(_tabHistoryController.index));
-              },
-              child: Column(
-                children: [
-                  TabBar(
-                    controller: _tabHistoryController,
-                    indicatorColor: ColorUtil.bangladeshGreen,
-                    tabs: [
-                      _buildTab('Lịch sử đặt lịch'),
-                      _buildTab('Nhật ký thay lõi'),
-                    ],
-                  ),
-                  Expanded(
-                    child: IndexedStack(
-                      index: _tabHistoryController.index,
-                      children: [
-                        _buildServiceHistory(),
-                        _buildProductsHistory(),
-                      ],
-                    ),
-                  )
+        tooltip: "Thêm công việc",
+        onPressed: () {
+          Navigator.pushNamed(
+            context,
+            App.instance.userApp?.isUserCustomer() == true
+                ? Routes.serviceScreen
+                : App.instance.userApp?.isUserRole() == true
+                ? Routes.staffServiceScreen
+                : Routes.staffServiceScreenSale,
+            arguments: {"listService": [], "index": ""},
+          );
+        },
+        child: const Icon(Icons.add),
+      ),
+      appBar: MyAppBar(title: "Lịch sử", isBackNavigation: false),
+      body: LoadingIndicator(
+        isLoading: _bloc.isLoading,
+        child: RefreshIndicator(
+          onRefresh: () async {
+            _bloc.add(HistoryScreenTabPressEvent(_tabHistoryController.index));
+          },
+          child: Column(
+            children: [
+              TabBar(
+                controller: _tabHistoryController,
+                indicatorColor: ColorUtil.bangladeshGreen,
+                tabs: [
+                  _buildTab('Lịch sử đặt lịch'),
+                  _buildTab('Nhật ký thay lõi'),
                 ],
               ),
-            )));
+              Expanded(
+                child: IndexedStack(
+                  index: _tabHistoryController.index,
+                  children: [_buildServiceHistory(), _buildProductsHistory()],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   Tab _buildTab(text) {
     return Tab(
-        height: 36,
-        child: Text(
-          text,
-          style: const TextStyle(
-              color: ColorUtil.bangladeshGreen,
-              fontSize: 20,
-              fontWeight: FontWeight.w600),
-        ));
+      height: 36,
+      child: Text(
+        text,
+        style: const TextStyle(
+          color: ColorUtil.bangladeshGreen,
+          fontSize: 20,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
   }
 
   Widget _buildServiceHistory() {
@@ -157,9 +152,10 @@ class _HistoryScreenState extends State<HistoryScreen>
       return const Text('Khách hàng chưa đặt lịch');
     }
     return ListView.separated(
-        itemBuilder: _buildItemServiceHistory,
-        separatorBuilder: separatorBuilder,
-        itemCount: _bloc.lstBooking.length);
+      itemBuilder: _buildItemServiceHistory,
+      separatorBuilder: separatorBuilder,
+      itemCount: _bloc.lstBooking.length,
+    );
   }
 
   Widget _buildProductsHistory() {
@@ -167,80 +163,99 @@ class _HistoryScreenState extends State<HistoryScreen>
       return const Text('Khách hàng chưa thay lõi');
     }
     return ListView.separated(
-        // reverse: true,
-        itemBuilder: _buildItemMachineInUse,
-        separatorBuilder: separatorBuilder,
-        itemCount: _bloc.lstMachine.length);
+      // reverse: true,
+      itemBuilder: _buildItemMachineInUse,
+      separatorBuilder: separatorBuilder,
+      itemCount: _bloc.lstMachine.length,
+    );
   }
 
   Widget separatorBuilder(BuildContext context, int index) {
     return Container(
-        decoration: const BoxDecoration(
-            border: Border(
-      bottom: BorderSide(width: 1.0, color: Colors.black26),
-    )));
+      decoration: const BoxDecoration(
+        border: Border(bottom: BorderSide(width: 1.0, color: Colors.black26)),
+      ),
+    );
   }
 
   Widget _buildItemServiceHistory(BuildContext context, int index) {
     TaskModel taskModel = _bloc.lstBooking[index];
     var dataFormat = _formatDatetime(taskModel.timeStar);
-    return Column(children: [
-      ButtonWidget(
+    return Column(
+      children: [
+        ButtonWidget(
           onTap: () {
             _detailTask(taskModel);
           },
           child: Padding(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: paddingHorizontal, vertical: 8),
-              child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+            padding: const EdgeInsets.symmetric(
+              horizontal: paddingHorizontal,
+              vertical: 8,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                                padding: const EdgeInsets.only(
-                                  bottom: 1, // space between underline and text
-                                ),
-                                decoration: const BoxDecoration(
-                                    border: Border(
-                                        bottom: BorderSide(
-                                  color:
-                                      ColorUtil.raisinBlack, // Text colour here
-                                  width: 1.0, // Underline width
-                                ))),
-                                child: Text('Mã dịch vụ: DV_${taskModel.id}',
-                                    style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        color: ColorUtil.raisinBlack,
-                                        fontSize: 16)))
-                          ],
+                        Container(
+                          padding: const EdgeInsets.only(
+                            bottom: 1, // space between underline and text
+                          ),
+                          decoration: const BoxDecoration(
+                            border: Border(
+                              bottom: BorderSide(
+                                color:
+                                    ColorUtil.raisinBlack, // Text colour here
+                                width: 1.0, // Underline width
+                              ),
+                            ),
+                          ),
+                          child: Text(
+                            'Mã dịch vụ: DV_${taskModel.id}',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: ColorUtil.raisinBlack,
+                              fontSize: 16,
+                            ),
+                          ),
                         ),
-                        if (taskModel.status == '1' ||
-                            taskModel.status == '2' ||
-                            taskModel.status == '5')
-                          Align(
-                              alignment: Alignment.centerRight,
-                              child: _buildButton(
-                                  text: 'Hủy',
-                                  isPositive: false,
-                                  action: () {
-                                    _cancelTask(taskModel);
-                                  })),
                       ],
                     ),
-                    const SizedBox(height: 3)
-                  ]))),
-      ButtonWidget(
+                    if (taskModel.status == '1' ||
+                        taskModel.status == '2' ||
+                        taskModel.status == '5')
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: _buildButton(
+                          text: 'Hủy',
+                          isPositive: false,
+                          action: () {
+                            _cancelTask(taskModel);
+                          },
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 3),
+              ],
+            ),
+          ),
+        ),
+        ButtonWidget(
           onTap: () async {
             _detailTask(taskModel);
           },
           child: Padding(
-            padding:
-                const EdgeInsets.only(left: 20, top: 0, bottom: 10, right: 8),
+            padding: const EdgeInsets.only(
+              left: 20,
+              top: 0,
+              bottom: 10,
+              right: 8,
+            ),
             child: Table(
               columnWidths: const {1: FlexColumnWidth(1)},
               children: [
@@ -251,68 +266,111 @@ class _HistoryScreenState extends State<HistoryScreen>
                       child: const Text(
                         "Trạng thái dịch vụ: ",
                         style: TextStyle(
-                            fontSize: 15, fontWeight: FontWeight.w600),
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
-                    Text(taskModel.getStatus(),
-                        style:
-                            const TextStyle(fontSize: 15, color: ColorUtil.red))
+                    Text(
+                      taskModel.getStatus(),
+                      style: const TextStyle(
+                        fontSize: 15,
+                        color: ColorUtil.red,
+                      ),
+                    ),
                   ],
                 ),
-                TableRow(children: [
-                  Container(
-                    padding: const EdgeInsets.only(bottom: 8.0),
-                    child: const Text('Công việc: ',
+                TableRow(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.only(bottom: 8.0),
+                      child: const Text(
+                        'Công việc: ',
                         style: TextStyle(
-                            fontSize: 15, fontWeight: FontWeight.w600)),
-                  ),
-                  Text(taskModel.name ?? '',
-                      style: const TextStyle(fontSize: 15)),
-                ]),
-                TableRow(children: [
-                  Container(
-                    padding: const EdgeInsets.only(bottom: 8.0),
-                    child: const Text('Thời gian:',
-                        style: TextStyle(
-                            fontSize: 15, fontWeight: FontWeight.w600)),
-                  ),
-                  Text(dataFormat,
-                      style: const TextStyle(
                           fontSize: 15,
-                          color: ColorUtil.red,
-                          fontWeight: FontWeight.w600))
-                ]),
-                TableRow(children: [
-                  Container(
-                    padding: const EdgeInsets.only(bottom: 8.0),
-                    child: const Text('Kỹ thuật viên:',
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    Text(
+                      taskModel.name ?? '',
+                      style: const TextStyle(fontSize: 15),
+                    ),
+                  ],
+                ),
+                TableRow(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.only(bottom: 8.0),
+                      child: const Text(
+                        'Thời gian:',
                         style: TextStyle(
-                            fontSize: 15, fontWeight: FontWeight.w600)),
-                  ),
-                  Text(taskModel.staff?.username ?? "",
-                      style: const TextStyle(fontSize: 15))
-                ]),
-                TableRow(children: [
-                  Container(
-                    padding: const EdgeInsets.only(bottom: 8.0),
-                    child: const Text('Số điện thoại KTV:',
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    Text(
+                      dataFormat,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        color: ColorUtil.red,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+                TableRow(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.only(bottom: 8.0),
+                      child: const Text(
+                        'Kỹ thuật viên:',
                         style: TextStyle(
-                            fontSize: 15, fontWeight: FontWeight.w600)),
-                  ),
-                  GestureDetector(
-                    child: Text(taskModel.staff?.phone ?? "",
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    Text(
+                      taskModel.staff?.username ?? "",
+                      style: const TextStyle(fontSize: 15),
+                    ),
+                  ],
+                ),
+                TableRow(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.only(bottom: 8.0),
+                      child: const Text(
+                        'Số điện thoại KTV:',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    GestureDetector(
+                      child: Text(
+                        taskModel.staff?.phone ?? "",
                         style: const TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.w600)),
-                    onTap: () async {
-                      const url = "tel:0963456911";
-                      await launchUrl(Uri.parse(url));
-                    },
-                  )
-                ]),
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      onTap: () async {
+                        const url = "tel:0963456911";
+                        await launchUrl(Uri.parse(url));
+                      },
+                    ),
+                  ],
+                ),
               ],
             ),
-          ))
-    ]);
+          ),
+        ),
+      ],
+    );
   }
 
   Widget _buildItemMachineInUse(BuildContext context, int index) {
@@ -321,128 +379,141 @@ class _HistoryScreenState extends State<HistoryScreen>
     OrderModel machine = _bloc.lstMachine[reversedIndex];
     var dataFormat = _formatDatetime(machine.createdAt);
     return ButtonWidget(
-        onTap: () {
-          _detailMachine(machine);
-        },
-        child: Container(
-          width: MediaQuery.of(context).size.width,
-          padding: EdgeInsets.only(
-              left: MediaQuery.of(context).size.width * 0.02,
-              right: MediaQuery.of(context).size.width * 0.02,
-              bottom: 10),
-          decoration: const BoxDecoration(
-              border: Border(
-                  bottom: BorderSide(
-            color: Colors.black12,
-            width: 1,
-          ))),
-//        padding: const EdgeInsets.symmetric(horizontal: paddingHorizontal, vertical: 8),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    width: MediaQuery.of(context).size.width * 0.2,
-                    decoration: BoxDecoration(
-                      border: Border.all(width: 3, color: Colors.black12),
-                    ),
-                    child: ImageUtil.loadNetWorkImage(
-                        url: machine.product?.images?[0].link == null
-                            ? ""
-                            : "$protocol${AppConfig.instance.values.apiUrl}${machine.product!.images![0].link!}",
-                        height: MediaQuery.of(context).size.width * 0.16,
-                        width: MediaQuery.of(context).size.width * 0.16),
+      onTap: () {
+        _detailMachine(machine);
+      },
+      child: Container(
+        width: MediaQuery.of(context).size.width,
+        padding: EdgeInsets.only(
+          left: MediaQuery.of(context).size.width * 0.02,
+          right: MediaQuery.of(context).size.width * 0.02,
+          bottom: 10,
+        ),
+        decoration: const BoxDecoration(
+          border: Border(bottom: BorderSide(color: Colors.black12, width: 1)),
+        ),
+        //        padding: const EdgeInsets.symmetric(horizontal: paddingHorizontal, vertical: 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: MediaQuery.of(context).size.width * 0.2,
+                  decoration: BoxDecoration(
+                    border: Border.all(width: 3, color: Colors.black12),
                   ),
-                  Container(
-                      padding: EdgeInsets.only(
-                          left: MediaQuery.of(context).size.width * 0.02,
-                          top: MediaQuery.of(context).size.width * 0.01),
-                      width: MediaQuery.of(context).size.width * 0.74,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                  child: ImageUtil.loadNetWorkImage(
+                    url: machine.product?.images?[0].link == null
+                        ? ""
+                        : "$protocol${AppConfig.instance.values.apiUrl}${machine.product!.images![0].link!}",
+                    height: MediaQuery.of(context).size.width * 0.16,
+                    width: MediaQuery.of(context).size.width * 0.16,
+                  ),
+                ),
+                Container(
+                  padding: EdgeInsets.only(
+                    left: MediaQuery.of(context).size.width * 0.02,
+                    top: MediaQuery.of(context).size.width * 0.01,
+                  ),
+                  width: MediaQuery.of(context).size.width * 0.74,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "${machine.product!.name}",
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: ColorUtil.raisinBlack,
+                          fontSize: 16,
+                        ),
+                      ),
+                      Wrap(
+                        //mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        spacing: 8.0, // gap between adjacent chips
+                        runSpacing: 4.0, // gap between lines
+                        direction:
+                            Axis.horizontal, // main axis (rows or columns)
                         children: [
-                          Text(
-                            "${machine.product!.name}",
-                            style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: ColorUtil.raisinBlack,
-                                fontSize: 16),
-                          ),
-                          Wrap(
-                            //mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            spacing: 8.0, // gap between adjacent chips
-                            runSpacing: 4.0, // gap between lines
-                            direction:
-                                Axis.horizontal, // main axis (rows or columns)
-                            children: [
-                              Align(
-                                alignment: Alignment.topLeft,
-                                child: Container(
-                                    padding: EdgeInsets.only(
-                                        top: MediaQuery.of(context).size.width *
-                                            0.01),
-                                    child: (RichText(
-                                        softWrap: true,
-                                        maxLines: 3,
-                                        text: TextSpan(children: [
-                                          const TextSpan(
-                                            text: 'Model: ',
-                                            style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                color:
-                                                    ColorUtil.bangladeshGreen,
-                                                decorationThickness: 1,
-                                                fontSize: 13),
-                                          ),
-                                          TextSpan(
-                                            text: machine.product!.name ?? '',
-                                            style: const TextStyle(
-                                                fontWeight: FontWeight.normal,
-                                                color: ColorUtil.raisinBlack,
-                                                decorationThickness: 1,
-                                                fontSize: 13),
-                                          )
-                                        ])))),
+                          Align(
+                            alignment: Alignment.topLeft,
+                            child: Container(
+                              padding: EdgeInsets.only(
+                                top: MediaQuery.of(context).size.width * 0.01,
                               ),
-                              Align(
-                                alignment: Alignment.topRight,
-                                child: Container(
-                                    padding: EdgeInsets.only(
-                                        top: MediaQuery.of(context).size.width *
-                                            0.01),
-                                    child: (RichText(
-                                        softWrap: true,
-                                        maxLines: 3,
-                                        text: TextSpan(children: [
-                                          const TextSpan(
-                                            text: 'Ngày mua: ',
-                                            style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                color:
-                                                    ColorUtil.bangladeshGreen,
-                                                decorationThickness: 1,
-                                                fontSize: 13),
-                                          ),
-                                          TextSpan(
-                                            text: dataFormat,
-                                            style: const TextStyle(
-                                                fontWeight: FontWeight.normal,
-                                                color: ColorUtil.raisinBlack,
-                                                decorationThickness: 1,
-                                                fontSize: 13),
-                                          ),
-                                        ])))),
-                              )
-                            ],
-                          )
+                              child: (RichText(
+                                softWrap: true,
+                                maxLines: 3,
+                                text: TextSpan(
+                                  children: [
+                                    const TextSpan(
+                                      text: 'Model: ',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: ColorUtil.bangladeshGreen,
+                                        decorationThickness: 1,
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                    TextSpan(
+                                      text: machine.product!.name ?? '',
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.normal,
+                                        color: ColorUtil.raisinBlack,
+                                        decorationThickness: 1,
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )),
+                            ),
+                          ),
+                          Align(
+                            alignment: Alignment.topRight,
+                            child: Container(
+                              padding: EdgeInsets.only(
+                                top: MediaQuery.of(context).size.width * 0.01,
+                              ),
+                              child: (RichText(
+                                softWrap: true,
+                                maxLines: 3,
+                                text: TextSpan(
+                                  children: [
+                                    const TextSpan(
+                                      text: 'Ngày mua: ',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: ColorUtil.bangladeshGreen,
+                                        decorationThickness: 1,
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                    TextSpan(
+                                      text: dataFormat,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.normal,
+                                        color: ColorUtil.raisinBlack,
+                                        decorationThickness: 1,
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )),
+                            ),
+                          ),
                         ],
-                      ))
-                ],
-              ),
-            ],
-          ),
-        ));
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _buildButton({text, isPositive, action}) {
@@ -461,11 +532,11 @@ class _HistoryScreenState extends State<HistoryScreen>
               text,
               textAlign: TextAlign.center,
               style: const TextStyle(fontSize: 16, color: Colors.white),
-            ))
+            ),
+          )
         : ElevatedButton(
             style: ButtonStyle(
-              backgroundColor:
-                  WidgetStateProperty.all<Color>(ColorUtil.white),
+              backgroundColor: WidgetStateProperty.all<Color>(ColorUtil.white),
               shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                 RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -492,43 +563,51 @@ class _HistoryScreenState extends State<HistoryScreen>
 
   Future<void> _cancelTask(TaskModel taskModel) async {
     return showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: const Text(
-              'Vui lòng cho biết lý do bạn hủy dịch vụ',
-              textAlign: TextAlign.center,
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text(
+            'Vui lòng cho biết lý do bạn hủy dịch vụ',
+            textAlign: TextAlign.center,
+          ),
+          content: TextFieldDefault(
+            controller: _feedbackController,
+            maxLines: 5,
+          ),
+          actions: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _buildButtonDialog(
+                  isPositive: false,
+                  text: 'Hủy',
+                  action: () {
+                    Navigator.pop(context);
+                    _feedbackController.clear();
+                  },
+                ),
+                const SizedBox(width: 16),
+                _buildButtonDialog(
+                  isPositive: true,
+                  text: 'Gửi',
+                  action: () {
+                    _bloc.add(
+                      BookingDeleteTaskEvent(
+                        taskModel.id ?? 0,
+                        taskModel.name!,
+                        _feedbackController.text,
+                      ),
+                    );
+                    Navigator.pop(context);
+                    _feedbackController.clear();
+                  },
+                ),
+              ],
             ),
-            content: TextFieldDefault(
-              controller: _feedbackController,
-              maxLines: 5,
-            ),
-            actions: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _buildButtonDialog(
-                      isPositive: false,
-                      text: 'Hủy',
-                      action: () {
-                        Navigator.pop(context);
-                        _feedbackController.clear();
-                      }),
-                  const SizedBox(width: 16),
-                  _buildButtonDialog(
-                      isPositive: true,
-                      text: 'Gửi',
-                      action: () {
-                        _bloc.add(BookingDeleteTaskEvent(taskModel.id ?? 0,
-                            taskModel.name!, _feedbackController.text));
-                        Navigator.pop(context);
-                        _feedbackController.clear();
-                      }),
-                ],
-              )
-            ],
-          );
-        });
+          ],
+        );
+      },
+    );
   }
 
   Widget _buildButtonDialog({isPositive, action, text}) {
@@ -537,33 +616,41 @@ class _HistoryScreenState extends State<HistoryScreen>
 
   StatelessWidget _button(isPositive, action, text) {
     return ButtonWidget(
-        color: isPositive ? ColorUtil.bangladeshGreen : Colors.grey,
-        borderRadius: BorderRadius.circular(30),
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        onTap: () {
-          if (action == null) {
-            Navigator.pop(context);
-          } else {
-            action();
-          }
-        },
-        child: Text(
-          text,
-          textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 16, color: Colors.white),
-        ));
+      color: isPositive ? ColorUtil.bangladeshGreen : Colors.grey,
+      borderRadius: BorderRadius.circular(30),
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      onTap: () {
+        if (action == null) {
+          Navigator.pop(context);
+        } else {
+          action();
+        }
+      },
+      child: Text(
+        text,
+        textAlign: TextAlign.center,
+        style: const TextStyle(fontSize: 16, color: Colors.white),
+      ),
+    );
   }
 
   void _detailTask(TaskModel taskModel) {
-    Navigator.pushNamed(context, Routes.detailBookingScreen,
-        arguments: {'id': taskModel.id});
+    Navigator.pushNamed(
+      context,
+      Routes.detailBookingScreen,
+      arguments: {'id': taskModel.id},
+    );
   }
 
   void _detailMachine(OrderModel orderModel) {
-    Navigator.pushNamed(context, Routes.machineDetail, arguments: {
-      'id_oder': orderModel,
-      'id_user': App.instance.userApp?.phone.toString()
-    });
+    Navigator.pushNamed(
+      context,
+      Routes.machineDetail,
+      arguments: {
+        'id_oder': orderModel,
+        'id_user': App.instance.userApp?.phone.toString(),
+      },
+    );
   }
 
   String _formatDatetime(String? dateTimeString) {

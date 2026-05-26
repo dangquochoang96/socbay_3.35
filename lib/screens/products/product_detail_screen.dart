@@ -41,7 +41,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<ProductDetailScreenBloc, ProductDetailScreenState>(
-        builder: _builder, listener: _listener);
+      builder: _builder,
+      listener: _listener,
+    );
   }
 
   void _listener(BuildContext context, ProductDetailScreenState state) {}
@@ -60,48 +62,55 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         ),
         children: [
           Container(
-              padding:const EdgeInsets.only(top: 0),
-              child: SizedBox(
-                width: MediaQuery.of(context).size.width * 0.6,
-                height: context.width - paddingHorizontal * 2,
-                child: FullScreenWidget(
-                  child: Hero(
-                    tag: _bloc.product.images!.isNotEmpty &&
-                        _bloc.product.images![0].link == null
-                        ? ""
-                        : "$protocol${AppConfig.instance.values.apiUrl}${_bloc.product.images![0].link!}",
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(16),
-                      child: ImageUtil.loadNetWorkImage(
-                          url: _bloc.product.images!.isNotEmpty &&
+            padding: const EdgeInsets.only(top: 0),
+            child: SizedBox(
+              width: MediaQuery.of(context).size.width * 0.6,
+              height: context.width - paddingHorizontal * 2,
+              child: FullScreenWidget(
+                child: Hero(
+                  tag:
+                      _bloc.product.images!.isNotEmpty &&
+                          _bloc.product.images![0].link == null
+                      ? ""
+                      : "$protocol${AppConfig.instance.values.apiUrl}${_bloc.product.images![0].link!}",
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: ImageUtil.loadNetWorkImage(
+                      url:
+                          _bloc.product.images!.isNotEmpty &&
                               _bloc.product.images![0].link == null
-                              ? ""
-                              : "$protocol${AppConfig.instance.values.apiUrl}${_bloc.product.images![0].link!}", height: 0, fit: BoxFit.contain),
-                      //fit: BoxFit.cover,
+                          ? ""
+                          : "$protocol${AppConfig.instance.values.apiUrl}${_bloc.product.images![0].link!}",
+                      height: 0,
+                      fit: BoxFit.contain,
                     ),
+                    //fit: BoxFit.cover,
                   ),
                 ),
-              )
+              ),
+            ),
           ),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 16),
             child: Text(
-              _bloc.product.name??'',
+              _bloc.product.name ?? '',
               style: const TextStyle(
-                  color: ColorUtil.bangladeshGreen,
-                  fontSize: 20,
-                  fontWeight: MyFontWeight.bold),
+                color: ColorUtil.bangladeshGreen,
+                fontSize: 20,
+                fontWeight: MyFontWeight.bold,
+              ),
             ),
           ),
           const Divider(color: Colors.grey, thickness: 1, height: 40),
           const Text(
             "Mô tả:",
             style: TextStyle(
-                color: ColorUtil.bangladeshGreen,
-                fontWeight: MyFontWeight.bold,
-                fontSize: 18),
+              color: ColorUtil.bangladeshGreen,
+              fontWeight: MyFontWeight.bold,
+              fontSize: 18,
+            ),
           ),
-          Html(data: _bloc.product.content??""),
+          Html(data: _bloc.product.content ?? ""),
         ],
       ),
     );
