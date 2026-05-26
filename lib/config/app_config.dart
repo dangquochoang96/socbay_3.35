@@ -10,21 +10,16 @@ extension FlavorExtension on Flavor {
   FlavorValues getValues() {
     switch (this) {
       case Flavor.development:
-        return FlavorValues(
-          apiUrl: 'api.chothuetatca.com',
-          // apiUrl: 'feasible-glowworm-finally.ngrok-free.app'
-        );
+        return FlavorValues(apiUrl: 'api.chothuetatca.com');
       case Flavor.staging:
         return FlavorValues(
           //todo change api stg
           apiUrl: 'api.chothuetatca.com',
-          // apiUrl: 'feasible-glowworm-finally.ngrok-free.app'
         );
       default:
         return FlavorValues(
           //todo change api prd
           apiUrl: 'api.chothuetatca.com',
-          // apiUrl: 'feasible-glowworm-finally.ngrok-free.app'
         );
     }
   }

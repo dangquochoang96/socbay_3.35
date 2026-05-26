@@ -11,9 +11,9 @@ import 'package:socbay/utils/image_util.dart';
 import 'package:socbay/widgets/loading_indicator.dart';
 import 'package:socbay/widgets/my_app_bar.dart';
 
-import '../../blocs/comment_ technique/comment_ technique_bloc.dart';
-import '../../blocs/comment_ technique/comment_ technique_event.dart';
-import '../../blocs/comment_ technique/comment_ technique_state.dart';
+import '../../blocs/comment_technique/comment_technique_bloc.dart';
+import '../../blocs/comment_technique/comment_technique_event.dart';
+import '../../blocs/comment_technique/comment_technique_state.dart';
 
 class CommentTechniqueListScreen extends StatefulWidget {
   const CommentTechniqueListScreen({super.key});
@@ -35,23 +35,26 @@ class _CommentTechniqueListScreenState
   }
 
   @override
-  void dispose(){
+  void dispose() {
     _bloc.close();
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<CommentTechniqueBloc,CommentTechniqueState>(
-        builder: _builder, listener: _listener);
+    return BlocConsumer<CommentTechniqueBloc, CommentTechniqueState>(
+      builder: _builder,
+      listener: _listener,
+    );
   }
 
   void _listener(BuildContext context, CommentTechniqueState state) {
-    if(state is CommentTechniqueInitState){
-      _lstOrder = _bloc.lstOrder??[];
+    if (state is CommentTechniqueInitState) {
+      _lstOrder = _bloc.lstOrder ?? [];
     }
   }
 
-  Widget _builder(BuildContext context,CommentTechniqueState state) {
+  Widget _builder(BuildContext context, CommentTechniqueState state) {
     return Scaffold(
       appBar: MyAppBar(
         title: "Đánh giá và nhận xét kỹ thuật",
@@ -72,10 +75,13 @@ class _CommentTechniqueListScreenState
                 child: SizedBox(
                   width: MediaQuery.of(context).size.width * 0.8,
                   child: const Divider(
-                      color: Color(0xFFD6D6D6), thickness: 2, height: 30),
+                    color: Color(0xFFD6D6D6),
+                    thickness: 2,
+                    height: 30,
+                  ),
                 ),
               ),
-              _buildStaffCommentAndRatingList()
+              _buildStaffCommentAndRatingList(),
             ],
           ),
         ),
@@ -90,10 +96,7 @@ class _CommentTechniqueListScreenState
         width: MediaQuery.of(context).size.width * 0.8,
         height: MediaQuery.of(context).size.width * 0.2,
         child: Row(
-          children: [
-            _staffImage(),
-            _staffInfo(),
-          ],
+          children: [_staffImage(), _staffInfo()],
           //height: 300,
         ),
       ),
@@ -106,7 +109,13 @@ class _CommentTechniqueListScreenState
       runSpacing: 4.0, // gap between lines
       //direction: Axis.horizontal, // main axis (rows or columns)
       children: [
-        const Padding(padding: EdgeInsets.only(left: 16,top: 10),child: Text("Các nhận xét đánh giá", style: TextStyle(fontWeight: FontWeight.bold,fontSize: 18),),),
+        const Padding(
+          padding: EdgeInsets.only(left: 16, top: 10),
+          child: Text(
+            "Các nhận xét đánh giá",
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+          ),
+        ),
         Column(
           //mainAxisSize: MainAxisSize.max,
           //crossAxisAlignment: CrossAxisAlignment.start,
@@ -119,7 +128,7 @@ class _CommentTechniqueListScreenState
               itemBuilder: _itemBuilder,
               separatorBuilder: _separateView,
             ),
-            const SizedBox(height: 10)
+            const SizedBox(height: 10),
           ],
         ),
       ],
@@ -129,77 +138,97 @@ class _CommentTechniqueListScreenState
   Widget _itemBuilder(BuildContext context, int index) {
     return Wrap(
       children: [
-        Row(mainAxisSize: MainAxisSize.min,
-            children: [
-              FullScreenWidget(
-                child: Hero(
-                  tag: "staffImage$index",
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: ImageUtil.loadNetWorkImage(
-                        url: _lstOrder?[index].user?.avatar != null
-                            ? ("$protocol${AppConfig.instance.values.apiUrl}/${_lstOrder![index].user!.avatar!}")
-                            : "",
-                        height: MediaQuery.of(context).size.width * 0.2 - 15,
-                        width: MediaQuery.of(context).size.width * 0.2 - 15,
-                        fit: BoxFit.contain),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            FullScreenWidget(
+              child: Hero(
+                tag: "staffImage$index",
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: ImageUtil.loadNetWorkImage(
+                    url: _lstOrder?[index].user?.avatar != null
+                        ? ("$protocol${AppConfig.instance.values.apiUrl}/${_lstOrder![index].user!.avatar!}")
+                        : "",
+                    height: MediaQuery.of(context).size.width * 0.2 - 15,
+                    width: MediaQuery.of(context).size.width * 0.2 - 15,
+                    fit: BoxFit.contain,
                   ),
                 ),
               ),
-              SizedBox(
-                width: MediaQuery.of(context).size.width * 0.75,
-                child: Column(
-                  children: [
-                    Padding(
-                      padding:
-                      const EdgeInsets.symmetric(horizontal: 30, vertical: 3.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            _lstOrder?[index].user?.username??"",
-                            style:const TextStyle(
-                                fontSize: 15, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(
+              width: MediaQuery.of(context).size.width * 0.75,
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 30,
+                      vertical: 3.0,
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          _lstOrder?[index].user?.username ?? "",
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
                           ),
-                          RatingBarIndicator(
-                            rating: _lstOrder?[index].rate!=null?double.parse(_lstOrder![index].rate!):0.0,
-                            direction: Axis.horizontal,
-                            unratedColor: Colors.amber.withAlpha(60),
-                            itemCount: 5,
-                            itemSize: 11.0,
-                            itemPadding: const EdgeInsets.symmetric(horizontal: 3.0),
-                            itemBuilder: (context, _) => const Icon(
-                              Icons.star,
-                              color: Colors.amber,
-                            ),
+                        ),
+                        RatingBarIndicator(
+                          rating: _lstOrder?[index].rate != null
+                              ? double.parse(_lstOrder![index].rate!)
+                              : 0.0,
+                          direction: Axis.horizontal,
+                          unratedColor: Colors.amber.withAlpha(60),
+                          itemCount: 5,
+                          itemSize: 11.0,
+                          itemPadding: const EdgeInsets.symmetric(
+                            horizontal: 3.0,
                           ),
-                          const SizedBox(height: 5),
-                          Align(
-                            alignment: Alignment.centerLeft,
-                            child: Text(_lstOrder?[index].comment??"",
-                                overflow: TextOverflow.ellipsis, // default is .clip
-                                maxLines: 2),
+                          itemBuilder: (context, _) =>
+                              const Icon(Icons.star, color: Colors.amber),
+                        ),
+                        const SizedBox(height: 5),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            _lstOrder?[index].comment ?? "",
+                            overflow: TextOverflow.ellipsis, // default is .clip
+                            maxLines: 2,
                           ),
-                        ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  Align(
+                    alignment: Alignment.bottomRight,
+                    child: TextButton(
+                      onPressed: () {
+                        Navigator.pushNamed(
+                          context,
+                          Routes.coreReplacementServiceScreen,
+                          arguments: {"orderDetail": _lstOrder![index]},
+                        );
+                      },
+                      style: const ButtonStyle(alignment: Alignment.topRight),
+                      child: const Text(
+                        "Xem chi tiết",
+                        style: TextStyle(
+                          color: ColorUtil.bangladeshGreen,
+                          fontSize: 11,
+                          fontStyle: FontStyle.italic,
+                        ),
                       ),
                     ),
-                    Align(
-                      alignment: Alignment.bottomRight,
-                      child: TextButton(
-                        onPressed: () {
-                          Navigator.pushNamed(
-                              context, Routes.coreReplacementServiceScreen,
-                              arguments: {"orderDetail": _lstOrder![index]});
-                        },
-                        style:const ButtonStyle(alignment: Alignment.topRight),
-                        child:const Text("Xem chi tiết",style: TextStyle(color: ColorUtil.bangladeshGreen,fontSize: 11, fontStyle: FontStyle.italic)),),
-                    )
-                  ],
-                ),
+                  ),
+                ],
               ),
-
-            ]),
+            ),
+          ],
+        ),
 
         Align(
           alignment: Alignment.center,
@@ -212,7 +241,7 @@ class _CommentTechniqueListScreenState
               ),
             ),
           ),
-        )
+        ),
       ],
     );
   }
@@ -224,12 +253,13 @@ class _CommentTechniqueListScreenState
         child: ClipRRect(
           borderRadius: BorderRadius.circular(16),
           child: ImageUtil.loadNetWorkImage(
-              url: _bloc.userProfile?.avatar != null
-                  ? ("$protocol${AppConfig.instance.values.apiUrl}/${_bloc.userProfile!.avatar!}")
-                  : "$protocol${AppConfig.instance.values.apiUrl}/product_images/ktv-avatar.jpg",
-              height: MediaQuery.of(context).size.width * 0.18,
-              width: MediaQuery.of(context).size.width * 0.18,
-              fit: BoxFit.contain),
+            url: _bloc.userProfile?.avatar != null
+                ? ("$protocol${AppConfig.instance.values.apiUrl}/${_bloc.userProfile!.avatar!}")
+                : "$protocol${AppConfig.instance.values.apiUrl}/product_images/ktv-avatar.jpg",
+            height: MediaQuery.of(context).size.width * 0.18,
+            width: MediaQuery.of(context).size.width * 0.18,
+            fit: BoxFit.contain,
+          ),
         ),
       ),
     );
@@ -245,16 +275,18 @@ class _CommentTechniqueListScreenState
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TextButton(
-                onPressed: () {
-                  _goToStaffInfo(_bloc.userProfile!);
-                },
-                child: Text(
-                  _bloc.userProfile?.username ?? "",
-                  style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
-                      color: ColorUtil.bangladeshGreen),
-                )),
+              onPressed: () {
+                _goToStaffInfo(_bloc.userProfile!);
+              },
+              child: Text(
+                _bloc.userProfile?.username ?? "",
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                  color: ColorUtil.bangladeshGreen,
+                ),
+              ),
+            ),
             Padding(
               padding: const EdgeInsets.only(left: 10),
               child: Text(_bloc.userProfile?.phone ?? ""),
@@ -268,16 +300,17 @@ class _CommentTechniqueListScreenState
                   itemCount: 5,
                   itemSize: 13.0,
                   itemPadding: const EdgeInsets.symmetric(horizontal: 4.0),
-                  itemBuilder: (context, _) => const Icon(
-                    Icons.star,
-                    color: Colors.amber,
-                  ),
+                  itemBuilder: (context, _) =>
+                      const Icon(Icons.star, color: Colors.amber),
                 ),
-                Text("(${_bloc.dem.toString()} đánh giá)",style: const TextStyle(fontSize: 11),)
+                Text(
+                  "(${_bloc.dem.toString()} đánh giá)",
+                  style: const TextStyle(fontSize: 11),
+                ),
               ],
-            )
+            ),
           ],
-        )
+        ),
       ],
     );
   }
@@ -285,11 +318,16 @@ class _CommentTechniqueListScreenState
   Widget _separateView(BuildContext context, int index) {
     return const SizedBox(height: 8);
   }
+
   Future _goToStaffInfo(UserProfile staffInfo) async {
-    await Navigator.pushNamed(context, Routes.staffInfoScreen, arguments: {
-      "id": staffInfo.id,
-      "name": staffInfo.username,
-      "staffInfo": staffInfo
-    });
+    await Navigator.pushNamed(
+      context,
+      Routes.staffInfoScreen,
+      arguments: {
+        "id": staffInfo.id,
+        "name": staffInfo.username,
+        "staffInfo": staffInfo,
+      },
+    );
   }
 }

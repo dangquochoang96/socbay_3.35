@@ -93,7 +93,7 @@ import 'package:socbay/screens/user/update_staff_screen.dart';
 import 'package:socbay/screens/user/address/user_address_screen.dart';
 import 'package:socbay/screens/user/user_profile_screen.dart';
 
-import 'blocs/comment_ technique/comment_ technique_bloc.dart';
+import 'blocs/comment_technique/comment_technique_bloc.dart';
 import 'blocs/historyidC/historyidC_screen_bloc.dart';
 import 'blocs/home/feedbackid/feedbackid_screen_bloc.dart';
 import 'blocs/home/hotline/hotline_screen_bloc.dart';
@@ -188,95 +188,109 @@ class Routes {
             );
           case accountInfoScreen:
             return BlocProvider<AccountInfoBloc>(
-                create: (context) =>
-                    AccountInfoBloc(apiRepository: apiRepository),
-                child: const AccountInfoScreen());
+              create: (context) =>
+                  AccountInfoBloc(apiRepository: apiRepository),
+              child: const AccountInfoScreen(),
+            );
 
           case userNewOrderScreen:
             return BlocProvider<UserNewOrderBloc>(
-                create: (ctx) => UserNewOrderBloc(
-                      apiRepository: apiRepository,
-                      // args: settings.arguments as Map<String, dynamic>
-                    ),
-                child: const UserNewOrderScreen());
+              create: (ctx) => UserNewOrderBloc(
+                apiRepository: apiRepository,
+                // args: settings.arguments as Map<String, dynamic>
+              ),
+              child: const UserNewOrderScreen(),
+            );
 
           case notificationScreen:
             return BlocProvider<NotificationScreenBloc>(
-                create: (context) =>
-                    NotificationScreenBloc(apiRepository: apiRepository),
-                child: const NotificationScreen());
+              create: (context) =>
+                  NotificationScreenBloc(apiRepository: apiRepository),
+              child: const NotificationScreen(),
+            );
           case notificationDetailScreen:
             return NotificationDetailScreen(
               notificationResponse: settings.arguments as NotificationResponse,
             );
           case giftScreen:
             return BlocProvider<GiftScreenBloc>(
-                create: (context) =>
-                    GiftScreenBloc(apiRepository: apiRepository),
-                child: const GiftScreen());
+              create: (context) => GiftScreenBloc(apiRepository: apiRepository),
+              child: const GiftScreen(),
+            );
           case favouriteProduct:
             return BlocProvider<FavouriteProductScreenBloc>(
-                create: (context) =>
-                    FavouriteProductScreenBloc(apiRepository: apiRepository),
-                child: const FavouriteProductScreen());
+              create: (context) =>
+                  FavouriteProductScreenBloc(apiRepository: apiRepository),
+              child: const FavouriteProductScreen(),
+            );
           case favouriteStaff:
             return BlocProvider<FavouriteStaffBloc>(
-                create: (context) =>
-                    FavouriteStaffBloc(apiRepository: apiRepository),
-                child: const FavouriteStaffScreen());
+              create: (context) =>
+                  FavouriteStaffBloc(apiRepository: apiRepository),
+              child: const FavouriteStaffScreen(),
+            );
 
           case productDetail:
             return BlocProvider<ProductDetailScreenBloc>(
-                create: (context) => ProductDetailScreenBloc(
-                    apiRepository: apiRepository,
-                    product: settings.arguments as ProductModel),
-                child: const ProductDetailScreen());
+              create: (context) => ProductDetailScreenBloc(
+                apiRepository: apiRepository,
+                product: settings.arguments as ProductModel,
+              ),
+              child: const ProductDetailScreen(),
+            );
           case machineDetail:
             return BlocProvider<MachineDetailScreenBloc>(
-                create: (context) => MachineDetailScreenBloc(
-                    apiRepository: apiRepository,
-                    args: settings.arguments as Map<String, dynamic>),
-                child: const MachineDetailScreen());
+              create: (context) => MachineDetailScreenBloc(
+                apiRepository: apiRepository,
+                args: settings.arguments as Map<String, dynamic>,
+              ),
+              child: const MachineDetailScreen(),
+            );
           case register:
             return const RegisterScreen();
           case verifyOTP:
             return BlocProvider<VerifyOtpScreenBloc>(
-                create: (context) => VerifyOtpScreenBloc(
-                    apiRepository: apiRepository,
-                    args: settings.arguments as Map<String, dynamic>),
-                child: const VerifyOTPScreen(
-                  userData: {},
-                ));
+              create: (context) => VerifyOtpScreenBloc(
+                apiRepository: apiRepository,
+                args: settings.arguments as Map<String, dynamic>,
+              ),
+              child: const VerifyOTPScreen(userData: {}),
+            );
           case productScreen:
             return BlocProvider<ProductScreenBloc>(
-                create: (context) => ProductScreenBloc(
-                    apiRepository: apiRepository,
-                    args: settings.arguments as Map<String, dynamic>),
-                child: ProductScreen(
-                  args: settings.arguments as Map<String, dynamic>,
-                ));
+              create: (context) => ProductScreenBloc(
+                apiRepository: apiRepository,
+                args: settings.arguments as Map<String, dynamic>,
+              ),
+              child: ProductScreen(
+                args: settings.arguments as Map<String, dynamic>,
+              ),
+            );
           case productCategoryScreen:
             return BlocProvider<ProductCategoryScreenBloc>(
-                create: (context) =>
-                    ProductCategoryScreenBloc(apiRepository: apiRepository),
-                child: const ProductCategoryScreen());
+              create: (context) =>
+                  ProductCategoryScreenBloc(apiRepository: apiRepository),
+              child: const ProductCategoryScreen(),
+            );
           case productViewMoreScreen:
             return BlocProvider<ProductViewMoreScreenBloc>(
-                create: (context) => ProductViewMoreScreenBloc(
-                    apiRepository: apiRepository,
-                    productCategory: settings.arguments as ProductCategory),
-                child: const ProductViewMoreScreen());
+              create: (context) => ProductViewMoreScreenBloc(
+                apiRepository: apiRepository,
+                productCategory: settings.arguments as ProductCategory,
+              ),
+              child: const ProductViewMoreScreen(),
+            );
           case newsScreen:
             return BlocProvider<NewsScreenBloc>(
-                create: (context) => NewsScreenBloc(
-                      apiRepository: apiRepository,
-                    ),
-                child: const NewsScreen());
+              create: (context) => NewsScreenBloc(apiRepository: apiRepository),
+              child: const NewsScreen(),
+            );
           case newDetail:
             return NewDetailScreen(blogModel: settings.arguments as BlogModel);
           case giftDetail:
             return GiftDetailScreen(
-                args: settings.arguments as Map<String, dynamic>);
+              args: settings.arguments as Map<String, dynamic>,
+            );
           case updateStaffScreen:
             return BlocProvider<UpdateStaffScreenBloc>(
               create: (context) =>
@@ -306,29 +320,33 @@ class Routes {
           case feedbackScreen:
             return BlocProvider<FeedbackScreenBloc>(
               create: (context) => FeedbackScreenBloc(
-                  apiRepository: apiRepository,
-                  args: settings.arguments as Map<String, dynamic>),
+                apiRepository: apiRepository,
+                args: settings.arguments as Map<String, dynamic>,
+              ),
               child: const FeedbackScreen(),
             );
           case staffFeedbackScreen:
             return BlocProvider<FeedbackScreenBloc>(
               create: (context) => FeedbackScreenBloc(
-                  apiRepository: apiRepository,
-                  args: settings.arguments as Map<String, dynamic>),
+                apiRepository: apiRepository,
+                args: settings.arguments as Map<String, dynamic>,
+              ),
               child: const StaffFeedbackScreen(),
             );
           case staffFeedbackListScreen:
             return BlocProvider<FeedbackScreenidBloc>(
               create: (context) => FeedbackScreenidBloc(
-                  apiRepository: apiRepository,
-                  args: settings.arguments as Map<String, dynamic>),
+                apiRepository: apiRepository,
+                args: settings.arguments as Map<String, dynamic>,
+              ),
               child: const StaffFeedbackListScreen(),
             );
           case serviceScreen:
             return BlocProvider<ServiceScreenBloc>(
               create: (context) => ServiceScreenBloc(
-                  apiRepository: apiRepository,
-                  args: settings.arguments as Map<String, dynamic>),
+                apiRepository: apiRepository,
+                args: settings.arguments as Map<String, dynamic>,
+              ),
               child: const ServiceScreen(),
             );
           case mapScreen:
@@ -336,15 +354,17 @@ class Routes {
           case chooseFavouriteStaffScreen:
             return BlocProvider<ChooseFavouriteStaffBloc>(
               create: (context) => ChooseFavouriteStaffBloc(
-                  apiRepository: apiRepository,
-                  args: settings.arguments as Map<String, dynamic>),
+                apiRepository: apiRepository,
+                args: settings.arguments as Map<String, dynamic>,
+              ),
               child: const ChooseFavouriteStaffScreen(),
             );
           case searchStaffScreen:
             return BlocProvider<SearchStaffScreenBloc>(
               create: (context) => SearchStaffScreenBloc(
-                  apiRepository: apiRepository,
-                  args: settings.arguments as Map<String, dynamic>),
+                apiRepository: apiRepository,
+                args: settings.arguments as Map<String, dynamic>,
+              ),
               child: const SearchStaffScreen(),
             );
           // case techniqueScreen:
@@ -366,24 +386,31 @@ class Routes {
           case staffInfoScreen:
             return BlocProvider<StaffInfoScreenBloc>(
               create: (context) => StaffInfoScreenBloc(
-                  apiRepository: apiRepository,
-                  args: settings.arguments as Map<String, dynamic>),
+                apiRepository: apiRepository,
+                args: settings.arguments as Map<String, dynamic>,
+              ),
               child: const StaffInfoScreen(),
             );
           case editServiceScreen:
             return BlocProvider<EditServiceBloc>(
-                create: (ctx) => EditServiceBloc(
-                    apiRepository: apiRepository,
-                    args: settings.arguments as Map<String, dynamic>),
-                child: EditServiceScreen(
-                    args: settings.arguments as Map<String, dynamic>));
+              create: (ctx) => EditServiceBloc(
+                apiRepository: apiRepository,
+                args: settings.arguments as Map<String, dynamic>,
+              ),
+              child: EditServiceScreen(
+                args: settings.arguments as Map<String, dynamic>,
+              ),
+            );
           case editRentServiceScreen:
             return BlocProvider<EditRentServiceBloc>(
-                create: (ctx) => EditRentServiceBloc(
-                    apiRepository: apiRepository,
-                    args: settings.arguments as Map<String, dynamic>),
-                child: EditRentServiceScreen(
-                    args: settings.arguments as Map<String, dynamic>));          
+              create: (ctx) => EditRentServiceBloc(
+                apiRepository: apiRepository,
+                args: settings.arguments as Map<String, dynamic>,
+              ),
+              child: EditRentServiceScreen(
+                args: settings.arguments as Map<String, dynamic>,
+              ),
+            );
           case userAddressScreen:
             return BlocProvider<UserAddressScreenBloc>(
               create: (ctx) =>
@@ -394,142 +421,150 @@ class Routes {
             return BlocProvider<UserAddressScreenBloc>(
               create: (ctx) =>
                   UserAddressScreenBloc(apiRepository: apiRepository),
-              child: AddUserAddressScreen(
-                arguments: settings.arguments,
-              ),
+              child: AddUserAddressScreen(arguments: settings.arguments),
             );
           case detailBookingScreen:
             return BlocProvider<DetailBookingBloc>(
               create: (ctx) => DetailBookingBloc(
-                  apiRepository: apiRepository,
-                  args: settings.arguments as Map<String, dynamic>),
+                apiRepository: apiRepository,
+                args: settings.arguments as Map<String, dynamic>,
+              ),
               child: const DetailBookingScreen(),
             );
           case detailRentBookingScreen:
             return BlocProvider<DetailRentBookingBloc>(
               create: (ctx) => DetailRentBookingBloc(
-                  apiRepository: apiRepository,
-                  args: settings.arguments as Map<String, dynamic>),
+                apiRepository: apiRepository,
+                args: settings.arguments as Map<String, dynamic>,
+              ),
               child: const DetailRentBookingScreen(),
             );
           case coreReplacementServiceScreen:
             return BlocProvider<CoreReplacementServiceBloc>(
               create: (builderContext) => CoreReplacementServiceBloc(
-                  apiRepository: apiRepository,
-                  args: settings.arguments as Map<String, dynamic>),
+                apiRepository: apiRepository,
+                args: settings.arguments as Map<String, dynamic>,
+              ),
               child: const CoreReplacementServiceScreen(),
             );
           case staffCommentAndRatingList:
             return BlocProvider<CommentAndRatingBloc>(
-              create: (builderContext) => CommentAndRatingBloc(
-                apiRepository: apiRepository,
-              ),
+              create: (builderContext) =>
+                  CommentAndRatingBloc(apiRepository: apiRepository),
               child: const CommentAndRatingListScreen(),
             );
           case staffCommentTechniqueList:
             return BlocProvider<CommentTechniqueBloc>(
               create: (builderContext) => CommentTechniqueBloc(
-                  apiRepository: apiRepository,
-                  args: settings.arguments as Map<String, dynamic>),
+                apiRepository: apiRepository,
+                args: settings.arguments as Map<String, dynamic>,
+              ),
               child: const CommentTechniqueListScreen(),
             );
           case orderManagerScreen:
             return BlocProvider<OrderManagerBloc>(
-              create: (builderContext) => OrderManagerBloc(
-                apiRepository: apiRepository,
-              ),
+              create: (builderContext) =>
+                  OrderManagerBloc(apiRepository: apiRepository),
               child: const OrderManagerScreen(),
             );
           case histoyridCScreen:
             return BlocProvider<HistoryidCScreenBloc>(
               create: (ctx) => HistoryidCScreenBloc(
-                  apiRepository: apiRepository,
-                  args: settings.arguments as Map<String, dynamic>),
+                apiRepository: apiRepository,
+                args: settings.arguments as Map<String, dynamic>,
+              ),
               child: const HistoryidCScreen(),
             );
           case staffServiceScreen:
             return BlocProvider<StaffServiceScreenBloc>(
               create: (context) => StaffServiceScreenBloc(
-                  apiRepository: apiRepository,
-                  args: settings.arguments as Map<String, dynamic>),
+                apiRepository: apiRepository,
+                args: settings.arguments as Map<String, dynamic>,
+              ),
               child: const StaffServiceScreen(),
             );
           case staffServiceScreenSale:
             return BlocProvider<StaffServiceSaleScreenBloc>(
               create: (context) => StaffServiceSaleScreenBloc(
-                  apiRepository: apiRepository,
-                  args: settings.arguments as Map<String, dynamic>),
+                apiRepository: apiRepository,
+                args: settings.arguments as Map<String, dynamic>,
+              ),
               child: const StaffServiceSaleScreen(),
             );
           case rentBookingServiceScreen:
             return BlocProvider<RentBookingServiceBloc>(
               create: (context) => RentBookingServiceBloc(
-                  apiRepository: apiRepository,
-                  args: settings.arguments as Map<String, dynamic>),
+                apiRepository: apiRepository,
+                args: settings.arguments as Map<String, dynamic>,
+              ),
               child: const RentBookingServiceScreen(),
             );
           case createOrderScreen:
             return BlocProvider<StaffNewOrderBloc>(
               create: (ctx) => StaffNewOrderBloc(
-                  apiRepository: apiRepository,
-                  args: settings.arguments as Map<String, dynamic>),
+                apiRepository: apiRepository,
+                args: settings.arguments as Map<String, dynamic>,
+              ),
               child: const StaffNewOrderScreen(),
             );
           case createRentOrderScreen:
             return BlocProvider<StaffNewRentOrderBloc>(
               create: (ctx) => StaffNewRentOrderBloc(
-                  apiRepository: apiRepository,
-                  args: settings.arguments as Map<String, dynamic>),
+                apiRepository: apiRepository,
+                args: settings.arguments as Map<String, dynamic>,
+              ),
               child: const StaffNewRentOrderScreen(),
             );
           case billScreen:
             return BlocProvider<StaffNewOrderBloc>(
-              create: (context) => StaffNewOrderBloc(
-                apiRepository: apiRepository,
-                args: {},
-              ),
+              create: (context) =>
+                  StaffNewOrderBloc(apiRepository: apiRepository, args: {}),
               child: BillScreen(billData: settings.arguments as BillData),
             );
           case staffDetailFeedBackScreen:
             return BlocProvider<FeedbackScreenBloc>(
               create: (context) => FeedbackScreenBloc(
-                  apiRepository: apiRepository,
-                  args: settings.arguments as Map<String, dynamic>),
+                apiRepository: apiRepository,
+                args: settings.arguments as Map<String, dynamic>,
+              ),
               child: const StaffDetailFeedbackScreen(),
             );
           case detailFeedBackScreen:
             return BlocProvider<FeedbackScreenBloc>(
               create: (context) => FeedbackScreenBloc(
-                  apiRepository: apiRepository,
-                  args: settings.arguments as Map<String, dynamic>),
+                apiRepository: apiRepository,
+                args: settings.arguments as Map<String, dynamic>,
+              ),
               child: const DetailFeedbackScreen(),
             );
           case staffProfileScreen:
             return BlocProvider<StaffInfoScreenBloc>(
               create: (context) => StaffInfoScreenBloc(
-                  apiRepository: apiRepository,
-                  args: settings.arguments as Map<String, dynamic>),
+                apiRepository: apiRepository,
+                args: settings.arguments as Map<String, dynamic>,
+              ),
               child: const StaffProfileScreen(),
             );
           case evaluateScreen:
             return BlocProvider<TechniqueScreenBloc>(
               create: (builderContext) => TechniqueScreenBloc(
-                  apiRepository: apiRepository,
-                  args: settings.arguments as Map<String, dynamic>),
+                apiRepository: apiRepository,
+                args: settings.arguments as Map<String, dynamic>,
+              ),
               child: const EvaluateScreen(),
             );
           case feedbackkScreen:
             return BlocProvider<TechniqueScreenBloc>(
               create: (builderContext) => TechniqueScreenBloc(
-                  apiRepository: apiRepository,
-                  args: settings.arguments as Map<String, dynamic>),
+                apiRepository: apiRepository,
+                args: settings.arguments as Map<String, dynamic>,
+              ),
               child: const FeedbackkScreen(),
             );
           case orderManagerScreenBySale:
             return BlocProvider<OrderManagerBlocBySale>(
-              create: (builderContext) => OrderManagerBlocBySale(
-                apiRepository: apiRepository,
-              ),
+              create: (builderContext) =>
+                  OrderManagerBlocBySale(apiRepository: apiRepository),
               child: const OrderManagerScreenBySale(),
             );
         }
