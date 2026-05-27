@@ -42,8 +42,8 @@ class DefaultResponse<T> extends BaseResponse {
 
   DefaultResponse.fromJson(Map<dynamic, dynamic> json) {
     data = json['data'] as T;
-    message = json['message'] as String;
-    status = Parse.toIntValue(json['code']);
+    message = json['message']?.toString();
+    status = Parse.toIntValue(json['status'] ?? json['code']);
     //total = Parse.toIntValue(json['total']);
   }
 
@@ -66,7 +66,7 @@ class Error {
 
   Error.fromJson(Map<String, dynamic> json) {
     message = json['message'] ?? '';
-    code = json['code'] ?? 0;
+    code = json['status'] ?? json['code'] ?? 0;
   }
 
   Map<String, dynamic> toJson() {

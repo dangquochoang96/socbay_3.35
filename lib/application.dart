@@ -22,7 +22,7 @@ class App {
     return _instance;
   }
 
-  static String versionApi = "";
+  static String versionApi = "v1.0";
   EventBus eventBus = EventBus();
 
   UserProfile? userApp;

@@ -1,20 +1,27 @@
 import 'dart:async';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:socbay/utils/logger_util.dart';
 
 class ConnectivityService {
   Future<bool> hasConnection() async {
     final bool internet = await _checkConnection();
+    LoggerUtil.info(
+      'hasConnection() -> $internet',
+      tag: 'ConnectivityService',
+    );
     return (internet);
   }
 
   Future<bool> _checkConnection() async {
-    final connectivityResult = await (Connectivity().checkConnectivity());
-    if (connectivityResult == ConnectivityResult.mobile) {
-      return true;
-    } else if (connectivityResult == ConnectivityResult.wifi) {
-      return true;
-    }
-    return false;
+    final connectivityResults = await Connectivity().checkConnectivity();
+    LoggerUtil.info(
+      'checkConnectivity() -> $connectivityResults',
+      tag: 'ConnectivityService',
+    );
+
+    return connectivityResults.any(
+      (result) => result != ConnectivityResult.none,
+    );
   }
 }

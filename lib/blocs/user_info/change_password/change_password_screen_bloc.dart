@@ -28,15 +28,18 @@ class ChangePasswordScreenBloc
     isLoading = false;
     if (res.data != null && res.status == 1) {
       var db = await $FloorAppDatabase.databaseBuilder('socbay.db').build();
-      await db.userDao.deleteAllUser();
-      final userGetMapper = UserProfileToUser();
-      final usr = userGetMapper(res.data!);
+      if ((res.data?.id ?? 0) > 0) {
+        await db.userDao.deleteAllUser();
+        final userGetMapper = UserProfileToUser();
+        final usr = userGetMapper(res.data!);
+        await db.userDao.insertUser(usr);
+      }
       // await DbManager.instance.insertAccount(
       //     username: App.instance.userApp?.phone ?? '',
       //     id: App.instance.userApp?.id?.toString() ?? '',
       //     password: event.changePasswordRequest.password);
       App.instance.userApp = res.data;
-      await db.userDao.insertUser(usr);
+      await db.close();
       emit(const ChangePasswordScreenDoneState());
     } else {
       emit(ChangePasswordScreenDoneState(error: res.message));

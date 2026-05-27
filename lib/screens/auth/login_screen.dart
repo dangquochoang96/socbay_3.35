@@ -14,6 +14,7 @@ import 'package:socbay/routes.dart';
 import 'package:socbay/utils/color_util.dart';
 import 'package:socbay/utils/context_extension.dart';
 import 'package:socbay/utils/image_util.dart';
+import 'package:socbay/utils/logger_util.dart';
 import 'package:socbay/widgets/hotline_widget.dart';
 import 'package:socbay/widgets/loading_indicator.dart';
 import 'package:socbay/widgets/my_app_bar.dart';
@@ -71,9 +72,17 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void _listener(BuildContext context, LoginScreenState state) {
     if (state is LogInSuccessState) {
-      _rootBloc.add(AppStarted());
+      LoggerUtil.info(
+        'listener received LogInSuccessState',
+        tag: 'LoginScreen',
+      );
+      _rootBloc.add(LoggedIn());
     }
     if (state is LogInFailureState) {
+      LoggerUtil.warning(
+        'listener received LogInFailureState message=${state.message}',
+        tag: 'LoginScreen',
+      );
       // context.showSnackBar(state.message);
       showDialog(
         context: context,

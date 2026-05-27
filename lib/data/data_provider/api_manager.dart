@@ -277,6 +277,9 @@ class ApiManager {
   }
 
   Map<String, String> get _defaultHeaders {
-    return {'Content-Type': 'application/json'};
+    return {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    };
   }
 }

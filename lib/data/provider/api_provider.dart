@@ -65,19 +65,34 @@ class ApiProvider {
     String password,
   ) async {
     try {
+      LoggerUtil.info('login() request phone=$phone', tag: 'ApiProvider');
       final Map resJson = await _baseAPI.request(
         manager: ApiManager(ApiType.login),
-        isUseAccessToken: false,
         bodyParams: {"phone": phone, "pass": password},
       );
-      final res = DefaultResponse.fromMap(resJson);
-      if (res.message == "success" && res.data != null) {
+      LoggerUtil.info('login() raw response=$resJson', tag: 'ApiProvider');
+      final res = DefaultResponse.fromJson(Map<String, dynamic>.from(resJson));
+      LoggerUtil.info(
+        'login() parsed status=${res.status} message=${res.message} hasData=${res.data != null}',
+        tag: 'ApiProvider',
+      );
+      if (res.status == 1 && res.data != null) {
         final item = LoginResponse.fromJson(res.data);
-        return DefaultResponse(data: item);
+        LoggerUtil.info(
+          'login() parsed loginResponse tokenPresent=${(item.accessToken ?? '').isNotEmpty} userId=${item.user?.id}',
+          tag: 'ApiProvider',
+        );
+        print("login response ${res.data}");
+        return DefaultResponse(data: item, status: 200, message: res.message);
       } else {
+        LoggerUtil.warning(
+          'login() failed status=${res.status} message=${res.message}',
+          tag: 'ApiProvider',
+        );
         return DefaultResponse(status: res.status, message: res.message);
       }
     } catch (e) {
+      LoggerUtil.error('login() exception=$e', tag: 'ApiProvider');
       return DefaultResponse.withError(Error(message: e.toString()));
     }
   }

@@ -58,11 +58,12 @@ class AccountInfoBloc extends Bloc<AccountInfoEvent, AccountInfoState> {
   ) async {
     isLoading = true;
     emit(AccountInfoInitialState());
+    AppDatabase? database;
 
     try {
       UserInfoRequest userInfoRequest = event.userInfoRequest;
       userInfoRequest.avatar = event.userInfoRequest.avatar;
-      final database = await $FloorAppDatabase
+      database = await $FloorAppDatabase
           .databaseBuilder('socbay.db')
           .build();
       final resUpdateUserInfo = await apiRepository.updateUserInfo(
@@ -70,11 +71,12 @@ class AccountInfoBloc extends Bloc<AccountInfoEvent, AccountInfoState> {
       );
       if (resUpdateUserInfo.data != null && resUpdateUserInfo.status == 1) {
         user = resUpdateUserInfo.data;
-        final userGetMapper = UserProfileToUser();
-        final usr = userGetMapper(user!);
-        await database.userDao.deleteAllUser();
-        await database.userDao.insertUser(usr);
-        await database.close();
+        if ((user?.id ?? 0) > 0) {
+          final userGetMapper = UserProfileToUser();
+          final usr = userGetMapper(user!);
+          await database.userDao.deleteAllUser();
+          await database.userDao.insertUser(usr);
+        }
         App.instance.userApp = user;
         emit(const AccountInfoUpdateDoneState(isSuccess: true));
       } else {
@@ -88,6 +90,7 @@ class AccountInfoBloc extends Bloc<AccountInfoEvent, AccountInfoState> {
     } catch (ex) {
       LoggerUtil.log(jsonEncode(ex));
     } finally {
+      await database?.close();
       isLoading = false;
     }
   }

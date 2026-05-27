@@ -1,17 +1,20 @@
 import 'package:socbay/data/model/user_profile.dart';
+import 'package:socbay/utils/parse_util.dart';
 
 class LoginResponse {
   final String? accessToken;
   final String? tokenType;
-  final String? expiresAt;
+  final int? expiresIn;
   final UserProfile? user;
 
-  LoginResponse({this.accessToken, this.tokenType, this.expiresAt, this.user});
+  LoginResponse({this.accessToken, this.tokenType, this.expiresIn, this.user});
 
   factory LoginResponse.fromJson(Map<String, dynamic> json) => LoginResponse(
     accessToken: json['access_token'],
     tokenType: json['token_type'],
-    expiresAt: json['expires_at'],
+    expiresIn: json['expires_in'] != null
+        ? Parse.toIntValue(json['expires_in'])
+        : null,
     user: json['user'] != null
         ? UserProfile.fromJson(json['user'] as Map<String, dynamic>)
         : null,
@@ -20,7 +23,7 @@ class LoginResponse {
   Map<String, dynamic> toJson() => {
     'access_token': accessToken,
     'token_type': tokenType,
-    'expires_at': expiresAt,
+    'expires_in': expiresIn,
     'user': user,
   };
 }

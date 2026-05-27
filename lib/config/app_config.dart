@@ -13,16 +13,16 @@ extension FlavorExtension on Flavor {
   FlavorValues getValues() {
     switch (this) {
       case Flavor.development:
-        return FlavorValues(apiUrl: 'api.chothuetatca.com');
+        return FlavorValues(apiUrl: 'shomefactory.com');
       case Flavor.staging:
         return FlavorValues(
           //todo change api stg
-          apiUrl: 'api.chothuetatca.com',
+          apiUrl: 'shomefactory.com',
         );
       default:
         return FlavorValues(
           //todo change api prd
-          apiUrl: 'api.chothuetatca.com',
+          apiUrl: 'shomefactory.com',
         );
     }
   }

@@ -53,8 +53,10 @@ class BaseAPI {
     bool isUseAccessToken = true,
   }) async {
     Map responseData;
+    ApiConfig? config;
+    String? path;
     try {
-      final ApiConfig config = manager.getConfig();
+      config = manager.getConfig();
       // final UserRepository userRepository = UserRepository(this);
 
       // Check internet connection
@@ -80,9 +82,14 @@ class BaseAPI {
       );
 
       // Setup custom path
-      final String path = optionalPath != null
+      path = optionalPath != null
           ? (config.path + optionalPath)
           : config.path;
+
+      LoggerUtil.info(
+        'request ${config.method} url=$_baseUrl$path useAccessToken=$isUseAccessToken headers=${_dio.options.headers} body=$bodyParams query=$queryParams',
+        tag: tag,
+      );
 
       Response response;
       switch (config.method) {
@@ -114,6 +121,26 @@ class BaseAPI {
 
       responseData = response.data;
     } on DioException catch (exception) {
+      LoggerUtil.error(
+        'DioException type=${exception.type} message=${exception.message} url=${exception.requestOptions.uri} method=${exception.requestOptions.method}',
+        tag: tag,
+      );
+      if (exception.requestOptions.headers.isNotEmpty) {
+        LoggerUtil.info(
+          'DioException request headers=${exception.requestOptions.headers}',
+          tag: tag,
+        );
+      }
+      LoggerUtil.info(
+        'DioException request data=${exception.requestOptions.data}',
+        tag: tag,
+      );
+      if (exception.response != null) {
+        LoggerUtil.error(
+          'DioException response status=${exception.response?.statusCode} data=${exception.response?.data}',
+          tag: tag,
+        );
+      }
       // The request was made and the server responded with a status code
       // that falls out of the range of 2xx and is also not 304.
       if (exception.response != null) {
@@ -134,6 +161,13 @@ class BaseAPI {
         }
       }
       return _errorJson(message: exception.message ?? '');
+    } catch (e, stackTrace) {
+      LoggerUtil.error(
+        'Unexpected request error url=$_baseUrl${path ?? ''} error=$e',
+        tag: tag,
+        stackTrace: stackTrace,
+      );
+      return _errorJson(message: e.toString());
     }
     LoggerUtil.info(
       '${manager.getConfig().method} - $_baseUrl${manager.getConfig().path} response: $responseData',
@@ -183,11 +217,7 @@ class BaseAPI {
     int status = HttpStatus.internalServerError,
     String message = '',
   }) {
-    return DefaultResponse(
-      data: null,
-      status: status,
-      message: message,
-    ).toJson();
+    return {'status': status, 'message': message, 'data': null};
   }
 
   Future<bool> _checkInternetConnection() async {

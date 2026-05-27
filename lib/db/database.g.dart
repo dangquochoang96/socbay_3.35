@@ -228,6 +228,6 @@ class _$UserDao extends UserDao {
 
   @override
   Future<void> insertUser(User user) async {
-    await _userInsertionAdapter.insert(user, OnConflictStrategy.abort);
+    await _userInsertionAdapter.insert(user, OnConflictStrategy.replace);
   }
 }
