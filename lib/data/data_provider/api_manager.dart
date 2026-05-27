@@ -173,7 +173,7 @@ class ApiManager {
         );
       case ApiType.createFeedback:
         return ApiConfig(
-          path: ApiEndpoints.feedback,
+          path: ApiEndpoints.feedbacks,
           method: HttpMethod.post,
           headers: _defaultHeaders,
         );
@@ -277,9 +277,6 @@ class ApiManager {
   }
 
   Map<String, String> get _defaultHeaders {
-    return {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-    };
+    return {'Content-Type': 'application/json', 'Accept': 'application/json'};
   }
 }

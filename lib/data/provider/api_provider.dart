@@ -31,7 +31,7 @@ import 'package:socbay/data/model/user_profile.dart';
 import 'package:socbay/data/response/api_response.dart';
 import 'package:socbay/utils/logger_util.dart';
 
-import 'package:http/http.dart' as http;
+import 'package:socbay/utils/auth_http.dart' as http;
 import 'package:path/path.dart' as path_manager;
 
 class ApiProvider {
@@ -286,13 +286,17 @@ class ApiProvider {
         queryParams: {"page": page},
       );
       final res = DefaultResponse.fromMap(resJson);
-      if (res.status == 200 && res.data != null) {
+      if ((res.status == 200 || res.status == 1) && res.data != null) {
         List<BlogModel> list = [];
         for (final item in res.data ?? []) {
           final model = BlogModel.fromJson(item);
           list.add(model);
         }
-        return DefaultResponse(data: list);
+        return DefaultResponse(
+          data: list,
+          status: res.status,
+          message: res.message,
+        );
       } else {
         return DefaultResponse(status: res.status, message: res.message);
       }

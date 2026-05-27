@@ -10,7 +10,7 @@ import 'package:socbay/constants/api_endpoints.dart';
 import 'package:socbay/data/model/request/user_info_request.dart';
 import 'package:socbay/data/model/user_profile.dart';
 import 'package:socbay/data/repository/auth/api_repository.dart';
-import 'package:http/http.dart' as http;
+import 'package:socbay/utils/auth_http.dart' as http;
 import 'package:path/path.dart';
 import 'package:socbay/db/database.dart';
 import 'package:socbay/db/entity/users.dart';

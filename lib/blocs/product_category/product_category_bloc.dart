@@ -6,7 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:socbay/blocs/product_category/product_category_event.dart';
 import 'package:socbay/blocs/product_category/product_category_state.dart';
 
-import 'package:http/http.dart' as http;
+import 'package:socbay/utils/auth_http.dart' as http;
 import 'package:socbay/config/app_config.dart';
 import 'package:socbay/constants/api_endpoints.dart';
 import 'package:socbay/data/model/product_category.dart';

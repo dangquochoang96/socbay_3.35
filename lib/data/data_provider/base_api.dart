@@ -6,7 +6,6 @@ import 'package:socbay/config/app_config.dart';
 import 'package:socbay/config/app_localization.dart';
 import 'package:socbay/constants/localization_key.dart';
 import 'package:socbay/data/data_provider/api_manager.dart';
-import 'package:socbay/data/response/api_response.dart';
 import 'package:socbay/services/connectivity_service.dart';
 import 'package:socbay/utils/secure_storage_utils.dart';
 
@@ -82,9 +81,7 @@ class BaseAPI {
       );
 
       // Setup custom path
-      path = optionalPath != null
-          ? (config.path + optionalPath)
-          : config.path;
+      path = optionalPath != null ? (config.path + optionalPath) : config.path;
 
       LoggerUtil.info(
         'request ${config.method} url=$_baseUrl$path useAccessToken=$isUseAccessToken headers=${_dio.options.headers} body=$bodyParams query=$queryParams',

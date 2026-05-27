@@ -9,7 +9,7 @@ import 'package:socbay/constants/api_endpoints.dart';
 import 'package:socbay/data/model/feed_back_model.dart';
 import 'package:socbay/data/model/order_filter_core_model.dart';
 import 'package:socbay/data/repository/auth/api_repository.dart';
-import 'package:http/http.dart' as http;
+import 'package:socbay/utils/auth_http.dart' as http;
 import 'package:socbay/utils/logger_util.dart';
 import 'package:path/path.dart';
 

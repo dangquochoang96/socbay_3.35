@@ -13,7 +13,7 @@ import 'package:socbay/utils/logger_util.dart';
 import '../../../data/model/order_detail_model.dart';
 import '../../../data/model/user_profile.dart';
 import '../../../data/repository/auth/api_repository.dart';
-import 'package:http/http.dart' as http;
+import 'package:socbay/utils/auth_http.dart' as http;
 
 class StaffInfoScreenBloc
     extends Bloc<StaffInfoScreenEvent, StaffInfoScreenState> {

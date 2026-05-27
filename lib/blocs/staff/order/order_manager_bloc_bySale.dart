@@ -11,7 +11,7 @@ import 'package:socbay/data/model/order_detail_model.dart';
 import 'package:socbay/data/model/staff_order_detail_model.dart';
 import 'package:socbay/data/model/staff_sales_income_model.dart';
 import 'package:socbay/data/repository/auth/api_repository.dart';
-import 'package:http/http.dart' as http;
+import 'package:socbay/utils/auth_http.dart' as http;
 
 class OrderManagerBlocBySale
     extends Bloc<OrderManagerEvent, OrderManagerState> {

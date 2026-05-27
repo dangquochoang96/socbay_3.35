@@ -11,7 +11,7 @@ import 'package:socbay/utils/logger_util.dart';
 
 import '../../../data/model/task_model.dart';
 import '../../../data/repository/auth/api_repository.dart';
-import 'package:http/http.dart' as http;
+import 'package:socbay/utils/auth_http.dart' as http;
 
 class DetailBookingBloc extends Bloc<DetailBookingEvent, DetailBookingState> {
   final ApiRepository apiRepository;

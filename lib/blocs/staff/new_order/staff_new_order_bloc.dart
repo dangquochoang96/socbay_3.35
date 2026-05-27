@@ -18,7 +18,7 @@ import 'package:socbay/data/model/request/user_info_request.dart';
 import 'package:socbay/data/model/task_model.dart';
 import 'package:socbay/data/repository/auth/api_repository.dart';
 
-import 'package:http/http.dart' as http;
+import 'package:socbay/utils/auth_http.dart' as http;
 import 'package:socbay/utils/logger_util.dart';
 import 'package:path/path.dart';
 

@@ -16,7 +16,7 @@ import 'package:socbay/data/model/user_address.dart';
 import 'package:socbay/data/repository/auth/api_repository.dart';
 import 'package:socbay/utils/logger_util.dart';
 
-import 'package:http/http.dart' as http;
+import 'package:socbay/utils/auth_http.dart' as http;
 import 'package:path/path.dart';
 
 class ServiceScreenBloc extends Bloc<ServiceScreenEvent, ServiceScreenState> {

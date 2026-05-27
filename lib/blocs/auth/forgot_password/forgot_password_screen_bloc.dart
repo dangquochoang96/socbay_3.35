@@ -7,7 +7,7 @@ import 'package:socbay/blocs/auth/forgot_password/forgot_password_screen_state.d
 import 'package:socbay/config/app_config.dart';
 import 'package:socbay/constants/api_endpoints.dart';
 import 'package:socbay/data/repository/auth/api_repository.dart';
-import 'package:http/http.dart' as http;
+import 'package:socbay/utils/auth_http.dart' as http;
 import 'package:socbay/utils/logger_util.dart';
 
 class ForgotPasswordScreenBloc

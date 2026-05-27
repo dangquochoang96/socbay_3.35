@@ -11,22 +11,22 @@ abstract final class ApiEndpoints {
   static const notificationList = '/notify/list';
   static const banners = '/banner';
   static const blogs = '/blog/list';
-  static const feedbacks = '/feedbacks';
-  static const feedback = '/feedback';
+  static const feedbacks = '/socbay/feedbacks';
   static const services = '/service';
   static const uploadImage = '/uploadImage';
-  static const orderUploadImage = '/order/upload-image';
-  static const orderCreate = '/order/them';
-  static const orderSaveRepair = '/order/save-repair';
-  static const orderByPhone = '/order/phone';
-  static const listOrderRatingByStaff = '/order/get-list-order-rating-by-staff';
-  static const tasks = '/tasks';
+  static const orderUploadImage = '/socbay/order/upload-image';
+  static const orderCreate = '/socbay/order/them';
+  static const orderSaveRepair = '/socbay/order/save-repair';
+  static const orderByPhone = '/socbay/order/phone';
+  static const listOrderRatingByStaff =
+      '/socbay/order/get-list-order-rating-by-staff';
+  static const tasks = '/socbay/tasks';
   static const taskAdmin = '/admin/task';
-  static const taskCreate = '/tasks/them';
-  static const taskDelete = '/tasks/xoa';
-  static const rentTasks = '/rent-tasks';
-  static const rentTaskCreate = '/rent-tasks/them';
-  static const rentTaskDelete = '/rent-tasks/xoa';
+  static const taskCreate = '/socbay/tasks/them';
+  static const taskDelete = '/socbay/tasks/xoa';
+  static const rentTasks = '/socbay/rent-tasks';
+  static const rentTaskCreate = '/socbay/rent-tasks/them';
+  static const rentTaskDelete = '/socbay/rent-tasks/xoa';
   static const products = '/product';
   static const productListAll = '/product/listAll';
   static const productSearch = '/product/search';
@@ -67,6 +67,7 @@ abstract final class ApiEndpoints {
   static String feedbackUpdate(Object? feedbackId) =>
       '/feedbacks/update/$feedbackId';
 
+  static String allTasks = '/tasks';
   static String tasksByCustomer(Object? customerId) =>
       '/tasks/customer/$customerId';
   static const tasksPending = '/tasks/ton-dong';

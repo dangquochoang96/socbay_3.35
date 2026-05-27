@@ -16,7 +16,7 @@ import 'package:socbay/data/model/user_address.dart';
 import 'package:socbay/data/model/user_profile.dart';
 import 'package:socbay/utils/logger_util.dart';
 
-import 'package:http/http.dart' as http;
+import 'package:socbay/utils/auth_http.dart' as http;
 import 'package:path/path.dart';
 
 class RentBookingServiceBloc

@@ -14,7 +14,7 @@ import 'package:socbay/data/repository/auth/api_repository.dart';
 import 'package:socbay/db/db_manager.dart';
 import 'package:socbay/utils/logger_util.dart';
 
-import 'package:http/http.dart' as http;
+import 'package:socbay/utils/auth_http.dart' as http;
 
 class TaskScreenBloc extends Bloc<TaskScreenEvent, TaskScreenState> {
   TaskScreenBloc({required this.apiRepository})
@@ -90,6 +90,7 @@ class TaskScreenBloc extends Bloc<TaskScreenEvent, TaskScreenState> {
         'start': DateFormat("yyyy-MM-dd").format(DateTime.now()),
       });
       var res = await http.get(url);
+      print(res.body);
       if (res.statusCode == HttpStatus.ok) {
         var l = Map<String, dynamic>.from(json.decode(res.body));
         List<TaskModel> newlistTaskModel = List<TaskModel>.from(

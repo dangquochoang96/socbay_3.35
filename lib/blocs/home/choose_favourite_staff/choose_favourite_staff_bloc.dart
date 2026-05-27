@@ -11,7 +11,7 @@ import '../../../data/model/user_profile.dart';
 import '../../../data/repository/auth/api_repository.dart';
 import 'choose_favourite_staff_event.dart';
 import 'choose_favourite_staff_state.dart';
-import 'package:http/http.dart' as http;
+import 'package:socbay/utils/auth_http.dart' as http;
 
 class ChooseFavouriteStaffBloc
     extends Bloc<ChooseFavouriteStaffEvent, ChooseFavouriteStaffState> {

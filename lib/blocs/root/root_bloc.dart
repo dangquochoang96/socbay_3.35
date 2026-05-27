@@ -35,6 +35,21 @@ class RootBloc extends Bloc<RootEvent, RootState> {
     return status == 1 || status == '1';
   }
 
+  Future<String?> _getStoredToken() {
+    return SecureStorageUtil.shared.readData(SecureStorageUtil.tokenStorageKey);
+  }
+
+  Dio _authorizedDio(String token) {
+    return Dio(
+      BaseOptions(
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      ),
+    );
+  }
+
   FutureOr<void> _mapAppStartedToState(
     AppStarted event,
     Emitter<RootState> emit,
@@ -47,19 +62,26 @@ class RootBloc extends Bloc<RootEvent, RootState> {
           .databaseBuilder('socbay.db')
           .build());
       var currentUser = await database.userDao.findAllUsers();
-      if (currentUser.isEmpty || currentUser.first.id <= 0) {
+      final token = await _getStoredToken();
+      if (currentUser.isEmpty ||
+          currentUser.first.id <= 0 ||
+          (token?.isEmpty ?? true)) {
         LoggerUtil.warning('AppStarted -> no valid local user', tag: tag);
         await PushNotificationService.instance.clearAuthenticatedUser();
         await database.close();
         emit(Unauthenticated());
       } else {
-        //App.instance.userApp = currentUser;
+        final localUser = currentUser.first;
+        App.instance.userApp = UserToUserProfile()(localUser);
+        LoggerUtil.info(
+          'AppStarted -> local session restored userId=${localUser.id}',
+          tag: tag,
+        );
+        emit(Authenticated());
         try {
-          var dio = Dio();
+          var dio = _authorizedDio(token!);
           final Response resJson = await dio.get(
-            AppConfig.instance.apiUrl(
-              ApiEndpoints.userById(currentUser.first.id),
-            ),
+            AppConfig.instance.apiUrl(ApiEndpoints.userById(localUser.id)),
           );
           LoggerUtil.info(
             'AppStarted userById response=${resJson.data}',
@@ -86,9 +108,6 @@ class RootBloc extends Bloc<RootEvent, RootState> {
             final user = userGetMapper(userProfile);
             await database.userDao.deleteAllUser();
             await database.userDao.insertUser(user);
-            await Future.delayed(const Duration(milliseconds: 500));
-            LoggerUtil.info('AppStarted -> emit Authenticated', tag: tag);
-            emit(Authenticated());
           } else {
             LoggerUtil.warning(
               'AppStarted -> API not success map=$map',
@@ -100,21 +119,32 @@ class RootBloc extends Bloc<RootEvent, RootState> {
           }
         } on DioException catch (e) {
           LoggerUtil.error('AppStarted DioException=$e', tag: tag);
-          await PushNotificationService.instance.clearAuthenticatedUser();
-          emit(Unauthenticated());
+          final statusCode = e.response?.statusCode ?? 0;
+          if (statusCode == 401 || statusCode == 403) {
+            await PushNotificationService.instance.clearAuthenticatedUser();
+            await database.userDao.deleteAllUser();
+            await SecureStorageUtil.shared.deleteKey(
+              SecureStorageUtil.tokenStorageKey,
+            );
+            emit(Unauthenticated());
+          }
         } finally {
           await database.close();
         }
       }
     } else {
       var currentUser = App.instance.userApp;
-      if (currentUser == null || (currentUser.id ?? 0) <= 0) {
+      final token = await _getStoredToken();
+      if (currentUser == null ||
+          (currentUser.id ?? 0) <= 0 ||
+          (token?.isEmpty ?? true)) {
         LoggerUtil.warning('AppStarted web/other -> no current user', tag: tag);
         await PushNotificationService.instance.clearAuthenticatedUser();
         emit(Unauthenticated());
       } else {
+        emit(Authenticated());
         try {
-          var dio = Dio();
+          var dio = _authorizedDio(token!);
           final Response resJson = await dio.get(
             AppConfig.instance.apiUrl(ApiEndpoints.userById(currentUser.id)),
           );
@@ -139,12 +169,6 @@ class RootBloc extends Bloc<RootEvent, RootState> {
             await PushNotificationService.instance.setAuthenticatedUser(
               userProfile.id.toString(),
             );
-            await Future.delayed(const Duration(milliseconds: 500));
-            LoggerUtil.info(
-              'AppStarted web/other -> emit Authenticated',
-              tag: tag,
-            );
-            emit(Authenticated());
           } else {
             // SecureStorageUtil.shared.logoutCurrentUser();
             LoggerUtil.warning(
@@ -157,8 +181,11 @@ class RootBloc extends Bloc<RootEvent, RootState> {
         } on DioException catch (e) {
           // SecureStorageUtil.shared.logoutCurrentUser();
           LoggerUtil.error('AppStarted web/other DioException=$e', tag: tag);
-          App.instance.onLogout();
-          emit(Unauthenticated());
+          final statusCode = e.response?.statusCode ?? 0;
+          if (statusCode == 401 || statusCode == 403) {
+            App.instance.onLogout();
+            emit(Unauthenticated());
+          }
         }
       }
     }

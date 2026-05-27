@@ -863,10 +863,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     color: ColorUtil.bangladeshGreen,
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4),
-                  child: Html(data: itemBlog.shortdes ?? ""),
-                ),
+                // Padding(
+                //   padding: const EdgeInsets.symmetric(vertical: 4),
+                //   child: Html(data: itemBlog.shortdes ?? ""),
+                // ),
               ],
             ),
           ),

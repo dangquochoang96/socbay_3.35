@@ -7,7 +7,7 @@ import 'package:socbay/config/app_config.dart';
 import 'package:socbay/constants/api_endpoints.dart';
 import 'package:socbay/data/model/user_profile.dart';
 import 'package:socbay/data/repository/auth/api_repository.dart';
-import 'package:http/http.dart' as http;
+import 'package:socbay/utils/auth_http.dart' as http;
 import 'package:socbay/blocs/technique/technique_screen_event.dart';
 import 'package:socbay/blocs/technique/technique_screen_state.dart';
 

@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:http/http.dart' as http;
+import 'package:socbay/utils/auth_http.dart' as http;
 import '../../config/app_config.dart';
 import 'package:socbay/constants/api_endpoints.dart';
 import '../../data/repository/auth/api_repository.dart';
