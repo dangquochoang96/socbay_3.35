@@ -82,7 +82,8 @@ class _RentTaskTabState extends State<RentTaskTab> {
 
   @override
   void dispose() {
-    _bloc.close();
+    _scrollController.dispose();
+    _feedbackController.dispose();
     super.dispose();
   }
 

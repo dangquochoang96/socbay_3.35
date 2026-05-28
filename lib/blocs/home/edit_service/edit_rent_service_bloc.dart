@@ -121,7 +121,7 @@ class EditRentServiceBloc extends Bloc<EditServiceEvent, EditServiceState> {
       return;
     }
     Map<String, dynamic> params = {
-      "time_star": event.updateTaskRequest.timeStart.toString(),
+      "time_start": event.updateTaskRequest.timeStart.toString(),
       "time_end": event.updateTaskRequest.timeEnd.toString(),
       "type_task": event.updateTaskRequest.serviceId.toString(),
       "name": event.updateTaskRequest.name.toString(),

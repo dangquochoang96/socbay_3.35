@@ -124,6 +124,7 @@ class TaskScreenBloc extends Bloc<TaskScreenEvent, TaskScreenState> {
         'user_id': App.instance.userApp?.id.toString(),
       });
       var res = await http.get(url);
+      print(res.body);
       if (res.statusCode == HttpStatus.ok) {
         var l = Map<String, dynamic>.from(json.decode(res.body));
         List<TaskModel> newlistTaskModel = List<TaskModel>.from(
@@ -161,12 +162,12 @@ class TaskScreenBloc extends Bloc<TaskScreenEvent, TaskScreenState> {
       "user_id": event.status == '1' || event.status == '2'
           ? null
           : App.instance.userApp!.id.toString(),
-      "time_star": DateFormat(
+      "time_start": DateFormat(
         'dd/MM/yyyy HH:mm',
       ).format(DateTime.parse(event.timeStart.toString())),
     };
     var url = AppConfig.instance.apiUri(
-      ApiEndpoints.taskEditDone(event.taskId.toString()),
+      ApiEndpoints.taskEdit(event.taskId.toString()),
     );
     var body = json.encode(params);
     var res = await http.post(
@@ -206,12 +207,12 @@ class TaskScreenBloc extends Bloc<TaskScreenEvent, TaskScreenState> {
       "user_id": event.status == '1' || event.status == '2'
           ? null
           : App.instance.userApp?.id.toString(),
-      "time_star": DateFormat(
+      "time_start": DateFormat(
         'dd/MM/yyyy HH:mm',
       ).format(DateTime.parse(event.timeStart.toString())),
     };
     var url = AppConfig.instance.apiUri(
-      ApiEndpoints.taskEditDone(event.taskId.toString()),
+      ApiEndpoints.taskEdit(event.taskId.toString()),
     );
     var body = json.encode(params);
     var res = await http.post(

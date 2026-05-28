@@ -127,7 +127,6 @@ class _StaffServiceSaleScreenState extends State<StaffServiceSaleScreen> {
 
   @override
   void dispose() {
-    _bloc.close();
     staffFavoriteTxtController.dispose();
     describeRequestTxtController.dispose();
     addressRequestTxtController.dispose();

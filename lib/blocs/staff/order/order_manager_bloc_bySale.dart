@@ -72,12 +72,15 @@ class OrderManagerBlocBySale
       );
       staffLstOrders.reversed;
       for (var element in staffSalesIncomes) {
-        if (element.status == "0")
+        if (element.status == "0") {
           totalDonLapMay = int.parse(element.totalOrder ?? "0");
-        if (element.status == "1")
+        }
+        if (element.status == "1") {
           totalDonVeSinh = int.parse(element.totalOrder ?? "0");
-        if (element.status == "2")
+        }
+        if (element.status == "2") {
           totalDonThayLoi = int.parse(element.totalOrder ?? "0");
+        }
       }
     }
     isLoading = false;

@@ -88,11 +88,11 @@ class HomeServiceModel {
       des: 'Đơn hàng',
       name: 'Quản lý đơn hàng',
     ),
-    HomeServiceModel(
-      image: Images.iconHotline,
-      des: 'Chương trình khuyến mại',
-      name: 'Thông báo',
-    ),
+    // HomeServiceModel(
+    //   image: Images.iconHotline,
+    //   des: 'Chương trình khuyến mại',
+    //   name: 'Thông báo',
+    // ),
     HomeServiceModel(
       image: Images.iconNews,
       des: 'Tin tức kỹ thuật',
@@ -115,11 +115,11 @@ class HomeServiceModel {
       des: 'Quản lý đơn hàng',
       name: 'Đơn hàng',
     ),
-    HomeServiceModel(
-      image: Images.iconMegaphone,
-      des: 'Chương trình khuyến mại',
-      name: 'Thông báo',
-    ),
+    // HomeServiceModel(
+    //   image: Images.iconMegaphone,
+    //   des: 'Chương trình khuyến mại',
+    //   name: 'Thông báo',
+    // ),
     HomeServiceModel(
       image: Images.iconFeedback,
       des: 'Góp ý & khiếu nại kỹ thuật',

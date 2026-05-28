@@ -58,7 +58,7 @@ class ServiceScreenBloc extends Bloc<ServiceScreenEvent, ServiceScreenState> {
       List<String>? images = event.createTaskRequest.images;
       Map<String, dynamic> params = {
         "customer": App.instance.userApp!.id.toString(),
-        "time_star": event.createTaskRequest.timeStart.toString(),
+        "time_start": event.createTaskRequest.timeStart.toString(),
         "time_end": event.createTaskRequest.timeEnd.toString(),
         "type_task": event.createTaskRequest.serviceId.toString(),
         "name": event.createTaskRequest.name.toString(),

@@ -261,7 +261,6 @@ class StaffNewOrderBloc extends Bloc<StaffNewOrderEvent, StaffNewOrderState> {
           if (l["code"] == 200) {
             var m = Map<String, dynamic>.from(l["data"]);
             var n = Map<String, dynamic>.from(m["order"]);
-            //thÃƒÆ’Ã‚Â¡Ãƒâ€šÃ‚Â»Ãƒâ€šÃ‚Â±c ra ÃƒÆ’Ã¢â‚¬Å¾ÃƒÂ¢Ã¢â€šÂ¬Ã‹Å“ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢y lÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â  dÃƒÆ’Ã‚Â¡Ãƒâ€šÃ‚Â»Ãƒâ€šÃ‚Â¯ liÃƒÆ’Ã‚Â¡Ãƒâ€šÃ‚Â»ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¡u cÃƒÆ’Ã‚Â¡Ãƒâ€šÃ‚Â»Ãƒâ€šÃ‚Â§a Order, nhÃƒÆ’Ã¢â‚¬Â Ãƒâ€šÃ‚Â°ng cÃƒÆ’Ã‚Â¡Ãƒâ€šÃ‚ÂºÃƒâ€šÃ‚Â§n mÃƒÆ’Ã‚Â¡Ãƒâ€šÃ‚Â»ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Âi Id thÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â´i nÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Âªn map bÃƒÆ’Ã‚Â¡Ãƒâ€šÃ‚Â»Ãƒâ€šÃ‚Â«a vÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â o class order detail
             orderDetail = OrderDetailModel(id: n["id"]);
             var urleditTask = AppConfig.instance
                 .apiUri(ApiEndpoints.taskEdit(taskModel?.id), {
@@ -270,7 +269,7 @@ class StaffNewOrderBloc extends Bloc<StaffNewOrderEvent, StaffNewOrderState> {
                   'des': taskModel?.des ?? "",
                   'status': '3',
                   'priority': taskModel?.priority?.toString() ?? '0',
-                  'time_star': DateFormat(
+                  'time_start': DateFormat(
                     'dd/MM/yyyy HH:ss',
                   ).format(DateTime.parse(taskModel!.timeStar.toString())),
                   'time_end': "",
@@ -292,11 +291,7 @@ class StaffNewOrderBloc extends Bloc<StaffNewOrderEvent, StaffNewOrderState> {
         }
       }
     } catch (exception) {
-      emit(
-        StaffCreateOrderCoresFailState(
-          "CÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â³ lÃƒÆ’Ã‚Â¡Ãƒâ€šÃ‚Â»ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Âi xÃƒÆ’Ã‚Â¡Ãƒâ€šÃ‚ÂºÃƒâ€šÃ‚Â£y ra!",
-        ),
-      );
+      emit(StaffCreateOrderCoresFailState("Có lỗi xảy ra!"));
     }
     isLoading = false;
     emit(StaffNewOrderInitialState());

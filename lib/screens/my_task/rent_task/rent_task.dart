@@ -105,7 +105,14 @@ class _RentTaskTabSale extends State<RentTaskTabSale> {
           _bloc.add(StaffTaskScreenGetTaskByDayEvent(isRefresh: _isRefresh));
         },
         child: _bloc.staffListTaskBydayModel.isEmpty && !_bloc.isLoading
-            ? const Center(child: Text("Chưa có công việc"))
+            ? const CustomScrollView(
+                physics: AlwaysScrollableScrollPhysics(),
+                slivers: [
+                  SliverFillRemaining(
+                    child: Center(child: Text("Chưa có công việc")),
+                  ),
+                ],
+              )
             : ListView.separated(
                 //controller: _scrollController,
                 itemBuilder: _itemBuilder,

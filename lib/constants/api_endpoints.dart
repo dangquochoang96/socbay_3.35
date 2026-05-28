@@ -21,14 +21,13 @@ abstract final class ApiEndpoints {
   static const listOrderRatingByStaff =
       '/socbay/order/get-list-order-rating-by-staff';
   static const tasks = '/socbay/tasks';
-  static const taskAdmin = '/admin/task';
   static const taskCreate = '/socbay/tasks/them';
   static const taskDelete = '/socbay/tasks/xoa';
   static const rentTasks = '/socbay/rent-tasks';
   static const rentTaskCreate = '/socbay/rent-tasks/them';
   static const rentTaskDelete = '/socbay/rent-tasks/xoa';
   static const products = '/product';
-  static const productListAll = '/product/listAll';
+  static const productListAll = '/product/listProduct';
   static const productSearch = '/product/search';
   static const productListCate = '/product/listCate';
   static const productCategory = '/product-category';
@@ -62,37 +61,34 @@ abstract final class ApiEndpoints {
       '/user/$phone/changePassWord';
 
   static String feedbacksByStaff(Object? staffId) =>
-      '/feedbacks/get-list-feddback-by-staff/$staffId';
-  static String feedbackById(Object? feedbackId) => '/feedbacks/$feedbackId';
+      '/socbay/feedbacks/get-list-feddback-by-staff/$staffId';
+  static String feedbackById(Object? feedbackId) =>
+      '/socbay/feedbacks/$feedbackId';
   static String feedbackUpdate(Object? feedbackId) =>
-      '/feedbacks/update/$feedbackId';
+      '/socbay/feedbacks/update/$feedbackId';
 
-  static String allTasks = '/tasks';
   static String tasksByCustomer(Object? customerId) =>
-      '/tasks/customer/$customerId';
-  static const tasksPending = '/tasks/ton-dong';
-  static String taskById(Object? id) => '/tasks/$id';
-  static String taskEdit(Object? id) => '/tasks/edit/$id';
-  static String taskEditDone(Object? id) => '/tasks/editt/$id';
-  static String taskAdminById(Object? id) => '/admin/task/$id';
+      '/socbay/tasks/customer/$customerId';
+  static const tasksPending = '/socbay/tasks/ton-dong';
+  static String taskById(Object? id) => '/socbay/tasks/$id';
+  static String taskEdit(Object? id) => '/socbay/tasks/edit/$id';
 
   static String rentTasksByCustomer(Object? customerId) =>
-      '/rent-tasks/customer/$customerId';
-  static const rentTasksPending = '/rent-tasks/ton-dong';
-  static String rentTaskById(Object? id) => '/rent-tasks/$id';
-  static String rentTaskEdit(Object? id) => '/rent-tasks/edit/$id';
-  static String rentTaskEditKtv(Object? id) => '/rent-tasks/editKTV/$id';
+      '/socbay/rent-tasks/customer/$customerId';
+  static const rentTasksPending = '/socbay/rent-tasks/ton-dong';
+  static String rentTaskById(Object? id) => '/socbay/rent-tasks/$id';
+  static String rentTaskEdit(Object? id) => '/socbay/rent-tasks/edit/$id';
 
   static String orderListByCustomer(Object? customerId) =>
-      '/order/list-order-by-customer/$customerId';
+      '/socbay/order/list-order-by-customer/$customerId';
   static String orderListStaff(Object? staffId) =>
-      '/order/order-list-staff/$staffId';
+      '/socbay/order/order-list-staff/$staffId';
   static String orderListBySale(Object? saleId) =>
-      '/order/order-list-bySale/$saleId';
+      '/socbay/order/order-list-bySale/$saleId';
   static String orderSalesIncome(Object? userId) =>
-      '/order/sales-income/$userId';
+      '/socbay/order/sales-income/$userId';
   static String orderLastReplaceFilterCore(Object? userId) =>
-      '/order/last-replace-filter-core/$userId';
+      '/socbay/order/last-replace-filter-core/$userId';
 
   static String giftList({bool isReceiveList = false}) =>
       isReceiveList ? '/gift/listReceive' : gifts;

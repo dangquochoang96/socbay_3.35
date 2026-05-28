@@ -126,7 +126,6 @@ class _ServiceScreenState extends State<StaffServiceScreen> {
 
   @override
   void dispose() {
-    _bloc.close();
     staffFavoriteTxtController.dispose();
     describeRequestTxtController.dispose();
     _nameTextController.dispose();

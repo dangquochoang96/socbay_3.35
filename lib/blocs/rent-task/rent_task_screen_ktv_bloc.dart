@@ -160,13 +160,13 @@ class RentTaskScreenKTVBloc
       "user_id": event.status == '1' || event.status == '2'
           ? null
           : App.instance.userApp!.id.toString(),
-      "time_star": DateFormat(
+      "time_start": DateFormat(
         'dd/MM/yyyy HH:mm',
       ).format(DateTime.parse(event.timeStart.toString())),
     };
 
     var url = AppConfig.instance.apiUri(
-      ApiEndpoints.rentTaskEditKtv(event.taskId.toString()),
+      ApiEndpoints.rentTaskEdit(event.taskId.toString()),
     );
     var body = json.encode(params);
     var res = await http.post(
@@ -206,7 +206,7 @@ class RentTaskScreenKTVBloc
       "user_id": event.status == '1' || event.status == '2'
           ? null
           : App.instance.userApp!.id.toString(),
-      "time_star": DateFormat(
+      "time_start": DateFormat(
         'dd/MM/yyyy HH:mm',
       ).format(DateTime.parse(event.timeStart.toString())),
     };

@@ -54,7 +54,6 @@ class _CoreReplacementServiceScreenState
 
   @override
   void dispose() {
-    _bloc.close();
     _feedbackController.dispose();
     _validateRatingController.dispose();
     super.dispose();
@@ -210,33 +209,6 @@ class _CoreReplacementServiceScreenState
                   ),
                 ),
               ),
-              // Container(
-              //   margin: const EdgeInsets.only(left: 15, top: 10),
-              //   child: Align(
-              //       alignment: Alignment.centerLeft,
-              //       child: ButtonWidget(
-              //         onTap: () {
-              //           _goToStaffInfo(_bloc.orderDetailModel?.staff);
-              //         },
-              //         child: RichText(
-              //           text: TextSpan(children: [
-              //             const TextSpan(
-              //                 text: "Thông tin kỹ thuật viên: ",
-              //                 style: TextStyle(color: Colors.black)),
-              //             TextSpan(
-              //               text: staffName,
-              //               style: const TextStyle(
-              //                   fontWeight: FontWeight.w600,
-              //                   color: ColorUtil.bangladeshGreen,
-              //                   decorationThickness: 1,
-              //                   decoration: TextDecoration.underline,
-              //                   fontSize: 13),
-              //             )
-              //           ]),
-              //         ),
-              //       )),
-              // ),
-              // const SizedBox(height: 10.0),
               Column(
                 children: [
                   Align(

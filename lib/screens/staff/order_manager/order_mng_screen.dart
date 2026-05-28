@@ -50,7 +50,6 @@ class _OrderManagerScreenState extends State<OrderManagerScreen> {
 
   @override
   void dispose() {
-    _bloc.close();
     super.dispose();
   }
 

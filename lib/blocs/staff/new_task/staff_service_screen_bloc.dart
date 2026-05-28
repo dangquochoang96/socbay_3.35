@@ -64,16 +64,14 @@ class StaffServiceScreenBloc
           event.createTaskRequest.customerId == 0 ||
           App.instance.userApp == null) {
         emit(
-          const StaffServiceScreenCreateTaskFailedState(
-            "ChÃƒâ€ Ã‚Â°a cÃƒÆ’Ã‚Â³ khÃƒÆ’Ã‚Â¡ch hÃƒÆ’Ã‚Â ng",
-          ),
+          const StaffServiceScreenCreateTaskFailedState("Chưa có khách hàng"),
         );
         isLoading = false;
         return;
       }
       Map<String, dynamic> args = {
         "customer": event.createTaskRequest.customerId,
-        "time_star": event.createTaskRequest.timeStart.toString(),
+        "time_start": event.createTaskRequest.timeStart.toString(),
         "time_end": event.createTaskRequest.timeEnd.toString(),
         "type_task": event.createTaskRequest.serviceId.toString(),
         "name": event.createTaskRequest.name.toString(),

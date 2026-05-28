@@ -215,8 +215,8 @@ class ApiManager {
         );
       case ApiType.updateTask:
         return ApiConfig(
-          path: '${ApiEndpoints.taskAdmin}$additionalPath',
-          method: HttpMethod.put,
+          path: '${ApiEndpoints.taskEdit}$additionalPath',
+          method: HttpMethod.post,
           headers: _defaultHeaders,
         );
       case ApiType.likeStaff:
@@ -269,7 +269,7 @@ class ApiManager {
         );
       case ApiType.deleteTask:
         return ApiConfig(
-          path: '${ApiEndpoints.taskAdmin}$additionalPath',
+          path: '${ApiEndpoints.taskDelete}$additionalPath',
           method: HttpMethod.del,
           headers: _defaultHeaders,
         );

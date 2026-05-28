@@ -44,7 +44,6 @@ class _DetailBookingScreenState extends State<DetailBookingScreen> {
 
   @override
   void dispose() {
-    _bloc.close();
     super.dispose();
   }
 

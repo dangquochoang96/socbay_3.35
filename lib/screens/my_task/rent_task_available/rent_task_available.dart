@@ -187,7 +187,14 @@ class _RentTaskAvailableTabState extends State<RentTaskAvailableTabSale> {
                 );
               },
               child: _bloc.staffListTaskAssigedModel.isEmpty && !_bloc.isLoading
-                  ? const Center(child: Text("Chưa có công việc"))
+                  ? const CustomScrollView(
+                      physics: AlwaysScrollableScrollPhysics(),
+                      slivers: [
+                        SliverFillRemaining(
+                          child: Center(child: Text("Chưa có công việc")),
+                        ),
+                      ],
+                    )
                   : ListView.separated(
                       controller: _scrollController,
                       itemBuilder: _itemBuilder,

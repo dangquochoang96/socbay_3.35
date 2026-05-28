@@ -13,6 +13,7 @@ class UserProfile {
   final String? address;
   final String? password;
   final String? type;
+  final String? typeStaff;
   final int? otp;
   final String? birthday;
   final int? status;
@@ -40,6 +41,7 @@ class UserProfile {
     this.address,
     this.password,
     this.type,
+    this.typeStaff,
     this.otp,
     this.id,
     this.birthday,
@@ -70,6 +72,7 @@ class UserProfile {
     address: json['address'],
     password: json['password'],
     type: json['type'],
+    typeStaff: json['type_staff'],
     otp: Parse.toIntValue(json['otp']),
     birthday: json['birthday'],
     status: Parse.toIntValue(json['status']),
@@ -106,6 +109,7 @@ class UserProfile {
     'status': status,
     'is_agency': isAgency,
     'type': type,
+    'type_staff': typeStaff,
     'is_admin': isAdmin,
     'sex': sex,
     'tich_diem': point,
@@ -120,7 +124,11 @@ class UserProfile {
     'idCardImageBack': idCardImageBack,
   };
 
-  bool isUserRole() => type == "2";
-  bool isUserCustomer() => type == "1";
-  bool isUserSale() => type == "3";
+  // bool isUserRole() => type == "2";
+  // bool isUserCustomer() => type == "1";
+  // bool isUserSale() => type == "3";
+
+  bool isUserRole() => type == "2" && typeStaff == "1";
+  bool isUserCustomer() => type == "1" && typeStaff == "0";
+  bool isUserSale() => type == "2" && typeStaff == "2";
 }

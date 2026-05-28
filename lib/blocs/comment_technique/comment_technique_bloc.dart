@@ -59,6 +59,7 @@ class CommentTechniqueBloc
     });
     try {
       var res = await http.get(url);
+      print(res.body);
       if (res.statusCode == HttpStatus.ok) {
         var map = Map<String, dynamic>.from(json.decode(res.body));
         lstOrder = List<OrderDetailModel>.from(
@@ -66,10 +67,6 @@ class CommentTechniqueBloc
         );
         dem = 0;
         lstOrder?.forEach((element) {
-          // if(element.rate != null){
-          //   diem = diem + int.parse(element.rate!);
-          //   dem =dem+1;
-          // }
           diem = diem + int.parse(element.rate!);
           dem = dem + 1;
         });

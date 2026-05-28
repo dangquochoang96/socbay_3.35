@@ -67,7 +67,7 @@ class RentBookingServiceBloc
           App.instance.userApp == null) {
         emit(
           const StaffServiceScreenSaleCreateTaskFailedState(
-            "LÃƒÂ¡Ã‚Â»Ã¢â‚¬â€i tÃƒÂ¡Ã‚ÂºÃ‚Â¡o cÃƒÆ’Ã‚Â´ng viÃƒÂ¡Ã‚Â»Ã¢â‚¬Â¡c mÃƒÂ¡Ã‚Â»Ã¢â‚¬Âºi.",
+            "Lỗi tạo công việc mới",
           ),
         );
         isLoading = false;
@@ -75,7 +75,7 @@ class RentBookingServiceBloc
       }
       Map<String, dynamic> args = {
         "customer": event.createTaskRequest.customerId,
-        "time_star": event.createTaskRequest.timeStart.toString(),
+        "time_start": event.createTaskRequest.timeStart.toString(),
         "time_end": event.createTaskRequest.timeEnd.toString(),
         "type_task": event.createTaskRequest.serviceId.toString(),
         "name": event.createTaskRequest.name.toString(),

@@ -82,10 +82,8 @@ class _MyTaskTabState extends State<MyTaskTab> {
 
   @override
   void dispose() {
-    // _scrollController.dispose();
-    // _feedbackController.dispose();
-    // _bloc.listTaskModel.clear();
-    _bloc.close();
+    _scrollController.dispose();
+    _feedbackController.dispose();
     super.dispose();
   }
 

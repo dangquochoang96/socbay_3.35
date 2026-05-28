@@ -44,8 +44,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
 
   @override
   void dispose() {
-    _taskScreenBloc.close();
-    _bloc.close();
     super.dispose();
   }
 

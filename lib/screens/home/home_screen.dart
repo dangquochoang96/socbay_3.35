@@ -706,11 +706,11 @@ class _HomeScreenState extends State<HomeScreen> {
             Navigator.pushNamed(context, Routes.staffCommentAndRatingList);
           } else if (index == 1) {
             Navigator.pushNamed(context, Routes.orderManagerScreen);
+            // } else if (index == 2) {
+            //   Navigator.pushNamed(context, Routes.notificationScreen);
           } else if (index == 2) {
-            Navigator.pushNamed(context, Routes.notificationScreen);
-          } else if (index == 3) {
             Navigator.pushNamed(context, Routes.newsScreen);
-          } else if (index == 4) {
+          } else if (index == 3) {
             Navigator.pushNamed(
               context,
               Routes.staffFeedbackScreen,
@@ -722,13 +722,13 @@ class _HomeScreenState extends State<HomeScreen> {
             Navigator.pushNamed(context, Routes.evaluateScreen);
           } else if (index == 1) {
             Navigator.pushNamed(context, Routes.orderManagerScreenBySale);
+            // } else if (index == 2) {
+            //   Navigator.pushNamed(context, Routes.notificationScreen);
           } else if (index == 2) {
-            Navigator.pushNamed(context, Routes.notificationScreen);
-          } else if (index == 3) {
             Navigator.pushNamed(context, Routes.feedbackkScreen);
-          } else if (index == 4) {
+          } else if (index == 3) {
             Navigator.pushNamed(context, Routes.staffCustomerInformationList);
-          } else if (index == 5) {
+          } else if (index == 4) {
             Navigator.pushNamed(
               context,
               Routes.rentBookingServiceScreen,

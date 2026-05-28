@@ -15,7 +15,15 @@ class CustomerInformationListBloc
     extends Bloc<CustomerInformationListEvent, CustomerInformationListState> {
   CustomerInformationListBloc(this.apiRepository)
     : super(CustomerInformationListInitialState()) {
+    on<CustomerInformationListStartEvent>(_getStartEventToState);
     on<CustomerInformationListSearchEvent>(_getSearchEventToState);
+  }
+
+  Future<void> _getStartEventToState(
+    CustomerInformationListStartEvent event,
+    Emitter<CustomerInformationListState> emit,
+  ) async {
+    await _getSearchEventToState(CustomerInformationListSearchEvent(), emit);
   }
 
   final ApiRepository apiRepository;
@@ -49,8 +57,7 @@ class CustomerInformationListBloc
         final List<UserProfile> searchedUsers = userData
             .map((model) => UserProfile.fromJson(model))
             .toList();
-        users =
-            searchedUsers; // CÃ¡ÂºÂ­p nhÃ¡ÂºÂ­t danh sÃƒÂ¡ch ngÃ†Â°Ã¡Â»Âi dÃƒÂ¹ng
+        users = searchedUsers;
         emit(CustomerInformationListLoadedState(users));
       } else {
         emit(

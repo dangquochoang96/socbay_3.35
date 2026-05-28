@@ -59,7 +59,6 @@ class _TaskWaitState extends State<TaskWaitTab> {
     _feedbackController.dispose();
     _page = 0;
     _bloc.listTaskModel.clear();
-    _bloc.close();
     super.dispose();
   }
 
