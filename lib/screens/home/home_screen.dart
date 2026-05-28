@@ -165,7 +165,7 @@ class _HomeScreenState extends State<HomeScreen> {
       return _buildEmptyMachineWidget(context);
     } else {
       return SizedBox(
-        height: 430,
+        height: 470,
         child: ListView.builder(
           shrinkWrap: false,
           scrollDirection: Axis.horizontal,
@@ -296,6 +296,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   Text(
                     "${machine.product?.name}",
                     textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       color: ColorUtil.raisinBlack,

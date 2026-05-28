@@ -92,9 +92,10 @@ class FeedbackScreenBloc
     Map<String, dynamic> args = {
       "order_id": event.orderId.toString(),
       "description": event.description.toString(),
-      "customer_id": App.instance.userApp?.id.toString(),
+      "user_id": App.instance.userApp?.id.toString(),
       "images": images,
     };
+    print("create feedback $args");
     var body = json.encode(args);
     var res = await http.post(
       url,

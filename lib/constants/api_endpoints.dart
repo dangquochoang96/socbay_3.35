@@ -61,7 +61,7 @@ abstract final class ApiEndpoints {
       '/user/$phone/changePassWord';
 
   static String feedbacksByStaff(Object? staffId) =>
-      '/socbay/feedbacks/get-list-feddback-by-staff/$staffId';
+      '/socbay/feedbacks/get-list-feedback-by-staff/$staffId';
   static String feedbackById(Object? feedbackId) =>
       '/socbay/feedbacks/$feedbackId';
   static String feedbackUpdate(Object? feedbackId) =>
