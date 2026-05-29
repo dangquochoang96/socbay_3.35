@@ -188,7 +188,7 @@ class _HistoryidScreenState extends State<HistoryidScreen>
     TaskModel taskModel = _bloc.lstBooking[reversedIndex];
     print("X4");
     print(_bloc.lstBooking[index]);
-    var dataFormat = _formatDatetime(taskModel.timeStar);
+    var dataFormat = _formatDatetime(taskModel.timeStart);
     return Column(
       children: [
         ButtonWidget(

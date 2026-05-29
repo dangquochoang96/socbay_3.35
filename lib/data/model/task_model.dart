@@ -13,7 +13,7 @@ class TaskModel {
   final String? des;
   final String? noti;
   final String? priority;
-  final String? timeStar;
+  final String? timeStart;
   final String? timeEnd;
   final String? userId;
   final String? saleId;
@@ -37,7 +37,7 @@ class TaskModel {
     this.des,
     this.noti,
     this.priority,
-    this.timeStar,
+    this.timeStart,
     this.timeEnd,
     this.userId,
     this.saleId,
@@ -62,7 +62,7 @@ class TaskModel {
     des: json["des"]?.toString(),
     noti: json["noti"]?.toString(),
     priority: json["priority"]?.toString(),
-    timeStar: json["time_start"]?.toString(),
+    timeStart: json["time_start"]?.toString(),
     timeEnd: json["time_end"]?.toString(),
     saleId: json["sale_id"]?.toString(),
     userId: json["user_id"]?.toString(),
@@ -90,7 +90,7 @@ class TaskModel {
     "status": status,
     "des": des,
     "noti": noti,
-    "time_start": timeStar,
+    "time_start": timeStart,
     "time_end": timeEnd,
     "staff": staff,
     "sale_id": saleId,

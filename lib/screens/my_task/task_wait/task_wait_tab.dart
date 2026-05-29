@@ -87,13 +87,13 @@ class _TaskWaitState extends State<TaskWaitTab> {
       id: 1,
       name: "Dịch vụ 1",
       des: "Mô tả dịch vụ 1",
-      timeStar: "08:00 AM",
+      timeStart: "08:00 AM",
     ),
     TaskModel(
       id: 2,
       name: "Dịch vụ 2",
       des: "Mô tả dịch vụ 2",
-      timeStar: "10:00 AM",
+      timeStart: "10:00 AM",
     ),
   ];
   Widget _builder(BuildContext context, state) {
@@ -172,7 +172,7 @@ class _TaskWaitState extends State<TaskWaitTab> {
             ),
             _buildTableRow(
               title: 'Thời gian:',
-              content: taskModel.timeStar,
+              content: taskModel.timeStart,
               isHighlight: false,
             ),
           ],

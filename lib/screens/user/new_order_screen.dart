@@ -926,7 +926,11 @@ class _UserNewOrderScreenState extends State<UserNewOrderScreen> {
     required ImagePicker picker,
     required Function funcPermission,
   }) async {
-    if (await Permission.photos.request().isGranted) {
+    bool isGranted = true;
+    if (Theme.of(context).platform == TargetPlatform.iOS) {
+      isGranted = await Permission.photos.request().isGranted;
+    }
+    if (isGranted) {
       try {
         final pickedFiles = await picker.pickMultiImage(imageQuality: 30);
 

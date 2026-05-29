@@ -181,7 +181,7 @@ class _MyTaskTabState extends State<MyTaskTab> {
           children: [
             _buildTableRow(
               title: 'Thời gian:',
-              content: taskModel.timeStar,
+              content: taskModel.timeStart,
               isHighlight: true,
               contentColor: Colors.red,
             ),
@@ -328,7 +328,7 @@ class _MyTaskTabState extends State<MyTaskTab> {
   Future<void> _updateTask(TaskModel taskModel) async {
     int? selectedOption = 5;
     DateTime tempDateTime = DateTime.parse(
-      taskModel.timeStar ?? DateTime.now().toString(),
+      taskModel.timeStart ?? DateTime.now().toString(),
     );
 
     showDialog(

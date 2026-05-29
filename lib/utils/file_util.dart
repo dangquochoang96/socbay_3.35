@@ -17,7 +17,11 @@ Future<File?> onGetPhotoFromGallery({
   required ImagePicker picker,
   required Function funcPermission,
 }) async {
-  if (await Permission.photos.request().isGranted) {
+  bool isGranted = true;
+  if (Platform.isIOS) {
+    isGranted = await Permission.photos.request().isGranted;
+  }
+  if (isGranted) {
     try {
       final pickedFile = await picker.pickImage(
         source: ImageSource.gallery,
@@ -46,7 +50,11 @@ Future<List<File>?> onGetMultiPhoto({
   required ImagePicker picker,
   required Function funcPermission,
 }) async {
-  if (await Permission.photos.request().isGranted) {
+  bool isGranted = true;
+  if (Platform.isIOS) {
+    isGranted = await Permission.photos.request().isGranted;
+  }
+  if (isGranted) {
     try {
       final pickedFiles = await picker.pickMultiImage(imageQuality: 100);
 
@@ -75,7 +83,11 @@ Future<File?> onGetVideo({
   required BuildContext context,
   required ImagePicker picker,
 }) async {
-  if (await Permission.photos.request().isGranted) {
+  bool isGranted = true;
+  if (Platform.isIOS) {
+    isGranted = await Permission.photos.request().isGranted;
+  }
+  if (isGranted) {
     try {
       final pickedFile = await picker.pickVideo(source: ImageSource.gallery);
 

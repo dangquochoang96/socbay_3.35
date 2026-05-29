@@ -292,7 +292,7 @@ class StaffNewRentOrderBloc
                   'priority': taskModel?.priority?.toString() ?? '0',
                   'time_start': DateFormat(
                     'dd/MM/yyyy HH:ss',
-                  ).format(DateTime.parse(taskModel!.timeStar.toString())),
+                  ).format(DateTime.parse(taskModel!.timeStart.toString())),
                   'time_end': "",
                   'staff': App.instance.userApp?.id.toString(),
                   'user_create': App.instance.userApp?.id.toString(),

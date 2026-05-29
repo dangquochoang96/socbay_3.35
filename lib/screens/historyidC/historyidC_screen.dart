@@ -42,7 +42,6 @@ class _HistoryidCScreenState extends State<HistoryidCScreen>
     userHistory = [];
     _bloc = BlocProvider.of(context);
     _bloc.add(HistoryidCScreenTabPressEvent(1));
-    _bloc.add(HistotyiDCScreenStartEvent());
     _tabHistoryController = TabController(
       length: 2,
       initialIndex: 1,
@@ -197,7 +196,7 @@ class _HistoryidCScreenState extends State<HistoryidCScreen>
       return Container();
     }
     TaskModel taskModel = _bloc.lstBooking[reversedIndex];
-    var dataFormat = _formatDatetime(taskModel.timeStar ?? "");
+    var dataFormat = _formatDatetime(taskModel.timeStart ?? "");
     return Column(
       children: [
         ButtonWidget(
@@ -413,7 +412,10 @@ class _HistoryidCScreenState extends State<HistoryidCScreen>
                     border: Border.all(width: 3, color: Colors.black12),
                   ),
                   child: ImageUtil.loadNetWorkImage(
-                    url: machine.product!.images?[0].link == null
+                    url:
+                        (machine.product!.images == null ||
+                            machine.product!.images!.isEmpty ||
+                            machine.product!.images![0].link == null)
                         ? ""
                         : "$protocol${AppConfig.instance.values.apiUrl}${machine.product!.images![0].link!}",
                     height: MediaQuery.of(context).size.width * 0.16,

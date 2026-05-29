@@ -88,8 +88,9 @@ class _MachineDetailScreenState extends State<MachineDetailScreen> {
                     borderRadius: BorderRadius.circular(21),
                     child: ImageUtil.loadNetWorkImage(
                       url:
-                          _bloc.order.product!.images!.isNotEmpty &&
-                              _bloc.order.product!.images![0].link == null
+                          (_bloc.order.product!.images == null ||
+                              _bloc.order.product!.images!.isEmpty ||
+                              _bloc.order.product!.images![0].link == null)
                           ? ""
                           : "$protocol${AppConfig.instance.values.apiUrl}${_bloc.order.product!.images![0].link!}",
                       width: MediaQuery.of(context).size.width * 0.6,
@@ -222,10 +223,7 @@ class _MachineDetailScreenState extends State<MachineDetailScreen> {
       shrinkWrap: true,
       itemCount: orderRentList.length,
       itemBuilder: (context, index) {
-        if (_bloc.ordersModel[index].type == '4') {
-          return _buildOrderRentItem(orderRentList[index]);
-        }
-        return null;
+        return _buildOrderRentItem(orderRentList[index]);
       },
       separatorBuilder: separatorBuilder,
     );

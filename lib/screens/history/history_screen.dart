@@ -44,6 +44,7 @@ class _HistoryScreenState extends State<HistoryScreen>
       vsync: this,
     );
     _tabHistoryController.addListener(() {
+      if (!mounted) return;
       setState(() {
         if (_tabHistoryController.index !=
             _tabHistoryController.previousIndex) {
@@ -55,7 +56,6 @@ class _HistoryScreenState extends State<HistoryScreen>
 
   @override
   void dispose() {
-    _bloc.close();
     _feedbackController.dispose();
     _tabHistoryController.dispose();
     super.dispose();
@@ -180,7 +180,7 @@ class _HistoryScreenState extends State<HistoryScreen>
 
   Widget _buildItemServiceHistory(BuildContext context, int index) {
     TaskModel taskModel = _bloc.lstBooking[index];
-    var dataFormat = _formatDatetime(taskModel.timeStar);
+    var dataFormat = _formatDatetime(taskModel.timeStart);
     return Column(
       children: [
         ButtonWidget(
@@ -404,7 +404,10 @@ class _HistoryScreenState extends State<HistoryScreen>
                     border: Border.all(width: 3, color: Colors.black12),
                   ),
                   child: ImageUtil.loadNetWorkImage(
-                    url: machine.product?.images?[0].link == null
+                    url:
+                        (machine.product?.images == null ||
+                            machine.product!.images!.isEmpty ||
+                            machine.product!.images![0].link == null)
                         ? ""
                         : "$protocol${AppConfig.instance.values.apiUrl}${machine.product!.images![0].link!}",
                     height: MediaQuery.of(context).size.width * 0.16,

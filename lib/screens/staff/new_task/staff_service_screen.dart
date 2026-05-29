@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -13,7 +15,6 @@ import 'package:socbay/blocs/tab_bar/tab_bar_event.dart';
 import 'package:socbay/blocs/task/task_screen_bloc.dart';
 import 'package:socbay/blocs/task/task_screen_event.dart';
 import 'package:socbay/config/app_config.dart';
-import 'package:socbay/constants/constants.dart';
 import 'package:socbay/data/model/home_service_model.dart';
 import 'package:socbay/data/model/machine_model.dart';
 import 'package:socbay/data/model/order_model.dart';
@@ -76,6 +77,7 @@ class _ServiceScreenState extends State<StaffServiceScreen> {
   final customerController = TextEditingController();
   late TabBarBloc _tabBarBloc;
   UserProfile? _favouriteStaff;
+
   @override
   void initState() {
     _bloc = BlocProvider.of(context);
@@ -83,9 +85,7 @@ class _ServiceScreenState extends State<StaffServiceScreen> {
     staffFavoriteTxtController = TextEditingController();
     describeRequestTxtController = TextEditingController();
     _nameTextController = TextEditingController();
-
     _addressTextController = TextEditingController();
-
     addressSPRequestTxtController = TextEditingController();
     service = LocaNotificationService.instance;
     service.initialize();
@@ -94,7 +94,6 @@ class _ServiceScreenState extends State<StaffServiceScreen> {
     _listProducts.add(
       OrderModel(id: 0, product: MachineModel(id: 0, name: "--Chọn máy--")),
     );
-    //_listNameService = _listService.map((e) => e.name).toList();
     _currentSelectedValue = _listService[int.tryParse(_bloc.args['index']) ?? 0]
         .id
         .toString();
@@ -116,7 +115,6 @@ class _ServiceScreenState extends State<StaffServiceScreen> {
       });
     } else {
       setState(() {
-        // _timeStart = TimeOfDay.now().toTimeString();
         _timeStart = DateFormat('HH:mm').format(DateTime.now());
       });
     }
@@ -212,8 +210,56 @@ class _ServiceScreenState extends State<StaffServiceScreen> {
     }
   }
 
+  // ─── helpers ───────────────────────────────────────────────────────────────
+
+  BoxDecoration _cardDecoration() {
+    return BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(16.0),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withValues(alpha: 0.04),
+          blurRadius: 12,
+          offset: const Offset(0, 4),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSectionHeader(String title, IconData icon) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16.0),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: ColorUtil.bangladeshGreen.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(icon, color: ColorUtil.bangladeshGreen, size: 20),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              title,
+              style: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                color: ColorUtil.raisinBlack,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ─── builder ───────────────────────────────────────────────────────────────
+
   Widget _builder(BuildContext context, StaffServiceScreenState state) {
     return Scaffold(
+      backgroundColor: Colors.grey.shade50,
       appBar: MyAppBar(
         isBackNavigation: true,
         title: 'Đăng ký công việc',
@@ -222,66 +268,21 @@ class _ServiceScreenState extends State<StaffServiceScreen> {
       body: LoadingIndicator(
         isLoading: _bloc.isLoading,
         child: SafeArea(
-          child: SafeArea(
-            child: Scaffold(
-              body: ListView(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: paddingHorizontal,
-                  vertical: paddingVertical,
-                ),
-                children: [
-                  _buildDropdownField(),
-                  _buildSearchCustomer(),
-                  if (App.instance.userApp?.isUserSale() == true) ...[
-                    _buildField(
-                      '',
-                      'Thợ ưa thích',
-                      Icons.person_outlined,
-                      null,
-                      value: _favouriteStaff?.username ?? "",
-                      onTap: () {
-                        _onChooseFavouriteStaff();
-                      },
-                    ),
-                  ],
-                  _buildDropdownFieldPruducts(),
-                  const SizedBox(height: 10),
-                  _buildFormDoubleHorizontal(
-                    'Hẹn lịch',
-                    Icons.calendar_today,
-                    Icons.av_timer_sharp,
-                    firstValue: _dateStart,
-                    secondValue: _timeStart,
-                    onTapFirst: _onTapDateStart,
-                    onTapSecond: _onTapTimeStart,
-                  ),
-                  const SizedBox(height: 10),
-                  _buildFormDescribe(
-                    'Mô tả yêu cầu',
-                    describeRequestTxtController,
-                    Icons.description_outlined,
-                    null,
-                  ),
-                  const SizedBox(height: 10),
-                  _buildSectionMedia(),
-                  const SizedBox(height: 34),
-                ],
-              ),
-              bottomSheet: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: Row(
-                  children: [
-                    _buildButton(
-                      text: 'ĐẶT LỊCH',
-                      isPositive: true,
-                      action: () {
-                        _onCreateTask(_notificationIndex ?? 0);
-                      },
-                    ),
-                    const SizedBox(width: 16),
-                  ],
-                ),
-              ),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                _buildCardServiceAndCustomer(),
+                const SizedBox(height: 16),
+                _buildCardScheduling(),
+                const SizedBox(height: 16),
+                _buildCardStaffAndRequest(),
+                const SizedBox(height: 16),
+                _buildCardMedia(),
+                const SizedBox(height: 32),
+                _buildBookingButton(),
+                const SizedBox(height: 24),
+              ],
             ),
           ),
         ),
@@ -289,92 +290,823 @@ class _ServiceScreenState extends State<StaffServiceScreen> {
     );
   }
 
+  // ─── card 1: dịch vụ, khách hàng, máy ─────────────────────────────────────
+
+  Widget _buildCardServiceAndCustomer() {
+    return Container(
+      decoration: _cardDecoration(),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionHeader(
+            '1. Thông tin dịch vụ & Khách hàng',
+            Icons.home_repair_service_rounded,
+          ),
+          _buildDropdownField(),
+          const SizedBox(height: 16),
+          _buildSearchCustomer(),
+          const SizedBox(height: 16),
+          _buildDropdownFieldPruducts(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDropdownField() {
+    final hasValue = _listService.any(
+      (e) => e.id.toString() == _currentSelectedValue,
+    );
+    return DropdownButtonFormField<String>(
+      initialValue: hasValue ? _currentSelectedValue : null,
+      decoration: InputDecoration(
+        labelText: 'Loại dịch vụ',
+        labelStyle: TextStyle(
+          color: ColorUtil.bangladeshGreen.withValues(alpha: 0.8),
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+        ),
+        filled: true,
+        fillColor: Colors.grey.shade50,
+        prefixIcon: const Icon(
+          Icons.construction_rounded,
+          color: ColorUtil.bangladeshGreen,
+        ),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 12,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey.shade200, width: 1.5),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(
+            color: ColorUtil.bangladeshGreen,
+            width: 1.5,
+          ),
+        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+      isExpanded: true,
+      hint: const Text(
+        'Chọn loại dịch vụ',
+        style: TextStyle(color: ColorUtil.silverChalice, fontSize: 14),
+      ),
+      icon: const Icon(
+        Icons.arrow_drop_down_rounded,
+        color: ColorUtil.spanishGray,
+        size: 28,
+      ),
+      onChanged: (String? newValue) {
+        if (newValue != null) {
+          _bloc.add(StaffServiceScreenChangeTypeServiceEvent(newValue));
+        }
+      },
+      items: _listService.map((HomeServiceModel sv) {
+        return DropdownMenuItem<String>(
+          value: sv.id.toString(),
+          child: Text(
+            sv.name ?? '',
+            style: const TextStyle(fontSize: 14, color: ColorUtil.raisinBlack),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
   Widget _buildSearchCustomer() {
     if (_addNewCustomer) {
-      return Padding(
-        padding: const EdgeInsets.only(top: 10.0, bottom: 10.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              "SĐT Khách hàng",
-              style: TextStyle(color: ColorUtil.raisinBlack, fontSize: 15),
-            ),
-            const SizedBox(height: 5),
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8.0),
-                        borderSide: const BorderSide(
-                          color: ColorUtil.bangladeshGreen,
-                          width: 0.5,
-                        ),
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Expanded(
+                child: TextField(
+                  keyboardType: TextInputType.number,
+                  controller: customerController,
+                  style: const TextStyle(
+                    color: ColorUtil.raisinBlack,
+                    fontSize: 14,
+                  ),
+                  decoration: InputDecoration(
+                    labelText: 'SĐT Khách hàng',
+                    labelStyle: TextStyle(
+                      color: ColorUtil.bangladeshGreen.withValues(alpha: 0.8),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    filled: true,
+                    fillColor: Colors.grey.shade50,
+                    prefixIcon: const Icon(
+                      Icons.phone_outlined,
+                      color: ColorUtil.bangladeshGreen,
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(
+                        color: Colors.grey.shade200,
+                        width: 1.5,
                       ),
-                      floatingLabelBehavior: FloatingLabelBehavior.always,
                     ),
-                    controller: customerController,
-                    style: const TextStyle(
-                      color: ColorUtil.raisinBlack,
-                      fontSize: 15,
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(
+                        color: ColorUtil.bangladeshGreen,
+                        width: 1.5,
+                      ),
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
                     ),
                   ),
                 ),
-                //Container(child: IconButton(onPressed: _addCustomer, icon:const Icon(Icons.add),color: Colors.white, ),color: Colors.green,),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    shape: const CircleBorder(),
-                    padding: const EdgeInsets.all(20),
-                    backgroundColor: ColorUtil.brightYellow, // <-- Button color
-                    foregroundColor: Colors.red, // <-- Splash color
+              ),
+              const SizedBox(width: 12),
+              GestureDetector(
+                onTap: _addCustomer,
+                child: Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: ColorUtil.brightYellow,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: ColorUtil.brightYellow.withValues(alpha: 0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
                   ),
-                  child: const Icon(Icons.add, color: ColorUtil.white),
-                  onPressed: () {
-                    _addCustomer();
-                  },
+                  child: const Icon(
+                    Icons.person_add_rounded,
+                    color: Colors.white,
+                    size: 22,
+                  ),
                 ),
-              ],
-            ),
-          ],
-        ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          const Text(
+            'Không tìm thấy khách hàng. Nhấn + để thêm mới.',
+            style: TextStyle(color: ColorUtil.brightYellow, fontSize: 12),
+          ),
+        ],
       );
     } else {
-      return Padding(
-        padding: const EdgeInsets.only(top: 10.0, bottom: 10.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              "SĐT Khách hàng",
-              style: TextStyle(color: ColorUtil.raisinBlack, fontSize: 15),
+      return TextField(
+        keyboardType: TextInputType.number,
+        controller: customerController,
+        style: const TextStyle(color: ColorUtil.raisinBlack, fontSize: 14),
+        decoration: InputDecoration(
+          labelText: 'SĐT Khách hàng',
+          labelStyle: TextStyle(
+            color: ColorUtil.bangladeshGreen.withValues(alpha: 0.8),
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+          ),
+          filled: true,
+          fillColor: Colors.grey.shade50,
+          prefixIcon: const Icon(
+            Icons.phone_outlined,
+            color: ColorUtil.bangladeshGreen,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.grey.shade200, width: 1.5),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(
+              color: ColorUtil.bangladeshGreen,
+              width: 1.5,
             ),
-            const SizedBox(height: 5),
-            TextField(
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                  borderSide: const BorderSide(
-                    color: ColorUtil.bangladeshGreen,
-                    width: 0.5,
-                  ),
-                ),
-                floatingLabelBehavior: FloatingLabelBehavior.always,
-              ),
-              controller: customerController,
-              style: const TextStyle(
-                color: ColorUtil.raisinBlack,
-                fontSize: 15,
-              ),
-            ),
-          ],
+          ),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 12,
+          ),
         ),
       );
     }
   }
+
+  Widget _buildDropdownFieldPruducts() {
+    final hasProduct = _listProducts.any(
+      (e) => e.id == _currentSelectedProductValue,
+    );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        DropdownButtonFormField<String>(
+          initialValue: hasProduct
+              ? _currentSelectedProductValue.toString()
+              : null,
+          decoration: InputDecoration(
+            labelText: 'Chọn máy / thiết bị',
+            labelStyle: TextStyle(
+              color: ColorUtil.bangladeshGreen.withValues(alpha: 0.8),
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
+            filled: true,
+            fillColor: Colors.grey.shade50,
+            prefixIcon: const Icon(
+              Icons.devices_other_rounded,
+              color: ColorUtil.bangladeshGreen,
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 12,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.grey.shade200, width: 1.5),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(
+                color: ColorUtil.bangladeshGreen,
+                width: 1.5,
+              ),
+            ),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+          isExpanded: true,
+          icon: const Icon(
+            Icons.arrow_drop_down_rounded,
+            color: ColorUtil.spanishGray,
+            size: 28,
+          ),
+          onChanged: (String? newValue) {
+            setState(() {
+              _currentSelectedProductValue = int.parse(newValue ?? '0');
+              final matched = _listProducts.where(
+                (item) =>
+                    item.id.toString() ==
+                    _currentSelectedProductValue.toString(),
+              );
+              if (matched.isNotEmpty) {
+                addressSPRequestTxtController.text =
+                    matched.first.address ?? '';
+              }
+            });
+          },
+          items: _listProducts.map((OrderModel sv) {
+            return DropdownMenuItem<String>(
+              value: sv.id.toString(),
+              child: Text(
+                sv.product?.name ?? '',
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: ColorUtil.raisinBlack,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            );
+          }).toList(),
+        ),
+        const SizedBox(height: 12),
+        TextFormField(
+          controller: addressSPRequestTxtController,
+          maxLines: 2,
+          cursorColor: ColorUtil.bangladeshGreen,
+          style: const TextStyle(fontSize: 14, color: ColorUtil.raisinBlack),
+          decoration: InputDecoration(
+            labelText: 'Vị trí lắp đặt chi tiết',
+            labelStyle: TextStyle(
+              color: ColorUtil.bangladeshGreen.withValues(alpha: 0.8),
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
+            filled: true,
+            fillColor: Colors.grey.shade50,
+            prefixIcon: const Icon(
+              Icons.location_on_outlined,
+              color: ColorUtil.bangladeshGreen,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.grey.shade200, width: 1.5),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(
+                color: ColorUtil.bangladeshGreen,
+                width: 1.5,
+              ),
+            ),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+            hintText: 'Nhập vị trí lắp đặt chi tiết...',
+            hintStyle: const TextStyle(
+              color: ColorUtil.silverChalice,
+              fontSize: 13,
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 12,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ─── card 2: lịch hẹn ──────────────────────────────────────────────────────
+
+  Widget _buildCardScheduling() {
+    return Container(
+      decoration: _cardDecoration(),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionHeader(
+            '2. Thời gian hẹn lịch',
+            Icons.calendar_month_rounded,
+          ),
+          Row(
+            children: [
+              Expanded(
+                child: _buildPickerTile(
+                  title: 'Ngày thực hiện',
+                  value: _dateStart.isEmpty ? 'Chọn ngày' : _dateStart,
+                  icon: Icons.calendar_today_rounded,
+                  onTap: _onTapDateStart,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildPickerTile(
+                  title: 'Giờ bắt đầu',
+                  value: _timeStart.isEmpty ? 'Chọn giờ' : _timeStart,
+                  icon: Icons.access_time_rounded,
+                  onTap: _onTapTimeStart,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPickerTile({
+    required String title,
+    required String value,
+    required IconData icon,
+    required VoidCallback onTap,
+  }) {
+    final hasValue =
+        value != 'Chọn ngày' && value != 'Chọn giờ' && value.isNotEmpty;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: Colors.grey.shade50,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: hasValue
+                ? ColorUtil.bangladeshGreen.withValues(alpha: 0.3)
+                : Colors.grey.shade200,
+            width: 1.5,
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              color: hasValue
+                  ? ColorUtil.bangladeshGreen
+                  : ColorUtil.spanishGray,
+              size: 22,
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      color: ColorUtil.spanishGray,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    value,
+                    style: TextStyle(
+                      color: hasValue
+                          ? ColorUtil.raisinBlack
+                          : ColorUtil.silverChalice,
+                      fontSize: 14,
+                      fontWeight: hasValue
+                          ? FontWeight.bold
+                          : FontWeight.normal,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ─── card 3: thợ ưa thích & mô tả ─────────────────────────────────────────
+
+  Widget _buildCardStaffAndRequest() {
+    final isSale = App.instance.userApp?.isUserSale() == true;
+    return Container(
+      decoration: _cardDecoration(),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionHeader(
+            '3. Kỹ thuật viên & Nội dung yêu cầu',
+            Icons.person_pin_rounded,
+          ),
+          if (isSale) ...[
+            _buildFavoriteStaffSelector(),
+            const SizedBox(height: 16),
+          ],
+          _buildFormDescribe(
+            'Nhập chi tiết mô tả yêu cầu công việc hoặc lưu ý đặc biệt tại đây...',
+            describeRequestTxtController,
+            Icons.edit_note_rounded,
+            null,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFavoriteStaffSelector() {
+    if (_favouriteStaff == null) {
+      return InkWell(
+        onTap: _onChooseFavouriteStaff,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          decoration: BoxDecoration(
+            color: Colors.grey.shade50,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.grey.shade200, width: 1.5),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: ColorUtil.bangladeshGreen.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.person_add_alt_1_rounded,
+                  color: ColorUtil.bangladeshGreen,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Kỹ thuật viên ưa thích',
+                      style: TextStyle(
+                        color: ColorUtil.raisinBlack,
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 2),
+                    Text(
+                      'Nhấn để chọn kỹ thuật viên yêu thích (Tùy chọn)',
+                      style: TextStyle(
+                        color: ColorUtil.spanishGray,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(
+                Icons.arrow_forward_ios_rounded,
+                color: ColorUtil.spanishGray,
+                size: 16,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final initial = _favouriteStaff?.username?.isNotEmpty == true
+        ? _favouriteStaff!.username![0].toUpperCase()
+        : 'S';
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: ColorUtil.bangladeshGreen, width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: ColorUtil.bangladeshGreen.withValues(alpha: 0.05),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 20,
+            backgroundColor: ColorUtil.bangladeshGreen,
+            child: Text(
+              initial,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  _favouriteStaff?.username ?? '',
+                  style: const TextStyle(
+                    color: ColorUtil.raisinBlack,
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                const Text(
+                  'Kỹ thuật viên yêu thích',
+                  style: TextStyle(
+                    color: ColorUtil.bangladeshGreen,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          IconButton(
+            icon: const Icon(
+              Icons.close_rounded,
+              color: ColorUtil.spanishGray,
+              size: 20,
+            ),
+            onPressed: () => setState(() => _favouriteStaff = null),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFormDescribe(
+    String placeHolder,
+    TextEditingController controller,
+    IconData iconPrefix,
+    IconData? iconSuffix, {
+    bool isReadOnly = false,
+  }) {
+    return TextFormField(
+      readOnly: isReadOnly,
+      keyboardType: TextInputType.multiline,
+      controller: controller,
+      maxLines: 4,
+      cursorColor: ColorUtil.bangladeshGreen,
+      style: const TextStyle(fontSize: 14, color: ColorUtil.raisinBlack),
+      decoration: InputDecoration(
+        labelText: 'Mô tả chi tiết yêu cầu',
+        labelStyle: TextStyle(
+          color: ColorUtil.bangladeshGreen.withValues(alpha: 0.8),
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+        ),
+        alignLabelWithHint: true,
+        filled: true,
+        fillColor: Colors.grey.shade50,
+        prefixIcon: Padding(
+          padding: const EdgeInsets.only(bottom: 50.0),
+          child: Icon(iconPrefix, color: ColorUtil.bangladeshGreen),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey.shade200, width: 1.5),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(
+            color: ColorUtil.bangladeshGreen,
+            width: 1.5,
+          ),
+        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        hintText: placeHolder,
+        hintStyle: const TextStyle(
+          color: ColorUtil.silverChalice,
+          fontSize: 13,
+        ),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 12,
+        ),
+      ),
+    );
+  }
+
+  // ─── card 4: hình ảnh ──────────────────────────────────────────────────────
+
+  Widget _buildCardMedia() {
+    return Container(
+      decoration: _cardDecoration(),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionHeader(
+            '4. Hình ảnh minh họa',
+            Icons.photo_library_rounded,
+          ),
+          const Text(
+            'Tải lên tối đa 4 ảnh chụp thực tế vị trí hoặc thiết bị để kỹ thuật viên chuẩn bị chu đáo nhất.',
+            style: TextStyle(
+              color: ColorUtil.graniteGray,
+              fontSize: 12,
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 14),
+          SizedBox(
+            height: 110,
+            child: ListView.builder(
+              itemCount: _listPath.length < 4 ? _listPath.length + 1 : 4,
+              scrollDirection: Axis.horizontal,
+              shrinkWrap: true,
+              itemBuilder: (BuildContext context, int index) {
+                if (index == _listPath.length && _listPath.length < 4) {
+                  return _buildDefaultItemMedia();
+                }
+                return _buildItemMedia(_listPath[index]);
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDefaultItemMedia() {
+    return GestureDetector(
+      onTap: _showModalBottomSheetMedia,
+      child: Container(
+        width: 100,
+        height: 100,
+        margin: const EdgeInsets.only(right: 12),
+        decoration: BoxDecoration(
+          color: Colors.grey.shade50,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: ColorUtil.bangladeshGreen.withValues(alpha: 0.3),
+            width: 1.5,
+          ),
+        ),
+        child: const Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.add_a_photo_outlined,
+              color: ColorUtil.bangladeshGreen,
+              size: 24,
+            ),
+            SizedBox(height: 6),
+            Text(
+              'Tải ảnh lên',
+              style: TextStyle(
+                color: ColorUtil.bangladeshGreen,
+                fontSize: 11,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildItemMedia(String path) {
+    return Container(
+      margin: const EdgeInsets.only(right: 12),
+      width: 100,
+      height: 100,
+      child: Stack(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: ImageUtil.loadNetWorkImage(
+              url: "$protocol${AppConfig.instance.values.apiUrl}$path",
+              width: 100,
+              height: 100,
+            ),
+          ),
+          Positioned(
+            top: 4,
+            right: 4,
+            child: GestureDetector(
+              onTap: () => setState(() => _listPath.remove(path)),
+              child: Container(
+                padding: const EdgeInsets.all(4),
+                decoration: const BoxDecoration(
+                  color: Colors.black54,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.close_rounded,
+                  color: Colors.white,
+                  size: 14,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ─── nút đặt lịch ──────────────────────────────────────────────────────────
+
+  Widget _buildBookingButton() {
+    return Container(
+      width: double.infinity,
+      height: 52,
+      decoration: BoxDecoration(
+        color: ColorUtil.bangladeshGreen,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: ColorUtil.bangladeshGreen.withValues(alpha: 0.3),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: () => _onCreateTask(_notificationIndex ?? 0),
+          child: const Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.check_circle_outline_rounded,
+                color: Colors.white,
+                size: 20,
+              ),
+              SizedBox(width: 8),
+              Text(
+                'ĐẶT LỊCH NGAY',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                  letterSpacing: 1.2,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ─── business logic ────────────────────────────────────────────────────────
 
   Future _onCreateTask(int index) async {
     if (_currentSelectedValue == "") {
@@ -404,7 +1136,6 @@ class _ServiceScreenState extends State<StaffServiceScreen> {
           status: _favouriteStaff?.id == null ? 1 : 5,
           priority: 1,
           serviceId: int.parse(_currentSelectedValue ?? "1"),
-          //NOTE
           timeStart: '$_dateStart $_timeStart',
           timeEnd: '',
           customerId: _bloc.customerInfor?.id ?? 0,
@@ -465,506 +1196,6 @@ class _ServiceScreenState extends State<StaffServiceScreen> {
     );
   }
 
-  Widget _buildSectionMedia() {
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: ColorUtil.bangladeshGreen, width: 0.5),
-        borderRadius: BorderRadius.circular(8.0),
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 5.0),
-      child: Column(
-        children: [
-          Row(
-            children: const [
-              Padding(
-                padding: EdgeInsets.all(8.0),
-                child: Icon(Icons.upload_file, color: ColorUtil.spanishGray),
-              ),
-              Flexible(
-                child: Text(
-                  'Up ảnh (tối đa 4 ảnh) và video (tối đa 15s) để kỹ thuật xem xét.',
-                  style: TextStyle(color: ColorUtil.spanishGray),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(
-            height: 200,
-            width: double.infinity,
-            child: ListView.builder(
-              itemCount: _listPath.length + 1,
-              shrinkWrap: true,
-              scrollDirection: Axis.horizontal,
-              itemBuilder: (BuildContext context, int index) {
-                return index < _listPath.length
-                    ? _buildItemMedia(_listPath[index])
-                    : _buildDefaultItemMedia();
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDefaultItemMedia() {
-    return GestureDetector(
-      onTap: _showModalBottomSheetMedia,
-      child: Container(
-        height: 120,
-        width: 120,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8.0),
-          border: Border.all(color: ColorUtil.bangladeshGreen, width: 0.5),
-        ),
-        child: const Icon(Icons.add_circle_outline),
-      ),
-    );
-  }
-
-  Widget _buildItemMedia(String path) {
-    return Row(
-      children: [
-        Stack(
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8.0),
-              child: ImageUtil.loadNetWorkImage(
-                url: "$protocol${AppConfig.instance.values.apiUrl}$path",
-                width: 120,
-                height: 200,
-              ),
-            ),
-            Positioned(
-              top: 0,
-              right: 0,
-              child: GestureDetector(
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.grey,
-                    borderRadius: BorderRadius.circular(60),
-                  ),
-                  child: const Icon(
-                    Icons.delete,
-                    color: Colors.white,
-                    size: 25,
-                  ),
-                ),
-                onTap: () {
-                  setState(() {
-                    _listPath.remove(path);
-                  });
-                },
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(width: 5.0),
-      ],
-    );
-  }
-
-  Widget _buildDropdownFieldPruducts() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        InputDecorator(
-          decoration: InputDecoration(
-            errorStyle: const TextStyle(
-              color: Colors.redAccent,
-              fontSize: 16.0,
-            ),
-            hintText: 'Please select expense',
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8.0),
-              borderSide: const BorderSide(
-                color: ColorUtil.bangladeshGreen,
-                width: 0.5,
-              ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8.0),
-              borderSide: const BorderSide(
-                color: ColorUtil.bangladeshGreen,
-                width: 0.5,
-              ),
-            ),
-            prefixIcon: const Icon(Icons.account_box_outlined),
-          ),
-          isEmpty: false,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              DropdownButtonHideUnderline(
-                child: DropdownButton<String>(
-                  value: _currentSelectedProductValue.toString(),
-                  isDense: true,
-                  isExpanded: true,
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      _currentSelectedProductValue = int.parse(newValue ?? "0");
-                      var add =
-                          _listProducts
-                              .where(
-                                (item) =>
-                                    item.id.toString() ==
-                                    _currentSelectedProductValue.toString(),
-                              )
-                              .first
-                              .address ??
-                          '';
-                      addressSPRequestTxtController.text = add;
-                      // print(jsonEncode(_listProducts.where((element) => element.id.toString() == newValue).first.address));
-                    });
-                  },
-                  items: _listProducts.map((OrderModel sv) {
-                    return DropdownMenuItem<String>(
-                      value: sv.id.toString(),
-                      child: Text(sv.product?.name ?? ""),
-                    );
-                  }).toList(),
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 10),
-        TextFormField(
-          readOnly: false,
-          controller: addressSPRequestTxtController,
-          maxLines: 2,
-          cursorColor: ColorUtil.bangladeshGreen,
-          decoration: InputDecoration(
-            prefixIcon: SizedBox(
-              width: 20,
-              height: 60,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
-                  Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 8.0,
-                      vertical: 5.0,
-                    ),
-                    child: Icon(Icons.account_box_outlined),
-                  ),
-                ],
-              ),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8.0),
-              borderSide: const BorderSide(
-                color: ColorUtil.bangladeshGreen,
-                width: 0.5,
-              ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8.0),
-              borderSide: const BorderSide(
-                color: ColorUtil.bangladeshGreen,
-                width: 0.5,
-              ),
-            ),
-            hintText: 'Vị trí lắp đặt',
-            hintStyle: const TextStyle(
-              color: ColorUtil.silverChalice,
-              fontSize: 13,
-            ),
-            contentPadding: const EdgeInsets.symmetric(
-              vertical: 3,
-              horizontal: 1,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDropdownField() {
-    return FormField<String>(
-      builder: (FormFieldState<String> state) {
-        return InputDecorator(
-          decoration: InputDecoration(
-            errorStyle: const TextStyle(
-              color: Colors.redAccent,
-              fontSize: 16.0,
-            ),
-            hintText: 'Please select expense',
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8.0),
-              borderSide: const BorderSide(
-                color: ColorUtil.bangladeshGreen,
-                width: 0.5,
-              ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8.0),
-              borderSide: const BorderSide(
-                color: ColorUtil.bangladeshGreen,
-                width: 0.5,
-              ),
-            ),
-            prefixIcon: const Icon(Icons.account_box_outlined),
-          ),
-          isEmpty: _currentSelectedValue == '',
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
-              value: _currentSelectedValue,
-              isDense: true,
-              isExpanded: true,
-              onChanged: (String? newValue) {
-                _bloc.add(StaffServiceScreenChangeTypeServiceEvent(newValue!));
-              },
-              items: _listService.map((HomeServiceModel sv) {
-                return DropdownMenuItem<String>(
-                  value: sv.id.toString(),
-                  child: Text(sv.name ?? ""),
-                );
-              }).toList(),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildFormDoubleHorizontal(
-    String titleTextField,
-    IconData iconPrefixFirst,
-    IconData iconPrefixSecond, {
-    required String firstValue,
-    required String secondValue,
-    required void Function() onTapFirst,
-    required void Function() onTapSecond,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          titleTextField,
-          style: const TextStyle(color: ColorUtil.raisinBlack, fontSize: 15),
-        ),
-        const SizedBox(height: 5),
-        Row(
-          children: [
-            Expanded(
-              flex: 2,
-              child: Container(
-                height: 40,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8.0),
-                  border: Border.all(
-                    color: ColorUtil.bangladeshGreen,
-                    width: 0.5,
-                  ),
-                ),
-                child: GestureDetector(
-                  onTap: onTapFirst,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(left: 10.0),
-                        child: Icon(
-                          iconPrefixFirst,
-                          color: ColorUtil.spanishGray,
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Flexible(
-                        child: Text(
-                          firstValue.isEmpty ? 'dd/MM/yyyy' : firstValue,
-                          style: TextStyle(
-                            color: firstValue.isEmpty
-                                ? ColorUtil.silverChalice
-                                : ColorUtil.raisinBlack,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 5),
-            Expanded(
-              flex: 1,
-              child: Container(
-                height: 40,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8.0),
-                  border: Border.all(
-                    color: ColorUtil.bangladeshGreen,
-                    width: 0.5,
-                  ),
-                ),
-                child: GestureDetector(
-                  onTap: onTapSecond,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(left: 10.0),
-                        child: Icon(
-                          iconPrefixSecond,
-                          color: ColorUtil.spanishGray,
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Flexible(
-                        child: Text(
-                          secondValue.isEmpty ? 'hh:mm' : secondValue,
-                          style: TextStyle(
-                            color: secondValue.isEmpty
-                                ? ColorUtil.silverChalice
-                                : ColorUtil.raisinBlack,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildFormDescribe(
-    String placeHolder,
-    TextEditingController controller,
-    IconData iconPrefix,
-    IconData? iconSuffix, {
-    // bool isNumberType = false,
-    bool isReadOnly = false,
-    bool haveSuffixIcon = false,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          padding: const EdgeInsets.only(top: 5),
-          child: TextFormField(
-            readOnly: isReadOnly,
-            keyboardType: TextInputType.multiline,
-            // isNumberType ? TextInputType.phone : TextInputType.text,
-            controller: controller,
-            maxLines: 5,
-            cursorColor: ColorUtil.bangladeshGreen,
-            decoration: InputDecoration(
-              prefixIcon: SizedBox(
-                width: 20,
-                height: 100,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8.0,
-                        vertical: 5.0,
-                      ),
-                      child: Icon(iconPrefix),
-                    ),
-                  ],
-                ),
-              ),
-              suffixIcon: haveSuffixIcon ? Icon(iconSuffix) : null,
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8.0),
-                borderSide: const BorderSide(
-                  color: ColorUtil.bangladeshGreen,
-                  width: 0.5,
-                ),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8.0),
-                borderSide: const BorderSide(
-                  color: ColorUtil.bangladeshGreen,
-                  width: 0.5,
-                ),
-              ),
-              hintText: placeHolder,
-              hintStyle: const TextStyle(
-                color: ColorUtil.silverChalice,
-                fontSize: 13,
-              ),
-              contentPadding: const EdgeInsets.symmetric(
-                vertical: 5,
-                horizontal: 15,
-              ),
-              suffixIconConstraints: const BoxConstraints(
-                minHeight: 20,
-                minWidth: 20,
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildButton({text, isPositive, action}) {
-    return Expanded(
-      child: isPositive
-          ? _button(isPositive, action, text)
-          : ElevatedButton(
-              style: ButtonStyle(
-                padding: WidgetStateProperty.all<EdgeInsets>(
-                  const EdgeInsets.symmetric(vertical: 10),
-                ),
-                backgroundColor: WidgetStateProperty.all<Color>(
-                  ColorUtil.white,
-                ),
-                shape: WidgetStateProperty.all<RoundedRectangleBorder>(
-                  RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
-                    side: const BorderSide(
-                      color: ColorUtil.bangladeshGreen,
-                      width: 2,
-                    ),
-                  ),
-                ),
-              ),
-              child: Text(
-                text,
-                style: const TextStyle(color: ColorUtil.bangladeshGreen),
-              ),
-              onPressed: () {
-                if (action == null) {
-                  Navigator.pop(context);
-                } else {
-                  action();
-                }
-              },
-            ),
-    );
-  }
-
-  StatelessWidget _button(isPositive, action, text) {
-    return ButtonWidget(
-      color: isPositive ? ColorUtil.bangladeshGreen : Colors.grey,
-      borderRadius: BorderRadius.circular(30),
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      onTap: () {
-        if (action == null) {
-          Navigator.pop(context);
-        } else {
-          action();
-        }
-      },
-      child: Text(
-        text,
-        textAlign: TextAlign.center,
-        style: const TextStyle(fontSize: 16, color: Colors.white),
-      ),
-    );
-  }
-
   void _onChooseImages() async {
     Navigator.of(context).pop();
     List<File>? files = await onGetMultiPhoto(
@@ -975,8 +1206,8 @@ class _ServiceScreenState extends State<StaffServiceScreen> {
     if (files != null && files.isNotEmpty) {
       for (var file in files) {
         img.Image? originalImage = img.decodeImage(await file.readAsBytes());
-        img.Image files = img.copyResize(originalImage!, width: 500);
-        await File(file.path).writeAsBytes(img.encodePng(files));
+        img.Image filesImg = img.copyResize(originalImage!, width: 500);
+        await File(file.path).writeAsBytes(img.encodePng(filesImg));
       }
       if (_listPath.length + files.length <= 4) {
         _bloc.add(StaffServiceScreenUploadImageEvent(files));
@@ -987,7 +1218,7 @@ class _ServiceScreenState extends State<StaffServiceScreen> {
     }
   }
 
-  Future getImage(ImageSource img) async {
+  Future getImage(ImageSource imgSource) async {
     if (await Permission.camera.request().isGranted) {
       if (_listPath.length >= 4) {
         context.showSnackBar('Chỉ được chọn tối đa 4 ảnh!');
@@ -996,7 +1227,7 @@ class _ServiceScreenState extends State<StaffServiceScreen> {
         final picker = ImagePicker();
         File? galleryFile;
         final pickedFile = await picker.pickImage(
-          source: img,
+          source: imgSource,
           imageQuality: 30,
         );
         List<File>? files = [];
@@ -1009,10 +1240,9 @@ class _ServiceScreenState extends State<StaffServiceScreen> {
             context.showSnackBar('Chỉ được chọn tối đa 4 ảnh!');
           }
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            // is this context <<<
-            const SnackBar(content: Text('Nothing is selected')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('Nothing is selected')));
         }
       }
     } else {
@@ -1030,13 +1260,8 @@ class _ServiceScreenState extends State<StaffServiceScreen> {
     }
   }
 
-  void _onTapDateStart() {
-    _selectDate();
-  }
-
-  void _onTapTimeStart() {
-    _selectTime();
-  }
+  void _onTapDateStart() => _selectDate();
+  void _onTapTimeStart() => _selectTime();
 
   Future<void> _selectDate() async {
     final DateTime? picked = await showDatePicker(
@@ -1069,6 +1294,8 @@ class _ServiceScreenState extends State<StaffServiceScreen> {
     }
   }
 
+  // ─── dialog: thêm khách hàng mới ───────────────────────────────────────────
+
   Future<void> _addCustomer() async {
     return showDialog(
       context: context,
@@ -1100,17 +1327,13 @@ class _ServiceScreenState extends State<StaffServiceScreen> {
                 _buildButtonDialog(
                   isPositive: false,
                   text: 'Hủy',
-                  action: () {
-                    //todo
-                    Navigator.pop(context);
-                  },
+                  action: () => Navigator.pop(context),
                 ),
                 const SizedBox(width: 16),
                 _buildButtonDialog(
                   isPositive: true,
                   text: 'Gửi',
                   action: () {
-                    //todo
                     _bloc.add(
                       UserAddressScreenCreateUserAddressEvent(
                         UserAddressRequest(
@@ -1149,9 +1372,7 @@ class _ServiceScreenState extends State<StaffServiceScreen> {
         child: TextFieldDefault(
           enabled: !isPhoneNumber,
           controller: controller,
-          onChanged: (String text) {
-            setState(() {});
-          },
+          onChanged: (String text) => setState(() {}),
           keyboardType: isPhoneNumber
               ? TextInputType.phone
               : TextInputType.text,
@@ -1163,64 +1384,23 @@ class _ServiceScreenState extends State<StaffServiceScreen> {
     );
   }
 
-  Widget _buildField(
-    String titleTextField,
-    String hint,
-    IconData iconPrefix,
-    IconData? iconSuffix, {
-    required String value,
-    required void Function() onTap,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Visibility(
-          visible: titleTextField == '' ? false : true,
-          child: Text(
-            titleTextField,
-            style: const TextStyle(color: ColorUtil.raisinBlack, fontSize: 15),
-          ),
-        ),
-        const SizedBox(height: 5),
-        GestureDetector(
-          onTap: onTap,
-          child: Container(
-            height: 40,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8.0),
-              border: Border.all(color: ColorUtil.bangladeshGreen, width: 0.5),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.max,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(left: 10.0),
-                  child: Icon(iconPrefix, color: ColorUtil.spanishGray),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    value.isEmpty ? hint : value,
-                    style: TextStyle(
-                      color: value.isEmpty
-                          ? ColorUtil.silverChalice
-                          : ColorUtil.raisinBlack,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(right: 8.0),
-                  child: Icon(iconSuffix, color: ColorUtil.spanishGray),
-                ),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: 10),
-      ],
+  StatelessWidget _button(isPositive, action, text) {
+    return ButtonWidget(
+      color: isPositive ? ColorUtil.bangladeshGreen : Colors.grey,
+      borderRadius: BorderRadius.circular(30),
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      onTap: () {
+        if (action == null) {
+          Navigator.pop(context);
+        } else {
+          action();
+        }
+      },
+      child: Text(
+        text,
+        textAlign: TextAlign.center,
+        style: const TextStyle(fontSize: 16, color: Colors.white),
+      ),
     );
   }
 
@@ -1246,19 +1426,10 @@ class _ServiceScreenState extends State<StaffServiceScreen> {
   }
 
   bool isValidPhoneNumber(String string) {
-    // Null or empty string is invalid phone number
-    if (string.isEmpty) {
-      return false;
-    }
-
-    // You may need to change this pattern to fit your requirement.
-    // I just copied the pattern from here: https://regexr.com/3c53v
+    if (string.isEmpty) return false;
     const pattern = r'^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\./0-9]*$';
     final regExp = RegExp(pattern);
-
-    if (!regExp.hasMatch(string)) {
-      return false;
-    }
+    if (!regExp.hasMatch(string)) return false;
     return true;
   }
 

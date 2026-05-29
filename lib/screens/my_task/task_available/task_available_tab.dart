@@ -146,6 +146,7 @@ class _TaskAvailableTabState extends State<TaskAvailableTab> {
       return const IndicatorLoadMore();
     }
     TaskModel taskModel = _bloc.staffListTaskAssigedModel[index];
+    print("taskModel.timeStart: ${taskModel.timeStart}");
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -184,7 +185,7 @@ class _TaskAvailableTabState extends State<TaskAvailableTab> {
           children: [
             _buildTableRow(
               title: 'Thời gian:',
-              content: taskModel.timeStar,
+              content: _formatDatetime(taskModel.timeStart),
               isHighlight: true,
             ),
             _buildTableRow(
@@ -326,7 +327,7 @@ class _TaskAvailableTabState extends State<TaskAvailableTab> {
   Future<void> _updateTask(TaskModel taskModel) async {
     int? selectedOption = 5;
     DateTime tempDateTime = DateTime.parse(
-      taskModel.timeStar ?? DateTime.now().toString(),
+      taskModel.timeStart ?? DateTime.now().toString(),
     );
 
     showDialog(
@@ -656,5 +657,17 @@ class _TaskAvailableTabState extends State<TaskAvailableTab> {
         ),
       ],
     );
+  }
+
+  String _formatDatetime(String? dateTimeString) {
+    try {
+      if (dateTimeString == null || dateTimeString.isEmpty) return "";
+      DateTime getDateTime = DateTime.parse(dateTimeString);
+      var output = DateFormat('HH:mm:ss dd/MM/yyyy').format(getDateTime);
+      return output.toString();
+    } on Exception catch (ex) {
+      print("format datetime error: $ex");
+      return dateTimeString ?? "";
+    }
   }
 }

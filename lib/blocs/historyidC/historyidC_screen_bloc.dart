@@ -58,7 +58,7 @@ class HistoryidCScreenBloc
       }
       emit(HistoryiDCScreenInitialState());
     } catch (ex) {
-      LoggerUtil.log(jsonEncode(ex));
+      LoggerUtil.log(ex.toString());
     }
   }
 

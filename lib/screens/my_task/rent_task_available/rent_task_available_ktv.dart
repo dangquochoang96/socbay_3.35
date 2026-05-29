@@ -184,7 +184,7 @@ class _RentTaskAvailableTabState extends State<RentTaskAvailableTab> {
           children: [
             _buildTableRow(
               title: 'Thời gian:',
-              content: taskModel.timeStar,
+              content: taskModel.timeStart,
               isHighlight: true,
             ),
             _buildTableRow(
@@ -326,7 +326,7 @@ class _RentTaskAvailableTabState extends State<RentTaskAvailableTab> {
   Future<void> _updateTask(TaskModel taskModel) async {
     int? selectedOption = 5;
     DateTime tempDateTime = DateTime.parse(
-      taskModel.timeStar ?? DateTime.now().toString(),
+      taskModel.timeStart ?? DateTime.now().toString(),
     );
 
     showDialog(

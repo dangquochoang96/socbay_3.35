@@ -266,7 +266,7 @@ class _DetailRentBookingScreenState extends State<DetailRentBookingScreen> {
               ),
             ),
             Text(
-              _formatDatetime(taskModel?.timeStar),
+              _formatDatetime(taskModel?.timeStart),
               style: const TextStyle(
                 color: ColorUtil.red,
                 fontSize: 18,

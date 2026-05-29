@@ -136,6 +136,7 @@ class _CoreReplacementServiceScreenState
     var staffName = _bloc.orderDetailModel?.staff != null
         ? _bloc.orderDetailModel?.staff?.username
         : '';
+    final isCustomer = App.instance.userApp?.isUserCustomer() == true;
     return Scaffold(
       appBar: MyAppBar(
         title: "Chi tiết lần thay lõi",
@@ -144,7 +145,7 @@ class _CoreReplacementServiceScreenState
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.only(bottom: 16),
+          padding: const EdgeInsets.only(bottom: 80),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             //shrinkWrap: true,
@@ -269,46 +270,93 @@ class _CoreReplacementServiceScreenState
           ),
         ),
       ),
+      floatingActionButton: isCustomer ? _buildFloatingBookingButton() : null,
       bottomNavigationBar: _showBottomSheetFeedback(),
+    );
+  }
+
+  Widget _buildFloatingBookingButton() {
+    return Container(
+      height: 40,
+      decoration: BoxDecoration(
+        color: ColorUtil.green,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: ColorUtil.green.withValues(alpha: 0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(20),
+          onTap: () {
+            Navigator.pushNamed(
+              context,
+              Routes.serviceScreen,
+              arguments: {
+                "listService": [],
+                "index": "",
+                "productId": _bloc
+                    .orderDetailModel
+                    ?.orderFilterCoresModel?[0]
+                    .orderDetailId,
+              },
+            );
+          },
+          child: const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.add_circle_outline_rounded,
+                  color: Colors.white,
+                  size: 18,
+                ),
+                SizedBox(width: 6),
+                Text(
+                  "Đặt lịch",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 
   Widget _showBottomSheetFeedback() {
     if (App.instance.userApp?.isUserCustomer() == true) {
-      final buttonWidth = (context.width - 40) / 3;
-      final itemWidth = buttonWidth.clamp(96.0, 140.0);
-
-      ButtonStyle buttonStyle(Color backgroundColor) {
-        return ButtonStyle(
-          backgroundColor: WidgetStateProperty.all(backgroundColor),
-          padding: WidgetStateProperty.all(
-            const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-          ),
-          shape: WidgetStateProperty.all(
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          ),
-          textStyle: WidgetStateProperty.all(
-            const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
-          ),
-        );
-      }
+      final hasPayment = _bloc.orderDetailModel?.paymentStatus == '0';
 
       return SafeArea(
         bottom: true,
         child: Container(
           decoration: BoxDecoration(
             color: Colors.white,
-            border: Border(top: BorderSide(color: Colors.grey.shade200)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.04),
+                blurRadius: 10,
+                offset: const Offset(0, -4),
+              ),
+            ],
+            border: Border(top: BorderSide(color: Colors.grey.shade100)),
           ),
-          padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
-          child: Wrap(
-            alignment: WrapAlignment.center,
-            spacing: 10,
-            runSpacing: 10,
+          padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
+          child: Row(
             children: [
-              SizedBox(
-                width: itemWidth,
-                child: ElevatedButton.icon(
+              Expanded(
+                child: OutlinedButton.icon(
                   onPressed: () {
                     Navigator.pushNamed(
                       context,
@@ -320,63 +368,59 @@ class _CoreReplacementServiceScreenState
                     );
                   },
                   icon: const Icon(
-                    Icons.feedback,
+                    Icons.feedback_outlined,
                     color: ColorUtil.brightYellow,
                     size: 16,
                   ),
                   label: const Text(
                     "Khiếu nại",
-                    style: TextStyle(color: ColorUtil.white, fontSize: 13),
+                    style: TextStyle(
+                      color: ColorUtil.brightYellow,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                    ),
                   ),
-                  style: buttonStyle(ColorUtil.bangladeshGreen),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    side: const BorderSide(
+                      color: ColorUtil.brightYellow,
+                      width: 1.2,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
                 ),
               ),
-              if (_bloc.orderDetailModel?.paymentStatus == '0')
-                SizedBox(
-                  width: itemWidth,
+              if (hasPayment) ...[
+                const SizedBox(width: 10),
+                Expanded(
                   child: ElevatedButton.icon(
                     onPressed: _createPayment,
                     icon: const Icon(
-                      Icons.payment,
-                      color: ColorUtil.brightYellow,
+                      Icons.payment_outlined,
+                      color: Colors.white,
                       size: 16,
                     ),
                     label: const Text(
                       "Thanh toán",
-                      style: TextStyle(color: ColorUtil.white, fontSize: 13),
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                      ),
                     ),
-                    style: buttonStyle(ColorUtil.red),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: ColorUtil.red,
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
                   ),
                 ),
-              SizedBox(
-                width: itemWidth,
-                child: ElevatedButton.icon(
-                  onPressed: () {
-                    Navigator.pushNamed(
-                      context,
-                      Routes.serviceScreen,
-                      arguments: {
-                        "listService": [],
-                        "index": "",
-                        "productId": _bloc
-                            .orderDetailModel
-                            ?.orderFilterCoresModel?[0]
-                            .orderDetailId,
-                      },
-                    );
-                  },
-                  icon: const Icon(
-                    Icons.add,
-                    color: ColorUtil.brightYellow,
-                    size: 16,
-                  ),
-                  label: const Text(
-                    "Đặt lịch",
-                    style: TextStyle(color: ColorUtil.white, fontSize: 13),
-                  ),
-                  style: buttonStyle(ColorUtil.bangladeshGreen),
-                ),
-              ),
+              ],
             ],
           ),
         ),

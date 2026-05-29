@@ -81,8 +81,8 @@ class _EditRentServiceScreenState extends State<EditRentServiceScreen> {
   void _listener(BuildContext context, EditServiceState state) {
     if (state is EditServiceInitialState) {
       _currentSelectedValue = _bloc.taskModel?.type;
-      if (_bloc.taskModel?.timeStar != null) {
-        _parsedDate = DateTime.parse(_bloc.taskModel!.timeStar!);
+      if (_bloc.taskModel?.timeStart != null) {
+        _parsedDate = DateTime.parse(_bloc.taskModel!.timeStart!);
         _dateStart =
             "${_parsedDate.day}/${_parsedDate.month}/${_parsedDate.year}";
         _timeStart =

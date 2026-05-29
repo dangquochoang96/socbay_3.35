@@ -279,7 +279,10 @@ class _HomeScreenState extends State<HomeScreen> {
             ClipRRect(
               borderRadius: BorderRadius.circular(10),
               child: ImageUtil.loadNetWorkImage(
-                url: machine.product?.images?[0].link == null
+                url:
+                    (machine.product?.images == null ||
+                        machine.product!.images!.isEmpty ||
+                        machine.product!.images![0].link == null)
                     ? ""
                     : "$protocol${AppConfig.instance.values.apiUrl}${machine.product!.images![0].link!}",
                 height: MediaQuery.of(context).size.width * 0.5,
@@ -399,9 +402,21 @@ class _HomeScreenState extends State<HomeScreen> {
                                   ),
                                 ),
                                 TextSpan(
-                                  text: _bloc
-                                      .orderFilterCore[index]
-                                      .replaceDatePromise,
+                                  text:
+                                      _bloc.orderFilterCore.any(
+                                        (element) =>
+                                            element.orderId ==
+                                            machine.id?.toString(),
+                                      )
+                                      ? (_bloc.orderFilterCore
+                                                .firstWhere(
+                                                  (element) =>
+                                                      element.orderId ==
+                                                      machine.id?.toString(),
+                                                )
+                                                .replaceDatePromise ??
+                                            "")
+                                      : "",
                                   // text: machine.orderFilterCoresModel?[0].replaceDatePromise,
                                   style: const TextStyle(
                                     color: Colors.red,
@@ -698,7 +713,12 @@ class _HomeScreenState extends State<HomeScreen> {
               Routes.coreReplacementServiceScreen,
               arguments: {
                 "orderDetail": OrderDetailModel(
-                  id: int.parse(_bloc.orderFilterCore[0].orderId ?? "0"),
+                  id: int.parse(
+                    (_bloc.orderFilterCore.isNotEmpty
+                            ? _bloc.orderFilterCore[0].orderId
+                            : null) ??
+                        "0",
+                  ),
                 ),
               },
             );

@@ -1,3 +1,4 @@
+import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:socbay/blocs/booking/detail_booking/detail_booking_bloc.dart';
@@ -222,116 +223,242 @@ class _RentTaskAvailableTabState extends State<RentTaskAvailableTabSale> {
       return const IndicatorLoadMore();
     }
     TaskModel taskModel = _filteredTasks[index];
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        ButtonWidget(
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(12),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
           onTap: () {
             _detailTask(taskModel);
           },
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Mã dịch vụ: ${taskModel.id}',
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: ColorUtil.bangladeshGreen,
-                  fontSize: 16,
-                ),
-              ),
-              if ((taskModel.status == '1' ||
-                  taskModel.status == '2' ||
-                  taskModel.status == '5'))
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildButton(
-                      text: 'Sửa',
-                      isPositive: false,
-                      action: () {
-                        _editBooking(taskModel);
-                      },
+                    Expanded(
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          const Icon(
+                            Icons.confirmation_number_outlined,
+                            size: 20,
+                            color: ColorUtil.bangladeshGreen,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Mã DV: ${taskModel.id}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: ColorUtil.bangladeshGreen,
+                                fontSize: 16,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    const SizedBox(width: 8), // Adjust spacing if needed
-                    _buildButton(
-                      text: 'Hủy',
-                      isPositive: false,
-                      action: () {
-                        _cancelTask(taskModel);
-                      },
-                    ),
+                    _buildStatusBadge(taskModel.getStatus()),
                   ],
                 ),
-            ],
+                const Divider(
+                  height: 24,
+                  thickness: 1,
+                  color: Color(0xFFEEEEEE),
+                ),
+
+                _buildInfoRow(
+                  Icons.access_time,
+                  'Thời gian:',
+                  _formatDatetime(taskModel.timeStart),
+                  valueColor: Colors.red,
+                  isBoldValue: true,
+                ),
+                const SizedBox(height: 8),
+                _buildInfoRow(
+                  Icons.person_outline,
+                  'Khách hàng:',
+                  taskModel.customer?.username ?? '',
+                ),
+                const SizedBox(height: 8),
+                _buildInfoRow(
+                  Icons.phone_outlined,
+                  'SĐT:',
+                  taskModel.customer?.phone ?? '',
+                ),
+                const SizedBox(height: 8),
+                _buildInfoRow(
+                  Icons.location_on_outlined,
+                  'Địa chỉ:',
+                  taskModel.customer?.address ?? '',
+                ),
+                const SizedBox(height: 8),
+                _buildInfoRow(
+                  Icons.work_outline,
+                  'Công việc:',
+                  taskModel.name ?? '',
+                ),
+                if (taskModel.des != null && taskModel.des!.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  _buildInfoRow(
+                    Icons.description_outlined,
+                    'Nội dung:',
+                    taskModel.des!,
+                  ),
+                ],
+                if (taskModel.noti != null && taskModel.noti!.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  _buildInfoRow(
+                    Icons.notifications_none,
+                    'Thông báo:',
+                    taskModel.noti!,
+                  ),
+                ],
+
+                if ((taskModel.status == '1' ||
+                    taskModel.status == '2' ||
+                    taskModel.status == '5')) ...[
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      _buildActionButton(
+                        icon: Icons.edit_outlined,
+                        text: 'Sửa',
+                        color: ColorUtil.bangladeshGreen,
+                        onTap: () => _editBooking(taskModel),
+                      ),
+                      const SizedBox(width: 12),
+                      _buildActionButton(
+                        icon: Icons.cancel_outlined,
+                        text: 'Huỷ',
+                        color: Colors.red,
+                        onTap: () => _cancelTask(taskModel),
+                        isOutlined: true,
+                      ),
+                    ],
+                  ),
+                ],
+              ],
+            ),
           ),
         ),
-        Table(
-          children: [
-            _buildTableRow(
-              title: 'Thời gian:',
-              content: taskModel.timeStar,
-              isHighlight: true,
+      ),
+    );
+  }
+
+  Widget _buildStatusBadge(String status) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: ColorUtil.bangladeshGreen.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        status,
+        style: const TextStyle(
+          color: ColorUtil.bangladeshGreen,
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(
+    IconData icon,
+    String label,
+    String value, {
+    Color? valueColor,
+    bool isBoldValue = false,
+  }) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 18, color: Colors.grey[600]),
+        const SizedBox(width: 8),
+        SizedBox(
+          width: 85,
+          child: Text(
+            label,
+            style: TextStyle(color: Colors.grey[600], fontSize: 14),
+          ),
+        ),
+        Expanded(
+          child: Text(
+            value,
+            style: TextStyle(
+              color: valueColor ?? Colors.black87,
+              fontSize: 14,
+              fontWeight: isBoldValue ? FontWeight.bold : FontWeight.normal,
             ),
-            _buildTableRow(
-              title: 'Khách hàng:',
-              content: taskModel.customer?.username,
-              isHighlight: false,
-            ),
-            _buildTableRow(
-              title: 'SĐT Khách:',
-              content: taskModel.customer?.phone,
-              isHighlight: false,
-            ),
-            _buildTableRow(
-              title: 'Địa chỉ khách:',
-              content: taskModel.customer?.address,
-              isHighlight: false,
-            ),
-            _buildTableRow(
-              title: 'Trạng thái dịch vụ:',
-              content: taskModel.getStatus(),
-              isHighlight: false,
-            ),
-            _buildTableRow(
-              title: 'Công việc:',
-              content: taskModel.name ?? "",
-              isHighlight: false,
-            ),
-            _buildTableRow(
-              title: 'Nội dung:',
-              content: taskModel.des ?? "",
-              isHighlight: false,
-            ),
-            _buildTableRow(
-              title: 'Thông báo:',
-              content: taskModel.noti ?? '',
-              isHighlight: false,
-            ),
-          ],
+          ),
         ),
       ],
     );
   }
 
-  TableRow _buildTableRow({
-    required String title,
-    required String? content,
-    required bool isHighlight,
+  Widget _buildActionButton({
+    required IconData icon,
+    required String text,
+    required Color color,
+    required VoidCallback onTap,
+    bool isOutlined = false,
   }) {
-    return TableRow(
-      children: [
-        Text(
-          title,
-          style: const TextStyle(
-            color: ColorUtil.raisinBlack,
-            fontWeight: FontWeight.bold,
-          ),
+    if (isOutlined) {
+      return OutlinedButton.icon(
+        onPressed: onTap,
+        icon: Icon(icon, size: 18, color: color),
+        label: Text(
+          text,
+          style: TextStyle(color: color, fontWeight: FontWeight.w600),
         ),
-        Text(
-          "$content",
-          style: TextStyle(color: isHighlight ? Colors.red : Colors.black),
+        style: OutlinedButton.styleFrom(
+          side: BorderSide(color: color),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          minimumSize: const Size(0, 36),
         ),
-      ],
+      );
+    }
+    return ElevatedButton.icon(
+      onPressed: onTap,
+      icon: Icon(icon, size: 18, color: Colors.white),
+      label: Text(
+        text,
+        style: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: color,
+        foregroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        elevation: 0,
+        minimumSize: const Size(0, 36),
+      ),
     );
   }
 
@@ -366,91 +493,86 @@ class _RentTaskAvailableTabState extends State<RentTaskAvailableTabSale> {
     });
   }
 
-  Widget _buildButton({text, isPositive, action}) {
-    return isPositive
-        ? ButtonWidget(
-            color: isPositive ? ColorUtil.bangladeshGreen : Colors.grey,
-            borderRadius: BorderRadius.circular(30),
-            onTap: () {
-              if (action == null) {
-                Navigator.pop(context);
-              } else {
-                action();
-              }
-            },
-            child: Text(
-              text,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 16, color: Colors.white),
-            ),
-          )
-        : ElevatedButton(
-            style: ButtonStyle(
-              backgroundColor: WidgetStateProperty.all<Color>(ColorUtil.white),
-              shape: WidgetStateProperty.all<RoundedRectangleBorder>(
-                RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  side: const BorderSide(
-                    color: ColorUtil.bangladeshGreen,
-                    width: 1,
-                  ),
-                ),
-              ),
-            ),
-            child: Text(
-              text,
-              style: const TextStyle(color: ColorUtil.bangladeshGreen),
-            ),
-            onPressed: () {
-              if (action == null) {
-                Navigator.pop(context);
-              } else {
-                action();
-              }
-            },
-          );
-  }
-
   Future<void> _cancelTask(TaskModel taskModel) async {
     return showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           title: const Text(
             'Vui lòng cho biết lý do bạn hủy dịch vụ',
             textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           content: TextFieldDefault(
             controller: _feedbackController,
             maxLines: 5,
+            hintText: 'Nhập lý do hủy...',
+          ),
+          actionsPadding: const EdgeInsets.only(
+            left: 16,
+            right: 16,
+            bottom: 16,
           ),
           actions: [
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _buildButtonDialog(
-                  isPositive: false,
-                  text: 'Hủy',
-                  action: () {
-                    Navigator.pop(context);
-                    _feedbackController.clear();
-                  },
-                ),
-                const SizedBox(width: 16),
-                _buildButtonDialog(
-                  isPositive: true,
-                  text: 'Gửi',
-                  action: () {
-                    _bloc.add(
-                      BookingDeleteTaskEvent(
-                        taskModel.id ?? 0,
-                        taskModel.name!,
-                        _feedbackController.text,
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      _feedbackController.clear();
+                    },
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                    );
-                    Navigator.pop(context);
-                    _feedbackController.clear();
-                  },
+                      side: const BorderSide(color: Colors.grey),
+                    ),
+                    child: const Text(
+                      'Hủy',
+                      style: TextStyle(
+                        color: Colors.grey,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      _bloc.add(
+                        BookingDeleteTaskEvent(
+                          taskModel.id ?? 0,
+                          taskModel.name ?? '',
+                          _feedbackController.text,
+                        ),
+                      );
+                      Navigator.pop(context);
+                      _feedbackController.clear();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: ColorUtil.bangladeshGreen,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: const Text(
+                      'Gửi',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -460,27 +582,15 @@ class _RentTaskAvailableTabState extends State<RentTaskAvailableTabSale> {
     );
   }
 
-  Widget _buildButtonDialog({isPositive, action, text}) {
-    return Expanded(child: _button(isPositive, action, text));
-  }
-
-  StatelessWidget _button(isPositive, action, text) {
-    return ButtonWidget(
-      color: isPositive ? ColorUtil.bangladeshGreen : Colors.grey,
-      borderRadius: BorderRadius.circular(30),
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      onTap: () {
-        if (action == null) {
-          Navigator.pop(context);
-        } else {
-          action();
-        }
-      },
-      child: Text(
-        text,
-        textAlign: TextAlign.center,
-        style: const TextStyle(fontSize: 16, color: Colors.white),
-      ),
-    );
+  String _formatDatetime(String? dateTimeString) {
+    try {
+      if (dateTimeString == null || dateTimeString.isEmpty) return "";
+      DateTime getDateTime = DateTime.parse(dateTimeString);
+      var output = DateFormat('HH:mm:ss dd/MM/yyyy').format(getDateTime);
+      return output.toString();
+    } on Exception catch (ex) {
+      print("format datetime error: $ex");
+      return dateTimeString ?? "";
+    }
   }
 }
