@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:restart_app/restart_app.dart';
 import 'package:socbay/application.dart';
-import 'package:socbay/blocs/task/task_screen_bloc.dart';
 import 'package:socbay/blocs/user_info/user_screen_bloc.dart';
 import 'package:socbay/blocs/user_info/user_screen_event.dart';
 import 'package:socbay/blocs/user_info/user_screen_state.dart';
@@ -30,14 +29,12 @@ class UserProfileScreen extends StatefulWidget {
 
 class _UserProfileScreenState extends State<UserProfileScreen> {
   late UserScreenBloc _bloc;
-  late TaskScreenBloc _taskScreenBloc;
   // late final ImagePicker _picker;
 
   @override
   void initState() {
     super.initState();
     _bloc = BlocProvider.of(context);
-    _taskScreenBloc = BlocProvider.of(context);
 
     _bloc.add(UserScreenStartedEvent());
   }

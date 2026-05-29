@@ -11,6 +11,7 @@ class User {
   final String? address;
   final String? password;
   final String? type;
+  final String? typeStaff;
   final int? otp;
   final String? birthday;
   final int? status;
@@ -32,6 +33,7 @@ class User {
     this.address,
     this.password,
     this.type,
+    this.typeStaff,
     this.otp,
     this.id,
     this.birthday,

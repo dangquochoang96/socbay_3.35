@@ -128,7 +128,8 @@ class UserProfile {
   // bool isUserCustomer() => type == "1";
   // bool isUserSale() => type == "3";
 
-  bool isUserRole() => type == "2" && typeStaff == "1";
+  bool isUserRole() => type == "2" && ["1", "3", "5"].contains(typeStaff);
   bool isUserCustomer() => type == "1" && typeStaff == "0";
-  bool isUserSale() => type == "2" && typeStaff == "2";
+  bool isUserSale() =>
+      type == "2" && ["2", "4", "6", "7", "8"].contains(typeStaff);
 }
