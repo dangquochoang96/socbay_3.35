@@ -29,8 +29,9 @@ abstract class BaseApiRepository {
   Future<DefaultResponse> registerAccount(UserProfile param);
   Future<DefaultResponse<LoginResponse>> loginAccount(
     String phone,
-    String password,
-  );
+    String password, [
+    String? fcmToken,
+  ]);
   Future<DefaultResponse> register(RegisterRequestModel registerRequestModel);
   Future<DefaultResponse> forgotPassword(NewPasswordRequest newPasswordRequest);
   Future<DefaultResponse<UserProfile>> getUserInfo();

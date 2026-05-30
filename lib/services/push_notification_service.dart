@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:socbay/data/model/order_detail_model.dart';
 import 'package:socbay/firebase_options.dart';
 import 'package:socbay/routes.dart';
 import 'package:socbay/services/local_notification_service.dart';
@@ -114,7 +115,7 @@ class PushNotificationService {
     final payload = jsonEncode(message.data);
     await _localNotificationService.showNotification(
       id: message.hashCode,
-      title: title ?? 'Thong bao',
+      title: title ?? 'Thông Báo',
       body: body ?? '',
       payload: payload,
     );
@@ -156,14 +157,39 @@ class PushNotificationService {
 
   void _navigateFromPayload(Map<String, dynamic> data) {
     final target = data['screen']?.toString();
+    final taskId = data['task_id']?.toString();
+    final rentTaskId = data['rent_task_id']?.toString();
+    final orderId = data['order_id']?.toString();
+    print(target);
 
     if (target == 'notification' || target == 'notification-list') {
       NavigationService.instance.navigateTo(Routes.notificationScreen);
       return;
     }
 
-    if (target == 'task-list' || target == 'order-manager') {
-      NavigationService.instance.navigateTo(Routes.orderManagerScreen);
+    if (target == 'tasks') {
+      NavigationService.instance.navigateTo(
+        Routes.detailBookingScreen,
+        args: {'id': taskId},
+      );
+      return;
+    }
+
+    if (target == 'rent-tasks') {
+      NavigationService.instance.navigateTo(
+        Routes.detailRentBookingScreen,
+        args: {'id': rentTaskId},
+      );
+      return;
+    }
+
+    if (target == 'order') {
+      NavigationService.instance.navigateTo(
+        Routes.coreReplacementServiceScreen,
+        args: {
+          'orderDetail': OrderDetailModel(id: int.tryParse(orderId ?? '') ?? 0),
+        },
+      );
       return;
     }
 

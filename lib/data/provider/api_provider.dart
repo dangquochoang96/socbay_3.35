@@ -62,13 +62,19 @@ class ApiProvider {
 
   Future<DefaultResponse<LoginResponse>> login(
     String phone,
-    String password,
-  ) async {
+    String password, [
+    String? fcmToken,
+  ]) async {
     try {
       LoggerUtil.info('login() request phone=$phone', tag: 'ApiProvider');
+      final bodyParams = {
+        "phone": phone,
+        "pass": password,
+        if (fcmToken != null && fcmToken.isNotEmpty) "fcm_token": fcmToken,
+      };
       final Map resJson = await _baseAPI.request(
         manager: ApiManager(ApiType.login),
-        bodyParams: {"phone": phone, "pass": password},
+        bodyParams: bodyParams,
       );
       LoggerUtil.info('login() raw response=$resJson', tag: 'ApiProvider');
       final res = DefaultResponse.fromJson(Map<String, dynamic>.from(resJson));

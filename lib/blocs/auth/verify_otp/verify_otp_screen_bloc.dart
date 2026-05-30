@@ -7,6 +7,7 @@ import 'package:socbay/data/model/login_response.dart';
 import 'package:socbay/data/model/request/register_request_model.dart';
 import 'package:socbay/data/repository/auth/api_repository.dart';
 import 'package:socbay/data/response/api_response.dart';
+import 'package:socbay/services/push_notification_service.dart';
 import 'package:socbay/utils/parse_util.dart';
 import 'package:socbay/utils/secure_storage_utils.dart';
 
@@ -70,9 +71,11 @@ class VerifyOtpScreenBloc
   ) async {
     isLoading = true;
     emit(VerifyOtpScreenInitialState());
+    final fcmToken = await PushNotificationService.instance.getToken();
     final DefaultResponse result = await apiRepository.loginAccount(
       args['phone'],
       args['password'],
+      fcmToken,
     );
     if (result.status == 200) {
       LoginResponse loginResponse = result.data;

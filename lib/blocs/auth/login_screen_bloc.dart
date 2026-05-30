@@ -32,9 +32,11 @@ class LoginScreenBloc extends Bloc<LoginScreenEvent, LoginScreenState> {
     emit(LoginInitialState());
     try {
       LoggerUtil.info('login started phone=${event.phone}', tag: tag);
+      final fcmToken = await PushNotificationService.instance.getToken();
       final result = await apiRepository.loginAccount(
         event.phone,
         event.password,
+        fcmToken,
       );
       LoggerUtil.info(
         'login result status=${result.status} message=${result.message} hasData=${result.data != null}',

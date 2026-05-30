@@ -117,7 +117,14 @@ class _RentTaskTabState extends State<RentTaskTab> {
           _bloc.add(StaffTaskScreenGetTaskByDayEvent(isRefresh: _isRefresh));
         },
         child: _bloc.staffListTaskBydayModel.isEmpty && !_bloc.isLoading
-            ? const Center(child: Text("Chưa có công việc"))
+            ? const CustomScrollView(
+                physics: AlwaysScrollableScrollPhysics(),
+                slivers: [
+                  SliverFillRemaining(
+                    child: Center(child: Text("Chưa có công việc")),
+                  ),
+                ],
+              )
             : ListView.separated(
                 //controller: _scrollController,
                 itemBuilder: _itemBuilder,
@@ -127,10 +134,7 @@ class _RentTaskTabState extends State<RentTaskTab> {
                   vertical: paddingVertical,
                 ),
                 separatorBuilder: (BuildContext context, int index) {
-                  return const Divider(
-                    thickness: 1,
-                    color: ColorUtil.bangladeshGreen,
-                  );
+                  return const SizedBox(height: 12);
                 },
               ),
       ),
@@ -142,115 +146,225 @@ class _RentTaskTabState extends State<RentTaskTab> {
       return const IndicatorLoadMore();
     }
     TaskModel taskModel = _bloc.staffListTaskBydayModel[index];
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        ButtonWidget(
-          onTap: () {
-            _detailTask(taskModel);
-          },
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Mã dịch vụ: ${taskModel.id}',
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: ColorUtil.bangladeshGreen,
-                  fontSize: 16,
+    return _buildTaskCard(taskModel);
+  }
+
+  Widget _buildTaskCard(TaskModel taskModel) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(12),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: () => _detailTask(taskModel),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.confirmation_number_outlined,
+                            size: 20,
+                            color: ColorUtil.bangladeshGreen,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Mã DV: ${taskModel.id}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: ColorUtil.bangladeshGreen,
+                                fontSize: 16,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    _buildStatusBadge(taskModel.getStatus()),
+                  ],
                 ),
-              ),
-              if ((taskModel.status == '1' ||
-                  taskModel.status == '2' ||
-                  taskModel.status == '5'))
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: _buildButton(
-                    text: 'Cập nhật',
-                    isPositive: false,
-                    action: () {
-                      _updateTask(taskModel);
-                    },
+                const Divider(
+                  height: 24,
+                  thickness: 1,
+                  color: Color(0xFFEEEEEE),
+                ),
+                _buildInfoRow(
+                  Icons.access_time,
+                  'Thời gian:',
+                  _formatTaskDatetime(taskModel.timeStart),
+                  valueColor: Colors.red,
+                  isBoldValue: true,
+                ),
+                const SizedBox(height: 8),
+                _buildInfoRow(
+                  Icons.person_outline,
+                  'Khách hàng:',
+                  taskModel.customer?.username ?? '',
+                ),
+                const SizedBox(height: 8),
+                _buildInfoRow(
+                  Icons.phone_outlined,
+                  'SĐT:',
+                  taskModel.customer?.phone ?? '',
+                ),
+                const SizedBox(height: 8),
+                _buildInfoRow(
+                  Icons.location_on_outlined,
+                  'Địa chỉ:',
+                  taskModel.customer?.address ?? '',
+                ),
+                const SizedBox(height: 8),
+                _buildInfoRow(
+                  Icons.work_outline,
+                  'Công việc:',
+                  taskModel.name ?? '',
+                ),
+                if (taskModel.des != null && taskModel.des!.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  _buildInfoRow(
+                    Icons.description_outlined,
+                    'Nội dung:',
+                    taskModel.des!,
                   ),
-                ),
-            ],
+                ],
+                if (taskModel.noti != null && taskModel.noti!.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  _buildInfoRow(
+                    Icons.notifications_none,
+                    'Thông báo:',
+                    taskModel.noti!,
+                    valueColor: Colors.red,
+                  ),
+                ],
+                if (taskModel.status == '1' ||
+                    taskModel.status == '2' ||
+                    taskModel.status == '5') ...[
+                  const SizedBox(height: 16),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: _buildActionButton(
+                      icon: Icons.edit_outlined,
+                      text: 'Cập nhật',
+                      color: ColorUtil.bangladeshGreen,
+                      onTap: () => _updateTask(taskModel),
+                    ),
+                  ),
+                ],
+              ],
+            ),
           ),
         ),
-        Table(
-          children: [
-            _buildTableRow(
-              title: 'Thời gian:',
-              content: taskModel.timeStart,
-              isHighlight: true,
-              contentColor: Colors.red,
+      ),
+    );
+  }
+
+  Widget _buildStatusBadge(String status) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: ColorUtil.bangladeshGreen.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        status,
+        style: const TextStyle(
+          color: ColorUtil.bangladeshGreen,
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(
+    IconData icon,
+    String label,
+    String value, {
+    Color? valueColor,
+    bool isBoldValue = false,
+  }) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 18, color: Colors.grey[600]),
+        const SizedBox(width: 8),
+        SizedBox(
+          width: 85,
+          child: Text(
+            label,
+            style: TextStyle(color: Colors.grey[600], fontSize: 14),
+          ),
+        ),
+        Expanded(
+          child: Text(
+            value,
+            style: TextStyle(
+              color: valueColor ?? Colors.black87,
+              fontSize: 14,
+              fontWeight: isBoldValue ? FontWeight.bold : FontWeight.normal,
             ),
-            _buildTableRow(
-              title: 'Khách hàng:',
-              content: taskModel.customer?.username,
-              isHighlight: false,
-            ),
-            _buildTableRow(
-              title: 'SĐT Khách:',
-              content: taskModel.customer?.phone,
-              isHighlight: false,
-            ),
-            _buildTableRow(
-              title: 'Địa chỉ khách:',
-              content: taskModel.customer?.address,
-              isHighlight: false,
-            ),
-            _buildTableRow(
-              title: 'Trạng thái dịch vụ:',
-              content: taskModel.getStatus(),
-              isHighlight: false,
-            ),
-            _buildTableRow(
-              title: 'Công việc:',
-              content: taskModel.name,
-              isHighlight: false,
-            ),
-            _buildTableRow(
-              title: 'Nội dung:',
-              content: taskModel.des ?? '',
-              isHighlight: false,
-            ),
-            _buildTableRow(
-              title: 'Thông báo:',
-              content: taskModel.noti ?? '',
-              contentColor: Colors.red,
-              isHighlight: false,
-            ),
-          ],
+          ),
         ),
       ],
     );
   }
 
-  TableRow _buildTableRow({
-    required String title,
-    required String? content,
-    required bool isHighlight,
-    Color? contentColor,
+  Widget _buildActionButton({
+    required IconData icon,
+    required String text,
+    required Color color,
+    required VoidCallback onTap,
   }) {
-    return TableRow(
-      children: [
-        Text(
-          title,
-          style: const TextStyle(
-            color: ColorUtil.raisinBlack,
-            fontWeight: FontWeight.bold,
-          ),
+    return ElevatedButton.icon(
+      onPressed: onTap,
+      icon: Icon(icon, size: 18, color: Colors.white),
+      label: Text(
+        text,
+        style: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.w600,
         ),
-        Text(
-          "$content",
-          style: TextStyle(
-            color:
-                contentColor ??
-                (isHighlight ? ColorUtil.bangladeshGreen : Colors.black),
-          ),
-        ),
-      ],
+      ),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: color,
+        foregroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        elevation: 0,
+        minimumSize: const Size(0, 36),
+      ),
     );
+  }
+
+  String _formatTaskDatetime(String? dateTimeString) {
+    try {
+      if (dateTimeString == null || dateTimeString.isEmpty) return "";
+      DateTime getDateTime = DateTime.parse(dateTimeString);
+      return DateFormat('HH:mm:ss dd/MM/yyyy').format(getDateTime);
+    } on Exception catch (ex) {
+      print("format datetime error: $ex");
+      return dateTimeString ?? "";
+    }
   }
 
   void _detailTask(TaskModel taskModel) {
@@ -259,69 +373,6 @@ class _RentTaskTabState extends State<RentTaskTab> {
       Routes.detailRentBookingScreen,
       arguments: {'id': taskModel.id},
     );
-  }
-
-  Widget _buildButton({text, isPositive, action}) {
-    return isPositive
-        ? ButtonWidget(
-            color: isPositive ? ColorUtil.bangladeshGreen : Colors.grey,
-            borderRadius: BorderRadius.circular(20), // Decreased border radius
-            onTap: () {
-              if (action == null) {
-                Navigator.pop(context);
-              } else {
-                action();
-              }
-            },
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 6,
-              ), // Adjust padding
-              child: Text(
-                text,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 8,
-                  color: Colors.white,
-                ), // Decreased font size
-              ),
-            ),
-          )
-        : ElevatedButton(
-            style: ButtonStyle(
-              backgroundColor: WidgetStateProperty.all<Color>(ColorUtil.white),
-              shape: WidgetStateProperty.all<RoundedRectangleBorder>(
-                RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  side: const BorderSide(
-                    color: ColorUtil.bangladeshGreen,
-                    width: 1,
-                  ),
-                ),
-              ),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 2,
-                vertical: 1,
-              ), // Adjust padding
-              child: Text(
-                text,
-                style: const TextStyle(
-                  fontSize: 10,
-                  color: ColorUtil.bangladeshGreen,
-                ), // Decreased font size
-              ),
-            ),
-            onPressed: () {
-              if (action == null) {
-                Navigator.pop(context);
-              } else {
-                action();
-              }
-            },
-          );
   }
 
   Future<void> _updateTask(TaskModel taskModel) async {

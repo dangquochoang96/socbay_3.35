@@ -47,9 +47,10 @@ class ApiRepository extends BaseApiRepository {
   @override
   Future<DefaultResponse<LoginResponse>> loginAccount(
     String phone,
-    String password,
-  ) {
-    return _apiProvider.login(phone, password);
+    String password, [
+    String? fcmToken,
+  ]) {
+    return _apiProvider.login(phone, password, fcmToken);
   }
 
   @override
