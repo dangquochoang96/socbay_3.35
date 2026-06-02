@@ -212,7 +212,7 @@ class _HomeScreenState extends State<HomeScreen> {
           borderRadius: const BorderRadius.all(Radius.circular(10)),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.2),
+              color: Colors.grey.withValues(alpha: 0.2),
               blurRadius: 4,
               offset: const Offset(0, 2),
             ),
@@ -265,7 +265,7 @@ class _HomeScreenState extends State<HomeScreen> {
           borderRadius: const BorderRadius.all(Radius.circular(10)),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.2),
+              color: Colors.grey.withValues(alpha: 0.2),
               blurRadius: 4,
               offset: const Offset(0, 2),
             ),
@@ -462,7 +462,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 borderRadius: const BorderRadius.all(Radius.circular(10.0)),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.withOpacity(0.4),
+                    color: Colors.grey.withValues(alpha: 0.4),
                     spreadRadius: 5,
                     blurRadius: 7,
                     offset: const Offset(0, 2), // changes position of shadow
@@ -490,7 +490,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ],
                     ),
                   ),
-                  Divider(height: 1, color: Colors.grey.withOpacity(0.7)),
+                  Divider(height: 1, color: Colors.grey.withValues(alpha: 0.7)),
                   Expanded(
                     child: Row(
                       children: [
@@ -504,7 +504,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                           Container(
                             width: 1,
-                            color: Colors.grey.withOpacity(0.7),
+                            color: Colors.grey.withValues(alpha: 0.7),
                           ),
                         ] else if (App.instance.userApp?.isUserRole() ??
                             false) ...[

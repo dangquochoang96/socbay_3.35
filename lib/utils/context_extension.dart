@@ -25,7 +25,7 @@ extension MediaQueryValues on BuildContext {
         ),
         duration: duration ?? const Duration(milliseconds: 1500),
         width: 280.0,
-        backgroundColor: color?.withOpacity(0.85),
+        backgroundColor: color?.withValues(alpha: 0.85),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10.0),

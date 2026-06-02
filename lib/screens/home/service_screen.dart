@@ -284,7 +284,7 @@ class _ServiceScreenState extends State<ServiceScreen> {
       (element) => element.id.toString() == _currentSelectedValue,
     );
     return DropdownButtonFormField<String>(
-      value: hasValue ? _currentSelectedValue : null,
+      initialValue: hasValue ? _currentSelectedValue : null,
       decoration: InputDecoration(
         labelText: 'Loại dịch vụ',
         labelStyle: TextStyle(
@@ -350,7 +350,9 @@ class _ServiceScreenState extends State<ServiceScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         DropdownButtonFormField<String>(
-          value: hasProduct ? _currentSelectedProductValue.toString() : null,
+          initialValue: hasProduct
+              ? _currentSelectedProductValue.toString()
+              : null,
           decoration: InputDecoration(
             labelText: 'Chọn máy / thiết bị',
             labelStyle: TextStyle(
@@ -734,7 +736,6 @@ class _ServiceScreenState extends State<ServiceScreen> {
     IconData iconPrefix,
     IconData? iconSuffix, {
     bool isReadOnly = false,
-    bool haveSuffixIcon = false,
   }) {
     return TextFormField(
       readOnly: isReadOnly,

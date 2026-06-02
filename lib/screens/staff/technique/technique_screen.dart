@@ -8,7 +8,6 @@ import '../../../blocs/technique/technique_screen_state.dart';
 import '../../../utils/color_util.dart';
 import '../../../utils/image_util.dart';
 import '../../../utils/theme_util.dart';
-import '../../../widgets/button_widget.dart';
 
 class TechniqueScreen extends StatefulWidget {
   const TechniqueScreen({

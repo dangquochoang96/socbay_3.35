@@ -200,7 +200,7 @@ class _HistoryScreenState extends State<HistoryScreen>
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         elevation: 2,
-        shadowColor: Colors.black.withOpacity(0.08),
+        shadowColor: Colors.black.withValues(alpha: 0.08),
         child: InkWell(
           borderRadius: BorderRadius.circular(12),
           onTap: () => _detailTask(taskModel),
@@ -219,7 +219,9 @@ class _HistoryScreenState extends State<HistoryScreen>
                             width: 36,
                             height: 36,
                             decoration: BoxDecoration(
-                              color: ColorUtil.bangladeshGreen.withOpacity(0.1),
+                              color: ColorUtil.bangladeshGreen.withValues(
+                                alpha: 0.1,
+                              ),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: const Icon(
@@ -327,7 +329,7 @@ class _HistoryScreenState extends State<HistoryScreen>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: ColorUtil.bangladeshGreen.withOpacity(0.1),
+        color: ColorUtil.bangladeshGreen.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
@@ -535,51 +537,6 @@ class _HistoryScreenState extends State<HistoryScreen>
         ),
       ),
     );
-  }
-
-  Widget _buildButton({text, isPositive, action}) {
-    return isPositive
-        ? ButtonWidget(
-            color: isPositive ? ColorUtil.bangladeshGreen : Colors.grey,
-            borderRadius: BorderRadius.circular(30),
-            onTap: () {
-              if (action == null) {
-                Navigator.pop(context);
-              } else {
-                action();
-              }
-            },
-            child: Text(
-              text,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 16, color: Colors.white),
-            ),
-          )
-        : ElevatedButton(
-            style: ButtonStyle(
-              backgroundColor: WidgetStateProperty.all<Color>(ColorUtil.white),
-              shape: WidgetStateProperty.all<RoundedRectangleBorder>(
-                RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  side: const BorderSide(
-                    color: ColorUtil.bangladeshGreen,
-                    width: 1,
-                  ),
-                ),
-              ),
-            ),
-            child: Text(
-              text,
-              style: const TextStyle(color: ColorUtil.bangladeshGreen),
-            ),
-            onPressed: () {
-              if (action == null) {
-                Navigator.pop(context);
-              } else {
-                action();
-              }
-            },
-          );
   }
 
   Future<void> _cancelTask(TaskModel taskModel) async {

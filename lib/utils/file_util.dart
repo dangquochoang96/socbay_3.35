@@ -132,15 +132,18 @@ Future saveAndShareImage({
   String content = '',
 }) async {
   String filePath = '${await getAppPath()}/screenshot_result.png';
+
   File file = File(filePath);
   await file.writeAsBytes(image);
+
   XFile xFile = XFile(filePath);
-  await Share.shareXFiles([xFile], text: content);
+
+  await SharePlus.instance.share(ShareParams(files: [xFile], text: content));
 }
 
 Future shareText({required String content}) async {
   try {
-    await Share.share(content);
+    await SharePlus.instance.share(ShareParams(text: content));
   } catch (e) {
     print('Error sharing text: $e');
   }

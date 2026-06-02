@@ -295,67 +295,59 @@ class _BillScreenState extends State<BillScreen> {
                   style: TextStyle(fontSize: 18),
                 ),
                 const SizedBox(height: 10.0),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    Expanded(
-                      flex: 1,
-                      child: Column(
-                        children: [
-                          const Text(
-                            'Tiền mặt',
-                            style: TextStyle(fontSize: 18),
-                          ),
-                          SizedBox(
-                            height: 24,
-                            width: 24,
-                            child: Radio(
-                              value: 1,
-                              groupValue: billData.paymentType,
-                              onChanged: (value) {},
+                RadioGroup<int>(
+                  groupValue: billData.paymentType,
+                  onChanged: (_) {},
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      Expanded(
+                        flex: 1,
+                        child: Column(
+                          children: [
+                            const Text(
+                              'Tiền mặt',
+                              style: TextStyle(fontSize: 18),
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      flex: 1,
-                      child: Column(
-                        children: [
-                          const Text(
-                            'Chuyển khoản',
-                            style: TextStyle(fontSize: 18),
-                          ),
-                          SizedBox(
-                            height: 24,
-                            width: 24,
-                            child: Radio(
-                              value: 2,
-                              groupValue: billData.paymentType,
-                              onChanged: (value) {},
+                            SizedBox(
+                              height: 24,
+                              width: 24,
+                              child: Radio<int>(value: 1),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                    Expanded(
-                      flex: 1,
-                      child: Column(
-                        children: [
-                          const Text('Ví', style: TextStyle(fontSize: 18)),
-                          SizedBox(
-                            height: 24,
-                            width: 24,
-                            child: Radio(
-                              value: 3,
-                              groupValue: billData.paymentType,
-                              onChanged: (value) {},
+                      Expanded(
+                        flex: 1,
+                        child: Column(
+                          children: [
+                            const Text(
+                              'Chuyển khoản',
+                              style: TextStyle(fontSize: 18),
                             ),
-                          ),
-                        ],
+                            SizedBox(
+                              height: 24,
+                              width: 24,
+                              child: Radio<int>(value: 2),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                      Expanded(
+                        flex: 1,
+                        child: Column(
+                          children: [
+                            const Text('Ví', style: TextStyle(fontSize: 18)),
+                            SizedBox(
+                              height: 24,
+                              width: 24,
+                              child: Radio<int>(value: 3),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 20.0),
                 const Text(

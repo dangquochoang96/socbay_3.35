@@ -64,7 +64,8 @@ class _OrderManagerScreenState extends State<OrderManagerScreen> {
   void _listener(BuildContext context, OrderManagerState state) {}
 
   Widget _builder(BuildContext context, OrderManagerState state) {
-    return WillPopScope(
+    return PopScope(
+      canPop: false,
       child: Scaffold(
         appBar: MyAppBar(
           title: "Quản lý đơn hàng",
@@ -182,9 +183,6 @@ class _OrderManagerScreenState extends State<OrderManagerScreen> {
           ),
         ),
       ),
-      onWillPop: () async {
-        return false;
-      },
     );
   }
 

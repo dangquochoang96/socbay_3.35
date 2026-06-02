@@ -41,8 +41,8 @@ class _RootState extends State<Root> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: null,
+    return PopScope(
+      canPop: false,
       child: Scaffold(
         key: _scaffoldKey,
         resizeToAvoidBottomInset: false,

@@ -59,16 +59,6 @@ class NewsScreenBloc extends Bloc<NewsScreenEvent, NewsScreenState> {
         );
         page = currentPage + 1;
       }
-      // final res = await apiRepository.getBlogs(page: event.isRefresh ? 1 : page);
-      // if (res.data != null && res.status == HttpStatus.ok) {
-      //   if (event.isRefresh) {
-      //     blogs.clear();
-      //     page = 1;
-      //   }
-      //   //total = res.total;
-      //   page++;
-      //   blogs.addAll(res.data!);
-      // } else {}
       isLoading = false;
       emit(NewsScreenInitialState());
     } catch (ex) {

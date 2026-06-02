@@ -815,73 +815,58 @@ class _StaffNewRentOrderScreen extends State<StaffNewRentOrderScreen> {
                     ],
                   ),
                   const SizedBox(height: 16.0),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      Expanded(
-                        flex: 1,
-                        child: Column(
-                          children: [
-                            const Text('Tiền mặt'),
-                            SizedBox(
-                              height: 24,
-                              width: 24,
-                              child: Radio(
-                                value: 1,
-                                groupValue: _bloc.paymentType,
-                                onChanged: (index) {
-                                  setState(() {
-                                    _bloc.paymentType = 1;
-                                  });
-                                },
+                  RadioGroup<int>(
+                    groupValue: _bloc.paymentType,
+                    onChanged: (int? index) {
+                      if (index == null) return;
+                      setState(() {
+                        _bloc.paymentType = index;
+                      });
+                    },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        Expanded(
+                          flex: 1,
+                          child: Column(
+                            children: [
+                              const Text('Tiền mặt'),
+                              SizedBox(
+                                height: 24,
+                                width: 24,
+                                child: Radio<int>(value: 1),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                      Expanded(
-                        flex: 1,
-                        child: Column(
-                          children: [
-                            const Text('Chuyển khoản'),
-                            SizedBox(
-                              height: 24,
-                              width: 24,
-                              child: Radio(
-                                value: 2,
-                                groupValue: _bloc.paymentType,
-                                onChanged: (index) {
-                                  setState(() {
-                                    _bloc.paymentType = 2;
-                                  });
-                                },
+                        Expanded(
+                          flex: 1,
+                          child: Column(
+                            children: [
+                              const Text('Chuyển khoản'),
+                              SizedBox(
+                                height: 24,
+                                width: 24,
+                                child: Radio<int>(value: 2),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                      Expanded(
-                        flex: 1,
-                        child: Column(
-                          children: [
-                            const Text('Ví'),
-                            SizedBox(
-                              height: 24,
-                              width: 24,
-                              child: Radio(
-                                value: 3,
-                                groupValue: _bloc.paymentType,
-                                onChanged: (index) {
-                                  setState(() {
-                                    _bloc.paymentType = 3;
-                                  });
-                                },
+                        Expanded(
+                          flex: 1,
+                          child: Column(
+                            children: [
+                              const Text('Ví'),
+                              SizedBox(
+                                height: 24,
+                                width: 24,
+                                child: Radio<int>(value: 3),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 16.0),
                   _buildSectionMedia(),

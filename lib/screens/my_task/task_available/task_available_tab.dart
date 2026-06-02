@@ -161,7 +161,7 @@ class _TaskAvailableTabState extends State<TaskAvailableTab> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -287,7 +287,7 @@ class _TaskAvailableTabState extends State<TaskAvailableTab> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: ColorUtil.bangladeshGreen.withOpacity(0.1),
+        color: ColorUtil.bangladeshGreen.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
@@ -461,61 +461,42 @@ class _TaskAvailableTabState extends State<TaskAvailableTab> {
                     hintText: 'Lý do',
                   ),
                   const SizedBox(height: 16),
-                  Column(
-                    // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Row(
-                        children: [
-                          Radio<int>(
-                            value: 5,
-                            groupValue: selectedOption,
-                            onChanged: (int? value) {
-                              setState(() {
-                                selectedOption = value;
-                              });
-                            },
-                          ),
-                          const Text(
-                            'Nhận Đơn',
-                            style: TextStyle(fontSize: 12),
-                          ),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          Radio<int>(
-                            value: 1,
-                            groupValue: selectedOption,
-                            onChanged: (int? value) {
-                              setState(() {
-                                selectedOption = value;
-                              });
-                            },
-                          ),
-                          const Text(
-                            'Không nhận Đơn',
-                            style: TextStyle(fontSize: 12),
-                          ),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          Radio<int>(
-                            value: 2,
-                            groupValue: selectedOption,
-                            onChanged: (int? value) {
-                              setState(() {
-                                selectedOption = value;
-                              });
-                            },
-                          ),
-                          const Text(
-                            'Khách hàng hủy',
-                            style: TextStyle(fontSize: 12),
-                          ),
-                        ],
-                      ),
-                    ],
+                  RadioGroup<int>(
+                    groupValue: selectedOption,
+                    onChanged: (int? value) {
+                      setState(() {
+                        selectedOption = value;
+                      });
+                    },
+                    child: Column(
+                      // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: const [
+                        Row(
+                          children: [
+                            Radio<int>(value: 5),
+                            Text('Nhận Đơn', style: TextStyle(fontSize: 12)),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            Radio<int>(value: 1),
+                            Text(
+                              'Không nhận Đơn',
+                              style: TextStyle(fontSize: 12),
+                            ),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            Radio<int>(value: 2),
+                            Text(
+                              'Khách hàng hủy',
+                              style: TextStyle(fontSize: 12),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -713,17 +694,5 @@ class _TaskAvailableTabState extends State<TaskAvailableTab> {
         ),
       ],
     );
-  }
-
-  String _formatDatetime(String? dateTimeString) {
-    try {
-      if (dateTimeString == null || dateTimeString.isEmpty) return "";
-      DateTime getDateTime = DateTime.parse(dateTimeString);
-      var output = DateFormat('HH:mm:ss dd/MM/yyyy').format(getDateTime);
-      return output.toString();
-    } on Exception catch (ex) {
-      print("format datetime error: $ex");
-      return dateTimeString ?? "";
-    }
   }
 }

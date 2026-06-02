@@ -323,7 +323,7 @@ class _StaffServiceSaleScreenState extends State<StaffServiceSaleScreen> {
       (e) => e.id.toString() == _currentSelectedValue,
     );
     return DropdownButtonFormField<String>(
-      value: hasValue ? _currentSelectedValue : null,
+      initialValue: hasValue ? _currentSelectedValue : null,
       decoration: InputDecoration(
         labelText: 'Loại dịch vụ',
         labelStyle: TextStyle(
@@ -514,7 +514,9 @@ class _StaffServiceSaleScreenState extends State<StaffServiceSaleScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         DropdownButtonFormField<String>(
-          value: hasProduct ? _currentSelectedProductValue.toString() : null,
+          initialValue: hasProduct
+              ? _currentSelectedProductValue.toString()
+              : null,
           decoration: InputDecoration(
             labelText: 'Chọn máy / thiết bị',
             labelStyle: TextStyle(
@@ -895,7 +897,6 @@ class _StaffServiceSaleScreenState extends State<StaffServiceSaleScreen> {
     IconData iconPrefix,
     IconData? iconSuffix, {
     bool isReadOnly = false,
-    bool haveSuffixIcon = false,
   }) {
     return TextFormField(
       readOnly: isReadOnly,

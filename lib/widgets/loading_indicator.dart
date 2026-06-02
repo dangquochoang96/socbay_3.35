@@ -48,7 +48,7 @@ class LoadingIndicator extends StatelessWidget {
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
                 borderRadius: const BorderRadius.all(Radius.circular(10)),
-                color: ColorUtil.bangladeshGreen.withOpacity(0.5),
+                color: ColorUtil.bangladeshGreen.withValues(alpha: 0.5),
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,

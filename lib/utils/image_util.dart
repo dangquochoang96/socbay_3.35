@@ -78,7 +78,9 @@ class ImageUtil {
         width: width,
         height: height,
         fit: fit,
-        color: color,
+        colorFilter: color != null
+            ? ColorFilter.mode(color, BlendMode.srcIn)
+            : null,
         alignment: alignment,
         key: key,
       );

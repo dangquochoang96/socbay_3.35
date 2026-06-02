@@ -10,7 +10,6 @@ import 'package:socbay/routes.dart';
 import 'package:socbay/utils/color_util.dart';
 import 'package:socbay/utils/context_extension.dart';
 import 'package:socbay/utils/scroll_util.dart';
-import 'package:socbay/widgets/button_widget.dart';
 import 'package:socbay/widgets/indicator_loadmore.dart';
 import 'package:socbay/widgets/loading_indicator.dart';
 import 'package:socbay/widgets/text_field_default.dart';
@@ -146,7 +145,7 @@ class _RentTaskTabSale extends State<RentTaskTabSale> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -286,7 +285,7 @@ class _RentTaskTabSale extends State<RentTaskTabSale> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: ColorUtil.bangladeshGreen.withOpacity(0.1),
+        color: ColorUtil.bangladeshGreen.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(

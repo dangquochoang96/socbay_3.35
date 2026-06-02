@@ -32,19 +32,6 @@ import 'package:socbay/widgets/my_app_bar.dart';
 import 'package:socbay/widgets/my_button.dart';
 import 'package:uuid/uuid.dart';
 
-// import '../../application.dart';
-// import '../../blocs/home/search_staff/search_staff_screen_bloc.dart';
-// import '../../constants/constants.dart';
-// import '../../data/model/home_service_model.dart';
-// import '../../routes.dart';
-// import '../../utils/logger_util.dart';
-// import '../../utils/theme_util.dart';
-// import '../../widgets/button_widget.dart';
-// import '../../widgets/dialog/custom_alert_dialog.dart';
-// import '../../widgets/indicator_loadmore.dart';
-// import '../../widgets/my_app_bar.dart';
-// import '../../widgets/my_button.dart';
-
 const double defaultLat = 21.0278; // HaNoi
 const double defaultLng = 105.8342; // HaNoi
 
@@ -129,14 +116,26 @@ class _SearchStaffScreenState extends State<SearchStaffScreen> {
   }
 
   Widget _builder(BuildContext context, SearchStaffScreenState state) {
-    return WillPopScope(
-      onWillPop: _onWillPop,
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+
+        final shouldPop = await _onWillPop();
+
+        if (shouldPop && context.mounted) {
+          Navigator.of(context).pop();
+        }
+      },
       child: Scaffold(
         appBar: MyAppBar(
           isBackNavigation: true,
           title: 'Tìm thợ',
-          onBack: () {
-            _onWillPop();
+          onBack: () async {
+            final shouldPop = await _onWillPop();
+            if (shouldPop && context.mounted) {
+              Navigator.of(context).pop();
+            }
           },
           centerTitle: true,
           actionWidgets: [
@@ -166,18 +165,9 @@ class _SearchStaffScreenState extends State<SearchStaffScreen> {
             ),
             child: Column(
               children: [
-                _buildInfoField(
-                  onTap: () {
-                    _onTapEditInfo();
-                  },
-                ),
+                _buildInfoField(onTap: _onTapEditInfo),
                 const SizedBox(height: 10),
-                Stack(
-                  children: [
-                    ///MAP
-                    _buildMap(),
-                  ],
-                ),
+                Stack(children: [_buildMap()]),
                 const SizedBox(height: 10),
                 Expanded(
                   child: _bloc.staffsInfo.isNotEmpty
@@ -195,7 +185,7 @@ class _SearchStaffScreenState extends State<SearchStaffScreen> {
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
                               const Text(
-                                "Tạm thời không có thợ nào quanh đây.Chúng tôi sẽ sắp xếp và liên hệ tới bạn sớm nhất",
+                                "Tạm thời không có thợ nào quanh đây. Chúng tôi sẽ sắp xếp và liên hệ tới bạn sớm nhất",
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color: ColorUtil.red,
@@ -571,7 +561,7 @@ class _SearchStaffScreenState extends State<SearchStaffScreen> {
         _userAddress?.lat ?? defaultLat,
         _userAddress?.lat ?? defaultLng,
       ),
-      icon: BitmapDescriptor.fromBytes(markerIcon!),
+      icon: BitmapDescriptor.bytes(markerIcon!),
       infoWindow: InfoWindow(title: _userAddress?.address, snippet: '*'),
       onTap: () {},
     );

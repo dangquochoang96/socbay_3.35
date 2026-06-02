@@ -24,7 +24,7 @@ class CustomAlertDialog {
     Color? colorBackground,
   }) {
     showDialog(
-      barrierColor: Colors.black12.withOpacity(0.75),
+      barrierColor: Colors.black12.withValues(alpha: 0.75),
       context: context,
       barrierDismissible: false,
       builder: (ctx) {
@@ -84,7 +84,14 @@ class _CustomAlertDialogWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        if (backListener != null) {
+          backListener!();
+        }
+      },
       child: Material(
         type: MaterialType.transparency,
         borderOnForeground: false,
@@ -180,13 +187,6 @@ class _CustomAlertDialogWidget extends StatelessWidget {
           ),
         ),
       ),
-      onWillPop: () async {
-        if (backListener != null) {
-          backListener!();
-          return false;
-        }
-        return false;
-      },
     );
   }
 

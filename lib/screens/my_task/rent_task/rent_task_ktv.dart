@@ -156,7 +156,7 @@ class _RentTaskTabState extends State<RentTaskTab> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -282,7 +282,7 @@ class _RentTaskTabState extends State<RentTaskTab> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: ColorUtil.bangladeshGreen.withOpacity(0.1),
+        color: ColorUtil.bangladeshGreen.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
@@ -456,67 +456,45 @@ class _RentTaskTabState extends State<RentTaskTab> {
                     hintText: 'Lý do',
                   ),
                   const SizedBox(height: 16),
-                  Column(
-                    // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Row(
-                        children: [
-                          Radio<int>(
-                            value: 5,
-                            groupValue: selectedOption,
-                            onChanged: (int? value) {
-                              setState(() {
-                                selectedOption = value;
-                                print("X1");
-                                print(value);
-                              });
-                            },
-                          ),
-                          const Text(
-                            'Nhận Đơn',
-                            style: TextStyle(fontSize: 12),
-                          ),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          Radio<int>(
-                            value: 1,
-                            groupValue: selectedOption,
-                            onChanged: (int? value) {
-                              setState(() {
-                                selectedOption = value;
-                                print("X2");
-                                print(value);
-                              });
-                            },
-                          ),
-                          const Text(
-                            'Không nhận Đơn',
-                            style: TextStyle(fontSize: 12),
-                          ),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          Radio<int>(
-                            value: 2,
-                            groupValue: selectedOption,
-                            onChanged: (int? value) {
-                              setState(() {
-                                selectedOption = value;
-                                print("X3");
-                                print(value);
-                              });
-                            },
-                          ),
-                          const Text(
-                            'Khách hàng hủy',
-                            style: TextStyle(fontSize: 12),
-                          ),
-                        ],
-                      ),
-                    ],
+                  RadioGroup<int>(
+                    groupValue: selectedOption,
+                    onChanged: (int? value) {
+                      setState(() {
+                        selectedOption = value;
+                      });
+                    },
+                    child: Column(
+                      // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Row(
+                          children: [
+                            Radio<int>(value: 5),
+                            const Text(
+                              'Nhận Đơn',
+                              style: TextStyle(fontSize: 12),
+                            ),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            Radio<int>(value: 1),
+                            const Text(
+                              'Không nhận Đơn',
+                              style: TextStyle(fontSize: 12),
+                            ),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            Radio<int>(value: 2),
+                            const Text(
+                              'Khách hàng hủy',
+                              style: TextStyle(fontSize: 12),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),

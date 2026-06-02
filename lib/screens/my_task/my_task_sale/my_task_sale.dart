@@ -145,7 +145,7 @@ class _MyTaskTabState extends State<MyTaskTabSale> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -285,7 +285,7 @@ class _MyTaskTabState extends State<MyTaskTabSale> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: ColorUtil.bangladeshGreen.withOpacity(0.1),
+        color: ColorUtil.bangladeshGreen.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
