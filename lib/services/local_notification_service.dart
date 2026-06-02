@@ -39,19 +39,30 @@ class LocaNotificationService {
     _isInitialized = true;
   }
 
-  Future<NotificationDetails> _notificationDetails() async {
-    const AndroidNotificationDetails androidNotificationDetails =
+  Future<NotificationDetails> _notificationDetails({
+    bool useTaskSound = false,
+  }) async {
+    final AndroidNotificationDetails androidNotificationDetails =
         AndroidNotificationDetails(
-          'socbay_push_channel',
-          'Socbay Notifications',
-          channelDescription: 'Push notifications for Socbay',
+          useTaskSound ? 'socbay_tasks_channel' : 'socbay_push_channel',
+          useTaskSound ? 'Socbay Task Notifications' : 'Socbay Notifications',
+          channelDescription: useTaskSound
+              ? 'Task notifications for Socbay'
+              : 'Push notifications for Socbay',
           importance: Importance.max,
           priority: Priority.max,
           playSound: true,
+          sound: useTaskSound
+              ? const RawResourceAndroidNotificationSound(
+                  'socbay_new_tasks',
+                )
+              : null,
         );
-    const DarwinNotificationDetails iosNotificationDetails =
-        DarwinNotificationDetails();
-    return const NotificationDetails(
+    final DarwinNotificationDetails iosNotificationDetails =
+        DarwinNotificationDetails(
+          sound: useTaskSound ? 'socbay_new_tasks.mp3' : null,
+        );
+    return NotificationDetails(
       android: androidNotificationDetails,
       iOS: iosNotificationDetails,
     );
@@ -62,8 +73,9 @@ class LocaNotificationService {
     required String title,
     required String body,
     String? payload,
+    bool useTaskSound = false,
   }) async {
-    final details = await _notificationDetails();
+    final details = await _notificationDetails(useTaskSound: useTaskSound);
     await _locaNotificationService.show(
       id,
       title,
@@ -78,8 +90,9 @@ class LocaNotificationService {
     required String title,
     required String body,
     required int seconds,
+    bool useTaskSound = false,
   }) async {
-    final details = await _notificationDetails();
+    final details = await _notificationDetails(useTaskSound: useTaskSound);
     await _locaNotificationService.zonedSchedule(
       id,
       title,
@@ -98,8 +111,9 @@ class LocaNotificationService {
     required String title,
     required String body,
     required String payload,
+    bool useTaskSound = false,
   }) async {
-    final details = await _notificationDetails();
+    final details = await _notificationDetails(useTaskSound: useTaskSound);
     await _locaNotificationService.show(
       id,
       title,

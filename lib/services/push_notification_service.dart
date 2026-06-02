@@ -113,11 +113,13 @@ class PushNotificationService {
     }
 
     final payload = jsonEncode(message.data);
+    final target = message.data['screen']?.toString();
     await _localNotificationService.showNotification(
       id: message.hashCode,
       title: title ?? 'Thông Báo',
       body: body ?? '',
       payload: payload,
+      useTaskSound: target == 'tasks',
     );
   }
 
