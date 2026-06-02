@@ -15,6 +15,7 @@ import 'package:socbay/blocs/tab_bar/tab_bar_event.dart';
 import 'package:socbay/blocs/task/task_screen_bloc.dart';
 import 'package:socbay/blocs/task/task_screen_event.dart';
 import 'package:socbay/config/app_config.dart';
+import 'package:socbay/constants/api_endpoints.dart';
 import 'package:socbay/data/model/home_service_model.dart';
 import 'package:socbay/data/model/machine_model.dart';
 import 'package:socbay/data/model/order_model.dart';
@@ -36,8 +37,15 @@ import 'package:socbay/widgets/my_app_bar.dart';
 import 'package:socbay/widgets/text_field_default.dart';
 import 'package:image/image.dart' as img;
 
+enum TaskOrderType { service, rent }
+
 class StaffServiceSaleScreen extends StatefulWidget {
-  const StaffServiceSaleScreen({super.key});
+  final TaskOrderType initialOrderType;
+
+  const StaffServiceSaleScreen({
+    super.key,
+    this.initialOrderType = TaskOrderType.service,
+  });
 
   @override
   State<StatefulWidget> createState() => _StaffServiceSaleScreenState();
@@ -64,6 +72,7 @@ class _StaffServiceSaleScreenState extends State<StaffServiceSaleScreen> {
   String _dateStart = '';
   String _timeStart = '';
   UserProfile? _favouriteStaff;
+  late TaskOrderType _selectedOrderType;
 
   bool _addNewCustomer = false;
   DateTime? selectedDate;
@@ -75,6 +84,7 @@ class _StaffServiceSaleScreenState extends State<StaffServiceSaleScreen> {
   @override
   void initState() {
     _bloc = BlocProvider.of(context);
+    _selectedOrderType = widget.initialOrderType;
     _tabBarBloc = BlocProvider.of<TabBarBloc>(context);
     staffFavoriteTxtController = TextEditingController();
     describeRequestTxtController = TextEditingController();
@@ -90,9 +100,7 @@ class _StaffServiceSaleScreenState extends State<StaffServiceSaleScreen> {
         proad: ProductModel(address: "--Chọn máy--"),
       ),
     );
-    _currentSelectedValue = _listService[int.tryParse(_bloc.args['index']) ?? 0]
-        .id
-        .toString();
+    _currentSelectedValue = _listService[_initialServiceIndex].id.toString();
     _picker = ImagePicker();
 
     if (selectedDate != null) {
@@ -133,6 +141,17 @@ class _StaffServiceSaleScreenState extends State<StaffServiceSaleScreen> {
     super.dispose();
   }
 
+  int get _initialServiceIndex {
+    final rawIndex = _bloc.args['index'];
+    final index = rawIndex is int
+        ? rawIndex
+        : int.tryParse(rawIndex?.toString() ?? '') ?? 0;
+    if (_listService.isEmpty) {
+      return 0;
+    }
+    return index.clamp(0, _listService.length - 1).toInt();
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<
@@ -152,11 +171,12 @@ class _StaffServiceSaleScreenState extends State<StaffServiceSaleScreen> {
         ),
       );
       for (var element in _bloc.listProducts) {
-        if (element.product != null) {
+        if (_productName(element).isNotEmpty) {
           _listProducts.add(element);
         }
       }
       setState(() {
+        _resetSelectedProductIfHidden();
         _addNewCustomer = false;
         customerController.text = _bloc.customerInfo?.username ?? '';
       });
@@ -174,7 +194,7 @@ class _StaffServiceSaleScreenState extends State<StaffServiceSaleScreen> {
     if (state is StaffServiceScreenSaleCreateTaskSuccessState) {
       CustomAlertDialog.show(
         context,
-        content: "Đăng ký dịch vụ thành công",
+        content: "Tạo công việc thành công",
         leftText: "Ok",
         isLeftPositive: true,
         backListener: () {},
@@ -308,6 +328,8 @@ class _StaffServiceSaleScreenState extends State<StaffServiceSaleScreen> {
             '1. Thông tin dịch vụ & Khách hàng',
             Icons.home_repair_service_rounded,
           ),
+          _buildOrderTypeDropdown(),
+          const SizedBox(height: 16),
           _buildDropdownField(),
           const SizedBox(height: 16),
           _buildSearchCustomer(),
@@ -315,6 +337,72 @@ class _StaffServiceSaleScreenState extends State<StaffServiceSaleScreen> {
           _buildDropdownFieldPruducts(),
         ],
       ),
+    );
+  }
+
+  Widget _buildOrderTypeDropdown() {
+    return DropdownButtonFormField<TaskOrderType>(
+      initialValue: _selectedOrderType,
+      decoration: InputDecoration(
+        labelText: 'Loại đơn',
+        labelStyle: TextStyle(
+          color: ColorUtil.bangladeshGreen.withValues(alpha: 0.8),
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+        ),
+        filled: true,
+        fillColor: Colors.grey.shade50,
+        prefixIcon: const Icon(
+          Icons.receipt_long_rounded,
+          color: ColorUtil.bangladeshGreen,
+        ),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 12,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey.shade200, width: 1.5),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(
+            color: ColorUtil.bangladeshGreen,
+            width: 1.5,
+          ),
+        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+      isExpanded: true,
+      icon: const Icon(
+        Icons.arrow_drop_down_rounded,
+        color: ColorUtil.spanishGray,
+        size: 28,
+      ),
+      onChanged: (TaskOrderType? newValue) {
+        if (newValue != null) {
+          setState(() {
+            _selectedOrderType = newValue;
+            _resetSelectedProductIfHidden();
+          });
+        }
+      },
+      items: const [
+        DropdownMenuItem<TaskOrderType>(
+          value: TaskOrderType.service,
+          child: Text(
+            'Đơn Dịch Vụ',
+            style: TextStyle(fontSize: 14, color: ColorUtil.raisinBlack),
+          ),
+        ),
+        DropdownMenuItem<TaskOrderType>(
+          value: TaskOrderType.rent,
+          child: Text(
+            'Đơn Thuê',
+            style: TextStyle(fontSize: 14, color: ColorUtil.raisinBlack),
+          ),
+        ),
+      ],
     );
   }
 
@@ -507,7 +595,8 @@ class _StaffServiceSaleScreenState extends State<StaffServiceSaleScreen> {
   }
 
   Widget _buildDropdownFieldPruducts() {
-    final hasProduct = _listProducts.any(
+    final displayedProducts = _displayedProducts;
+    final hasProduct = displayedProducts.any(
       (e) => e.id == _currentSelectedProductValue,
     );
     return Column(
@@ -556,7 +645,7 @@ class _StaffServiceSaleScreenState extends State<StaffServiceSaleScreen> {
           onChanged: (String? newValue) {
             setState(() {
               _currentSelectedProductValue = int.parse(newValue ?? '0');
-              final matched = _listProducts.where(
+              final matched = displayedProducts.where(
                 (item) =>
                     item.id.toString() ==
                     _currentSelectedProductValue.toString(),
@@ -567,11 +656,11 @@ class _StaffServiceSaleScreenState extends State<StaffServiceSaleScreen> {
               }
             });
           },
-          items: _listProducts.map((OrderModel sv) {
+          items: displayedProducts.map((OrderModel sv) {
             return DropdownMenuItem<String>(
               value: sv.id.toString(),
               child: Text(
-                sv.product?.name ?? '',
+                _productName(sv),
                 style: const TextStyle(
                   fontSize: 14,
                   color: ColorUtil.raisinBlack,
@@ -625,6 +714,33 @@ class _StaffServiceSaleScreenState extends State<StaffServiceSaleScreen> {
         ),
       ],
     );
+  }
+
+  List<OrderModel> get _displayedProducts {
+    if (_selectedOrderType != TaskOrderType.rent) {
+      return _listProducts;
+    }
+    return _listProducts
+        .where((item) => item.id == 0 || _isRentOrderProduct(item))
+        .toList();
+  }
+
+  bool _isRentOrderProduct(OrderModel item) {
+    return item.orderTypeLabel?.trim().toLowerCase().contains('thu') == true;
+  }
+
+  String _productName(OrderModel item) {
+    return item.product?.name ?? item.proad?.name ?? '';
+  }
+
+  void _resetSelectedProductIfHidden() {
+    final hasSelectedProduct = _displayedProducts.any(
+      (item) => item.id == _currentSelectedProductValue,
+    );
+    if (!hasSelectedProduct) {
+      _currentSelectedProductValue = 0;
+      addressSPRequestTxtController.clear();
+    }
   }
 
   // ─── card 2: lịch hẹn ──────────────────────────────────────────────────────
@@ -1145,6 +1261,9 @@ class _StaffServiceSaleScreenState extends State<StaffServiceSaleScreen> {
           images: _listPath,
         ),
         false,
+        createTaskEndpoint: _selectedOrderType == TaskOrderType.rent
+            ? ApiEndpoints.rentTaskCreate
+            : ApiEndpoints.taskCreate,
       ),
     );
   }

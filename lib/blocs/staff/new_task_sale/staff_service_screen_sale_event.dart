@@ -18,8 +18,13 @@ class StaffServiceScreenSaleCreateTaskEvent
     extends StaffServiceSaleScreenEvent {
   final CreateTaskRequest createTaskRequest;
   final bool isSearch;
+  final String? createTaskEndpoint;
 
-  StaffServiceScreenSaleCreateTaskEvent(this.createTaskRequest, this.isSearch);
+  StaffServiceScreenSaleCreateTaskEvent(
+    this.createTaskRequest,
+    this.isSearch, {
+    this.createTaskEndpoint,
+  });
 }
 
 class StaffServiceScreenSaleUploadImageEvent

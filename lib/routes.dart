@@ -24,7 +24,6 @@ import 'package:socbay/blocs/staff/new_order/staff_new_rent_order_bloc.dart';
 import 'package:socbay/blocs/staff/new_task/staff_service_screen_bloc.dart';
 import 'package:socbay/blocs/staff/new_task_sale/staff_service_screen_sale_bloc.dart';
 import 'package:socbay/blocs/staff/order/order_manager_bloc.dart';
-import 'package:socbay/blocs/staff/rent_task_sale/rent_booking_service_bloc.dart';
 import 'package:socbay/blocs/user_info/account_info/account_info_bloc.dart';
 import 'package:socbay/blocs/user_info/change_password/change_password_screen_bloc.dart';
 import 'package:socbay/blocs/user_info/favourite_product/favourite_product_bloc.dart';
@@ -77,7 +76,6 @@ import 'package:socbay/screens/staff/feedback/staff_feedback_screen.dart';
 import 'package:socbay/screens/staff/new_order/bill_screen.dart';
 import 'package:socbay/screens/staff/new_order/new_rent_order_screen.dart';
 import 'package:socbay/screens/staff/new_order/staff_new_order_screen.dart';
-import 'package:socbay/screens/staff/new_rent_task/rent_booking_service.dart';
 import 'package:socbay/screens/staff/new_task/staff_service_screen.dart';
 import 'package:socbay/screens/staff/new_task/staff_service_screen_sale.dart';
 import 'package:socbay/screens/staff/profile/staff_profile_screen.dart';
@@ -170,7 +168,7 @@ class Routes {
   static const String feedbackkScreen = '/feedbackkScreen';
   static const String staffFeedbackListScreen = '/staffFeedbackListScreen';
   static const String staffServiceScreenSale = '/staffServiceScreenSale';
-  static const String rentBookingServiceScreen = '/rentBookingServiceScreen';
+  // static const String rentBookingServiceScreen = '/rentBookingServiceScreen';
   static const String orderManagerScreenBySale = '/orderManagerScreenBySale';
   CupertinoPageRoute routePage(RouteSettings settings) {
     return CupertinoPageRoute(
@@ -491,14 +489,16 @@ class Routes {
               ),
               child: const StaffServiceSaleScreen(),
             );
-          case rentBookingServiceScreen:
-            return BlocProvider<RentBookingServiceBloc>(
-              create: (context) => RentBookingServiceBloc(
-                apiRepository: apiRepository,
-                args: settings.arguments as Map<String, dynamic>,
-              ),
-              child: const RentBookingServiceScreen(),
-            );
+          // case rentBookingServiceScreen:
+          //   return BlocProvider<StaffServiceSaleScreenBloc>(
+          //     create: (context) => StaffServiceSaleScreenBloc(
+          //       apiRepository: apiRepository,
+          //       args: settings.arguments as Map<String, dynamic>,
+          //     ),
+          //     child: const StaffServiceSaleScreen(
+          //       initialOrderType: TaskOrderType.rent,
+          //     ),
+          //   );
           case createOrderScreen:
             return BlocProvider<StaffNewOrderBloc>(
               create: (ctx) => StaffNewOrderBloc(

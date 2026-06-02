@@ -23,6 +23,7 @@ class StaffServiceSaleScreenBloc
     extends Bloc<StaffServiceSaleScreenEvent, StaffServiceSaleScreenState> {
   final ApiRepository apiRepository;
   final Map<String, dynamic> args;
+  final String createTaskEndpoint;
   bool isLoading = false;
   List<UserAddress> listUserAddress = [];
   List<OrderModel> listProducts = [];
@@ -30,8 +31,11 @@ class StaffServiceSaleScreenBloc
   List<HomeServiceModel> listService = [];
   UserProfile? customerInfo;
 
-  StaffServiceSaleScreenBloc({required this.apiRepository, required this.args})
-    : super(StaffServiceScreenSaleInitialState()) {
+  StaffServiceSaleScreenBloc({
+    required this.apiRepository,
+    required this.args,
+    this.createTaskEndpoint = ApiEndpoints.taskCreate,
+  }) : super(StaffServiceScreenSaleInitialState()) {
     on<StaffServiceScreenSaleChangeTypeServiceEvent>(
       _mapChangeTypeServiceEventToState,
     );
@@ -91,7 +95,9 @@ class StaffServiceSaleScreenBloc
         "address": event.createTaskRequest.address.toString(),
         "request_user_id": App.instance.userApp!.id.toString(),
       };
-      var url = AppConfig.instance.apiUri(ApiEndpoints.taskCreate);
+      var url = AppConfig.instance.apiUri(
+        event.createTaskEndpoint ?? createTaskEndpoint,
+      );
       var body = json.encode(args);
       print('body');
       print(body);
