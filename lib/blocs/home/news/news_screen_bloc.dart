@@ -5,7 +5,6 @@ import 'dart:io';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:socbay/blocs/home/news/news_screen_event.dart';
 import 'package:socbay/blocs/home/news/news_screen_state.dart';
-import 'package:socbay/config/app_config.dart';
 import 'package:socbay/constants/api_endpoints.dart';
 import 'package:socbay/data/model/blog_model.dart';
 import 'package:socbay/data/repository/auth/api_repository.dart';
@@ -24,6 +23,7 @@ class NewsScreenBloc extends Bloc<NewsScreenEvent, NewsScreenState> {
   bool isLoading = false;
   int page = 1;
   int total = 1;
+  int lastPage = 1;
 
   FutureOr<void> _mapGetNewsEventToState(
     NewsScreenGetNewsEvent event,
@@ -33,18 +33,31 @@ class NewsScreenBloc extends Bloc<NewsScreenEvent, NewsScreenState> {
       isLoading = true;
       emit(NewsScreenInitialState());
 
-      var url = AppConfig.instance.apiUri(ApiEndpoints.blogs, {'page': '0'});
+      if (event.isRefresh) {
+        blogs.clear();
+        page = 1;
+        total = 1;
+        lastPage = 1;
+      }
+
+      final url = Uri.parse(
+        ApiEndpoints.geyserBlogs,
+      ).replace(queryParameters: {'page': page.toString()});
       var res = await http.get(url);
       if (res.statusCode == HttpStatus.ok) {
-        var l = Map<String, dynamic>.from(json.decode(res.body));
-        if (event.isRefresh) {
-          blogs.clear();
-          page = 0;
-        }
-        page = page + page * 20;
-        blogs = List<BlogModel>.from(
-          l["data"].map((model) => BlogModel.fromJson(model)),
+        var l = Map<String, dynamic>.from(
+          json.decode(utf8.decode(res.bodyBytes)),
         );
+        final data = Map<String, dynamic>.from(l["data"]);
+        total = _toInt(data["total"]) ?? total;
+        final currentPage = _toInt(data["current_page"]) ?? page;
+        lastPage = _toInt(data["last_page"]) ?? lastPage;
+        blogs.addAll(
+          List<BlogModel>.from(
+            data["data"].map((model) => BlogModel.fromJson(model)),
+          ),
+        );
+        page = currentPage + 1;
       }
       // final res = await apiRepository.getBlogs(page: event.isRefresh ? 1 : page);
       // if (res.data != null && res.status == HttpStatus.ok) {
@@ -60,8 +73,17 @@ class NewsScreenBloc extends Bloc<NewsScreenEvent, NewsScreenState> {
       emit(NewsScreenInitialState());
     } catch (ex) {
       LoggerUtil.error("---GET BLOGS LIST ERROR--- \n$ex");
+      isLoading = false;
+      emit(NewsScreenInitialState());
     }
   }
 
-  bool isHasMore() => blogs.length < total;
+  bool isHasMore() => page <= lastPage && blogs.length < total;
+
+  int? _toInt(dynamic value) {
+    if (value is int) {
+      return value;
+    }
+    return int.tryParse(value?.toString() ?? "");
+  }
 }

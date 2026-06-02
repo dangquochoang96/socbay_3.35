@@ -129,12 +129,17 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     Emitter<HomeState> emit,
   ) async {
     try {
-      var url = AppConfig.instance.apiUri(ApiEndpoints.blogs, {'page': "0"});
+      final url = Uri.parse(
+        ApiEndpoints.geyserBlogs,
+      ).replace(queryParameters: {'page': '1'});
       var res = await http.get(url);
       if (res.statusCode == HttpStatus.ok) {
-        var l = Map<String, dynamic>.from(json.decode(res.body));
+        var l = Map<String, dynamic>.from(
+          json.decode(utf8.decode(res.bodyBytes)),
+        );
+        final data = Map<String, dynamic>.from(l["data"]);
         blogs = List<BlogModel>.from(
-          l["data"].map((model) => BlogModel.fromJson(model)),
+          data["data"].map((model) => BlogModel.fromJson(model)),
         );
       }
     } catch (ex) {

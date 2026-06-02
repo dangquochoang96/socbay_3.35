@@ -11,6 +11,8 @@ abstract final class ApiEndpoints {
   static const notificationList = '/notify/list';
   static const banners = '/setting/banner';
   static const blogs = '/blog/list';
+  static const geyserBlogs =
+      'https://geysereco.com/api/blogs/category/san-pham-dich-vu-2';
   static const feedbacks = '/socbay/feedbacks';
   static const services = '/service';
   static const uploadImage = '/uploadImage';

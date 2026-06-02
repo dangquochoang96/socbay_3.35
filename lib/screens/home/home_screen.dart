@@ -863,9 +863,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ClipRRect(
             borderRadius: BorderRadius.circular(10.0),
             child: ImageUtil.loadNetWorkImage(
-              url: itemBlog.image == null
-                  ? ""
-                  : "$protocol${AppConfig.instance.values.apiUrl}${itemBlog.image!}",
+              url: itemBlog.imageUrl,
               fit: BoxFit.cover,
               height: 100,
               width: 100,

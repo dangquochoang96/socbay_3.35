@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
-import 'package:socbay/config/app_config.dart';
 import 'package:socbay/constants/constants.dart';
 import 'package:socbay/data/model/blog_model.dart';
 import 'package:socbay/utils/color_util.dart';
@@ -23,9 +22,7 @@ class NewDetailScreen extends StatelessWidget {
         ),
         children: [
           ImageUtil.loadNetWorkImage(
-            url: blogModel.image != null
-                ? '$protocol${AppConfig.instance.values.apiUrl}${blogModel.image!}'
-                : "",
+            url: blogModel.imageUrl,
             height: 200,
           ),
           const SizedBox(height: 16),

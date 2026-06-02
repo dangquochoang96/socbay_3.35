@@ -4,7 +4,6 @@ import 'package:flutter_html/flutter_html.dart';
 import 'package:socbay/blocs/home/news/news_screen_bloc.dart';
 import 'package:socbay/blocs/home/news/news_screen_event.dart';
 import 'package:socbay/blocs/home/news/news_screen_state.dart';
-import 'package:socbay/config/app_config.dart';
 import 'package:socbay/constants/constants.dart';
 import 'package:socbay/routes.dart';
 import 'package:socbay/widgets/my_app_bar.dart';
@@ -91,9 +90,7 @@ class _NewsScreenState extends State<NewsScreen> {
           ClipRRect(
             borderRadius: BorderRadius.circular(10.0),
             child: ImageUtil.loadNetWorkImage(
-              url: itemBlog.image == null
-                  ? ""
-                  : "$protocol${AppConfig.instance.values.apiUrl}${itemBlog.image!}",
+              url: itemBlog.imageUrl,
               fit: BoxFit.cover,
               height: 100,
               width: 100,
