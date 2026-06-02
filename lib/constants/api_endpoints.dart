@@ -9,7 +9,7 @@ abstract final class ApiEndpoints {
   static const forgotPassword = '/auth/fogotPassWord';
   static const notifications = '/notify';
   static const notificationList = '/notify/list';
-  static const banners = '/banner';
+  static const banners = '/setting/banner';
   static const blogs = '/blog/list';
   static const feedbacks = '/socbay/feedbacks';
   static const services = '/service';

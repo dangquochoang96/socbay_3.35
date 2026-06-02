@@ -417,7 +417,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                                 .replaceDatePromise ??
                                             "")
                                       : "",
-                                  // text: machine.orderFilterCoresModel?[0].replaceDatePromise,
                                   style: const TextStyle(
                                     color: Colors.red,
                                     fontWeight: FontWeight.normal,
@@ -765,7 +764,9 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
         decoration: BoxDecoration(
-          border: Border.all(color: ColorUtil.bangladeshGreen.withOpacity(0.4)),
+          border: Border.all(
+            color: ColorUtil.bangladeshGreen.withValues(alpha: 0.4),
+          ),
           borderRadius: BorderRadius.circular(12.0),
         ),
         child: Column(

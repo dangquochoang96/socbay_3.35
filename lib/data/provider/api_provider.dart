@@ -317,13 +317,20 @@ class ApiProvider {
         manager: ApiManager(ApiType.getBanners),
       );
       final res = DefaultResponse.fromMap(resJson);
-      if (res.status == 200 && res.data != null) {
+      if ((resJson['code'] == 1 || res.status == 200) && res.data != null) {
         List<BannerModel> list = [];
-        for (final item in res.data ?? []) {
-          final model = BannerModel.fromJson(item);
+        if (res.data is List) {
+          for (final item in res.data ?? []) {
+            final model = BannerModel.fromJson(item);
+            list.add(model);
+          }
+        } else if (res.data is Map) {
+          final model = BannerModel.fromJson(
+            Map<String, dynamic>.from(res.data as Map),
+          );
           list.add(model);
         }
-        return DefaultResponse(data: list);
+        return DefaultResponse(data: list, status: HttpStatus.ok);
       } else {
         return DefaultResponse(status: res.status, message: res.message);
       }

@@ -82,7 +82,12 @@ class AppConfig {
   }
 
   Uri apiUri(String endpoint, [Map<String, dynamic>? queryParameters]) {
-    return Uri.http(apiHost, buildApiPath(endpoint), queryParameters);
+    return Uri(
+      scheme: protocol.replaceAll('://', ''),
+      host: apiHost,
+      path: buildApiPath(endpoint),
+      queryParameters: queryParameters,
+    );
   }
 
   Uri apiSecureUri(String endpoint, [Map<String, dynamic>? queryParameters]) {

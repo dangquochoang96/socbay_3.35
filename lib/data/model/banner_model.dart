@@ -25,7 +25,7 @@ class BannerModel {
 
   factory BannerModel.fromJson(Map<String, dynamic> json) => BannerModel(
     id: json['id'] as int?,
-    image: json['image'] as String?,
+    image: (json['image'] ?? json['banner'])?.toString(),
     link: json['link'] as String?,
     title: json['title'] as String?,
     description: json['description'] as String?,

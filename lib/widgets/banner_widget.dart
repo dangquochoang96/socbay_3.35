@@ -1,5 +1,6 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:socbay/config/app_config.dart';
 import 'package:socbay/utils/context_extension.dart';
 
 import '../data/model/banner_model.dart';
@@ -22,7 +23,7 @@ class _SliderWidget extends State<BannerSliderWidget> {
     return Visibility(
       visible: widget.banners.length > 1,
       replacement: ImageUtil.loadNetWorkImage(
-        url: widget.banners[0].image ?? '',
+        url: _bannerImageUrl(widget.banners[0].image),
         width: width,
         height: 200,
         fit: BoxFit.cover,
@@ -38,7 +39,7 @@ class _SliderWidget extends State<BannerSliderWidget> {
         ),
         items: widget.banners.map((i) {
           return ImageUtil.loadNetWorkImage(
-            url: i.image ?? '',
+            url: _bannerImageUrl(i.image),
             width: width,
             height: 150,
             fit: BoxFit.cover,
@@ -46,5 +47,19 @@ class _SliderWidget extends State<BannerSliderWidget> {
         }).toList(),
       ),
     );
+  }
+
+  String _bannerImageUrl(String? image) {
+    if (image == null || image.isEmpty) {
+      return '';
+    }
+
+    final uri = Uri.tryParse(image);
+    if (uri != null && uri.hasScheme) {
+      return image;
+    }
+
+    final path = image.startsWith('/') ? image : '/$image';
+    return '$protocol${AppConfig.instance.values.apiUrl}$path';
   }
 }

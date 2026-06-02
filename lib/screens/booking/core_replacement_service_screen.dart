@@ -19,6 +19,7 @@ import 'package:socbay/utils/color_util.dart';
 import 'package:socbay/utils/context_extension.dart';
 import 'package:socbay/utils/image_util.dart';
 import 'package:socbay/widgets/button_widget.dart';
+import 'package:socbay/widgets/loading_indicator.dart';
 import 'package:socbay/widgets/my_app_bar.dart';
 import 'package:socbay/widgets/text_field_default.dart';
 
@@ -133,6 +134,31 @@ class _CoreReplacementServiceScreenState
   void _listener(BuildContext context, CoreReplatementServiceState state) {}
 
   Widget _builder(BuildContext context, CoreReplatementServiceState state) {
+    final hasData = _hasData;
+    if (_bloc.isLoading) {
+      return Scaffold(
+        appBar: MyAppBar(
+          title: "Chi tiết lần thay lõi",
+          isBackNavigation: true,
+          centerTitle: true,
+        ),
+        body: const SafeArea(
+          child: LoadingIndicator(isLoading: true, child: SizedBox.expand()),
+        ),
+      );
+    }
+
+    if (!hasData) {
+      return Scaffold(
+        appBar: MyAppBar(
+          title: "Chi tiết lần thay lõi",
+          isBackNavigation: true,
+          centerTitle: true,
+        ),
+        body: SafeArea(child: _buildEmptyState()),
+      );
+    }
+
     var staffName = _bloc.orderDetailModel?.staff != null
         ? _bloc.orderDetailModel?.staff?.username
         : '';
@@ -272,6 +298,22 @@ class _CoreReplacementServiceScreenState
       ),
       floatingActionButton: isCustomer ? _buildFloatingBookingButton() : null,
       bottomNavigationBar: _showBottomSheetFeedback(),
+    );
+  }
+
+  bool get _hasData {
+    final coreModels = _bloc.orderDetailModel?.orderFilterCoresModel;
+    return _bloc.orderDetailModel != null &&
+        coreModels != null &&
+        coreModels.isNotEmpty;
+  }
+
+  Widget _buildEmptyState() {
+    return const Center(
+      child: Text(
+        "Không có dữ liệu",
+        style: TextStyle(fontSize: 16, color: Colors.black54),
+      ),
     );
   }
 
