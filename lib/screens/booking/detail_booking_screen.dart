@@ -6,10 +6,13 @@ import 'package:socbay/application.dart';
 import 'package:socbay/blocs/booking/detail_booking/detail_booking_bloc.dart';
 import 'package:socbay/blocs/booking/detail_booking/detail_booking_event.dart';
 import 'package:socbay/blocs/booking/detail_booking/detail_booking_state.dart';
+import 'package:socbay/blocs/booking/detail_booking/detail_rent_booking_bloc.dart';
 import 'package:socbay/blocs/task/task_screen_event.dart';
 import 'package:socbay/blocs/task/task_screen_sale_bloc.dart';
+import 'package:socbay/blocs/rent-task/rent_task_screen_event.dart'
+    as rent_event;
+import 'package:socbay/blocs/rent-task/rent_task_screen_bloc.dart';
 import 'package:socbay/config/app_config.dart';
-import 'package:socbay/constants/constants.dart';
 import 'package:socbay/constants/maps.dart';
 import 'package:socbay/data/model/order_detail_model.dart';
 import 'package:socbay/data/model/task_model.dart';
@@ -24,20 +27,26 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:android_intent_plus/android_intent.dart';
 
 class DetailBookingScreen extends StatefulWidget {
-  const DetailBookingScreen({super.key});
+  final bool isRent;
+  const DetailBookingScreen({super.key, this.isRent = false});
 
   @override
   State<DetailBookingScreen> createState() => _DetailBookingScreenState();
 }
 
 class _DetailBookingScreenState extends State<DetailBookingScreen> {
-  late DetailBookingBloc _bloc;
-  late TaskScreenSaleBloc _taskScreenSaleBloc;
+  late dynamic _bloc;
+  late dynamic _taskScreenSaleBloc;
 
   @override
   void initState() {
-    _bloc = BlocProvider.of(context);
-    _taskScreenSaleBloc = BlocProvider.of<TaskScreenSaleBloc>(context);
+    if (widget.isRent) {
+      _bloc = BlocProvider.of<DetailRentBookingBloc>(context);
+      _taskScreenSaleBloc = BlocProvider.of<RentTaskScreenSaleBloc>(context);
+    } else {
+      _bloc = BlocProvider.of<DetailBookingBloc>(context);
+      _taskScreenSaleBloc = BlocProvider.of<TaskScreenSaleBloc>(context);
+    }
     _bloc.add(DetailBookingStartedEvent());
     super.initState();
   }
@@ -49,16 +58,24 @@ class _DetailBookingScreenState extends State<DetailBookingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<DetailBookingBloc, DetailBookingState>(
-      builder: _builder,
-      listener: _listener,
-    );
+    if (widget.isRent) {
+      return BlocConsumer<DetailRentBookingBloc, DetailBookingState>(
+        builder: _builder,
+        listener: _listener,
+      );
+    } else {
+      return BlocConsumer<DetailBookingBloc, DetailBookingState>(
+        builder: _builder,
+        listener: _listener,
+      );
+    }
   }
 
   void _listener(BuildContext context, DetailBookingState state) {}
 
   Widget _builder(BuildContext context, DetailBookingState state) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF4F6F8),
       appBar: MyAppBar(
         titleWidget: GestureDetector(
           //onTap: onTapTitleWidget,
@@ -139,27 +156,23 @@ class _DetailBookingScreenState extends State<DetailBookingScreen> {
       body: LoadingIndicator(
         isLoading: _bloc.isLoading,
         child: ListView(
-          padding: const EdgeInsets.symmetric(
-            horizontal: paddingHorizontal,
-            vertical: paddingVertical,
-          ),
+          padding: const EdgeInsets.all(16),
           children: [
-            _buildTable(_bloc.taskModel),
-            const SizedBox(height: 5),
-            const Text(
-              'VIDEO - HÌNH ẢNH:',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-            ),
-            _buildMediaRow(),
+            _buildGeneralInfoCard(_bloc.taskModel),
+            _buildProductInfoCard(_bloc.taskModel),
+            if (App.instance.userApp?.isUserCustomer() == false)
+              _buildCustomerInfoCard(_bloc.taskModel),
+            _buildMediaCard(),
+            const SizedBox(height: 16),
             if (App.instance.userApp?.isUserRole() == true) ...[
               if (_bloc.taskModel?.status == "3") _detailTask(),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: Row(
-                  children: [
-                    if (_bloc.taskModel?.status != "3" &&
-                        _bloc.taskModel?.status != "4" &&
-                        !(App.instance.userApp?.isUserCustomer() == true))
+              if (_bloc.taskModel?.status != "3" &&
+                  _bloc.taskModel?.status != "4" &&
+                  !(App.instance.userApp?.isUserCustomer() == true))
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Row(
+                    children: [
                       _buildButton(
                         text: 'TẠO HÓA ĐƠN',
                         isPositive: true,
@@ -167,13 +180,398 @@ class _DetailBookingScreenState extends State<DetailBookingScreen> {
                           _createOrder(_bloc.taskModel?.id ?? 0);
                         },
                       ),
-                    const SizedBox(width: 16),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
             ],
+            const SizedBox(height: 30),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildGeneralInfoCard(TaskModel? taskModel) {
+    return _buildCard(
+      title: "Thông tin chung",
+      icon: Icons.info_outline,
+      child: Column(
+        children: [
+          _buildInfoRow(
+            "Thời gian:",
+            _formatDatetime(taskModel?.timeStart),
+            valueColor: ColorUtil.red,
+            isBold: true,
+          ),
+          _buildInfoRow("Công việc:", taskModel?.name ?? ""),
+          _buildInfoRow(
+            "Trạng thái:",
+            taskModel?.getStatus() ?? "",
+            valueColor: ColorUtil.red,
+            isBold: true,
+          ),
+          if (taskModel?.staff?.username != null)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8.0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    flex: 2,
+                    child: Text(
+                      "Kỹ thuật viên:",
+                      style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 3,
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.pushNamed(
+                          context,
+                          Routes.staffCommentTechniqueList,
+                          arguments: {
+                            "id": taskModel?.staff?.id,
+                            "name": taskModel?.staff?.username,
+                            "staffInfo": taskModel?.staff,
+                          },
+                        );
+                      },
+                      child: Text(
+                        taskModel?.staff?.username ?? "",
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: ColorUtil.bangladeshGreen,
+                          fontWeight: FontWeight.bold,
+                          decoration: TextDecoration.underline,
+                        ),
+                        textAlign: TextAlign.right,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          if (taskModel?.staff?.phone != null)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8.0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    flex: 2,
+                    child: Text(
+                      "SĐT KTV:",
+                      style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 3,
+                    child: GestureDetector(
+                      onTap: () {
+                        var url = "tel:${taskModel!.staff!.phone!}";
+                        launchUrl(Uri.parse(url));
+                      },
+                      child: Text(
+                        taskModel?.staff?.phone ?? "",
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: ColorUtil.bangladeshGreen,
+                          fontWeight: FontWeight.bold,
+                          decoration: TextDecoration.underline,
+                        ),
+                        textAlign: TextAlign.right,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          if (taskModel?.noti != null && taskModel!.noti!.isNotEmpty)
+            _buildInfoRow("Thông báo:", taskModel.noti!),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProductInfoCard(TaskModel? taskModel) {
+    return _buildCard(
+      title: "Thông tin thiết bị & Yêu cầu",
+      icon: Icons.kitchen_outlined,
+      child: Column(
+        children: [
+          _buildInfoRow(
+            "Tên sản phẩm:",
+            taskModel?.productInfo?.machineModel?.name ?? "",
+          ),
+          _buildInfoRow("Nội dung:", taskModel?.des ?? ""),
+          if (App.instance.userApp?.isUserCustomer() == true)
+            _buildInfoRow(
+              "Vị trí lắp đặt:",
+              taskModel?.productInfo?.address ?? "",
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCustomerInfoCard(TaskModel? taskModel) {
+    return _buildCard(
+      title: "Thông tin khách hàng",
+      icon: Icons.person_outline,
+      child: Column(
+        children: [
+          if (taskModel?.customer?.phone != null)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8.0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    flex: 2,
+                    child: Text(
+                      "Số điện thoại:",
+                      style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 3,
+                    child: GestureDetector(
+                      onTap: () {
+                        var url = "tel:${taskModel!.customer!.phone!}";
+                        launchUrl(Uri.parse(url));
+                      },
+                      child: Text(
+                        taskModel?.customer?.phone ?? "",
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: ColorUtil.bangladeshGreen,
+                          fontWeight: FontWeight.bold,
+                          decoration: TextDecoration.underline,
+                        ),
+                        textAlign: TextAlign.right,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          if (taskModel?.customer?.address != null)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8.0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    flex: 2,
+                    child: Text(
+                      "Địa chỉ:",
+                      style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 3,
+                    child: GestureDetector(
+                      onTap: () async {
+                        if (isAndroid) {
+                          final AndroidIntent intent = AndroidIntent(
+                            action: 'action_view',
+                            data:
+                                'google.navigation:q=${taskModel?.customer?.address ?? ""}',
+                            package: 'package:com.google.android.apps.maps',
+                          );
+                          await intent.launch();
+                        } else {
+                          commonLaunchUrl(
+                            '$GOOGLE_MAP_PREFIX${Uri.encodeFull(taskModel?.customer?.address ?? "")}',
+                            launchMode: LaunchMode.externalApplication,
+                          );
+                        }
+                      },
+                      child: Text(
+                        taskModel?.customer?.address ?? "",
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: ColorUtil.brightYellow,
+                          fontWeight: FontWeight.w500,
+                          decoration: TextDecoration.underline,
+                        ),
+                        textAlign: TextAlign.right,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          if (taskModel?.productInfo?.address != null)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8.0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    flex: 2,
+                    child: Text(
+                      "Vị trí lắp đặt:",
+                      style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 3,
+                    child: GestureDetector(
+                      onTap: () async {
+                        if (isAndroid) {
+                          final AndroidIntent intent = AndroidIntent(
+                            action: 'action_view',
+                            data:
+                                'google.navigation:q=${taskModel?.productInfo?.address ?? ""}',
+                            package: 'package:com.google.android.apps.maps',
+                          );
+                          await intent.launch();
+                        } else {
+                          commonLaunchUrl(
+                            '$GOOGLE_MAP_PREFIX${Uri.encodeFull(taskModel?.productInfo?.address ?? "")}',
+                            launchMode: LaunchMode.externalApplication,
+                          );
+                        }
+                      },
+                      child: Text(
+                        taskModel?.productInfo?.address ?? "",
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: ColorUtil.brightYellow,
+                          fontWeight: FontWeight.w500,
+                          decoration: TextDecoration.underline,
+                        ),
+                        textAlign: TextAlign.right,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMediaCard() {
+    if (_bloc.taskModel == null ||
+        _bloc.taskModel!.images == null ||
+        _bloc.taskModel!.images!.isEmpty) {
+      return const SizedBox();
+    }
+    return _buildCard(
+      title: "Hình ảnh / Video đính kèm",
+      icon: Icons.attach_file_outlined,
+      child: SizedBox(
+        height: 100,
+        width: double.infinity,
+        child: ListView.builder(
+          itemCount: _bloc.taskModel!.images?.length,
+          shrinkWrap: true,
+          scrollDirection: Axis.horizontal,
+          itemBuilder: (BuildContext context, int index) {
+            String url = _bloc.taskModel!.images![index].isEmpty
+                ? ""
+                : "$protocol${AppConfig.instance.values.apiUrl}${_bloc.taskModel!.images![index]}";
+            return Padding(
+              padding: const EdgeInsets.only(right: 8.0),
+              child: _fullScreenHeroWidget(url),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCard({
+    required String title,
+    required Widget child,
+    IconData? icon,
+    Widget? trailing,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            decoration: BoxDecoration(
+              color: ColorUtil.bangladeshGreen.withValues(alpha: 0.1),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(16),
+              ),
+            ),
+            child: Row(
+              children: [
+                if (icon != null) ...[
+                  Icon(icon, color: ColorUtil.bangladeshGreen, size: 20),
+                  const SizedBox(width: 8),
+                ],
+                Expanded(
+                  child: Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: ColorUtil.bangladeshGreen,
+                    ),
+                  ),
+                ),
+                if (trailing != null) trailing,
+              ],
+            ),
+          ),
+          Padding(padding: const EdgeInsets.all(16), child: child),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(
+    String label,
+    String value, {
+    Color? valueColor,
+    bool isBold = false,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            flex: 2,
+            child: Text(
+              label,
+              style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+            ),
+          ),
+          Expanded(
+            flex: 3,
+            child: Text(
+              value,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: isBold ? FontWeight.bold : FontWeight.w500,
+                color: valueColor ?? ColorUtil.raisinBlack,
+              ),
+              textAlign: TextAlign.right,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -192,7 +590,7 @@ class _DetailBookingScreenState extends State<DetailBookingScreen> {
   void _editBooking(int id) {
     Navigator.pushNamed(
       context,
-      Routes.editServiceScreen,
+      widget.isRent ? Routes.editRentServiceScreen : Routes.editServiceScreen,
       arguments: {'id': id},
     ).then((value) async {
       if (value == null) {
@@ -202,12 +600,25 @@ class _DetailBookingScreenState extends State<DetailBookingScreen> {
         if (result != null) {
           setState(() {
             _bloc.add(DetailBookingStartedEvent());
-            _taskScreenSaleBloc.add(
-              const StaffTaskScreenGetTaskAssigedEvent(isRefresh: true),
-            );
-            _taskScreenSaleBloc.add(
-              const StaffTaskScreenGetTaskByDayEvent(isRefresh: true),
-            );
+            if (widget.isRent) {
+              _taskScreenSaleBloc.add(
+                const rent_event.StaffTaskScreenGetTaskAssigedEvent(
+                  isRefresh: true,
+                ),
+              );
+              _taskScreenSaleBloc.add(
+                const rent_event.StaffTaskScreenGetTaskByDayEvent(
+                  isRefresh: true,
+                ),
+              );
+            } else {
+              _taskScreenSaleBloc.add(
+                const StaffTaskScreenGetTaskAssigedEvent(isRefresh: true),
+              );
+              _taskScreenSaleBloc.add(
+                const StaffTaskScreenGetTaskByDayEvent(isRefresh: true),
+              );
+            }
           });
         }
       }
@@ -232,327 +643,6 @@ class _DetailBookingScreenState extends State<DetailBookingScreen> {
           ),
         ),
       ),
-    );
-  }
-
-  TableRow buildTableRowDivider({
-    required int cols,
-    double height = 1,
-    Color color = Colors.orange,
-  }) => TableRow(
-    children: [
-      for (var i = 0; i < cols; i++) Container(height: height, color: color),
-    ],
-  );
-
-  Widget _buildTable(TaskModel? taskModel) {
-    final tableRowDivider = buildTableRowDivider(cols: 2, height: 1);
-    return Table(
-      // border: const TableBorder(
-      //     bottom: BorderSide(), horizontalInside: BorderSide()),
-      children: [
-        TableRow(
-          children: [
-            Container(
-              padding: const EdgeInsets.only(bottom: 20),
-              child: const Text(
-                'Thời gian:',
-                style: TextStyle(
-                  color: ColorUtil.raisinBlack,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20,
-                ),
-              ),
-            ),
-            Text(
-              _formatDatetime(taskModel?.timeStart),
-              style: const TextStyle(
-                color: ColorUtil.red,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-        _buildTableRow(
-          title: 'Công việc:',
-          content: taskModel?.name,
-          isHighlight: false,
-        ),
-        _buildTableRow(
-          title: 'Tên sản phẩm:',
-          content: taskModel?.productInfo?.machineModel?.name ?? "",
-          isHighlight: false,
-        ),
-        _buildTableRow(
-          title: 'Nội dung:',
-          content: taskModel?.des,
-          isHighlight: false,
-        ),
-        if (App.instance.userApp?.isUserCustomer() == false) ...[
-          tableRowDivider,
-        ],
-        if (App.instance.userApp?.isUserCustomer() == true) ...[
-          TableRow(
-            children: [
-              Container(
-                padding: const EdgeInsets.only(bottom: 20),
-                child: const Text(
-                  'Vị trí lắp đặt:',
-                  style: TextStyle(
-                    color: ColorUtil.raisinBlack,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
-                  ),
-                ),
-              ),
-              Text(
-                (taskModel?.productInfo?.address) ?? "",
-                style: const TextStyle(
-                  color: ColorUtil.red,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-        ],
-        if (App.instance.userApp?.isUserCustomer() == false) ...[
-          TableRow(
-            children: [
-              Container(
-                padding: const EdgeInsets.only(bottom: 20, top: 10),
-                child: const Text(
-                  'Số điện thoại:',
-                  style: TextStyle(
-                    color: ColorUtil.raisinBlack,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
-                  ),
-                ),
-              ),
-              ButtonWidget(
-                padding: const EdgeInsets.only(bottom: 20, top: 10),
-                onTap: () {
-                  if (taskModel?.customer?.phone != null &&
-                      App.instance.userApp!.isUserCustomer() == false) {
-                    var url = "tel:${taskModel!.customer!.phone!}";
-                    launchUrl(Uri.parse(url));
-                  }
-                },
-                child: Text(
-                  taskModel?.customer?.phone ?? "",
-                  style: const TextStyle(
-                    color: ColorUtil.bangladeshGreen,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    decoration: TextDecoration.underline,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          _buildTableRow(
-            title: 'Địa chỉ:',
-            content: taskModel?.customer?.address ?? "",
-            isHighlight: true,
-            color: ColorUtil.brightYellow,
-            decoration: TextDecoration.underline,
-            onTap: () async {
-              if (isAndroid) {
-                final AndroidIntent intent = AndroidIntent(
-                  action: 'action_view',
-                  data:
-                      'google.navigation:q=${taskModel?.customer?.address ?? ""}',
-                  package: 'package:com.google.android.apps.maps',
-                );
-                await intent.launch();
-              } else {
-                commonLaunchUrl(
-                  '$GOOGLE_MAP_PREFIX${Uri.encodeFull(taskModel?.customer?.address ?? "")}',
-                  launchMode: LaunchMode.externalApplication,
-                );
-              }
-            },
-          ),
-          _buildTableRow(
-            title: 'Vị trí lắp đặt:',
-            content: taskModel?.productInfo?.address ?? "",
-            isHighlight: true,
-            color: ColorUtil.brightYellow,
-            onTap: () async {
-              if (isAndroid) {
-                final AndroidIntent intent = AndroidIntent(
-                  action: 'action_view',
-                  data:
-                      'google.navigation:q=${taskModel?.productInfo?.address ?? ""}',
-                  package: 'package:com.google.android.apps.maps',
-                );
-                await intent.launch();
-              } else {
-                commonLaunchUrl(
-                  '$GOOGLE_MAP_PREFIX${Uri.encodeFull(taskModel?.productInfo?.address ?? "")}',
-                  launchMode: LaunchMode.externalApplication,
-                );
-              }
-            },
-          ),
-        ],
-        tableRowDivider,
-        TableRow(
-          children: [
-            Container(
-              padding: const EdgeInsets.only(bottom: 20),
-              child: const Text(
-                'Trạng thái:',
-                style: TextStyle(
-                  color: ColorUtil.raisinBlack,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20,
-                ),
-              ),
-            ),
-            Text(
-              (taskModel?.getStatus()) ?? "",
-              style: const TextStyle(
-                color: ColorUtil.red,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-        _buildTableRow(
-          title: 'Kỹ thuật viên:',
-          content: taskModel?.staff?.username ?? "",
-          isHighlight: true,
-          color: ColorUtil.brightYellow,
-          decoration: TextDecoration.underline,
-          onTap: () {
-            Navigator.pushNamed(
-              context,
-              Routes.staffCommentTechniqueList,
-              arguments: {
-                "id": taskModel?.staff?.id,
-                "name": taskModel?.staff?.username,
-                "staffInfo": taskModel?.staff,
-              },
-            );
-          },
-        ),
-        TableRow(
-          children: [
-            Container(
-              padding: const EdgeInsets.only(bottom: 20),
-              child: const Text(
-                'SĐT KTV:',
-                style: TextStyle(
-                  color: ColorUtil.raisinBlack,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 20,
-                ),
-              ),
-            ),
-            ButtonWidget(
-              onTap: () {
-                if (taskModel?.staff?.phone != null) {
-                  var url = "tel:${taskModel!.staff!.phone!}";
-                  launchUrl(Uri.parse(url));
-                }
-              },
-              child: Text(
-                taskModel?.staff?.phone ?? "",
-                style: const TextStyle(
-                  color: ColorUtil.bangladeshGreen,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 18,
-                  decoration: TextDecoration.underline,
-                ),
-              ),
-            ),
-          ],
-        ),
-        _buildTableRow(
-          title: 'Thông báo:',
-          content: taskModel?.noti,
-          isHighlight: false,
-        ),
-        tableRowDivider,
-      ],
-    );
-  }
-
-  TableRow _buildTableRow({
-    title,
-    onTap,
-    content,
-    isHighlight,
-    color,
-    fontWeight,
-    decoration,
-  }) {
-    return TableRow(
-      children: [
-        Container(
-          padding: const EdgeInsets.only(bottom: 20),
-          child: Text(
-            title,
-            style: const TextStyle(
-              color: ColorUtil.raisinBlack,
-              fontWeight: FontWeight.bold,
-              fontSize: 20,
-            ),
-          ),
-        ),
-        ButtonWidget(
-          onTap: onTap,
-          child: Text(
-            content ?? "",
-            style: TextStyle(
-              color: isHighlight ? color : null,
-              fontWeight: fontWeight ?? FontWeight.normal,
-              // decoration: TextDecoration.underline,
-              decoration: decoration,
-              fontSize: 18,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildMediaRow() {
-    return _bloc.taskModel != null &&
-            _bloc.taskModel!.images != null &&
-            _bloc.taskModel!.images!.isNotEmpty
-        ? SizedBox(
-            height: 200,
-            width: double.maxFinite,
-            child: Align(
-              alignment: Alignment.bottomCenter,
-              child: ListView.builder(
-                itemCount: _bloc.taskModel!.images?.length,
-                shrinkWrap: true,
-                scrollDirection: Axis.horizontal,
-                itemBuilder: (BuildContext context, int index) {
-                  return _buildItemMedia(
-                    _bloc.taskModel!.images![index].isEmpty
-                        ? ""
-                        : "$protocol${AppConfig.instance.values.apiUrl}${_bloc.taskModel!.images![index]}",
-                  );
-                },
-              ),
-            ),
-          )
-        : Container();
-  }
-
-  Widget _buildItemMedia(String url) {
-    return Row(
-      children: [
-        Stack(children: [_fullScreenHeroWidget(url)]),
-        const SizedBox(width: 5),
-      ],
     );
   }
 
@@ -656,7 +746,7 @@ class _DetailBookingScreenState extends State<DetailBookingScreen> {
   void _createOrder(int id) {
     Navigator.pushNamed(
       context,
-      Routes.createOrderScreen,
+      widget.isRent ? Routes.createRentOrderScreen : Routes.createOrderScreen,
       arguments: {'id': id},
     );
   }

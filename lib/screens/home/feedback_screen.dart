@@ -101,6 +101,7 @@ class _FeedbackScreenState extends State<FeedbackScreen>
 
   Widget _builder(BuildContext context, FeedbackScreenState state) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF4F6F8),
       appBar: MyAppBar(
         isBackNavigation: true,
         title: 'Góp ý và khiếu nại',
@@ -108,10 +109,26 @@ class _FeedbackScreenState extends State<FeedbackScreen>
       ),
       body: Column(
         children: [
-          TabBar(
-            controller: _tabController,
-            indicatorColor: ColorUtil.bangladeshGreen,
-            tabs: [_buildTab('Tạo mới'), _buildTab('Đã gửi')],
+          Container(
+            color: Colors.white,
+            child: TabBar(
+              controller: _tabController,
+              indicatorColor: ColorUtil.bangladeshGreen,
+              labelColor: ColorUtil.bangladeshGreen,
+              unselectedLabelColor: Colors.grey,
+              labelStyle: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+              unselectedLabelStyle: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+              tabs: const [
+                Tab(height: 48, text: 'Tạo mới'),
+                Tab(height: 48, text: 'Đã gửi'),
+              ],
+            ),
           ),
           Expanded(
             child: IndexedStack(
@@ -124,50 +141,45 @@ class _FeedbackScreenState extends State<FeedbackScreen>
     );
   }
 
-  Tab _buildTab(text) {
-    return Tab(
-      height: 36,
-      child: Text(
-        text,
-        style: const TextStyle(color: ColorUtil.bangladeshGreen, fontSize: 20),
-      ),
-    );
-  }
-
   Widget _buildCreateFeedback() {
     return LoadingIndicator(
       isLoading: _bloc.isLoading,
       child: ListView(
-        padding: const EdgeInsets.symmetric(
-          horizontal: paddingHorizontal,
-          vertical: paddingVertical,
-        ),
+        padding: const EdgeInsets.all(16),
         children: [
-          _buildField(
-            Icons.feedback_outlined,
-            null,
-            value: "Góp ý và khiếu nại",
-            onTap: () {},
+          _buildCard(
+            title: "Thông tin phản hồi",
+            icon: Icons.feedback_outlined,
+            child: Column(
+              children: [
+                _buildField(
+                  Icons.report_problem_outlined,
+                  null,
+                  value: "Góp ý và khiếu nại",
+                  onTap: () {},
+                ),
+                const SizedBox(height: 16),
+                _buildDropdownFieldOrders(),
+                const SizedBox(height: 16),
+                _buildFormDescribe(
+                  'Mô tả chi tiết yêu cầu của bạn...',
+                  describeRequestTxtController,
+                  Icons.description_outlined,
+                  null,
+                ),
+              ],
+            ),
           ),
-          const SizedBox(height: 10),
-          _buildDropdownFieldOrders(),
-          const SizedBox(height: 10),
-          _buildFormDescribe(
-            'Mô tả yêu cầu',
-            describeRequestTxtController,
-            Icons.description_outlined,
-            null,
+          _buildCard(
+            title: "Hình ảnh / Video đính kèm",
+            icon: Icons.attach_file_outlined,
+            child: _buildSectionMedia(),
           ),
-          const SizedBox(height: 10),
-          _buildSectionMedia(),
-          const SizedBox(height: 10),
-          _buildButton(
-            text: 'GỬI',
-            isPositive: true,
-            action: () {
-              _onCreateFeedBack();
-            },
-          ),
+          const SizedBox(height: 16),
+          _button(true, () {
+            _onCreateFeedBack();
+          }, 'GỬI PHẢN HỒI'),
+          const SizedBox(height: 40),
         ],
       ),
     );
@@ -192,132 +204,112 @@ class _FeedbackScreenState extends State<FeedbackScreen>
       return LoadingIndicator(
         isLoading: _bloc.isLoading,
         child: ListView.separated(
+          padding: const EdgeInsets.all(16),
           itemBuilder: _buildItemServiceHistory,
           separatorBuilder: separatorBuilder,
           itemCount: _bloc.feedBacksModel.length,
         ),
       );
     }
-    return const Center(child: Text('Lịch sử máy'));
-  }
-
-  Widget _buildItemServiceHistory(BuildContext context, int index) {
-    return Column(
-      children: [
-        ButtonWidget(
-          onTap: () {
-            Navigator.pushNamed(
-              context,
-              Routes.detailFeedBackScreen,
-              arguments: {
-                "fbId": _bloc.feedBacksModel[index].id.toString(),
-                "orderId": "0",
-              },
-            );
-          },
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: paddingHorizontal,
-              vertical: 8,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.only(
-                            bottom: 1, // space between underline and text
-                          ),
-                          decoration: const BoxDecoration(
-                            border: Border(
-                              bottom: BorderSide(
-                                color:
-                                    ColorUtil.raisinBlack, // Text colour here
-                                width: 1.0, // Underline width
-                              ),
-                            ),
-                          ),
-                          child: Text(
-                            'Mã đơn hàng: ĐH_${_bloc.feedBacksModel[index].orderId}',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: ColorUtil.raisinBlack,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 3),
-              ],
-            ),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(
-            left: 20,
-            top: 0,
-            bottom: 10,
-            right: 8,
-          ),
-          child: Table(
-            columnWidths: const {1: FlexColumnWidth(2)},
-            children: [
-              TableRow(
-                children: [
-                  const Text(
-                    "Trạng thái dịch vụ: ",
-                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-                  ),
-                  Text(_bloc.feedBacksModel[index].getStatus()),
-                ],
-              ),
-              TableRow(
-                children: [
-                  const Text(
-                    'Mô tả: ',
-                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-                  ),
-                  Text(
-                    _bloc.feedBacksModel[index].description ?? '',
-                    style: const TextStyle(fontSize: 15),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget separatorBuilder(BuildContext context, int index) {
-    return Container(
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(width: 1.0, color: Colors.black26)),
+    return const Center(
+      child: Text(
+        'Chưa có dữ liệu phản hồi',
+        style: TextStyle(color: Colors.grey, fontSize: 16),
       ),
     );
   }
 
-  Widget _buildButton({text, isPositive, action}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 32.0),
-      child: _button(isPositive, action, text),
+  Widget _buildItemServiceHistory(BuildContext context, int index) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.pushNamed(
+          context,
+          Routes.detailFeedBackScreen,
+          arguments: {
+            "fbId": _bloc.feedBacksModel[index].id.toString(),
+            "orderId": "0",
+          },
+        );
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: ColorUtil.bangladeshGreen.withValues(alpha: 0.1),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(16),
+                ),
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.receipt_long_outlined,
+                    color: ColorUtil.bangladeshGreen,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Mã đơn: ĐH_${_bloc.feedBacksModel[index].orderId}',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: ColorUtil.bangladeshGreen,
+                        fontSize: 15,
+                      ),
+                    ),
+                  ),
+                  const Icon(Icons.chevron_right, color: Colors.grey, size: 20),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  _buildInfoRow(
+                    "Trạng thái:",
+                    _bloc.feedBacksModel[index].getStatus(),
+                    valueColor:
+                        _bloc.feedBacksModel[index].getStatus() == "Đã xử lý"
+                        ? ColorUtil.bangladeshGreen
+                        : ColorUtil.brightYellow,
+                    isBold: true,
+                  ),
+                  _buildInfoRow(
+                    "Mô tả:",
+                    _bloc.feedBacksModel[index].description ?? 'Không có mô tả',
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
-  StatelessWidget _button(isPositive, action, text) {
+  Widget separatorBuilder(BuildContext context, int index) {
+    return const SizedBox(height: 16);
+  }
+
+  Widget _button(bool isPositive, Function()? action, String text) {
     return ButtonWidget(
       color: isPositive ? ColorUtil.bangladeshGreen : Colors.grey,
       borderRadius: BorderRadius.circular(30),
-      padding: const EdgeInsets.symmetric(vertical: 10),
+      padding: const EdgeInsets.symmetric(vertical: 14),
       onTap: () {
         if (action == null) {
           Navigator.pop(context);
@@ -328,7 +320,11 @@ class _FeedbackScreenState extends State<FeedbackScreen>
       child: Text(
         text,
         textAlign: TextAlign.center,
-        style: const TextStyle(fontSize: 16, color: Colors.white),
+        style: const TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+        ),
       ),
     );
   }
@@ -339,211 +335,110 @@ class _FeedbackScreenState extends State<FeedbackScreen>
     required String value,
     required void Function() onTap,
   }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SizedBox(height: 5),
-        GestureDetector(
-          onTap: onTap,
-          child: Container(
-            height: 40,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8.0),
-              border: Border.all(color: ColorUtil.bangladeshGreen, width: 0.5),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.max,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(left: 10.0),
-                  child: Icon(iconPrefix, color: ColorUtil.spanishGray),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    value,
-                    style: TextStyle(
-                      color: value.isEmpty
-                          ? ColorUtil.silverChalice
-                          : ColorUtil.raisinBlack,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                const Spacer(),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Icon(iconSuffix, color: ColorUtil.spanishGray),
-                ),
-              ],
-            ),
-          ),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8.0),
+          border: Border.all(color: Colors.grey.shade300),
+          color: Colors.grey.shade50,
         ),
-      ],
+        child: Row(
+          children: [
+            Icon(iconPrefix, color: ColorUtil.bangladeshGreen, size: 20),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                value,
+                style: TextStyle(
+                  color: value.isEmpty ? Colors.grey : ColorUtil.raisinBlack,
+                  fontSize: 15,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            if (iconSuffix != null)
+              Icon(iconSuffix, color: Colors.grey, size: 20),
+          ],
+        ),
+      ),
     );
   }
-
-  // Widget _buildForm(
-  //   String placeHolder,
-  //   TextEditingController controller,
-  //   IconData iconPrefix,
-  //   IconData? iconSuffix, {
-  //   bool isNumberType = false,
-  //   bool isReadOnly = false,
-  //   bool haveSuffixIcon = false,
-  // }) {
-  //   return Column(
-  //     crossAxisAlignment: CrossAxisAlignment.start,
-  //     children: [
-  //       Container(
-  //         padding: const EdgeInsets.only(top: 5),
-  //         height: 40,
-  //         child: TextFormField(
-  //             readOnly: isReadOnly,
-  //             keyboardType:
-  //                 isNumberType ? TextInputType.phone : TextInputType.text,
-  //             controller: controller,
-  //             cursorColor: ColorUtil.bangladeshGreen,
-  //             decoration: InputDecoration(
-  //               prefixIcon: Icon(iconPrefix),
-  //               suffixIcon: haveSuffixIcon ? Icon(iconSuffix) : null,
-  //               enabledBorder: OutlineInputBorder(
-  //                 borderRadius: BorderRadius.circular(8.0),
-  //                 borderSide: const BorderSide(
-  //                     color: ColorUtil.bangladeshGreen, width: 0.5),
-  //               ),
-  //               focusedBorder: OutlineInputBorder(
-  //                 borderRadius: BorderRadius.circular(8.0),
-  //                 borderSide: const BorderSide(
-  //                     color: ColorUtil.bangladeshGreen, width: 0.5),
-  //               ),
-  //               hintText: placeHolder,
-  //               hintStyle: const TextStyle(
-  //                   color: ColorUtil.silverChalice, fontSize: 13),
-  //               contentPadding:
-  //                   const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
-  //               suffixIconConstraints:
-  //                   const BoxConstraints(minHeight: 20, minWidth: 20),
-  //             )),
-  //       ),
-  //     ],
-  //   );
-  // }
 
   Widget _buildFormDescribe(
     String placeHolder,
     TextEditingController controller,
     IconData iconPrefix,
     IconData? iconSuffix, {
-    // bool isNumberType = false,
     bool isReadOnly = false,
     bool haveSuffixIcon = false,
   }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          padding: const EdgeInsets.only(top: 5),
-          child: TextFormField(
-            readOnly: isReadOnly,
-            keyboardType: TextInputType.multiline,
-            // isNumberType ? TextInputType.phone : TextInputType.text,
-            controller: controller,
-            maxLines: 5,
-            cursorColor: ColorUtil.bangladeshGreen,
-            decoration: InputDecoration(
-              prefixIcon: SizedBox(
-                width: 20,
-                height: 100,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8.0,
-                        vertical: 5.0,
-                      ),
-                      child: Icon(iconPrefix),
-                    ),
-                  ],
-                ),
-              ),
-              suffixIcon: haveSuffixIcon ? Icon(iconSuffix) : null,
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8.0),
-                borderSide: const BorderSide(
-                  color: ColorUtil.bangladeshGreen,
-                  width: 0.5,
-                ),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8.0),
-                borderSide: const BorderSide(
-                  color: ColorUtil.bangladeshGreen,
-                  width: 0.5,
-                ),
-              ),
-              hintText: placeHolder,
-              hintStyle: const TextStyle(
-                color: ColorUtil.silverChalice,
-                fontSize: 13,
-              ),
-              contentPadding: const EdgeInsets.symmetric(
-                vertical: 5,
-                horizontal: 15,
-              ),
-              suffixIconConstraints: const BoxConstraints(
-                minHeight: 20,
-                minWidth: 20,
-              ),
-            ),
-          ),
+    return TextFormField(
+      readOnly: isReadOnly,
+      keyboardType: TextInputType.multiline,
+      controller: controller,
+      maxLines: 5,
+      cursorColor: ColorUtil.bangladeshGreen,
+      decoration: InputDecoration(
+        filled: true,
+        fillColor: Colors.white,
+        prefixIcon: Padding(
+          padding: const EdgeInsets.only(bottom: 80.0),
+          child: Icon(iconPrefix, color: ColorUtil.bangladeshGreen, size: 20),
         ),
-      ],
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8.0),
+          borderSide: BorderSide(color: Colors.grey.shade300),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8.0),
+          borderSide: const BorderSide(color: ColorUtil.bangladeshGreen),
+        ),
+        hintText: placeHolder,
+        hintStyle: const TextStyle(color: Colors.grey, fontSize: 14),
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 16,
+          horizontal: 16,
+        ),
+      ),
     );
   }
 
   Widget _buildSectionMedia() {
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: ColorUtil.bangladeshGreen, width: 0.5),
-        borderRadius: BorderRadius.circular(8.0),
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 5.0),
-      child: Column(
-        children: [
-          Row(
-            children: const [
-              Padding(
-                padding: EdgeInsets.all(8.0),
-                child: Icon(Icons.upload_file, color: ColorUtil.spanishGray),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: const [
+            Icon(Icons.info_outline, color: ColorUtil.spanishGray, size: 16),
+            SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                'Up ảnh (tối đa 4 ảnh) và video (tối đa 15s) để kỹ thuật xem xét.',
+                style: TextStyle(color: ColorUtil.spanishGray, fontSize: 13),
               ),
-              Flexible(
-                child: Text(
-                  'Up ảnh (tối đa 4 ảnh) và video (tối đa 15s) để kỹ thuật xem xét.',
-                  style: TextStyle(color: ColorUtil.spanishGray),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(
-            height: 200,
-            width: double.infinity,
-            child: ListView.builder(
-              itemCount: _listFile.length + 1,
-              shrinkWrap: true,
-              scrollDirection: Axis.horizontal,
-              itemBuilder: (BuildContext context, int index) {
-                return index < _listFile.length
-                    ? _buildItemMedia(_listFile[index])
-                    : _buildDefaultItemMedia();
-              },
             ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        SizedBox(
+          height: 100,
+          width: double.infinity,
+          child: ListView.builder(
+            itemCount: _listFile.length + 1,
+            shrinkWrap: true,
+            scrollDirection: Axis.horizontal,
+            itemBuilder: (BuildContext context, int index) {
+              return index < _listFile.length
+                  ? _buildItemMedia(_listFile[index])
+                  : _buildDefaultItemMedia();
+            },
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -551,13 +446,28 @@ class _FeedbackScreenState extends State<FeedbackScreen>
     return GestureDetector(
       onTap: _showModalBottomSheetMedia,
       child: Container(
-        height: 120,
-        width: 120,
+        height: 100,
+        width: 100,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8.0),
-          border: Border.all(color: ColorUtil.bangladeshGreen, width: 0.5),
+          border: Border.all(color: Colors.grey.shade300),
+          color: Colors.grey.shade50,
         ),
-        child: const Icon(Icons.add_circle_outline),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: const [
+            Icon(
+              Icons.add_photo_alternate_outlined,
+              color: Colors.grey,
+              size: 30,
+            ),
+            SizedBox(height: 4),
+            Text(
+              'Thêm ảnh',
+              style: TextStyle(color: Colors.grey, fontSize: 12),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -589,117 +499,179 @@ class _FeedbackScreenState extends State<FeedbackScreen>
     );
   }
 
-  // Widget _buildDefaultItemMedia() {
-  //   return GestureDetector(
-  //     onTap: _onChooseImages,
-  //     child: Container(
-  //       height: 120,
-  //       width: 120,
-  //       decoration: BoxDecoration(
-  //         borderRadius: BorderRadius.circular(8.0),
-  //         border: Border.all(color: ColorUtil.bangladeshGreen, width: 0.5),
-  //       ),
-  //       child: const Icon(Icons.add_circle_outline),
-  //     ),
-  //   );
-  // }
-
   Widget _buildItemMedia(String path) {
-    return Row(
-      children: [
-        Stack(
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8.0),
-              child: ImageUtil.loadNetWorkImage(
-                url: "$protocol${AppConfig.instance.values.apiUrl}$path",
-                width: 120,
-                height: 200,
-              ),
+    return Padding(
+      padding: const EdgeInsets.only(right: 8.0),
+      child: Stack(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8.0),
+            child: ImageUtil.loadNetWorkImage(
+              url: "$protocol${AppConfig.instance.values.apiUrl}$path",
+              width: 100,
+              height: 100,
             ),
-            Positioned(
-              top: 0,
-              right: 0,
-              child: GestureDetector(
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.grey,
-                    borderRadius: BorderRadius.circular(60),
-                  ),
-                  child: const Icon(
-                    Icons.delete,
-                    color: Colors.white,
-                    size: 25,
-                  ),
+          ),
+          Positioned(
+            top: 4,
+            right: 4,
+            child: GestureDetector(
+              child: Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.5),
+                  shape: BoxShape.circle,
                 ),
-                onTap: () {
-                  setState(() {
-                    _listFile.remove(path);
-                  });
-                },
+                child: const Icon(Icons.close, color: Colors.white, size: 16),
               ),
+              onTap: () {
+                setState(() {
+                  _listFile.remove(path);
+                });
+              },
             ),
-          ],
-        ),
-        const SizedBox(width: 5.0),
-      ],
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildDropdownFieldOrders() {
-    return FormField<String>(
-      builder: (FormFieldState<String> state) {
-        return InputDecorator(
-          decoration: InputDecoration(
-            errorStyle: const TextStyle(
-              color: Colors.redAccent,
-              fontSize: 16.0,
-            ),
-            hintText: 'Please select expense',
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8.0),
-              borderSide: const BorderSide(
-                color: ColorUtil.bangladeshGreen,
-                width: 0.5,
-              ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8.0),
-              borderSide: const BorderSide(
-                color: ColorUtil.bangladeshGreen,
-                width: 0.5,
-              ),
-            ),
-            prefixIcon: const Icon(Icons.account_box_outlined),
-          ),
-          isEmpty: false,
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
-              value: _selectedValue,
-              isDense: true,
-              isExpanded: true,
-              onChanged: (String? newValue) {
-                setState(() {
-                  _selectedValue = newValue;
-                });
-              },
-              items: _listOrders.map((OrderFilterCoreModel sv) {
-                return DropdownMenuItem<String>(
-                  value: sv.id.toString(),
-                  child: Text(
-                    sv.id == 0
-                        ? "--Chọn--"
-                        :
-                          //"${sv.product!=null?"${sv.product}:":""}${sv.id! > 0 ? sv.id.toString() : ""}-${sv.name}"),
-                          "${sv.product} - ${_createdDateConvert(sv.createdAt)}: Mã đơn ${sv.id}",
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8.0),
+        border: Border.all(color: Colors.grey.shade300),
+        color: Colors.white,
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: _selectedValue,
+          isDense: true,
+          isExpanded: true,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          icon: const Icon(Icons.arrow_drop_down, color: Colors.grey),
+          onChanged: (String? newValue) {
+            setState(() {
+              _selectedValue = newValue;
+            });
+          },
+          items: _listOrders.map((OrderFilterCoreModel sv) {
+            return DropdownMenuItem<String>(
+              value: sv.id.toString(),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.receipt_outlined,
+                    color: ColorUtil.bangladeshGreen,
+                    size: 20,
                   ),
-                );
-              }).toList(),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      sv.id == 0
+                          ? "-- Chọn đơn hàng --"
+                          : "${sv.product} - ${_createdDateConvert(sv.createdAt)}: Mã đơn ${sv.id}",
+                      style: const TextStyle(fontSize: 14),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCard({
+    required String title,
+    required Widget child,
+    IconData? icon,
+    Widget? trailing,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            decoration: BoxDecoration(
+              color: ColorUtil.bangladeshGreen.withValues(alpha: 0.1),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(16),
+              ),
+            ),
+            child: Row(
+              children: [
+                if (icon != null) ...[
+                  Icon(icon, color: ColorUtil.bangladeshGreen, size: 20),
+                  const SizedBox(width: 8),
+                ],
+                Expanded(
+                  child: Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: ColorUtil.bangladeshGreen,
+                    ),
+                  ),
+                ),
+                if (trailing != null) trailing,
+              ],
             ),
           ),
-        );
-      },
+          Padding(padding: const EdgeInsets.all(16), child: child),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(
+    String label,
+    String value, {
+    Color? valueColor,
+    bool isBold = false,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            flex: 2,
+            child: Text(
+              label,
+              style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+            ),
+          ),
+          Expanded(
+            flex: 3,
+            child: Text(
+              value,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: isBold ? FontWeight.bold : FontWeight.w500,
+                color: valueColor ?? ColorUtil.raisinBlack,
+              ),
+              textAlign: TextAlign.right,
+            ),
+          ),
+        ],
+      ),
     );
   }
 

@@ -169,7 +169,7 @@ class _TaskAvailableTabState extends State<TaskAvailableTabSale> {
                     _searchController.clear();
                   });
                 },
-                child: const Text('All'),
+                child: const Text('All', style: TextStyle(color: Colors.white)),
               ),
             ],
           ),

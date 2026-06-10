@@ -398,142 +398,105 @@ class _HistoryScreenState extends State<HistoryScreen>
 
     OrderModel machine = _bloc.lstMachine[reversedIndex];
     var dataFormat = _formatDatetime(machine.createdAt);
-    return ButtonWidget(
-      onTap: () {
-        _detailMachine(machine);
-      },
-      child: Container(
-        width: MediaQuery.of(context).size.width,
-        padding: EdgeInsets.only(
-          left: MediaQuery.of(context).size.width * 0.02,
-          right: MediaQuery.of(context).size.width * 0.02,
-          bottom: 10,
-        ),
-        decoration: const BoxDecoration(
-          border: Border(bottom: BorderSide(color: Colors.black12, width: 1)),
-        ),
-        //        padding: const EdgeInsets.symmetric(horizontal: paddingHorizontal, vertical: 8),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Row(
+
+    return _buildMachineInUseCard(machine, dataFormat);
+  }
+
+  Widget _buildMachineInUseCard(OrderModel machine, String dataFormat) {
+    String imageUrl =
+        (machine.product?.images == null ||
+            machine.product!.images!.isEmpty ||
+            machine.product!.images![0].link == null)
+        ? ""
+        : "$protocol${AppConfig.instance.values.apiUrl}${machine.product!.images![0].link!}";
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: paddingHorizontal,
+        vertical: 8,
+      ),
+      child: Material(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        elevation: 2,
+        shadowColor: Colors.black.withValues(alpha: 0.08),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: () => _detailMachine(machine),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  width: MediaQuery.of(context).size.width * 0.2,
-                  decoration: BoxDecoration(
-                    border: Border.all(width: 3, color: Colors.black12),
-                  ),
-                  child: ImageUtil.loadNetWorkImage(
-                    url:
-                        (machine.product?.images == null ||
-                            machine.product!.images!.isEmpty ||
-                            machine.product!.images![0].link == null)
-                        ? ""
-                        : "$protocol${AppConfig.instance.values.apiUrl}${machine.product!.images![0].link!}",
-                    height: MediaQuery.of(context).size.width * 0.16,
-                    width: MediaQuery.of(context).size.width * 0.16,
-                  ),
-                ),
-                Container(
-                  padding: EdgeInsets.only(
-                    left: MediaQuery.of(context).size.width * 0.02,
-                    top: MediaQuery.of(context).size.width * 0.01,
-                  ),
-                  width: MediaQuery.of(context).size.width * 0.74,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "${machine.product!.name}",
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: ColorUtil.raisinBlack,
-                          fontSize: 16,
-                        ),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 56,
+                      height: 56,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.black12),
                       ),
-                      Wrap(
-                        //mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        spacing: 8.0, // gap between adjacent chips
-                        runSpacing: 4.0, // gap between lines
-                        direction:
-                            Axis.horizontal, // main axis (rows or columns)
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: imageUrl.isEmpty
+                            ? Icon(
+                                Icons.water_drop,
+                                color: ColorUtil.bangladeshGreen.withValues(
+                                  alpha: 0.5,
+                                ),
+                                size: 30,
+                              )
+                            : ImageUtil.loadNetWorkImage(
+                                url: imageUrl,
+                                height: 56,
+                                width: 56,
+                              ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Align(
-                            alignment: Alignment.topLeft,
-                            child: Container(
-                              padding: EdgeInsets.only(
-                                top: MediaQuery.of(context).size.width * 0.01,
-                              ),
-                              child: (RichText(
-                                softWrap: true,
-                                maxLines: 3,
-                                text: TextSpan(
-                                  children: [
-                                    const TextSpan(
-                                      text: 'Model: ',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        color: ColorUtil.bangladeshGreen,
-                                        decorationThickness: 1,
-                                        fontSize: 13,
-                                      ),
-                                    ),
-                                    TextSpan(
-                                      text: machine.product!.name ?? '',
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.normal,
-                                        color: ColorUtil.raisinBlack,
-                                        decorationThickness: 1,
-                                        fontSize: 13,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              )),
+                          Text(
+                            machine.product?.name ?? 'Sản phẩm',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              color: ColorUtil.raisinBlack,
                             ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          Align(
-                            alignment: Alignment.topRight,
-                            child: Container(
-                              padding: EdgeInsets.only(
-                                top: MediaQuery.of(context).size.width * 0.01,
-                              ),
-                              child: (RichText(
-                                softWrap: true,
-                                maxLines: 3,
-                                text: TextSpan(
-                                  children: [
-                                    const TextSpan(
-                                      text: 'Ngày mua: ',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        color: ColorUtil.bangladeshGreen,
-                                        decorationThickness: 1,
-                                        fontSize: 13,
-                                      ),
-                                    ),
-                                    TextSpan(
-                                      text: dataFormat,
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.normal,
-                                        color: ColorUtil.raisinBlack,
-                                        decorationThickness: 1,
-                                        fontSize: 13,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              )),
+                          const SizedBox(height: 6),
+                          Text(
+                            'Model: ${machine.product?.name ?? ''}',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.grey[700],
                             ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
+                ),
+                const Divider(height: 24, color: Color(0xFFEFEFEF)),
+                _buildHistoryInfoRow(
+                  Icons.calendar_today_outlined,
+                  'Ngày mua',
+                  dataFormat,
+                  valueColor: ColorUtil.bangladeshGreen,
+                  isBoldValue: true,
                 ),
               ],
             ),
-          ],
+          ),
         ),
       ),
     );

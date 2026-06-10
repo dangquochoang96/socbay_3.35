@@ -178,34 +178,6 @@ class _ProductScreenState extends State<ProductScreen> {
                 ),
               ),
               const SizedBox(height: 5),
-              // Row(
-              //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              //   children: [
-              //     if (productInfo.price != 0 && productInfo.price != null)
-              //       Flexible(
-              //         child: Text(
-              //           NumberFormatUtil.parseToVND(productInfo.price),
-              //           style: const TextStyle(
-              //               fontSize: 12,
-              //               overflow: TextOverflow.ellipsis,
-              //               fontWeight: FontWeight.bold,
-              //               color: ColorUtil.brightYellow),
-              //           maxLines: 1,
-              //         ),
-              //       ),
-              //     const SizedBox(width: 4),
-              //     if (productInfo.priceSale != 0 &&
-              //         productInfo.priceSale != null)
-              //       Flexible(
-              //         child: Text(
-              //             NumberFormatUtil.parseToVND(productInfo.priceSale),
-              //             style: const TextStyle(
-              //                 color: Colors.grey,
-              //                 fontSize: 11,
-              //                 decoration: TextDecoration.lineThrough)),
-              //       )
-              //   ],
-              // )
             ],
           ),
         ),

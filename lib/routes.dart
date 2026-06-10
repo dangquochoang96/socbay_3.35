@@ -40,7 +40,6 @@ import 'package:socbay/data/model/product_category.dart';
 import 'package:socbay/data/model/product_model.dart';
 import 'package:socbay/data/repository/auth/api_repository.dart';
 import 'package:socbay/root.dart';
-import 'package:socbay/screens/booking/detail_rent_booking_screen.dart';
 import 'package:socbay/screens/feedback/feedback_list_screen.dart';
 import 'package:socbay/screens/feedback/feedback_screen.dart';
 import 'package:socbay/screens/auth/forgot_password_screen.dart';
@@ -74,7 +73,6 @@ import 'package:socbay/screens/products/product_detail_screen.dart';
 import 'package:socbay/screens/staff/customer_information/customer_information_list_screen.dart';
 import 'package:socbay/screens/staff/feedback/staff_feedback_screen.dart';
 import 'package:socbay/screens/staff/new_order/bill_screen.dart';
-import 'package:socbay/screens/staff/new_order/new_rent_order_screen.dart';
 import 'package:socbay/screens/staff/new_order/staff_new_order_screen.dart';
 import 'package:socbay/screens/staff/new_task/staff_service_screen.dart';
 import 'package:socbay/screens/staff/new_task/staff_service_screen_sale.dart';
@@ -435,7 +433,7 @@ class Routes {
                 apiRepository: apiRepository,
                 args: settings.arguments as Map<String, dynamic>,
               ),
-              child: const DetailRentBookingScreen(),
+              child: const DetailBookingScreen(isRent: true),
             );
           case coreReplacementServiceScreen:
             return BlocProvider<CoreReplacementServiceBloc>(
@@ -513,7 +511,7 @@ class Routes {
                 apiRepository: apiRepository,
                 args: settings.arguments as Map<String, dynamic>,
               ),
-              child: const StaffNewRentOrderScreen(),
+              child: const StaffNewOrderScreen(isRent: true),
             );
           case billScreen:
             return BlocProvider<StaffNewOrderBloc>(

@@ -9,6 +9,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:socbay/blocs/staff/new_order/staff_new_order_bloc.dart';
 import 'package:socbay/blocs/staff/new_order/staff_new_order_event.dart';
 import 'package:socbay/blocs/staff/new_order/staff_new_order_state.dart';
+import 'package:socbay/blocs/staff/new_order/staff_new_rent_order_bloc.dart';
 import 'package:socbay/config/app_config.dart';
 import 'package:socbay/data/model/bill_data.dart';
 import 'package:socbay/data/model/list_order_core_model.dart';
@@ -31,14 +32,15 @@ import 'package:socbay/utils/context_extension.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 
 class StaffNewOrderScreen extends StatefulWidget {
-  const StaffNewOrderScreen({super.key});
+  final bool isRent;
+  const StaffNewOrderScreen({super.key, this.isRent = false});
 
   @override
   State<StatefulWidget> createState() => _StaffNewOrderScreen();
 }
 
 class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
-  late StaffNewOrderBloc _bloc;
+  late dynamic _bloc;
   late BillData billData;
   late Map<String, dynamic> billDataMap;
   int _currentSelectedProductValue = 0;
@@ -48,6 +50,16 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
   final List<ProductModel> _listProductsAll = [];
   List<KeyValue> lstKeyValueCores = [];
   List<KeyValue> lstKeyValueMaintainCores = [];
+
+  bool _showRentalDetails = false;
+  DateTime _selectedEndDate = DateTime.now();
+
+  final TextEditingController _rentalDurationController =
+      TextEditingController();
+  final TextEditingController _depositController = TextEditingController();
+  final TextEditingController _monthlyPaymentController =
+      TextEditingController();
+  final TextEditingController _vatController = TextEditingController();
 
   TextEditingController chietKhauController = TextEditingController();
   TextEditingController subSavePointController = TextEditingController();
@@ -62,10 +74,12 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
   final FocusNode _focusNode = FocusNode();
   @override
   void initState() {
-    _bloc = BlocProvider.of(context);
+    _bloc = widget.isRent
+        ? BlocProvider.of<StaffNewRentOrderBloc>(context)
+        : BlocProvider.of<StaffNewOrderBloc>(context);
     _bloc.add(StaffNewOrderInitEvent());
     String dateDefault = DateTime.now()
-        .add(const Duration(days: 183))
+        .add(Duration(days: widget.isRent ? 91 : 183))
         .toDateString(format: "dd/MM/yyyy");
     lstKeyValueCores
       ..add(KeyValue(TextEditingController(), TextEditingController()))
@@ -99,10 +113,35 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
           .isNotEmpty) {
         setState(() {
           _currentSelectedProductValue = 0;
+          _showRentalDetails = true;
+        });
+      } else {
+        setState(() {
+          _showRentalDetails = false;
         });
       }
     });
+    _rentalDurationController.addListener(() {
+      _calculateEndDate();
+    });
     super.initState();
+  }
+
+  void _calculateEndDate() {
+    if (_rentalDurationController.text.isNotEmpty) {
+      try {
+        int rentalDuration = int.parse(_rentalDurationController.text);
+        setState(() {
+          _selectedEndDate = DateTime.now().add(
+            Duration(days: rentalDuration * 30),
+          );
+        });
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Vui lòng nhập số ngày hợp lệ.')),
+        );
+      }
+    }
   }
 
   @override
@@ -115,6 +154,12 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.isRent) {
+      return BlocConsumer<StaffNewRentOrderBloc, StaffNewOrderState>(
+        builder: _builder,
+        listener: _listener,
+      );
+    }
     return BlocConsumer<StaffNewOrderBloc, StaffNewOrderState>(
       builder: _builder,
       listener: _listener,
@@ -218,587 +263,527 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
           FocusManager.instance.primaryFocus?.unfocus(),
       child: SafeArea(
         child: Scaffold(
+          backgroundColor: const Color(0xFFF4F6F8),
           appBar: MyAppBar(title: "Tạo hóa đơn", isBackNavigation: true),
           body: LoadingIndicator(
             isLoading: _isLoading,
-            child: Padding(
-              padding: const EdgeInsets.only(
-                top: 16.0,
-                left: 16.0,
-                right: 10.0,
-                bottom: 0.0,
-              ),
-              child: ListView(
-                addRepaintBoundaries: false,
-                // controller: _controller,
-                children: [
-                  Center(
-                    child: Table(
-                      columnWidths: const {0: FlexColumnWidth(0.5)},
-                      children: [
-                        TableRow(
-                          children: [
-                            const TableCell(
-                              verticalAlignment:
-                                  TableCellVerticalAlignment.middle,
-                              child: Padding(
-                                padding: EdgeInsets.only(top: 16.0, right: 8.0),
-                                child: Text(
-                                  'Tên khách hàng:',
-                                  style: TextStyle(
-                                    color: ColorUtil.raisinBlack,
-                                    fontWeight: FontWeight.bold,
-                                    height: 1.5,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            TableCell(
-                              verticalAlignment:
-                                  TableCellVerticalAlignment.middle,
-                              child: Padding(
-                                padding: const EdgeInsets.only(
-                                  top: 16.0,
-                                  left: 8.0,
-                                ),
-                                child: Row(
-                                  children: [
-                                    Text(
-                                      _bloc.taskModel?.customer?.username ?? '',
-                                      style: const TextStyle(
-                                        color: ColorUtil.raisinBlack,
-                                        height: 1.5,
-                                      ),
-                                    ),
-                                    Text(
-                                      ' (${_bloc.taskModel?.customer?.phone ?? ''})',
-                                      style: const TextStyle(
-                                        color: Color.fromARGB(255, 4, 100, 52),
-                                        height: 1.5,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        TableRow(
-                          children: [
-                            const TableCell(
-                              verticalAlignment:
-                                  TableCellVerticalAlignment.middle,
-                              child: Padding(
-                                padding: EdgeInsets.only(top: 16.0, right: 8.0),
-                                child: Text(
-                                  "Địa chỉ khách",
-                                  style: TextStyle(
-                                    color: ColorUtil.raisinBlack,
-                                    fontWeight: FontWeight.bold,
-                                    height: 1.5,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            TableCell(
-                              verticalAlignment:
-                                  TableCellVerticalAlignment.middle,
-                              child: Padding(
-                                padding: const EdgeInsets.only(
-                                  top: 16.0,
-                                  left: 8.0,
-                                ),
-                                child: TextField(
-                                  controller: addressCustomerController,
-                                  textAlign: TextAlign.left,
-                                  keyboardType: TextInputType.text,
-                                  maxLines: 1,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        TableRow(
-                          children: [
-                            const TableCell(
-                              verticalAlignment:
-                                  TableCellVerticalAlignment.middle,
-                              child: Padding(
-                                padding: EdgeInsets.only(top: 16.0, right: 8.0),
-                                child: Text(
-                                  "Vị trí lắp đặt",
-                                  style: TextStyle(
-                                    color: ColorUtil.raisinBlack,
-                                    fontWeight: FontWeight.bold,
-                                    height: 1,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            TableCell(
-                              verticalAlignment:
-                                  TableCellVerticalAlignment.middle,
-                              child: Padding(
-                                padding: const EdgeInsets.only(
-                                  top: 16.0,
-                                  left: 8.0,
-                                ),
-                                child: TextField(
-                                  controller: addressCustomerControllerSP,
-                                  textAlign: TextAlign.left,
-                                  keyboardType: TextInputType.text,
-                                  maxLines: 1,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
+            child: ListView(
+              addRepaintBoundaries: false,
+              padding: const EdgeInsets.only(bottom: 24.0, top: 8.0),
+              children: [
+                _buildCard(
+                  children: [
+                    _buildSectionTitle(
+                      'Thông tin khách hàng',
+                      Icons.person_outline,
                     ),
-                  ),
-                  Center(
-                    child: Table(
-                      columnWidths: const {0: FlexColumnWidth(1)},
-                      children: [
-                        _buildTableRow(
-                          title: 'Sản phẩm đã có:',
-                          content: '',
-                          isHighlight: false,
-                        ),
-                      ],
+                    _buildInfoRow(
+                      'Khách hàng',
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              _bloc.taskModel?.customer?.username ?? '',
+                              style: const TextStyle(
+                                color: ColorUtil.raisinBlack,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+                          Text(
+                            _bloc.taskModel?.customer?.phone ?? '',
+                            style: const TextStyle(
+                              color: ColorUtil.green,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  _buildDropdownFieldPruducts(),
-                  Center(
-                    child: Table(
-                      columnWidths: const {1: FlexColumnWidth(0.1)},
-                      children: [
-                        _buildTableRow(
-                          title: 'Thêm sản phẩm mới nếu chưa có:',
-                          content: '',
-                          isHighlight: false,
+                    const Divider(color: Color(0xFFF1F5F9), height: 24),
+                    _buildInputRow(
+                      'Địa chỉ khách',
+                      _buildTextFieldWrapper(
+                        TextField(
+                          controller: addressCustomerController,
+                          decoration: const InputDecoration(
+                            border: InputBorder.none,
+                            hintText: 'Nhập địa chỉ khách hàng...',
+                          ),
                         ),
-                      ],
+                      ),
                     ),
-                  ),
-                  _selectNewProduct(),
-                  _itemFilterCoreTable(),
-                  _itemFilterCoreMaintainTable(),
-                  Table(
-                    columnWidths: const {0: FlexColumnWidth(1.0)},
+                    _buildInputRow(
+                      'Vị trí lắp đặt',
+                      _buildTextFieldWrapper(
+                        TextField(
+                          controller: addressCustomerControllerSP,
+                          decoration: const InputDecoration(
+                            border: InputBorder.none,
+                            hintText: 'Nhập vị trí lắp đặt...',
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+
+                _buildCard(
+                  children: [
+                    _buildSectionTitle(
+                      'Thông tin sản phẩm',
+                      Icons.inventory_2_outlined,
+                    ),
+                    _buildInputRow(
+                      'Sản phẩm đã có',
+                      _buildDropdownFieldPruducts(),
+                    ),
+                    _buildInputRow(
+                      'Thêm sản phẩm mới nếu chưa có',
+                      _selectNewProduct(),
+                    ),
+                  ],
+                ),
+                if (widget.isRent && _showRentalDetails)
+                  _buildCard(
                     children: [
-                      TableRow(
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: const Color.fromRGBO(4, 107, 80, 1),
+                      _buildSectionTitle(
+                        'Chi tiết thuê',
+                        Icons.calendar_month_outlined,
+                      ),
+                      _buildInputRow(
+                        'Thời gian thuê (Tháng)',
+                        _buildTextFieldWrapper(
+                          TextField(
+                            controller: _rentalDurationController,
+                            keyboardType: TextInputType.number,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                            ],
+                            decoration: const InputDecoration(
+                              border: InputBorder.none,
+                              hintText: 'Nhập số tháng thuê...',
+                            ),
                           ),
-                          borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(10),
-                            topRight: Radius.circular(10),
-                          ),
-                          color: ColorUtil.bangladeshGreen,
                         ),
-                        children: [
-                          TableCell(
-                            child: Align(
-                              alignment: Alignment.bottomCenter,
-                              child: TextButton(
-                                onPressed: () => {},
-                                child: const Padding(
-                                  padding: EdgeInsets.only(
-                                    top: 8.0,
-                                    bottom: 6.0,
-                                    right: 16.0,
+                      ),
+                      _buildInputRow(
+                        'Tiền cọc',
+                        _buildTextFieldWrapper(
+                          TextField(
+                            controller: _depositController,
+                            keyboardType: TextInputType.number,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                            ],
+                            decoration: const InputDecoration(
+                              border: InputBorder.none,
+                              hintText: 'Nhập tiền cọc (VNĐ)...',
+                            ),
+                            onChanged: (text) {
+                              if (text.isNotEmpty) {
+                                String formattedText = text
+                                    .replaceAll('.', '')
+                                    .replaceAll('đ', '')
+                                    .nonBreaking
+                                    .trim()
+                                    .toVND();
+                                _depositController.value = TextEditingValue(
+                                  text: formattedText,
+                                  selection: TextSelection.collapsed(
+                                    offset: formattedText.length > 2
+                                        ? formattedText.length - 2
+                                        : formattedText.length,
                                   ),
-                                  child: Text(
-                                    "Thanh toán",
-                                    style: TextStyle(color: ColorUtil.white),
-                                  ),
-                                ),
-                              ),
-                            ),
+                                );
+                              }
+                            },
                           ),
-                          const TableCell(child: SizedBox()),
-                        ],
+                        ),
                       ),
-                      _buildTableRow(
-                        title: 'Tổng tiền:',
-                        content: _bloc.total.toVND(),
-                        isHighlight: false,
-                      ),
-                      TableRow(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.only(top: 16.0),
-                            child: const Text(
-                              "Chiết khấu",
-                              style: TextStyle(
-                                color: ColorUtil.raisinBlack,
-                                fontWeight: FontWeight.bold,
-                                height: 1.5,
-                              ),
+                      _buildInputRow(
+                        'Số tiền trả mỗi tháng',
+                        _buildTextFieldWrapper(
+                          TextField(
+                            controller: _monthlyPaymentController,
+                            keyboardType: TextInputType.number,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                            ],
+                            decoration: const InputDecoration(
+                              border: InputBorder.none,
+                              hintText: 'Nhập số tiền trả mỗi tháng (VNĐ)...',
                             ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.only(top: 16.0),
-                            child: TextField(
-                              controller: chietKhauController,
-                              textAlign: TextAlign.left,
-                              keyboardType: TextInputType.number,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.digitsOnly,
-                              ],
-                              maxLines: null,
-                              decoration: const InputDecoration(
-                                border: InputBorder.none,
-                                hintText: 'VNĐ',
-                                isDense: true,
-                                contentPadding: EdgeInsets.only(top: 6.0),
-                              ),
-                              onChanged: (text) {
-                                if (chietKhauController.text != '') {
-                                  var money = text
-                                      .replaceAll(".", "")
-                                      .replaceAll("đ", "")
-                                      .nonBreaking
-                                      .trim();
-                                  setState(() {
-                                    _bloc.totalPay =
-                                        _bloc.total -
-                                        (int.tryParse(money) ?? 0) -
-                                        (int.tryParse(
-                                                  subSavePointController.text,
-                                                ) ??
-                                                0) *
-                                            1000;
-                                    _bloc.savePoint =
-                                        (_bloc.totalPay * 3 / 100000).ceil();
-                                    chietKhauController.value =
-                                        TextEditingValue(
-                                          text: money.toVND(),
-                                          selection: TextSelection.collapsed(
-                                            offset: money.toVND().length - 2,
-                                          ),
-                                        );
-                                  });
-                                }
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                      TableRow(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.only(top: 16.0),
-                            child: const Text(
-                              "Trừ tích điểm",
-                              style: TextStyle(
-                                color: ColorUtil.raisinBlack,
-                                fontWeight: FontWeight.bold,
-                                height: 1.5,
-                              ),
-                            ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.only(top: 16.0),
-                            child: TextField(
-                              style: const TextStyle(color: ColorUtil.red),
-                              controller: subSavePointController,
-                              textAlign: TextAlign.left,
-                              keyboardType: TextInputType.number,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.digitsOnly,
-                              ],
-                              maxLines: null,
-                              decoration: const InputDecoration(
-                                border: InputBorder.none,
-                                isDense: true,
-                                contentPadding: EdgeInsets.only(top: 6.0),
-                              ),
-                              onChanged: (text) {
-                                if (subSavePointController.text != '') {
-                                  if (int.parse(text) > _bloc.subSavePoint) {
-                                    context.showSnackBarSuccess(
-                                      "Không đủ điểm!",
+                            onChanged: (text) {
+                              if (text.isNotEmpty) {
+                                String formattedText = text
+                                    .replaceAll('.', '')
+                                    .replaceAll('đ', '')
+                                    .nonBreaking
+                                    .trim()
+                                    .toVND();
+                                _monthlyPaymentController.value =
+                                    TextEditingValue(
+                                      text: formattedText,
+                                      selection: TextSelection.collapsed(
+                                        offset: formattedText.length > 2
+                                            ? formattedText.length - 2
+                                            : formattedText.length,
+                                      ),
                                     );
-                                    setState(() {
-                                      {
-                                        subSavePointController.text = _bloc
-                                            .subSavePoint
-                                            .toString();
-                                        var chietKhau =
-                                            chietKhauController.text;
-                                        var totalPay =
-                                            _bloc.total -
-                                            (int.tryParse(
-                                                  chietKhau
-                                                      .replaceAll(".", "")
-                                                      .replaceAll("đ", "")
-                                                      .nonBreaking
-                                                      .trim(),
-                                                ) ??
-                                                0) -
-                                            1000 * (_bloc.subSavePoint);
-                                        _bloc.totalPay = totalPay > 0
-                                            ? totalPay
-                                            : 0;
-                                        _bloc.savePoint =
-                                            (_bloc.totalPay * 3 / 100000)
-                                                .ceil();
-                                      }
-                                    });
-                                    return;
-                                  } else {
-                                    // subSavePointController.text = text;
-                                    setState(() {
-                                      var chietKhau = chietKhauController.text;
-                                      var totalPay =
-                                          _bloc.total -
-                                          (int.tryParse(
-                                                chietKhau
-                                                    .replaceAll(".", "")
-                                                    .replaceAll("đ", "")
-                                                    .nonBreaking
-                                                    .trim(),
-                                              ) ??
-                                              0) -
-                                          1000 * (int.tryParse(text) ?? 0);
-                                      _bloc.totalPay = totalPay > 0
-                                          ? totalPay
-                                          : 0;
-                                      _bloc.savePoint =
-                                          (_bloc.totalPay * 3 / 100000).ceil();
-                                    });
-                                  }
-                                } else {
-                                  setState(() {
-                                    var chietKhau = chietKhauController.text;
-                                    var totalPay =
-                                        _bloc.total -
-                                        (int.tryParse(
-                                              chietKhau
-                                                  .replaceAll(".", "")
-                                                  .replaceAll("đ", "")
-                                                  .nonBreaking
-                                                  .trim(),
-                                            ) ??
-                                            0);
-                                    _bloc.totalPay = totalPay > 0
-                                        ? totalPay
-                                        : 0;
-                                    _bloc.savePoint =
-                                        (_bloc.totalPay * 3 / 100000).ceil();
-                                  });
-                                }
-                              },
-                            ),
+                              }
+                            },
                           ),
-                        ],
-                      ),
-                      _buildTableRow(
-                        title: 'Tổng thanh toán:',
-                        content: _bloc.totalPay.toVND(),
-                        isHighlight: false,
-                      ),
-                      _buildTableRow(
-                        title: 'Tích điểm:',
-                        content: _bloc.savePoint.toString(),
-                        isHighlight: false,
-                      ),
-                      _buildTableRow(
-                        title: 'Hình thức thanh toán:',
-                        content: '',
-                        isHighlight: false,
+                        ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16.0),
-                  RadioGroup<int>(
-                    groupValue: _bloc.paymentType,
-                    onChanged: (int? index) {
-                      if (index == null) return;
-                      setState(() {
-                        _bloc.paymentType = index;
-                      });
-                    },
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        Expanded(
-                          flex: 1,
-                          child: Column(
-                            children: [
-                              const Text('Tiền mặt'),
-                              SizedBox(
-                                height: 24,
-                                width: 24,
-                                child: Radio<int>(value: 1),
-                              ),
-                            ],
-                          ),
+                _itemFilterCoreTable(),
+                _itemFilterCoreMaintainTable(),
+                _buildCard(
+                  children: [
+                    _buildSectionTitle('Thanh toán', Icons.payment_outlined),
+                    _buildInfoRow(
+                      'Tổng tiền',
+                      Text(
+                        _bloc.total.toString().toVND(),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
                         ),
-                        Expanded(
-                          flex: 1,
-                          child: Column(
-                            children: [
-                              const Text('Chuyển khoản'),
-                              SizedBox(
-                                height: 24,
-                                width: 24,
-                                child: Radio<int>(value: 2),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Expanded(
-                          flex: 1,
-                          child: Column(
-                            children: [
-                              const Text('Ví'),
-                              SizedBox(
-                                height: 24,
-                                width: 24,
-                                child: Radio<int>(value: 3),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 16.0),
-                  _buildSectionMedia(),
-                  ButtonWidget(
-                    onTap: () {
-                      var getProductNew = _listProductsAll.where(
-                        (element) =>
-                            element.name == currentSelectedProductAllValue.text,
-                      );
-                      if (_currentSelectedProductValue == 0 &&
-                          getProductNew.isEmpty) {
-                        context.showSnackBar('Vui lòng chọn sản phẩm');
-                        return;
-                      }
-                      List<OrderFilterCoreModel> lst1 = [];
-                      List<OrderFilterCoreModel> lst2 = [];
-                      for (var item in lstKeyValueCores) {
-                        if (item.key.text.isNotEmpty) {
-                          lst1.add(
-                            OrderFilterCoreModel(
-                              name: item.key.text,
-                              price: item.value.text
+                    _buildInputRow(
+                      'Chiết khấu',
+                      _buildTextFieldWrapper(
+                        TextField(
+                          controller: chietKhauController,
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
+                          decoration: const InputDecoration(
+                            border: InputBorder.none,
+                            hintText: 'Nhập số tiền chiết khấu (VNĐ)...',
+                          ),
+                          onChanged: (text) {
+                            if (text.isNotEmpty) {
+                              var money = text
                                   .replaceAll(".", "")
                                   .replaceAll("đ", "")
                                   .nonBreaking
-                                  .trim(),
-                            ),
-                          );
-                        }
-                      }
-                      for (var item in lstKeyValueMaintainCores) {
-                        if (item.key.text.isNotEmpty) {
-                          lst2.add(
-                            OrderFilterCoreModel(
-                              name: item.key.text,
-                              replaceDatePromise: item.value.text,
-                            ),
-                          );
-                        }
-                      }
-                      if (lst1.isEmpty) {
-                        context.showSnackBar('Chưa nhập chi tiết lần thay lõi');
-                        return;
-                      }
-
-                      billData = BillData(
-                        usernameId: _bloc.taskModel?.customer?.id,
-                        saleId: _bloc.taskModel?.saleId,
-                        name: _bloc.taskModel?.customer?.username ?? '',
-                        address: addressCustomerController.text,
-                        addressSP: addressCustomerControllerSP.text,
-                        phone: _bloc.taskModel?.customer?.phone ?? '',
-                        productId: _currentSelectedProductValue,
-                        newProductId: getProductNew.isNotEmpty
-                            ? getProductNew.first.id
-                            : 0,
-                        lstNew: lst1,
-                        lstMaintain: lst2,
-                        total: _bloc.total,
-                        discount:
-                            int.tryParse(
-                              chietKhauController.text
-                                  .replaceAll(".", "")
-                                  .replaceAll("đ", "")
-                                  .nonBreaking
-                                  .trim(),
-                            ) ??
-                            0,
-                        vat: 0,
-                        totalPay: _bloc.totalPay,
-                        savePoint: _bloc.savePoint,
-                        subSavePoint: (_bloc.total == 0 && _bloc.totalPay == 0)
-                            ? 0
-                            : (int.tryParse(subSavePointController.text) ?? 0),
-                        paymentType: _bloc.paymentType,
-                        images: _listPath,
-                        staff: _bloc.taskModel?.staff?.username,
-                      );
-
-                      Navigator.pushNamed(
-                        context,
-                        Routes.billScreen,
-                        arguments: billData,
-                      ).then(
-                        (value) => {
-                          if (value != null && value is List<File>)
-                            {
+                                  .trim();
                               setState(() {
-                                _bloc.add(StaffNewOrderUploadImageEvent(value));
-                              }),
+                                _bloc.totalPay =
+                                    _bloc.total -
+                                    (int.tryParse(money) ?? 0) -
+                                    (int.tryParse(
+                                              subSavePointController.text,
+                                            ) ??
+                                            0) *
+                                        1000;
+                                _bloc.savePoint = (_bloc.totalPay * 3 / 100000)
+                                    .ceil();
+                                chietKhauController.value = TextEditingValue(
+                                  text: money.toVND(),
+                                  selection: TextSelection.collapsed(
+                                    offset: money.toVND().length - 2,
+                                  ),
+                                );
+                              });
                             }
-                          else
-                            {context.showSnackBar('Chưa lưu ảnh hóa đơn')},
-                        },
-                      );
-                    },
-                    padding: const EdgeInsets.only(top: 10.0, bottom: 10.0),
-                    borderRadius: BorderRadius.circular(30),
-                    margin: const EdgeInsets.only(
-                      left: 60.0,
-                      right: 60,
-                      bottom: 10,
-                      top: 10,
+                          },
+                        ),
+                      ),
                     ),
-                    color: ColorUtil.green,
-                    child: const Text(
-                      "Hóa đơn điện tử",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 16, color: Colors.white),
+                    _buildInputRow(
+                      'Trừ tích điểm',
+                      _buildTextFieldWrapper(
+                        TextField(
+                          controller: subSavePointController,
+                          style: const TextStyle(color: ColorUtil.red),
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
+                          decoration: const InputDecoration(
+                            border: InputBorder.none,
+                            hintText: 'Nhập điểm cần trừ...',
+                          ),
+                          onChanged: (text) {
+                            if (text.isNotEmpty) {
+                              if (int.parse(text) > _bloc.subSavePoint) {
+                                context.showSnackBarSuccess("Không đủ điểm!");
+                                setState(() {
+                                  subSavePointController.text = _bloc
+                                      .subSavePoint
+                                      .toString();
+                                  var chietKhau = chietKhauController.text;
+                                  var totalPay =
+                                      _bloc.total -
+                                      (int.tryParse(
+                                            chietKhau
+                                                .replaceAll(".", "")
+                                                .replaceAll("đ", "")
+                                                .nonBreaking
+                                                .trim(),
+                                          ) ??
+                                          0) -
+                                      1000 * _bloc.subSavePoint;
+                                  _bloc.totalPay = totalPay > 0 ? totalPay : 0;
+                                  _bloc.savePoint =
+                                      (_bloc.totalPay * 3 / 100000).ceil();
+                                });
+                              } else {
+                                setState(() {
+                                  var chietKhau = chietKhauController.text;
+                                  var totalPay =
+                                      _bloc.total -
+                                      (int.tryParse(
+                                            chietKhau
+                                                .replaceAll(".", "")
+                                                .replaceAll("đ", "")
+                                                .nonBreaking
+                                                .trim(),
+                                          ) ??
+                                          0) -
+                                      1000 * (int.tryParse(text) ?? 0);
+                                  _bloc.totalPay = totalPay > 0 ? totalPay : 0;
+                                  _bloc.savePoint =
+                                      (_bloc.totalPay * 3 / 100000).ceil();
+                                });
+                              }
+                            } else {
+                              setState(() {
+                                var chietKhau = chietKhauController.text;
+                                var totalPay =
+                                    _bloc.total -
+                                    (int.tryParse(
+                                          chietKhau
+                                              .replaceAll(".", "")
+                                              .replaceAll("đ", "")
+                                              .nonBreaking
+                                              .trim(),
+                                        ) ??
+                                        0);
+                                _bloc.totalPay = totalPay > 0 ? totalPay : 0;
+                                _bloc.savePoint = (_bloc.totalPay * 3 / 100000)
+                                    .ceil();
+                              });
+                            }
+                          },
+                        ),
+                      ),
                     ),
-                  ),
-                  ButtonWidget(
-                    onTap: () {
-                      var getProductNew = _listProductsAll.where(
-                        (element) =>
-                            element.name == currentSelectedProductAllValue.text,
-                      );
-                      if (_currentSelectedProductValue == 0 &&
-                          getProductNew.isEmpty) {
-                        context.showSnackBar('Vui lòng chọn sản phẩm');
-                        return;
-                      }
-                      _bloc.total =
-                          int.tryParse(
-                            _bloc.total
-                                .toString()
+                    if (widget.isRent)
+                      _buildInputRow(
+                        'Thuế VAT (%)',
+                        _buildTextFieldWrapper(
+                          TextField(
+                            controller: _vatController,
+                            style: const TextStyle(color: ColorUtil.red),
+                            keyboardType: TextInputType.number,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                            ],
+                            decoration: const InputDecoration(
+                              border: InputBorder.none,
+                              hintText: 'Nhập % VAT...',
+                            ),
+                            onChanged: (text) {
+                              if (text.isNotEmpty) {
+                                _bloc.vatPercentage =
+                                    double.tryParse(text) ?? 0;
+                                _bloc.vatAmount =
+                                    (_bloc.totalPay * _bloc.vatPercentage / 100)
+                                        .round();
+                                setState(() {
+                                  _bloc.totalPay =
+                                      _bloc.total +
+                                      _bloc.vatAmount -
+                                      (int.tryParse(
+                                            chietKhauController.text
+                                                .replaceAll(".", "")
+                                                .replaceAll("đ", "")
+                                                .nonBreaking
+                                                .trim(),
+                                          ) ??
+                                          0);
+                                  _bloc.savePoint =
+                                      (_bloc.totalPay * 3 / 100000).ceil();
+                                });
+                              } else {
+                                setState(() {
+                                  _bloc.totalPay =
+                                      _bloc.total -
+                                      (int.tryParse(
+                                            chietKhauController.text
+                                                .replaceAll(".", "")
+                                                .replaceAll("đ", "")
+                                                .nonBreaking
+                                                .trim(),
+                                          ) ??
+                                          0);
+                                  _bloc.savePoint =
+                                      (_bloc.totalPay * 3 / 100000).ceil();
+                                });
+                              }
+                            },
+                          ),
+                        ),
+                      ),
+                    const Divider(color: Color(0xFFF1F5F9), height: 32),
+                    _buildInfoRow(
+                      'Tổng thanh toán',
+                      Text(
+                        _bloc.totalPay.toString().toVND(),
+                        style: const TextStyle(
+                          color: ColorUtil.red,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
+                      ),
+                    ),
+                    _buildInfoRow(
+                      'Tích điểm',
+                      Text(
+                        _bloc.savePoint.toString(),
+                        style: const TextStyle(
+                          color: ColorUtil.green,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Hình thức thanh toán:',
+                      style: TextStyle(
+                        color: ColorUtil.raisinBlack,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    RadioGroup<int>(
+                      groupValue: _bloc.paymentType,
+                      onChanged: (int? index) {
+                        if (index != null) {
+                          setState(() {
+                            _bloc.paymentType = index;
+                          });
+                        }
+                      },
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          Column(
+                            children: [
+                              const Text(
+                                'Tiền mặt',
+                                style: TextStyle(fontSize: 13),
+                              ),
+                              const SizedBox(height: 4),
+                              Radio<int>(
+                                value: 1,
+                                groupValue: _bloc.paymentType,
+                                onChanged: (v) =>
+                                    setState(() => _bloc.paymentType = v ?? 1),
+                              ),
+                            ],
+                          ),
+                          Column(
+                            children: [
+                              const Text(
+                                'Chuyển khoản',
+                                style: TextStyle(fontSize: 13),
+                              ),
+                              const SizedBox(height: 4),
+                              Radio<int>(
+                                value: 2,
+                                groupValue: _bloc.paymentType,
+                                onChanged: (v) =>
+                                    setState(() => _bloc.paymentType = v ?? 2),
+                              ),
+                            ],
+                          ),
+                          Column(
+                            children: [
+                              const Text('Ví', style: TextStyle(fontSize: 13)),
+                              const SizedBox(height: 4),
+                              Radio<int>(
+                                value: 3,
+                                groupValue: _bloc.paymentType,
+                                onChanged: (v) =>
+                                    setState(() => _bloc.paymentType = v ?? 3),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16.0),
+                _buildSectionMedia(),
+                ButtonWidget(
+                  onTap: () {
+                    var getProductNew = _listProductsAll.where(
+                      (element) =>
+                          element.name == currentSelectedProductAllValue.text,
+                    );
+                    if (_currentSelectedProductValue == 0 &&
+                        getProductNew.isEmpty) {
+                      context.showSnackBar('Vui lòng chọn sản phẩm');
+                      return;
+                    }
+                    List<OrderFilterCoreModel> lst1 = [];
+                    List<OrderFilterCoreModel> lst2 = [];
+                    for (var item in lstKeyValueCores) {
+                      if (item.key.text.isNotEmpty) {
+                        lst1.add(
+                          OrderFilterCoreModel(
+                            name: item.key.text,
+                            price: item.value.text
                                 .replaceAll(".", "")
                                 .replaceAll("đ", "")
                                 .nonBreaking
                                 .trim(),
-                          ) ??
-                          0;
-                      _bloc.chietKhau =
+                          ),
+                        );
+                      }
+                    }
+                    for (var item in lstKeyValueMaintainCores) {
+                      if (item.key.text.isNotEmpty) {
+                        lst2.add(
+                          OrderFilterCoreModel(
+                            name: item.key.text,
+                            replaceDatePromise: item.value.text,
+                          ),
+                        );
+                      }
+                    }
+                    if (lst1.isEmpty) {
+                      context.showSnackBar('Chưa nhập chi tiết lần thay lõi');
+                      return;
+                    }
+
+                    billData = BillData(
+                      usernameId: _bloc.taskModel?.customer?.id,
+                      saleId: _bloc.taskModel?.saleId,
+                      name: _bloc.taskModel?.customer?.username ?? '',
+                      address: addressCustomerController.text,
+                      addressSP: addressCustomerControllerSP.text,
+                      phone: _bloc.taskModel?.customer?.phone ?? '',
+                      productId: _currentSelectedProductValue,
+                      newProductId: getProductNew.isNotEmpty
+                          ? getProductNew.first.id
+                          : 0,
+                      lstNew: lst1,
+                      lstMaintain: lst2,
+                      total: _bloc.total,
+                      discount:
                           int.tryParse(
                             chietKhauController.text
                                 .replaceAll(".", "")
@@ -806,118 +791,201 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                                 .nonBreaking
                                 .trim(),
                           ) ??
-                          0;
-                      _bloc.subSavePoint =
-                          int.tryParse(
-                            subSavePointController.text
+                          0,
+                      vat: 0,
+                      totalPay: _bloc.totalPay,
+                      savePoint: _bloc.savePoint,
+                      subSavePoint: (_bloc.total == 0 && _bloc.totalPay == 0)
+                          ? 0
+                          : (int.tryParse(subSavePointController.text) ?? 0),
+                      paymentType: _bloc.paymentType,
+                      images: _listPath,
+                      staff: _bloc.taskModel?.staff?.username,
+                    );
+
+                    Navigator.pushNamed(
+                      context,
+                      Routes.billScreen,
+                      arguments: billData,
+                    ).then(
+                      (value) => {
+                        if (value != null && value is List<File>)
+                          {
+                            setState(() {
+                              _bloc.add(StaffNewOrderUploadImageEvent(value));
+                            }),
+                          }
+                        else
+                          {context.showSnackBar('Chưa lưu ảnh hóa đơn')},
+                      },
+                    );
+                  },
+                  padding: const EdgeInsets.only(top: 10.0, bottom: 10.0),
+                  borderRadius: BorderRadius.circular(30),
+                  margin: const EdgeInsets.only(
+                    left: 60.0,
+                    right: 60,
+                    bottom: 10,
+                    top: 10,
+                  ),
+                  color: ColorUtil.green,
+                  child: const Text(
+                    "Hóa đơn điện tử",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 16, color: Colors.white),
+                  ),
+                ),
+                ButtonWidget(
+                  onTap: () {
+                    var getProductNew = _listProductsAll.where(
+                      (element) =>
+                          element.name == currentSelectedProductAllValue.text,
+                    );
+                    if (_currentSelectedProductValue == 0 &&
+                        getProductNew.isEmpty) {
+                      context.showSnackBar('Vui lòng chọn sản phẩm');
+                      return;
+                    }
+                    _bloc.total =
+                        int.tryParse(
+                          _bloc.total
+                              .toString()
+                              .replaceAll(".", "")
+                              .replaceAll("đ", "")
+                              .nonBreaking
+                              .trim(),
+                        ) ??
+                        0;
+                    _bloc.chietKhau =
+                        int.tryParse(
+                          chietKhauController.text
+                              .replaceAll(".", "")
+                              .replaceAll("đ", "")
+                              .nonBreaking
+                              .trim(),
+                        ) ??
+                        0;
+                    _bloc.subSavePoint =
+                        int.tryParse(
+                          subSavePointController.text
+                              .replaceAll(".", "")
+                              .replaceAll("đ", "")
+                              .nonBreaking
+                              .trim(),
+                        ) ??
+                        0;
+                    _bloc.totalPay =
+                        int.tryParse(
+                          _bloc.totalPay
+                              .toString()
+                              .replaceAll(".", "")
+                              .replaceAll("đ", "")
+                              .nonBreaking
+                              .trim(),
+                        ) ??
+                        0;
+                    _bloc.savePoint = _bloc.savePoint;
+                    if (_bloc.totalPay < 0) {
+                      context.showSnackBar('Tổng thanh toán không được âm');
+                      return;
+                    }
+                    List<OrderFilterCoreModel> lst1 = [];
+                    List<OrderFilterCoreModel> lst2 = [];
+                    for (var item in lstKeyValueCores) {
+                      if (item.key.text.isNotEmpty) {
+                        lst1.add(
+                          OrderFilterCoreModel(
+                            name: item.key.text,
+                            price: item.value.text
                                 .replaceAll(".", "")
                                 .replaceAll("đ", "")
                                 .nonBreaking
                                 .trim(),
-                          ) ??
-                          0;
-                      _bloc.totalPay =
-                          int.tryParse(
-                            _bloc.totalPay
-                                .toString()
-                                .replaceAll(".", "")
-                                .replaceAll("đ", "")
-                                .nonBreaking
-                                .trim(),
-                          ) ??
-                          0;
-                      _bloc.savePoint = _bloc.savePoint;
-                      if (_bloc.totalPay < 0) {
-                        context.showSnackBar('Tổng thanh toán không được âm');
-                        return;
+                          ),
+                        );
                       }
-                      List<OrderFilterCoreModel> lst1 = [];
-                      List<OrderFilterCoreModel> lst2 = [];
-                      for (var item in lstKeyValueCores) {
-                        if (item.key.text.isNotEmpty) {
-                          lst1.add(
-                            OrderFilterCoreModel(
-                              name: item.key.text,
-                              price: item.value.text
+                    }
+                    for (var item in lstKeyValueMaintainCores) {
+                      if (item.key.text.isNotEmpty) {
+                        lst2.add(
+                          OrderFilterCoreModel(
+                            name: item.key.text,
+                            replaceDatePromise: item.value.text,
+                          ),
+                        );
+                      }
+                    }
+
+                    if (lst1.isEmpty) {
+                      context.showSnackBar('Chưa nhập chi tiết lần thay lõi');
+                      return;
+                    }
+
+                    if (_listPath.isEmpty) {
+                      context.showSnackBar('Vui lòng lưu ảnh!');
+                      return;
+                    }
+
+                    _bloc.add(
+                      StaffCreateOrderEvent(
+                        _currentSelectedProductValue,
+                        getProductNew.isNotEmpty ? getProductNew.first.id : 0,
+                        lst1,
+                        lst2,
+                        _bloc.total,
+                        (int.tryParse(
+                              chietKhauController.text
                                   .replaceAll(".", "")
                                   .replaceAll("đ", "")
                                   .nonBreaking
                                   .trim(),
-                            ),
-                          );
-                        }
-                      }
-                      for (var item in lstKeyValueMaintainCores) {
-                        if (item.key.text.isNotEmpty) {
-                          lst2.add(
-                            OrderFilterCoreModel(
-                              name: item.key.text,
-                              replaceDatePromise: item.value.text,
-                            ),
-                          );
-                        }
-                      }
-
-                      if (lst1.isEmpty) {
-                        context.showSnackBar('Chưa nhập chi tiết lần thay lõi');
-                        return;
-                      }
-
-                      if (_listPath.isEmpty) {
-                        context.showSnackBar('Vui lòng lưu ảnh!');
-                        return;
-                      }
-
-                      _bloc.add(
-                        StaffCreateOrderEvent(
-                          _currentSelectedProductValue,
-                          getProductNew.isNotEmpty ? getProductNew.first.id : 0,
-                          lst1,
-                          lst2,
-                          _bloc.total,
-                          (int.tryParse(
-                                chietKhauController.text
-                                    .replaceAll(".", "")
-                                    .replaceAll("đ", "")
-                                    .nonBreaking
-                                    .trim(),
-                              ) ??
-                              0),
-                          (_bloc.total == 0 && _bloc.totalPay == 0)
-                              ? 0
-                              : (int.tryParse(subSavePointController.text) ??
-                                    0),
-                          _bloc.totalPay,
-                          _bloc.savePoint,
-                          _bloc.paymentType,
-                          '0',
-                          _listPath,
-                          addressCustomerController.text,
-                          addressCustomerControllerSP.text,
-                          '0',
-                          '0',
-                          '0',
-                          DateTime.now(),
-                        ),
-                      );
-                    },
-                    padding: const EdgeInsets.only(top: 10.0, bottom: 10.0),
-                    borderRadius: BorderRadius.circular(30),
-                    margin: const EdgeInsets.only(
-                      left: 60.0,
-                      right: 60,
-                      bottom: 60,
-                      top: 10,
-                    ),
-                    color: ColorUtil.bangladeshGreen,
-                    child: const Text(
-                      "HOÀN THÀNH",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 16, color: Colors.white),
-                    ),
+                            ) ??
+                            0),
+                        (_bloc.total == 0 && _bloc.totalPay == 0)
+                            ? 0
+                            : (int.tryParse(subSavePointController.text) ?? 0),
+                        _bloc.totalPay,
+                        _bloc.savePoint,
+                        _bloc.paymentType,
+                        widget.isRent ? _vatController.text : '0',
+                        _listPath,
+                        addressCustomerController.text,
+                        addressCustomerControllerSP.text,
+                        widget.isRent ? _rentalDurationController.text : '0',
+                        widget.isRent
+                            ? _depositController.text
+                                  .replaceAll(".", "")
+                                  .replaceAll("đ", "")
+                                  .nonBreaking
+                                  .trim()
+                            : '0',
+                        widget.isRent
+                            ? _monthlyPaymentController.text
+                                  .replaceAll(".", "")
+                                  .replaceAll("đ", "")
+                                  .nonBreaking
+                                  .trim()
+                            : '0',
+                        widget.isRent ? _selectedEndDate : DateTime.now(),
+                      ),
+                    );
+                  },
+                  padding: const EdgeInsets.only(top: 10.0, bottom: 10.0),
+                  borderRadius: BorderRadius.circular(30),
+                  margin: const EdgeInsets.only(
+                    left: 60.0,
+                    right: 60,
+                    bottom: 60,
+                    top: 10,
                   ),
-                ],
-              ),
+                  color: ColorUtil.bangladeshGreen,
+                  child: const Text(
+                    "HOÀN THÀNH",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 16, color: Colors.white),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -926,44 +994,63 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
   }
 
   Widget _buildSectionMedia() {
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: ColorUtil.bangladeshGreen, width: 0.5),
-        borderRadius: BorderRadius.circular(8.0),
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 5.0),
-      child: Column(
-        children: [
-          Row(
-            children: const [
-              Padding(
-                padding: EdgeInsets.all(8.0),
-                child: Icon(Icons.upload_file, color: ColorUtil.spanishGray),
+    return _buildCard(
+      children: [
+        _buildSectionTitle('Đính kèm', Icons.attach_file_outlined),
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF8FAFC),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.grey.shade200),
+          ),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(
+                      Icons.cloud_upload_outlined,
+                      color: Colors.blue,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  const Expanded(
+                    child: Text(
+                      'Tải ảnh/video lên để kỹ thuật xem xét (tối đa 15 ảnh, video < 15s).',
+                      style: TextStyle(
+                        color: ColorUtil.spanishGray,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              Flexible(
-                child: Text(
-                  'Up ảnh (tối đa 15 ảnh) và video (tối đa 15s) để kỹ thuật xem xét.',
-                  style: TextStyle(color: ColorUtil.spanishGray),
+              const SizedBox(height: 16),
+              SizedBox(
+                height: 120,
+                width: double.infinity,
+                child: ListView.builder(
+                  itemCount: _listPath.length + 1,
+                  shrinkWrap: true,
+                  scrollDirection: Axis.horizontal,
+                  itemBuilder: (BuildContext context, int index) {
+                    return index < _listPath.length
+                        ? _buildItemMedia(_listPath[index])
+                        : _buildDefaultItemMedia();
+                  },
                 ),
               ),
             ],
           ),
-          SizedBox(
-            height: 200,
-            width: double.infinity,
-            child: ListView.builder(
-              itemCount: _listPath.length + 1,
-              shrinkWrap: true,
-              scrollDirection: Axis.horizontal,
-              itemBuilder: (BuildContext context, int index) {
-                return index < _listPath.length
-                    ? _buildItemMedia(_listPath[index])
-                    : _buildDefaultItemMedia();
-              },
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -972,12 +1059,29 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
       onTap: _showModalBottomSheetMedia,
       child: Container(
         height: 120,
-        width: 120,
+        width: 100,
+        margin: const EdgeInsets.only(right: 12),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8.0),
-          border: Border.all(color: ColorUtil.bangladeshGreen, width: 0.5),
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12.0),
+          border: Border.all(
+            color: Colors.grey.shade300,
+            width: 1,
+            style: BorderStyle.solid,
+          ),
         ),
-        child: const Icon(Icons.add_circle_outline),
+        child: const Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.add_photo_alternate_outlined,
+              color: Colors.grey,
+              size: 32,
+            ),
+            SizedBox(height: 8),
+            Text('Thêm', style: TextStyle(color: Colors.grey, fontSize: 12)),
+          ],
+        ),
       ),
     );
   }
@@ -1093,145 +1197,120 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
   }
 
   Widget _itemFilterCoreTable() {
-    return Container(
-      margin: const EdgeInsets.only(top: 10.0, bottom: 10.0),
-      decoration: BoxDecoration(
-        border: Border.all(color: const Color.fromRGBO(4, 107, 80, 1)),
-        borderRadius: BorderRadius.circular(10.0),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [Expanded(child: _tableAction())],
-      ),
-    );
+    return _buildCard(padding: EdgeInsets.zero, children: [_tableAction()]);
   }
 
   Widget _itemFilterCoreMaintainTable() {
-    return Container(
-      margin: const EdgeInsets.only(top: 10.0, bottom: 10.0),
-      decoration: BoxDecoration(
-        border: Border.all(color: const Color.fromRGBO(4, 107, 80, 1)),
-        borderRadius: BorderRadius.circular(10.0),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [Expanded(child: _tableActionMaintain())],
-      ),
+    return _buildCard(
+      padding: EdgeInsets.zero,
+      children: [_tableActionMaintain()],
     );
   }
 
   Widget _tableAction() {
-    return Table(
-      columnWidths: const {1: FlexColumnWidth(0.8)},
-      border: TableBorder.symmetric(
-        inside: const BorderSide(
-          width: 1,
-          color: Color.fromRGBO(4, 107, 80, 1),
-        ),
-        //outside: const BorderSide(width: 1),
-      ),
+    return Column(
       children: [
-        TableRow(
-          decoration: BoxDecoration(
-            border: Border.all(color: const Color.fromRGBO(4, 107, 80, 1)),
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(10),
-              topRight: Radius.circular(10),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: const BoxDecoration(
+            color: ColorUtil.green,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(16),
+              topRight: Radius.circular(16),
             ),
-            color: ColorUtil.bangladeshGreen,
           ),
-          children: [
-            TableCell(
-              child: Align(
-                alignment: Alignment.bottomCenter,
-                child: TextButton(
-                  onPressed: () => {},
-                  child: const Padding(
-                    padding: EdgeInsets.only(top: 8.0),
-                    child: Text(
-                      "Chi tiết lần thay lõi",
-                      style: TextStyle(color: ColorUtil.white),
-                    ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                "Chi tiết lần thay lõi",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+              GestureDetector(
+                onTap: () {
+                  setState(() {
+                    lstKeyValueCores.add(
+                      KeyValue(
+                        TextEditingController(),
+                        TextEditingController(),
+                      ),
+                    );
+                  });
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(8),
                   ),
+                  child: const Icon(Icons.add, color: Colors.white, size: 20),
                 ),
               ),
-            ),
-            TableCell(
-              child: Align(
-                alignment: Alignment.topRight,
-                child: IconButton(
-                  onPressed: () {
-                    setState(() {
-                      lstKeyValueCores.add(
-                        KeyValue(
-                          TextEditingController(),
-                          TextEditingController(),
-                        ),
-                      );
-                    });
-                    for (var element in lstKeyValueCores) {
-                      LoggerUtil.log(
-                        "${element.key.text}-${element.value.text}",
-                      );
-                    }
-                  },
-                  padding: EdgeInsets.zero,
-                  icon: const Icon(Icons.add, color: Colors.white),
-                ),
-              ),
-            ),
-          ],
-        ),
-        const TableRow(
-          decoration: BoxDecoration(
-            // border: Border.all(color: ColorUtil.brightYellow),
-            color: ColorUtil.brightYellow,
+            ],
           ),
-          children: [
-            TableCell(
-              verticalAlignment: TableCellVerticalAlignment.middle,
-              child: Align(
-                alignment: Alignment.center,
-                child: Padding(
-                  padding: EdgeInsets.only(left: 10.0, top: 3.0, bottom: 3.0),
-                  child: Text(
-                    "Tên lõi",
-                    style: TextStyle(color: Colors.white, fontSize: 16),
-                  ),
-                ),
-              ),
-            ),
-            TableCell(
-              verticalAlignment: TableCellVerticalAlignment.middle,
-              child: Align(
-                alignment: Alignment.center,
-                child: Padding(
-                  padding: EdgeInsets.only(left: 10.0, top: 3.0, bottom: 3.0),
-                  child: Text(
-                    "Thành tiền",
-                    style: TextStyle(color: Colors.white, fontSize: 16),
-                  ),
-                ),
-              ),
-            ),
-          ],
         ),
-        //https://stackoverflow.com/questions/47032262/flutter-dropdownbutton-overflow
+        Container(
+          color: const Color(0xFFFFF3CD),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: const Row(
+            children: [
+              Expanded(
+                flex: 1,
+                child: Text(
+                  "Tên lõi",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: ColorUtil.raisinBlack,
+                  ),
+                ),
+              ),
+              Expanded(
+                flex: 1,
+                child: Text(
+                  "Thành tiền (VNĐ)",
+                  textAlign: TextAlign.right,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: ColorUtil.raisinBlack,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
         if (lstKeyValueCores.isNotEmpty)
-          for (var i = 0; i < lstKeyValueCores.length; i++)
-            TableRow(
-              children: [
-                TableCell(
-                  verticalAlignment: TableCellVerticalAlignment.middle,
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 6.0, bottom: 6.0),
+          ...List.generate(
+            lstKeyValueCores.length,
+            (i) => Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    flex: 1,
                     child: TextFieldSearch(
                       label: '',
-                      decoration: const InputDecoration(
-                        border: InputBorder.none,
-                        hintText: 'item',
+                      decoration: InputDecoration(
+                        hintText: 'Tên lõi...',
                         isDense: true,
-                        contentPadding: EdgeInsets.zero,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 10,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
+                        ),
                       ),
                       controller: lstKeyValueCores[i].key,
                       itemsInView: 10,
@@ -1239,22 +1318,29 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                       initialList: ListOrderCoreModel.coreList,
                     ),
                   ),
-                ),
-                TableCell(
-                  verticalAlignment: TableCellVerticalAlignment.middle,
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 6.0, bottom: 6.0),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    flex: 1,
                     child: TextField(
                       controller: lstKeyValueCores[i].value,
-                      textAlign: TextAlign.center,
+                      textAlign: TextAlign.right,
                       keyboardType: TextInputType.number,
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                      maxLines: null,
-                      decoration: const InputDecoration(
-                        border: InputBorder.none,
-                        hintText: 'VNĐ',
+                      decoration: InputDecoration(
+                        hintText: '0',
                         isDense: true,
-                        contentPadding: EdgeInsets.zero,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 10,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
+                        ),
                       ),
                       onChanged: (text) {
                         if (lstKeyValueCores[i].key.text == '') {
@@ -1263,15 +1349,18 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                           return;
                         } else {
                           setState(() {
+                            String formattedText = (text.isEmpty ? "0" : text)
+                                .replaceAll(".", "")
+                                .replaceAll("đ", "")
+                                .nonBreaking
+                                .trim()
+                                .toVND();
                             lstKeyValueCores[i].value.value = TextEditingValue(
-                              text: (text.isEmpty ? "0" : text)
-                                  .replaceAll(".", "")
-                                  .replaceAll("đ", "")
-                                  .nonBreaking
-                                  .trim()
-                                  .toVND(),
+                              text: formattedText,
                               selection: TextSelection.collapsed(
-                                offset: text.length,
+                                offset: formattedText.length > 2
+                                    ? formattedText.length - 2
+                                    : formattedText.length,
                               ),
                             );
                             _bloc.total = 0;
@@ -1321,125 +1410,122 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                       },
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
+          ),
       ],
     );
   }
 
   Widget _tableActionMaintain() {
-    return Table(
-      columnWidths: const {1: FlexColumnWidth(0.8)},
-      border: TableBorder.symmetric(
-        inside: const BorderSide(
-          width: 1,
-          color: Color.fromRGBO(4, 107, 80, 1),
-        ),
-      ),
+    return Column(
       children: [
-        TableRow(
-          decoration: BoxDecoration(
-            border: Border.all(color: const Color.fromRGBO(4, 107, 80, 1)),
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(10),
-              topRight: Radius.circular(10),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: const BoxDecoration(
+            color: ColorUtil.green,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(16),
+              topRight: Radius.circular(16),
             ),
-            color: ColorUtil.bangladeshGreen,
           ),
-          children: [
-            TableCell(
-              child: Align(
-                alignment: Alignment.bottomCenter,
-                child: TextButton(
-                  onPressed: () => {},
-                  child: const Padding(
-                    padding: EdgeInsets.only(top: 8.0),
-                    child: Text(
-                      "Hẹn lịch",
-                      style: TextStyle(color: ColorUtil.white),
-                    ),
-                  ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                "Hẹn lịch bảo dưỡng",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
                 ),
               ),
-            ),
-            TableCell(
-              child: Align(
-                alignment: Alignment.topRight,
-                child: IconButton(
-                  onPressed: () {
-                    setState(() {
-                      lstKeyValueMaintainCores.add(
-                        KeyValue(
-                          TextEditingController(),
-                          TextEditingController(
-                            text: DateTime.now()
-                                .add(const Duration(days: 183))
-                                .toDateString(format: "dd/MM/yyyy"),
-                          ),
+              GestureDetector(
+                onTap: () {
+                  setState(() {
+                    lstKeyValueMaintainCores.add(
+                      KeyValue(
+                        TextEditingController(),
+                        TextEditingController(
+                          text: DateTime.now()
+                              .add(const Duration(days: 183))
+                              .toDateString(format: "dd/MM/yyyy"),
                         ),
-                      );
-                    });
-                    for (var element in lstKeyValueMaintainCores) {
-                      LoggerUtil.log(
-                        "${element.key.text}-${element.value.text}",
-                      );
-                    }
-                  },
-                  padding: EdgeInsets.zero,
-                  icon: const Icon(Icons.add, color: Colors.white),
+                      ),
+                    );
+                  });
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(Icons.add, color: Colors.white, size: 20),
                 ),
               ),
-            ),
-          ],
-        ),
-        const TableRow(
-          decoration: BoxDecoration(
-            // border: Border.all(color: ColorUtil.brightYellow),
-            color: ColorUtil.brightYellow,
+            ],
           ),
-          children: [
-            TableCell(
-              child: Align(
-                alignment: Alignment.center,
-                child: Padding(
-                  padding: EdgeInsets.only(left: 10.0, top: 3.0, bottom: 3.0),
-                  child: Text(
-                    "Tên lõi",
-                    style: TextStyle(color: Colors.white, fontSize: 16),
+        ),
+        Container(
+          color: const Color(0xFFFFF3CD),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: const Row(
+            children: [
+              Expanded(
+                flex: 1,
+                child: Text(
+                  "Tên lõi",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: ColorUtil.raisinBlack,
                   ),
                 ),
               ),
-            ),
-            TableCell(
-              child: Align(
-                alignment: Alignment.center,
-                child: Padding(
-                  padding: EdgeInsets.only(left: 10.0, top: 3.0, bottom: 3.0),
-                  child: Text(
-                    "Ngày thay tiếp theo",
-                    style: TextStyle(color: Colors.white, fontSize: 16),
+              Expanded(
+                flex: 1,
+                child: Text(
+                  "Ngày thay tiếp theo",
+                  textAlign: TextAlign.right,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: ColorUtil.raisinBlack,
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
         if (lstKeyValueMaintainCores.isNotEmpty)
-          for (var i = 0; i < lstKeyValueMaintainCores.length; i++)
-            TableRow(
-              children: [
-                TableCell(
-                  verticalAlignment: TableCellVerticalAlignment.middle,
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 6.0, bottom: 6.0),
+          ...List.generate(
+            lstKeyValueMaintainCores.length,
+            (i) => Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    flex: 1,
                     child: TextFieldSearch(
                       label: '',
-                      decoration: const InputDecoration(
-                        border: InputBorder.none,
-                        hintText: 'item',
+                      decoration: InputDecoration(
+                        hintText: 'Tên lõi...',
                         isDense: true,
-                        contentPadding: EdgeInsets.zero,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 10,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
+                        ),
                       ),
                       controller: lstKeyValueMaintainCores[i].key,
                       itemsInView: 10,
@@ -1447,39 +1533,44 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                       initialList: ListOrderCoreModel.coreList,
                     ),
                   ),
-                ),
-                TableCell(
-                  verticalAlignment: TableCellVerticalAlignment.middle,
-                  child: Padding(
-                    padding: const EdgeInsets.only(
-                      left: 12.0,
-                      top: 6.0,
-                      bottom: 6.0,
-                    ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    flex: 1,
                     child: InkWell(
-                      onTap: () {
-                        _selectDate(
-                          i,
-                        ); // Call Function that has showDatePicker()
-                      },
+                      onTap: () => _selectDate(i),
                       child: IgnorePointer(
                         child: TextFormField(
                           controller: lstKeyValueMaintainCores[i].value,
-                          decoration: const InputDecoration(
+                          textAlign: TextAlign.right,
+                          decoration: InputDecoration(
                             hintText: 'dd/MM/yyyy',
-                            border: InputBorder.none,
+                            isDense: true,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 10,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide(
+                                color: Colors.grey.shade300,
+                              ),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide(
+                                color: Colors.grey.shade300,
+                              ),
+                            ),
                           ),
-                          readOnly: true, // Đặt trạng thái cho phép chỉ đọc
-                          onTap: () {
-                            _selectDate(i); // Gọi hàm để chọn ngày
-                          },
+                          readOnly: true,
                         ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
+          ),
       ],
     );
   }
@@ -1772,6 +1863,116 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
               ),
             );
           },
+    );
+  }
+
+  Widget _buildCard({
+    required List<Widget> children,
+    EdgeInsetsGeometry? padding,
+  }) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16.0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: padding ?? const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: children,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title, IconData icon) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16.0),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: ColorUtil.green.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(icon, color: ColorUtil.green, size: 20),
+          ),
+          const SizedBox(width: 12),
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: ColorUtil.raisinBlack,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(String title, Widget valueWidget) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            flex: 2,
+            child: Text(
+              title,
+              style: const TextStyle(
+                color: ColorUtil.spanishGray,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          Expanded(flex: 3, child: valueWidget),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInputRow(String title, Widget inputWidget) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              color: ColorUtil.raisinBlack,
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+            ),
+          ),
+          const SizedBox(height: 8),
+          inputWidget,
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTextFieldWrapper(Widget child) {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+      child: child,
     );
   }
 }
