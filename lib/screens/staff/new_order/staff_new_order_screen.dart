@@ -742,6 +742,12 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                     List<OrderFilterCoreModel> lst2 = [];
                     for (var item in lstKeyValueCores) {
                       if (item.key.text.isNotEmpty) {
+                        if (item.value.text.trim().isEmpty) {
+                          context.showSnackBar(
+                            'Vui lòng nhập thành tiền cho ${item.key.text}',
+                          );
+                          return;
+                        }
                         lst1.add(
                           OrderFilterCoreModel(
                             name: item.key.text,
@@ -893,6 +899,12 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                     List<OrderFilterCoreModel> lst2 = [];
                     for (var item in lstKeyValueCores) {
                       if (item.key.text.isNotEmpty) {
+                        if (item.value.text.trim().isEmpty) {
+                          context.showSnackBar(
+                            'Vui lòng nhập thành tiền cho ${item.key.text}',
+                          );
+                          return;
+                        }
                         lst1.add(
                           OrderFilterCoreModel(
                             name: item.key.text,
@@ -1244,7 +1256,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                 child: Container(
                   padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
+                    color: Colors.white.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: const Icon(Icons.add, color: Colors.white, size: 20),
@@ -1270,10 +1282,18 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
               ),
               Expanded(
                 flex: 1,
-                child: Text(
-                  "Thành tiền (VNĐ)",
+                child: Text.rich(
+                  const TextSpan(
+                    text: "Thành tiền (VNĐ) ",
+                    children: [
+                      TextSpan(
+                        text: "*",
+                        style: TextStyle(color: Colors.red),
+                      ),
+                    ],
+                  ),
                   textAlign: TextAlign.right,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     color: ColorUtil.raisinBlack,
                   ),
