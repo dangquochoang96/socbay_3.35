@@ -83,14 +83,12 @@ class _LoginScreenState extends State<LoginScreen> {
         'listener received LogInFailureState message=${state.message}',
         tag: 'LoginScreen',
       );
-      // context.showSnackBar(state.message);
       showDialog(
         context: context,
         builder: (BuildContext context) => AlertDialog(
           backgroundColor: ColorUtil.white,
-          //title: const Text('AlertDialog Title'),
-          content: const Text(
-            "Thông tin đăng nhập không chính xác,\r vui lòng đăng nhập lại",
+          content: Text(
+            "Có lỗi trong quá trình đăng nhập",
             textAlign: TextAlign.center,
             style: TextStyle(
               color: ColorUtil.bangladeshGreen,

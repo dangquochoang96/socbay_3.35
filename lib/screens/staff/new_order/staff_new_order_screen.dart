@@ -21,7 +21,6 @@ import 'package:socbay/routes.dart';
 import 'package:socbay/utils/color_util.dart';
 import 'package:socbay/utils/date_util.dart';
 import 'package:socbay/utils/image_util.dart';
-import 'package:socbay/utils/logger_util.dart';
 import 'package:socbay/utils/string_extension.dart';
 import 'package:socbay/widgets/button_widget.dart';
 import 'package:socbay/widgets/dialog/custom_alert_dialog.dart';
