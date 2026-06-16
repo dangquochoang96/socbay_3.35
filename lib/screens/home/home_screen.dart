@@ -727,16 +727,14 @@ class _HomeScreenState extends State<HomeScreen> {
             Navigator.pushNamed(context, Routes.staffCommentAndRatingList);
           } else if (index == 1) {
             Navigator.pushNamed(context, Routes.orderManagerScreen);
-            // } else if (index == 2) {
-            //   Navigator.pushNamed(context, Routes.notificationScreen);
           } else if (index == 2) {
-            Navigator.pushNamed(context, Routes.newsScreen);
-          } else if (index == 3) {
             Navigator.pushNamed(
               context,
               Routes.staffFeedbackScreen,
               arguments: {"fbId": "0", "orderId": "0"},
             );
+          } else if (index == 3) {
+            Navigator.pushNamed(context, Routes.retailOrderScreen);
           }
         } else {
           if (index == 0) {

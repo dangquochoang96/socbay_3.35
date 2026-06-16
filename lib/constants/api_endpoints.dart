@@ -2,11 +2,11 @@ abstract final class ApiEndpoints {
   // =========================
   // AUTH
   // =========================
-  static const setOtp = '/auth/setOTP';
-  static const register = '/auth/register';
-  static const logout = '/auth/logout';
-  static const userInfo = '/auth';
-  static const forgotPassword = '/auth/fogotPassWord';
+  static const setOtp = '/user/setOTP';
+  static const register = '/user/register';
+  static const logout = '/user/logout';
+  static const userInfo = '/user';
+  static const forgotPassword = '/user/fogotPassWord';
 
   // =========================
   // USER
@@ -159,7 +159,7 @@ abstract final class ApiEndpoints {
       '/socbay/order/last-replace-filter-core/$userId';
 
   // =========================
-  // Warehouse
+  // Retail Order Warehouse
   // =========================
   static String listWasehouseByUser(Object? userId) =>
       '/riha/listWasehouseByUser/$userId';

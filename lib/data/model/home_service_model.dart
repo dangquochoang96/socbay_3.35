@@ -89,14 +89,14 @@ class HomeServiceModel {
       name: 'Quản lý đơn hàng',
     ),
     HomeServiceModel(
-      image: Images.iconNews,
-      des: 'Tin tức kỹ thuật',
-      name: 'Tin tức',
-    ),
-    HomeServiceModel(
       image: Images.iconinventory,
       des: 'Góp ý & khiếu nại',
       name: 'GÓP Ý & KHIẾU NẠI',
+    ),
+    HomeServiceModel(
+      image: Images.iconNews,
+      des: 'Đơn hàng bán lẻ',
+      name: 'Đơn nhập hàng',
     ),
   ];
   static List<HomeServiceModel> staffServiceListSale = [
@@ -120,11 +120,6 @@ class HomeServiceModel {
       des: 'Thông tin khách hàng',
       name: 'Thông tin khách hàng',
     ),
-    // HomeServiceModel(
-    //   image: Images.iconMaintenance,
-    //   des: 'Đặt lịch dịch vụ thuê máy lọc nước',
-    //   name: 'ĐẶT LỊCH THUÊ',
-    // ),
   ];
   static List<HomeServiceModel> taskServiceList = [
     HomeServiceModel(

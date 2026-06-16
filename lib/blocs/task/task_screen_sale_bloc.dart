@@ -177,8 +177,9 @@ class TaskScreenSaleBloc extends Bloc<TaskScreenEvent, TaskScreenState> {
       var l = Map<String, dynamic>.from(json.decode(res.body));
       if (l["code"] == 1) {
         emit(BookingUpdateSuccessState());
+      } else {
+        emit(BookingUpdateErrorState());
       }
-      emit(BookingUpdateSuccessState());
     } else {
       emit(BookingUpdateErrorState());
     }
@@ -222,8 +223,9 @@ class TaskScreenSaleBloc extends Bloc<TaskScreenEvent, TaskScreenState> {
       var l = Map<String, dynamic>.from(json.decode(res.body));
       if (l["code"] == 1) {
         emit(BookingUpdateTodaySuccessState());
+      } else {
+        emit(BookingUpdateTodayErrorState());
       }
-      emit(BookingUpdateTodaySuccessState());
     } else {
       emit(BookingUpdateTodayErrorState());
     }

@@ -16,6 +16,7 @@ extension MediaQueryValues on BuildContext {
     Duration? duration,
     TextStyle? style,
   }) {
+    ScaffoldMessenger.of(this).clearSnackBars();
     ScaffoldMessenger.of(this).showSnackBar(
       SnackBar(
         content: Text(

@@ -91,6 +91,7 @@ class TaskScreenBloc extends Bloc<TaskScreenEvent, TaskScreenState> {
       });
       var res = await http.get(url);
       print(res.body);
+      print(url);
       if (res.statusCode == HttpStatus.ok) {
         var l = Map<String, dynamic>.from(json.decode(res.body));
         List<TaskModel> newlistTaskModel = List<TaskModel>.from(
@@ -150,7 +151,6 @@ class TaskScreenBloc extends Bloc<TaskScreenEvent, TaskScreenState> {
     isLoading = true;
     emit(MyTaskScreenInitialState());
     Map<String, dynamic> params = {
-      // "type_task":event.taskId.toString(),
       "name": event.name.toString(),
       "status": event.status.toString(),
       "noti": event.noti.toString(),
@@ -179,8 +179,9 @@ class TaskScreenBloc extends Bloc<TaskScreenEvent, TaskScreenState> {
       var l = Map<String, dynamic>.from(json.decode(res.body));
       if (l["code"] == 1) {
         emit(BookingUpdateSuccessState());
+      } else {
+        emit(BookingUpdateErrorState());
       }
-      emit(BookingUpdateSuccessState());
     } else {
       emit(BookingUpdateErrorState());
     }
@@ -224,8 +225,9 @@ class TaskScreenBloc extends Bloc<TaskScreenEvent, TaskScreenState> {
       var l = Map<String, dynamic>.from(json.decode(res.body));
       if (l["code"] == 1) {
         emit(BookingUpdateTodaySuccessState());
+      } else {
+        emit(BookingUpdateTodayErrorState());
       }
-      emit(BookingUpdateTodaySuccessState());
     } else {
       emit(BookingUpdateTodayErrorState());
     }

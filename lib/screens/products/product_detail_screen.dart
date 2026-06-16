@@ -69,7 +69,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               child: FullScreenWidget(
                 child: Hero(
                   tag:
-                      _bloc.product.images!.isNotEmpty &&
+                      _bloc.product.images == null ||
+                          _bloc.product.images!.isEmpty ||
                           _bloc.product.images![0].link == null
                       ? ""
                       : "$protocol${AppConfig.instance.values.apiUrl}${_bloc.product.images![0].link!}",
@@ -77,7 +78,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     borderRadius: BorderRadius.circular(16),
                     child: ImageUtil.loadNetWorkImage(
                       url:
-                          _bloc.product.images!.isNotEmpty &&
+                          _bloc.product.images == null ||
+                              _bloc.product.images!.isEmpty ||
                               _bloc.product.images![0].link == null
                           ? ""
                           : "$protocol${AppConfig.instance.values.apiUrl}${_bloc.product.images![0].link!}",
