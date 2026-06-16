@@ -24,22 +24,23 @@ class RetailOrderBloc extends Bloc<RetailOrderEvent, RetailOrderState> {
     Emitter<RetailOrderState> emit,
   ) async {
     final currentState = state;
-    
+
     // Check if we need to load the first page (refresh or query change)
-    final bool isRefresh = event.isRefresh || 
-        currentState is! RetailOrderLoadSuccess || 
-        event.search != (currentState as RetailOrderLoadSuccess).search;
+    final bool isRefresh =
+        event.isRefresh ||
+        currentState is! RetailOrderLoadSuccess ||
+        event.search != (currentState).search;
 
     int nextPage = 0;
     List<RetailOrder> currentOrders = [];
 
-    if (!isRefresh && currentState is RetailOrderLoadSuccess) {
+    if (!isRefresh) {
       if (currentState.hasReachedMax || currentState.isFetchingMore) {
         return; // Already reached the end or currently loading
       }
       nextPage = currentState.page + 1;
       currentOrders = currentState.orders;
-      
+
       // Emit fetching more state to show the bottom spinner
       emit(currentState.copyWith(isFetchingMore: true));
     } else {
@@ -47,9 +48,7 @@ class RetailOrderBloc extends Bloc<RetailOrderEvent, RetailOrderState> {
     }
 
     try {
-      final Map<String, dynamic> queryParams = {
-        'page': nextPage.toString(),
-      };
+      final Map<String, dynamic> queryParams = {'page': nextPage.toString()};
       if (event.search.trim().isNotEmpty) {
         queryParams['search'] = event.search.trim();
       }
@@ -59,26 +58,39 @@ class RetailOrderBloc extends Bloc<RetailOrderEvent, RetailOrderState> {
         queryParams,
       );
       LoggerUtil.log('Fetching retail orders from URL: $url');
-      
+
       var response = await http.get(url);
       if (response.statusCode == HttpStatus.ok) {
-        var jsonResponse = Map<String, dynamic>.from(json.decode(response.body));
+        var jsonResponse = Map<String, dynamic>.from(
+          json.decode(response.body),
+        );
         if (jsonResponse['code'] == 1) {
           var newOrders = listRetailOrderFromJson(jsonResponse['data']);
           final bool hasReachedMax = newOrders.length < 20;
 
-          emit(RetailOrderLoadSuccess(
-            orders: isRefresh ? newOrders : (List<RetailOrder>.from(currentOrders)..addAll(newOrders)),
-            hasReachedMax: hasReachedMax,
-            page: nextPage,
-            search: event.search,
-            isFetchingMore: false,
-          ));
+          emit(
+            RetailOrderLoadSuccess(
+              orders: isRefresh
+                  ? newOrders
+                  : (List<RetailOrder>.from(currentOrders)..addAll(newOrders)),
+              hasReachedMax: hasReachedMax,
+              page: nextPage,
+              search: event.search,
+              isFetchingMore: false,
+            ),
+          );
         } else {
-          emit(RetailOrderLoadFailure(error: jsonResponse['message'] ?? 'Đã xảy ra lỗi khi tải đơn hàng'));
+          emit(
+            RetailOrderLoadFailure(
+              error:
+                  jsonResponse['message'] ?? 'Đã xảy ra lỗi khi tải đơn hàng',
+            ),
+          );
         }
       } else {
-        emit(RetailOrderLoadFailure(error: 'Lỗi máy chủ: ${response.statusCode}'));
+        emit(
+          RetailOrderLoadFailure(error: 'Lỗi máy chủ: ${response.statusCode}'),
+        );
       }
     } catch (e) {
       LoggerUtil.log('Exception in RetailOrderBloc: ${e.toString()}');

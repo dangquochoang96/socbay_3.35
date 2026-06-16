@@ -12,6 +12,7 @@ import 'package:socbay/utils/color_util.dart';
 import 'package:socbay/utils/image_util.dart';
 import 'package:socbay/widgets/my_app_bar.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:socbay/screens/retailOrder/create_retail_order.dart';
 
 class RetailOrderScreen extends StatefulWidget {
   const RetailOrderScreen({super.key});
@@ -123,6 +124,26 @@ class _RetailOrderScreenState extends State<RetailOrderScreen> {
     return Scaffold(
       appBar: MyAppBar(title: "Đơn Hàng Bán Lẻ", isBackNavigation: true),
       backgroundColor: const Color(0xfff7f8fa),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const CreateRetailOrderScreen(),
+            ),
+          ).then((value) {
+            if (value == true) {
+              _onRefresh();
+            }
+          });
+        },
+        backgroundColor: ColorUtil.bangladeshGreen,
+        icon: const Icon(Icons.add, color: Colors.white),
+        label: const Text(
+          "Tạo đơn mới",
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+      ),
       body: Column(
         children: [
           _buildSearchBar(),
