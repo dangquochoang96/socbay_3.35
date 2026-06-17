@@ -4,6 +4,10 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:socbay/blocs/retail_order/retail_order_bloc.dart';
+import 'package:socbay/blocs/retail_order/retail_order_event.dart';
+import 'package:socbay/blocs/retail_order/retail_order_state.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:socbay/application.dart';
@@ -29,7 +33,6 @@ class _CreateRetailOrderScreenState extends State<CreateRetailOrderScreen> {
   UserProfile? _currentUser;
   DateTime _selectedDate = DateTime.now();
   final TextEditingController _notesController = TextEditingController();
-  bool _isSubmitting = false;
 
   final List<SelectedProduct> _selectedProducts = [];
 
@@ -151,63 +154,36 @@ class _CreateRetailOrderScreenState extends State<CreateRetailOrderScreen> {
       return;
     }
 
-    setState(() {
-      _isSubmitting = true;
-    });
+    final String userId = _currentUser?.id?.toString() ?? "";
+    final String name = _currentUser?.username ?? "Chưa cập nhật";
+    final String phone = _currentUser?.phone ?? "";
+    final String address = "Lấy hàng tại kho";
 
-    try {
-      final String userId = _currentUser?.id?.toString() ?? "";
-      final String name = _currentUser?.username ?? "Chưa cập nhật";
-      final String phone = _currentUser?.phone ?? "";
-      final String address = "Lấy hàng tại kho";
-
-      final productsJson = _selectedProducts.map((p) {
-        return {
-          "product_id": p.product.id,
-          "quantity": p.quantity,
-          "price": p.price,
-        };
-      }).toList();
-
-      final Map<String, dynamic> body = {
-        "user_id": userId,
-        "customer_id": userId,
-        "sale_id": userId,
-        "status": "1",
-        "order_user_name": name,
-        "order_user_phone": phone,
-        "order_user_address": address,
-        "notes": _notesController.text.trim(),
-        "order_date": DateFormat("yyyy-MM-ddTHH:mm").format(_selectedDate),
-        "products_json": jsonEncode(productsJson),
+    final productsJson = _selectedProducts.map((p) {
+      return {
+        "product_id": p.product.id,
+        "quantity": p.quantity,
+        "price": p.price,
       };
+    }).toList();
 
-      final url = AppConfig.instance.apiUri(ApiEndpoints.createRetailOrder);
-      final response = await http.post(url, body: body);
+    final Map<String, dynamic> body = {
+      "user_id": userId,
+      "customer_id": userId,
+      "sale_id": userId,
+      "status": "0",
+      "order_user_name": name,
+      "order_user_phone": phone,
+      "order_user_address": address,
+      "notes": _notesController.text.trim(),
+      "order_date": DateFormat("yyyy-MM-ddTHH:mm").format(_selectedDate),
+      "products_json": jsonEncode(productsJson),
+      "is_socbay": true,
+    };
 
-      if (response.statusCode == HttpStatus.ok ||
-          response.statusCode == HttpStatus.created) {
-        final resJson = jsonDecode(response.body);
-        if (resJson['code'] == 1) {
-          Fluttertoast.showToast(msg: "Tạo đơn hàng thành công");
-          Navigator.pop(context, true);
-        } else {
-          Fluttertoast.showToast(
-            msg: resJson['message'] ?? "Có lỗi xảy ra, vui lòng thử lại",
-          );
-        }
-      } else {
-        Fluttertoast.showToast(msg: "Lỗi máy chủ: ${response.statusCode}");
-      }
-    } catch (e) {
-      Fluttertoast.showToast(msg: "Đã xảy ra lỗi: $e");
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isSubmitting = false;
-        });
-      }
-    }
+    BlocProvider.of<RetailOrderBloc>(
+      context,
+    ).add(CreateRetailOrderSubmitEvent(body: body));
   }
 
   String _formatCurrency(dynamic val) {
@@ -237,43 +213,56 @@ class _CreateRetailOrderScreenState extends State<CreateRetailOrderScreen> {
       totalAmount += p.price * p.quantity;
     }
 
-    return Scaffold(
-      appBar: MyAppBar(title: "Tạo đơn bán buôn", isBackNavigation: true),
-      backgroundColor: const Color(0xfff7f8fa),
-      body: Stack(
-        children: [
-          Column(
+    return BlocConsumer<RetailOrderBloc, RetailOrderState>(
+      listener: (context, state) {
+        if (state is CreateRetailOrderSuccess) {
+          Fluttertoast.showToast(msg: "Tạo đơn hàng thành công");
+          Navigator.pop(context, true);
+        } else if (state is CreateRetailOrderFailure) {
+          Fluttertoast.showToast(msg: state.error);
+        }
+      },
+      builder: (context, state) {
+        final isSubmitting = state is CreateRetailOrderLoading;
+        return Scaffold(
+          appBar: MyAppBar(title: "Tạo đơn bán buôn", isBackNavigation: true),
+          backgroundColor: const Color(0xfff7f8fa),
+          body: Stack(
             children: [
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(paddingHorizontal),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildCustomerInfoCard(),
-                      const SizedBox(height: 16),
-                      _buildOrderInfoCard(),
-                      const SizedBox(height: 16),
-                      _buildProductsCard(),
-                      const SizedBox(height: 100),
-                    ],
+              Column(
+                children: [
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(paddingHorizontal),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildCustomerInfoCard(),
+                          const SizedBox(height: 16),
+                          _buildOrderInfoCard(),
+                          const SizedBox(height: 16),
+                          _buildProductsCard(),
+                          const SizedBox(height: 100),
+                        ],
+                      ),
+                    ),
+                  ),
+                  _buildBottomBar(totalAmount),
+                ],
+              ),
+              if (isSubmitting)
+                Container(
+                  color: Colors.black.withValues(alpha: 0.3),
+                  child: const Center(
+                    child: CircularProgressIndicator(
+                      color: ColorUtil.bangladeshGreen,
+                    ),
                   ),
                 ),
-              ),
-              _buildBottomBar(totalAmount),
             ],
           ),
-          if (_isSubmitting)
-            Container(
-              color: Colors.black.withValues(alpha: 0.3),
-              child: const Center(
-                child: CircularProgressIndicator(
-                  color: ColorUtil.bangladeshGreen,
-                ),
-              ),
-            ),
-        ],
-      ),
+        );
+      },
     );
   }
 

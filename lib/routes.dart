@@ -106,7 +106,7 @@ import 'blocs/staff/order/order_manager_bloc_bySale.dart';
 import 'screens/staff/order_manager/order_mng_screen_bySale.dart';
 import 'package:socbay/blocs/retail_order/retail_order_bloc.dart';
 import 'package:socbay/screens/retailOrder/retail_order_screen.dart';
-
+import 'package:socbay/screens/warehouse/warehouse.dart';
 
 class Routes {
   static const String root = '/';
@@ -172,6 +172,7 @@ class Routes {
   // static const String rentBookingServiceScreen = '/rentBookingServiceScreen';
   static const String orderManagerScreenBySale = '/orderManagerScreenBySale';
   static const String retailOrderScreen = '/retailOrderScreen';
+  static const String warehouseScreen = '/warehouseScreen';
   CupertinoPageRoute routePage(RouteSettings settings) {
     return CupertinoPageRoute(
       settings: settings,
@@ -571,9 +572,12 @@ class Routes {
             );
           case retailOrderScreen:
             return BlocProvider<RetailOrderBloc>(
-              create: (context) => RetailOrderBloc(apiRepository: apiRepository),
+              create: (context) =>
+                  RetailOrderBloc(apiRepository: apiRepository),
               child: const RetailOrderScreen(),
             );
+          case warehouseScreen:
+            return const WarehouseUI();
         }
         return const Scaffold();
       },

@@ -24,6 +24,8 @@ abstract final class ApiEndpoints {
   static const userRegister = '/user/register';
   static const userAddress = '/userAddress';
   static const userSearchList = '/user/searchUser_list';
+  static const userSearch = '/user/searchUser';
+  static const userChangePassword = '/user/changePassWord';
 
   static String userById(Object? id) => '/user/$id';
   static String userProducts(Object? id) => '/user/listProduct/$id';
@@ -35,8 +37,6 @@ abstract final class ApiEndpoints {
       '/user/updatePaymentStatus/$orderId';
   static String userRate(Object? userId, Object? orderId) =>
       '/user/rate/$userId/$orderId';
-  static String userChangePassword(Object? phone) =>
-      '/user/$phone/changePassWord';
 
   // =========================
   // USER FAVORITES
@@ -81,6 +81,9 @@ abstract final class ApiEndpoints {
   static const productListAll = '/product/listProduct';
   static const productSearch = '/product/search';
   static const productListCate = '/product/listCate';
+
+  static String getProductByBarcode(String barcode) =>
+      '/product/getProductByBarcode/$barcode';
 
   static String productById(Object? id) => '/product/$id';
 
@@ -161,8 +164,13 @@ abstract final class ApiEndpoints {
   // =========================
   // Retail Order Warehouse
   // =========================
-  static String listWasehouseByUser(Object? userId) =>
+  static String listWarehouseByUser(Object? userId) =>
       '/riha/listWasehouseByUser/$userId';
+  static const statisticalWarehouseHistory =
+      '/riha/statisticalWarehouseHistory';
+  static String exportWarehouse(Object? userId) =>
+      '/riha/exportWasehouse/$userId';
+  static String refundWarehouse(Object? id) => '/riha/warehouse_refund/$id';
   static const retailOrder = '/retailOrder';
   static const createRetailOrder = '/retailOrder/createRetailOrder';
 }

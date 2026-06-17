@@ -161,7 +161,7 @@ class ApiManager {
         );
       case ApiType.changePassword:
         return ApiConfig(
-          path: ApiEndpoints.userChangePassword(App.instance.userApp!.phone),
+          path: ApiEndpoints.userChangePassword,
           method: HttpMethod.post,
           headers: _defaultHeaders,
         );

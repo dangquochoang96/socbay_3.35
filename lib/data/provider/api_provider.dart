@@ -507,12 +507,12 @@ class ApiProvider {
   ) async {
     try {
       var bodyParams = {
-        "password": changePasswordRequest.oldPassword,
+        "old_pass": changePasswordRequest.oldPassword,
         "new_password": changePasswordRequest.password,
         "new_password_confirm": changePasswordRequest.rePassword,
       };
       var url = AppConfig.instance.apiUri(
-        ApiEndpoints.userChangePassword(App.instance.userApp!.phone),
+        ApiEndpoints.userChangePassword,
         bodyParams,
       );
       var res = await http.post(url);
@@ -560,11 +560,11 @@ class ApiProvider {
     try {
       var dio = Dio();
       var response = await dio.post(
-        AppConfig.instance.apiUrl(ApiEndpoints.updateUser),
+        AppConfig.instance.apiUrl(ApiEndpoints.forgotPassword),
         data: {
           "phone": newPasswordRequest.phone,
-          "password": newPasswordRequest.newPassword,
-          "password_confirmation": newPasswordRequest.newPasswordConfirm,
+          "new_password": newPasswordRequest.newPassword,
+          "new_password_confirm": newPasswordRequest.newPasswordConfirm,
         },
         options: Options(contentType: 'application/json'),
       );

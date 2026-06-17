@@ -29,6 +29,11 @@ import 'package:socbay/widgets/my_app_bar.dart';
 import 'package:socbay/widgets/textfield_search.dart';
 import 'package:socbay/utils/context_extension.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:socbay/application.dart';
+import 'package:socbay/constants/api_endpoints.dart';
+import 'package:socbay/data/model/warehouse_model.dart';
+import 'package:socbay/utils/auth_http.dart' as http;
+import 'dart:convert';
 
 class StaffNewOrderScreen extends StatefulWidget {
   final bool isRent;
@@ -49,6 +54,8 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
   final List<ProductModel> _listProductsAll = [];
   List<KeyValue> lstKeyValueCores = [];
   List<KeyValue> lstKeyValueMaintainCores = [];
+  List<String> _ktvWarehouseCores = [];
+  bool _isLoadingWarehouse = false;
 
   bool _showRentalDetails = false;
   DateTime _selectedEndDate = DateTime.now();
@@ -104,6 +111,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
         ),
       );
     _picker = ImagePicker();
+    _fetchKtvWarehouse();
     currentSelectedProductAllValue.addListener(() {
       if (_listProductsAll
           .where(
@@ -124,6 +132,51 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
       _calculateEndDate();
     });
     super.initState();
+  }
+
+  void _fetchKtvWarehouse() async {
+    final user = App.instance.userApp;
+    if (user == null) return;
+    setState(() {
+      _isLoadingWarehouse = true;
+    });
+    try {
+      final url = AppConfig.instance.apiUri(ApiEndpoints.listWarehouseByUser(user.id.toString()));
+      final response = await http.get(url);
+      if (response.statusCode == HttpStatus.ok) {
+        final jsonRes = json.decode(response.body);
+        if (jsonRes['code'] == 1 && jsonRes['data'] != null && jsonRes['data']['data_wasehouse'] != null) {
+          final List<dynamic> whData = jsonRes['data']['data_wasehouse'];
+          final whList = warehouseListFromJson(whData);
+          
+          final List<String> items = [];
+          for (var wh in whList) {
+            final name = wh.product?.name;
+            final qtyExist = double.tryParse(wh.quantityExist ?? '0')?.toInt() ?? 0;
+            if (name != null && name.isNotEmpty && qtyExist > 0) {
+              items.add(name);
+            }
+          }
+          
+          setState(() {
+            _ktvWarehouseCores = items;
+            _isLoadingWarehouse = false;
+          });
+        } else {
+          setState(() {
+            _isLoadingWarehouse = false;
+          });
+        }
+      } else {
+        setState(() {
+          _isLoadingWarehouse = false;
+        });
+      }
+    } catch (_) {
+      setState(() {
+        _isLoadingWarehouse = false;
+      });
+    }
   }
 
   void _calculateEndDate() {
@@ -1022,7 +1075,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.blue.withOpacity(0.1),
+                      color: Colors.blue.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: const Icon(
@@ -1282,7 +1335,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
               Expanded(
                 flex: 1,
                 child: Text.rich(
-                  const TextSpan(
+                  TextSpan(
                     text: "Thành tiền (VNĐ) ",
                     children: [
                       TextSpan(
@@ -1292,7 +1345,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                     ],
                   ),
                   textAlign: TextAlign.right,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.bold,
                     color: ColorUtil.raisinBlack,
                   ),
@@ -1313,29 +1366,53 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                 children: [
                   Expanded(
                     flex: 1,
-                    child: TextFieldSearch(
-                      label: '',
-                      decoration: InputDecoration(
-                        hintText: 'Tên lõi...',
-                        isDense: true,
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 10,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: Colors.grey.shade300),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: Colors.grey.shade300),
-                        ),
-                      ),
-                      controller: lstKeyValueCores[i].key,
-                      itemsInView: 10,
-                      minStringLength: 0,
-                      initialList: ListOrderCoreModel.coreList,
-                    ),
+                    child: _isLoadingWarehouse
+                        ? const Center(
+                            child: SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                          )
+                        : DropdownButtonFormField<String>(
+                            isExpanded: true,
+                            value: _ktvWarehouseCores.contains(lstKeyValueCores[i].key.text)
+                                ? lstKeyValueCores[i].key.text
+                                : null,
+                            decoration: InputDecoration(
+                              hintText: _ktvWarehouseCores.isEmpty
+                                  ? 'Kho trống!'
+                                  : 'Chọn lõi/máy...',
+                              isDense: true,
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 10,
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: BorderSide(color: Colors.grey.shade300),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: BorderSide(color: Colors.grey.shade300),
+                              ),
+                            ),
+                            items: _ktvWarehouseCores.map((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(
+                                  value,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(fontSize: 13),
+                                ),
+                              );
+                            }).toList(),
+                            onChanged: (newValue) {
+                              setState(() {
+                                lstKeyValueCores[i].key.text = newValue ?? '';
+                              });
+                            },
+                          ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -1478,7 +1555,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                 child: Container(
                   padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
+                    color: Colors.white.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: const Icon(Icons.add, color: Colors.white, size: 20),
@@ -1590,38 +1667,6 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
               ),
             ),
           ),
-      ],
-    );
-  }
-
-  TableRow _buildTableRow({
-    required String title,
-    required String? content,
-    required bool isHighlight,
-  }) {
-    return TableRow(
-      children: [
-        Container(
-          padding: const EdgeInsets.only(top: 16.0),
-          child: Text(
-            title,
-            style: const TextStyle(
-              color: ColorUtil.raisinBlack,
-              fontWeight: FontWeight.bold,
-              height: 1.5,
-            ),
-          ),
-        ),
-        Container(
-          padding: const EdgeInsets.only(top: 16.0),
-          child: Text(
-            "$content",
-            style: TextStyle(
-              color: isHighlight ? ColorUtil.bangladeshGreen : Colors.black,
-              height: 1.5,
-            ),
-          ),
-        ),
       ],
     );
   }
@@ -1896,7 +1941,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
         borderRadius: BorderRadius.circular(16.0),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -1920,7 +1965,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: ColorUtil.green.withOpacity(0.1),
+              color: ColorUtil.green.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(icon, color: ColorUtil.green, size: 20),

@@ -44,3 +44,12 @@ class RetailOrderLoadFailure extends RetailOrderState {
   final String error;
   const RetailOrderLoadFailure({required this.error});
 }
+
+class CreateRetailOrderLoading extends RetailOrderState {}
+
+class CreateRetailOrderSuccess extends RetailOrderState {}
+
+class CreateRetailOrderFailure extends RetailOrderState {
+  final String error;
+  const CreateRetailOrderFailure({required this.error});
+}

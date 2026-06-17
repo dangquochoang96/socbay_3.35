@@ -115,6 +115,7 @@ class _LoginScreenState extends State<LoginScreen> {
     return SafeArea(
       child: Scaffold(
         appBar: MyAppBar(
+          isBackNavigation: false,
           backgroundColor: Colors.white,
           systemOverlayStyle: systemUiOverlayStyle.copyWith(
             statusBarColor: Colors.white,

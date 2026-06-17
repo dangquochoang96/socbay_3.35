@@ -95,8 +95,13 @@ class HomeServiceModel {
     ),
     HomeServiceModel(
       image: Images.iconNews,
-      des: 'Đơn hàng bán lẻ',
-      name: 'Đơn nhập hàng',
+      des: 'Quản lý đơn nhập vật liệu',
+      name: 'Nhập Vật Liệu',
+    ),
+    HomeServiceModel(
+      image: Images.iconinventory,
+      des: 'Kho Cá Nhân của KTV',
+      name: 'KHO CÁ NHÂN',
     ),
   ];
   static List<HomeServiceModel> staffServiceListSale = [

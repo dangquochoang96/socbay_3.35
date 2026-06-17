@@ -126,10 +126,14 @@ class _RetailOrderScreenState extends State<RetailOrderScreen> {
       backgroundColor: const Color(0xfff7f8fa),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
+          final retailOrderBloc = BlocProvider.of<RetailOrderBloc>(context);
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => const CreateRetailOrderScreen(),
+              builder: (context) => BlocProvider.value(
+                value: retailOrderBloc,
+                child: const CreateRetailOrderScreen(),
+              ),
             ),
           ).then((value) {
             if (value == true) {
@@ -149,6 +153,10 @@ class _RetailOrderScreenState extends State<RetailOrderScreen> {
           _buildSearchBar(),
           Expanded(
             child: BlocBuilder<RetailOrderBloc, RetailOrderState>(
+              buildWhen: (previous, current) =>
+                  current is RetailOrderLoading ||
+                  current is RetailOrderLoadFailure ||
+                  current is RetailOrderLoadSuccess,
               builder: (context, state) {
                 if (state is RetailOrderLoading) {
                   return const Center(

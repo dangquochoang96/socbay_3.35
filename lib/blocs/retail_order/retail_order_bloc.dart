@@ -17,6 +17,7 @@ class RetailOrderBloc extends Bloc<RetailOrderEvent, RetailOrderState> {
 
   RetailOrderBloc({required this.apiRepository}) : super(RetailOrderInitial()) {
     on<FetchRetailOrdersEvent>(_onFetchRetailOrders);
+    on<CreateRetailOrderSubmitEvent>(_onCreateRetailOrderSubmit);
   }
 
   Future<void> _onFetchRetailOrders(
@@ -95,6 +96,35 @@ class RetailOrderBloc extends Bloc<RetailOrderEvent, RetailOrderState> {
     } catch (e) {
       LoggerUtil.log('Exception in RetailOrderBloc: ${e.toString()}');
       emit(RetailOrderLoadFailure(error: e.toString()));
+    }
+  }
+
+  Future<void> _onCreateRetailOrderSubmit(
+    CreateRetailOrderSubmitEvent event,
+    Emitter<RetailOrderState> emit,
+  ) async {
+    emit(CreateRetailOrderLoading());
+    try {
+      final url = AppConfig.instance.apiUri(ApiEndpoints.createRetailOrder);
+      final response = await http.post(url, body: event.body);
+
+      if (response.statusCode == HttpStatus.ok ||
+          response.statusCode == HttpStatus.created) {
+        final resJson = jsonDecode(response.body);
+        if (resJson['code'] == 1) {
+          emit(CreateRetailOrderSuccess());
+        } else {
+          emit(CreateRetailOrderFailure(
+            error: resJson['message'] ?? "Có lỗi xảy ra, vui lòng thử lại",
+          ));
+        }
+      } else {
+        emit(CreateRetailOrderFailure(
+          error: "Lỗi máy chủ: ${response.statusCode}",
+        ));
+      }
+    } catch (e) {
+      emit(CreateRetailOrderFailure(error: "Đã xảy ra lỗi: $e"));
     }
   }
 }

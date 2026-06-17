@@ -735,6 +735,8 @@ class _HomeScreenState extends State<HomeScreen> {
             );
           } else if (index == 3) {
             Navigator.pushNamed(context, Routes.retailOrderScreen);
+          }else if (index == 4) {
+            Navigator.pushNamed(context, Routes.warehouseScreen);
           }
         } else {
           if (index == 0) {
