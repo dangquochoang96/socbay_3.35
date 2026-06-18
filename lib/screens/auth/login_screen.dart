@@ -88,7 +88,7 @@ class _LoginScreenState extends State<LoginScreen> {
         builder: (BuildContext context) => AlertDialog(
           backgroundColor: ColorUtil.white,
           content: Text(
-            "Có lỗi trong quá trình đăng nhập",
+            "Có lỗi trong quá trình đăng nhập ${state.message}",
             textAlign: TextAlign.center,
             style: TextStyle(
               color: ColorUtil.bangladeshGreen,
