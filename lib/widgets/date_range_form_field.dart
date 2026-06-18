@@ -9,7 +9,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-
 /// A [DateRangeField] which extends a [FormField].
 ///
 /// The use of a [Form] ancestor is not required, however it makes it easier to
@@ -26,100 +25,105 @@ class DateRangeField extends FormField<DateTimeRange> {
   ///
   /// When using without a [Form] ancestor a [GlobalKey] is required.
 
-  DateRangeField(
-      {super.key,
-        this.firstDate,
-        this.lastDate,
-        this.currentDate,
-        this.initialEntryMode,
-        this.helpText,
-        this.cancelText,
-        this.enabled = true,
-        this.confirmText,
-        this.saveText,
-        this.errorFormatText,
-        this.errorInvalidText,
-        this.errorInvalidRangeText,
-        this.fieldStartHintText,
-        this.fieldEndHintText,
-        this.fieldStartLabelText,
-        this.fieldEndLabelText,
-        this.width,
-        this.margin,
-        ValueChanged<DateTimeRange?>? onChanged,
-        super.onSaved,
-        super.validator,
-        this.initialValue,
-        bool autoValidate = false,
-        this.dateFormat,
-        InputDecoration decoration = const InputDecoration()})
-      : super(
-      enabled: enabled,
-      initialValue: initialValue,
-      builder: (FormFieldState<DateTimeRange> state) {
-        final DateFormat format =
-        (dateFormat ?? DateFormat('MM/dd/yyyy'));
-        final InputDecoration inputDecoration = decoration
-            .copyWith(enabled: enabled)
-            .applyDefaults(Theme.of(state.context).inputDecorationTheme);
+  DateRangeField({
+    super.key,
+    this.firstDate,
+    this.lastDate,
+    this.currentDate,
+    this.initialEntryMode,
+    this.helpText,
+    this.cancelText,
+    this.enabled = true,
+    this.confirmText,
+    this.saveText,
+    this.errorFormatText,
+    this.errorInvalidText,
+    this.errorInvalidRangeText,
+    this.fieldStartHintText,
+    this.fieldEndHintText,
+    this.fieldStartLabelText,
+    this.fieldEndLabelText,
+    this.width,
+    this.margin,
+    ValueChanged<DateTimeRange?>? onChanged,
+    super.onSaved,
+    super.validator,
+    this.initialValue,
+    bool autoValidate = false,
+    this.dateFormat,
+    InputDecoration decoration = const InputDecoration(),
+  }) : super(
+         enabled: enabled,
+         initialValue: initialValue,
+         builder: (FormFieldState<DateTimeRange> state) {
+           final DateFormat format = (dateFormat ?? DateFormat('MM/dd/yyyy'));
+           final InputDecoration inputDecoration = decoration
+               .copyWith(enabled: enabled)
+               .applyDefaults(Theme.of(state.context).inputDecorationTheme);
 
-        /// This is the dialog to select the date range.
-        Future<void> selectDateRange() async {
-          DateTimeRange? picked = await showDateRangePicker(
-              context: state.context,
-              locale: const Locale("vi","VN"),
-              initialDateRange: initialValue,
-              firstDate: firstDate ?? DateTime.now(),
-              lastDate: lastDate ?? DateTime(DateTime.now().year + 5),
-              helpText: helpText ?? 'Chọn khoảng thời gian',
-              cancelText: cancelText ?? 'HỦY',
-              confirmText: confirmText ?? 'OK',
-              saveText: saveText ?? 'CHỌN',
-              errorFormatText: errorFormatText ?? 'Invalid format.',
-              errorInvalidText: errorInvalidText ?? 'Out of range.',
-              errorInvalidRangeText:
-              errorInvalidRangeText ?? 'Invalid range.',
-              fieldStartHintText: fieldStartHintText ?? 'Start Date',
-              fieldEndHintText: fieldEndHintText ?? 'End Date',
-              fieldStartLabelText: fieldStartLabelText ?? 'Ngày bắt đầu',
-              fieldEndLabelText: fieldEndLabelText ?? 'Ngày kết thúc') ??
-              state.value;
-          if (picked != state.value) {
-            state.didChange(picked);
-            onChanged?.call(picked);
-          }
-        }
+           /// This is the dialog to select the date range.
+           Future<void> selectDateRange() async {
+             DateTimeRange? picked =
+                 await showDateRangePicker(
+                   context: state.context,
+                   locale: const Locale("vi", "VN"),
+                   initialDateRange: initialValue,
+                   firstDate: firstDate ?? DateTime.now(),
+                   lastDate: lastDate ?? DateTime(DateTime.now().year + 5),
+                   helpText: helpText ?? 'Chọn khoảng thời gian',
+                   cancelText: cancelText ?? 'HỦY',
+                   confirmText: confirmText ?? 'OK',
+                   saveText: saveText ?? 'CHỌN',
+                   errorFormatText: errorFormatText ?? 'Invalid format.',
+                   errorInvalidText: errorInvalidText ?? 'Out of range.',
+                   errorInvalidRangeText:
+                       errorInvalidRangeText ?? 'Invalid range.',
+                   fieldStartHintText: fieldStartHintText ?? 'Start Date',
+                   fieldEndHintText: fieldEndHintText ?? 'End Date',
+                   fieldStartLabelText: fieldStartLabelText ?? 'Ngày bắt đầu',
+                   fieldEndLabelText: fieldEndLabelText ?? 'Ngày kết thúc',
+                 ) ??
+                 state.value;
+             if (picked != state.value) {
+               state.didChange(picked);
+               onChanged?.call(picked);
+             }
+           }
 
-        String hintText = decoration.hintText ?? '';
-        return InkWell(
-          /// This calls the dialog to select the date range.
-          onTap: enabled ? selectDateRange : null,
-          child: Container(
-            margin: margin ?? const EdgeInsets.all(15.0),
-            width: width ?? MediaQuery.of(state.context).size.width,
-            child: InputDecorator(
-              decoration:
-              inputDecoration.copyWith(errorText: state.errorText),
-              child: Text(
-                // This will display hintText if provided and if state.value is null
-                  state.value == null
-                      ? hintText
-                      :
-
-                  /// This displays the selected date range when the dialog is closed.
-                  '${format.format(state.value!.start)} - ${format.format(state.value!.end)}',
-                  style: (state.value == null &&
-                      hintText != '' &&
-                      decoration.hintStyle != null)
-                      ? decoration.hintStyle
-                      : TextStyle(
-                      color: enabled
-                          ? null
-                          : Theme.of(state.context).disabledColor)),
-            ),
-          ),
-        );
-      });
+           String hintText = decoration.hintText ?? '';
+           return InkWell(
+             /// This calls the dialog to select the date range.
+             onTap: enabled ? selectDateRange : null,
+             child: Container(
+               margin: margin ?? const EdgeInsets.all(15.0),
+               width: width ?? MediaQuery.of(state.context).size.width,
+               child: InputDecorator(
+                 decoration: inputDecoration.copyWith(
+                   errorText: state.errorText,
+                 ),
+                 child: Text(
+                   // This will display hintText if provided and if state.value is null
+                   state.value == null
+                       ? hintText
+                       :
+                         /// This displays the selected date range when the dialog is closed.
+                         '${format.format(state.value!.start)} - ${format.format(state.value!.end)}',
+                   style:
+                       (state.value == null &&
+                           hintText != '' &&
+                           decoration.hintStyle != null)
+                       ? decoration.hintStyle
+                       : TextStyle(
+                           color: enabled
+                               ? null
+                               : Theme.of(state.context).disabledColor,
+                         ),
+                 ),
+               ),
+             ),
+           );
+         },
+       );
 
   /// This is the earliest date a user can select.
   ///

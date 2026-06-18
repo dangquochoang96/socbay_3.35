@@ -51,7 +51,7 @@ extension DateExtension on DateTime {
 extension TimeExtension on TimeOfDay {
   String toTimeString() {
     return '$hour:$minute';
-}
+  }
 }
 
 extension StringDateExtension on String {
@@ -65,8 +65,10 @@ extension StringDateExtension on String {
     return dateTime.toDateString(format: format);
   }
 
-  String convertToDateString(
-      {required String fromFormat, required String toFormat}) {
+  String convertToDateString({
+    required String fromFormat,
+    required String toFormat,
+  }) {
     var dateTime = DateFormat(fromFormat).parse(this);
     return dateTime.toDateString(format: toFormat);
   }

@@ -7,7 +7,8 @@ import 'package:socbay/data/model/task_model.dart';
 import 'package:socbay/data/model/task_processed_model.dart';
 import 'package:socbay/data/repository/auth/api_repository.dart';
 
-class DetailTaskProcessedBloc extends Bloc<DetailTaskProcessedEvent, DetailTaskProcessedState> {
+class DetailTaskProcessedBloc
+    extends Bloc<DetailTaskProcessedEvent, DetailTaskProcessedState> {
   final ApiRepository apiRepository;
   bool isLoading = false;
   Map<String, dynamic> args;
@@ -17,13 +18,15 @@ class DetailTaskProcessedBloc extends Bloc<DetailTaskProcessedEvent, DetailTaskP
   double rating = 0;
   var des = "";
   DetailTaskProcessedBloc({required this.apiRepository, required this.args})
-      : super(DetailTaskProcessedInitialState())  {
+    : super(DetailTaskProcessedInitialState()) {
     on<DetailTaskProcessedStartEvent>(_startPage);
     on<FeedbackTaskProcessedEvent>(_createOrUpdateFeedbackTaskProcessed);
     //do something
   }
   FutureOr<void> _startPage(
-      DetailTaskProcessedStartEvent event, Emitter<DetailTaskProcessedState> emit) async {
+    DetailTaskProcessedStartEvent event,
+    Emitter<DetailTaskProcessedState> emit,
+  ) async {
     isLoading = true;
     //emit(DetailTaskProcessedInitialState());
     count = 3;
@@ -31,16 +34,20 @@ class DetailTaskProcessedBloc extends Bloc<DetailTaskProcessedEvent, DetailTaskP
     if (result.status == HttpStatus.ok && result.data != null) {
       taskModel = result.data!;
       taskProcessedModel = TaskProcessedModel(
-          id: taskModel!.id,
-          staff:taskModel!.staff,
-          createdAt: taskModel!.createdAt
-          //images:taskModel!.images,
+        id: taskModel!.id,
+        staff: taskModel!.staff,
+        createdAt: taskModel!.createdAt,
+        //images:taskModel!.images,
       );
     }
     isLoading = false;
     emit(DetailTaskProcessedInitialState());
   }
-  FutureOr<void> _createOrUpdateFeedbackTaskProcessed(FeedbackTaskProcessedEvent event, Emitter<DetailTaskProcessedState> emitter) async{
+
+  FutureOr<void> _createOrUpdateFeedbackTaskProcessed(
+    FeedbackTaskProcessedEvent event,
+    Emitter<DetailTaskProcessedState> emitter,
+  ) async {
     //do something
     rating = event.rating;
     des = event.des;

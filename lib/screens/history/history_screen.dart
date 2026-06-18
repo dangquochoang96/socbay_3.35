@@ -44,6 +44,7 @@ class _HistoryScreenState extends State<HistoryScreen>
       vsync: this,
     );
     _tabHistoryController.addListener(() {
+      if (!mounted) return;
       setState(() {
         if (_tabHistoryController.index !=
             _tabHistoryController.previousIndex) {
@@ -55,7 +56,6 @@ class _HistoryScreenState extends State<HistoryScreen>
 
   @override
   void dispose() {
-    _bloc.close();
     _feedbackController.dispose();
     _tabHistoryController.dispose();
     super.dispose();
@@ -64,7 +64,9 @@ class _HistoryScreenState extends State<HistoryScreen>
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<HistoryScreenBloc, HistoryScreenState>(
-        builder: _builder, listener: _listener);
+      builder: _builder,
+      listener: _listener,
+    );
   }
 
   void _listener(BuildContext context, HistoryScreenState state) {
@@ -81,75 +83,68 @@ class _HistoryScreenState extends State<HistoryScreen>
 
   Widget _builder(BuildContext context, HistoryScreenState state) {
     return Scaffold(
-        floatingActionButton: FloatingActionButton(
-            heroTag: "history_screen",
-            backgroundColor: ColorUtil.brightYellow,
-            shape: const CircleBorder(
-              side: BorderSide(
-                color: Colors.white,
-                width: 3.0,
-              ),
-            ),
-            tooltip: "Thêm công việc",
-            onPressed: () {
-              Navigator.pushNamed(
-                  context,
-                  App.instance.userApp?.isUserCustomer() == true
-                      ? Routes.serviceScreen
-                      : App.instance.userApp?.isUserRole() == true
-                          ? Routes.staffServiceScreen
-                          : Routes.staffServiceScreenSale,
-                  arguments: {
-                    "listService": [],
-                    "index": "",
-                  });
-            },
-            child: const Icon(Icons.add)),
-        appBar: MyAppBar(
-          title: "Lịch sử",
-          isBackNavigation: false,
+      floatingActionButton: FloatingActionButton(
+        heroTag: "history_screen",
+        backgroundColor: ColorUtil.brightYellow,
+        shape: const CircleBorder(
+          side: BorderSide(color: Colors.white, width: 3.0),
         ),
-        body: LoadingIndicator(
-            isLoading: _bloc.isLoading,
-            child: RefreshIndicator(
-              onRefresh: () async {
-                _bloc.add(
-                    HistoryScreenTabPressEvent(_tabHistoryController.index));
-              },
-              child: Column(
-                children: [
-                  TabBar(
-                    controller: _tabHistoryController,
-                    indicatorColor: ColorUtil.bangladeshGreen,
-                    tabs: [
-                      _buildTab('Lịch sử đặt lịch'),
-                      _buildTab('Nhật ký thay lõi'),
-                    ],
-                  ),
-                  Expanded(
-                    child: IndexedStack(
-                      index: _tabHistoryController.index,
-                      children: [
-                        _buildServiceHistory(),
-                        _buildProductsHistory(),
-                      ],
-                    ),
-                  )
+        tooltip: "Thêm công việc",
+        onPressed: () {
+          Navigator.pushNamed(
+            context,
+            App.instance.userApp?.isUserCustomer() == true
+                ? Routes.serviceScreen
+                : App.instance.userApp?.isUserRole() == true
+                ? Routes.staffServiceScreen
+                : Routes.staffServiceScreenSale,
+            arguments: {"listService": [], "index": ""},
+          );
+        },
+        child: const Icon(Icons.add),
+      ),
+      appBar: MyAppBar(title: "Lịch sử", isBackNavigation: false),
+      body: LoadingIndicator(
+        isLoading: _bloc.isLoading,
+        child: RefreshIndicator(
+          onRefresh: () async {
+            _bloc.add(HistoryScreenTabPressEvent(_tabHistoryController.index));
+          },
+          child: Column(
+            children: [
+              TabBar(
+                controller: _tabHistoryController,
+                indicatorColor: ColorUtil.bangladeshGreen,
+                tabs: [
+                  _buildTab('Lịch sử đặt lịch'),
+                  _buildTab('Nhật ký thay lõi'),
                 ],
               ),
-            )));
+              Expanded(
+                child: IndexedStack(
+                  index: _tabHistoryController.index,
+                  children: [_buildServiceHistory(), _buildProductsHistory()],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   Tab _buildTab(text) {
     return Tab(
-        height: 36,
-        child: Text(
-          text,
-          style: const TextStyle(
-              color: ColorUtil.bangladeshGreen,
-              fontSize: 20,
-              fontWeight: FontWeight.w600),
-        ));
+      height: 36,
+      child: Text(
+        text,
+        style: const TextStyle(
+          color: ColorUtil.bangladeshGreen,
+          fontSize: 20,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
   }
 
   Widget _buildServiceHistory() {
@@ -157,9 +152,10 @@ class _HistoryScreenState extends State<HistoryScreen>
       return const Text('Khách hàng chưa đặt lịch');
     }
     return ListView.separated(
-        itemBuilder: _buildItemServiceHistory,
-        separatorBuilder: separatorBuilder,
-        itemCount: _bloc.lstBooking.length);
+      itemBuilder: _buildItemServiceHistory,
+      separatorBuilder: separatorBuilder,
+      itemCount: _bloc.lstBooking.length,
+    );
   }
 
   Widget _buildProductsHistory() {
@@ -167,152 +163,234 @@ class _HistoryScreenState extends State<HistoryScreen>
       return const Text('Khách hàng chưa thay lõi');
     }
     return ListView.separated(
-        // reverse: true,
-        itemBuilder: _buildItemMachineInUse,
-        separatorBuilder: separatorBuilder,
-        itemCount: _bloc.lstMachine.length);
+      // reverse: true,
+      itemBuilder: _buildItemMachineInUse,
+      separatorBuilder: separatorBuilder,
+      itemCount: _bloc.lstMachine.length,
+    );
   }
 
   Widget separatorBuilder(BuildContext context, int index) {
     return Container(
-        decoration: const BoxDecoration(
-            border: Border(
-      bottom: BorderSide(width: 1.0, color: Colors.black26),
-    )));
+      decoration: const BoxDecoration(
+        border: Border(bottom: BorderSide(width: 1.0, color: Colors.black26)),
+      ),
+    );
   }
 
   Widget _buildItemServiceHistory(BuildContext context, int index) {
     TaskModel taskModel = _bloc.lstBooking[index];
-    var dataFormat = _formatDatetime(taskModel.timeStar);
-    return Column(children: [
-      ButtonWidget(
-          onTap: () {
-            _detailTask(taskModel);
-          },
+    final dataFormat = _formatDatetime(taskModel.timeStart);
+    return _buildServiceHistoryCard(taskModel, dataFormat);
+  }
+
+  Widget _buildServiceHistoryCard(TaskModel taskModel, String dataFormat) {
+    final canCancel =
+        taskModel.status == '1' ||
+        taskModel.status == '2' ||
+        taskModel.status == '5';
+    final staffPhone = taskModel.staff?.phone ?? '';
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: paddingHorizontal,
+        vertical: 8,
+      ),
+      child: Material(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        elevation: 2,
+        shadowColor: Colors.black.withValues(alpha: 0.08),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: () => _detailTask(taskModel),
           child: Padding(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: paddingHorizontal, vertical: 8),
-              child: Column(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                                padding: const EdgeInsets.only(
-                                  bottom: 1, // space between underline and text
+                    Expanded(
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 36,
+                            height: 36,
+                            decoration: BoxDecoration(
+                              color: ColorUtil.bangladeshGreen.withValues(
+                                alpha: 0.1,
+                              ),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Icon(
+                              Icons.event_note_outlined,
+                              color: ColorUtil.bangladeshGreen,
+                              size: 20,
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Mã Dịch Vụ: DV_${taskModel.id}',
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w700,
+                                    color: ColorUtil.raisinBlack,
+                                  ),
+                                  maxLines: 2,
                                 ),
-                                decoration: const BoxDecoration(
-                                    border: Border(
-                                        bottom: BorderSide(
-                                  color:
-                                      ColorUtil.raisinBlack, // Text colour here
-                                  width: 1.0, // Underline width
-                                ))),
-                                child: Text('Mã dịch vụ: DV_${taskModel.id}',
-                                    style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        color: ColorUtil.raisinBlack,
-                                        fontSize: 16)))
-                          ],
-                        ),
-                        if (taskModel.status == '1' ||
-                            taskModel.status == '2' ||
-                            taskModel.status == '5')
-                          Align(
-                              alignment: Alignment.centerRight,
-                              child: _buildButton(
-                                  text: 'Hủy',
-                                  isPositive: false,
-                                  action: () {
-                                    _cancelTask(taskModel);
-                                  })),
-                      ],
-                    ),
-                    const SizedBox(height: 3)
-                  ]))),
-      ButtonWidget(
-          onTap: () async {
-            _detailTask(taskModel);
-          },
-          child: Padding(
-            padding:
-                const EdgeInsets.only(left: 20, top: 0, bottom: 10, right: 8),
-            child: Table(
-              columnWidths: const {1: FlexColumnWidth(1)},
-              children: [
-                TableRow(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.only(bottom: 8.0),
-                      child: const Text(
-                        "Trạng thái dịch vụ: ",
-                        style: TextStyle(
-                            fontSize: 15, fontWeight: FontWeight.w600),
+                                const SizedBox(height: 3),
+                                Text(
+                                  taskModel.name ?? '',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: Colors.grey[700],
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 8),
+                                Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: _buildHistoryStatusBadge(
+                                    taskModel.getStatus(),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    Text(taskModel.getStatus(),
-                        style:
-                            const TextStyle(fontSize: 15, color: ColorUtil.red))
                   ],
                 ),
-                TableRow(children: [
-                  Container(
-                    padding: const EdgeInsets.only(bottom: 8.0),
-                    child: const Text('Công việc: ',
-                        style: TextStyle(
-                            fontSize: 15, fontWeight: FontWeight.w600)),
+                const Divider(height: 24, color: Color(0xFFEFEFEF)),
+                _buildHistoryInfoRow(
+                  Icons.access_time,
+                  'Thời gian',
+                  dataFormat,
+                  valueColor: ColorUtil.red,
+                  isBoldValue: true,
+                ),
+                const SizedBox(height: 10),
+                _buildHistoryInfoRow(
+                  Icons.person_outline,
+                  'Kỹ thuật viên',
+                  taskModel.staff?.username ?? 'Chưa giao',
+                ),
+                const SizedBox(height: 10),
+                _buildHistoryInfoRow(
+                  Icons.phone_outlined,
+                  'SĐT KTV',
+                  staffPhone.isEmpty ? 'Chưa có' : staffPhone,
+                  valueColor: staffPhone.isEmpty
+                      ? Colors.grey[600]
+                      : ColorUtil.bangladeshGreen,
+                  isBoldValue: staffPhone.isNotEmpty,
+                  onTap: staffPhone.isEmpty
+                      ? null
+                      : () => launchUrl(Uri.parse('tel:$staffPhone')),
+                ),
+                if (canCancel) ...[
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: OutlinedButton.icon(
+                      onPressed: () => _cancelTask(taskModel),
+                      icon: const Icon(Icons.cancel_outlined, size: 18),
+                      label: const Text('Hủy lịch'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: ColorUtil.red,
+                        side: const BorderSide(color: ColorUtil.red),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 8,
+                        ),
+                      ),
+                    ),
                   ),
-                  Text(taskModel.name ?? '',
-                      style: const TextStyle(fontSize: 15)),
-                ]),
-                TableRow(children: [
-                  Container(
-                    padding: const EdgeInsets.only(bottom: 8.0),
-                    child: const Text('Thời gian:',
-                        style: TextStyle(
-                            fontSize: 15, fontWeight: FontWeight.w600)),
-                  ),
-                  Text(dataFormat,
-                      style: const TextStyle(
-                          fontSize: 15,
-                          color: ColorUtil.red,
-                          fontWeight: FontWeight.w600))
-                ]),
-                TableRow(children: [
-                  Container(
-                    padding: const EdgeInsets.only(bottom: 8.0),
-                    child: const Text('Kỹ thuật viên:',
-                        style: TextStyle(
-                            fontSize: 15, fontWeight: FontWeight.w600)),
-                  ),
-                  Text(taskModel.staff?.username ?? "",
-                      style: const TextStyle(fontSize: 15))
-                ]),
-                TableRow(children: [
-                  Container(
-                    padding: const EdgeInsets.only(bottom: 8.0),
-                    child: const Text('Số điện thoại KTV:',
-                        style: TextStyle(
-                            fontSize: 15, fontWeight: FontWeight.w600)),
-                  ),
-                  GestureDetector(
-                    child: Text(taskModel.staff?.phone ?? "",
-                        style: const TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.w600)),
-                    onTap: () async {
-                      const url = "tel:0963456911";
-                      await launchUrl(Uri.parse(url));
-                    },
-                  )
-                ]),
+                ],
               ],
             ),
-          ))
-    ]);
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHistoryStatusBadge(String status) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: ColorUtil.bangladeshGreen.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        status,
+        textAlign: TextAlign.center,
+        style: const TextStyle(
+          color: ColorUtil.bangladeshGreen,
+          fontSize: 12,
+          fontWeight: FontWeight.w700,
+        ),
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+      ),
+    );
+  }
+
+  Widget _buildHistoryInfoRow(
+    IconData icon,
+    String label,
+    String value, {
+    Color? valueColor,
+    bool isBoldValue = false,
+    VoidCallback? onTap,
+  }) {
+    final content = Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 18, color: Colors.grey[600]),
+        const SizedBox(width: 8),
+        SizedBox(
+          width: 96,
+          child: Text(
+            label,
+            style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+          ),
+        ),
+        Expanded(
+          child: Text(
+            value,
+            style: TextStyle(
+              fontSize: 14,
+              color: valueColor ?? ColorUtil.raisinBlack,
+              fontWeight: isBoldValue ? FontWeight.w700 : FontWeight.w400,
+            ),
+          ),
+        ),
+      ],
+    );
+
+    if (onTap == null) {
+      return content;
+    }
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 2),
+        child: content,
+      ),
+    );
   }
 
   Widget _buildItemMachineInUse(BuildContext context, int index) {
@@ -320,215 +398,157 @@ class _HistoryScreenState extends State<HistoryScreen>
 
     OrderModel machine = _bloc.lstMachine[reversedIndex];
     var dataFormat = _formatDatetime(machine.createdAt);
-    return ButtonWidget(
-        onTap: () {
-          _detailMachine(machine);
-        },
-        child: Container(
-          width: MediaQuery.of(context).size.width,
-          padding: EdgeInsets.only(
-              left: MediaQuery.of(context).size.width * 0.02,
-              right: MediaQuery.of(context).size.width * 0.02,
-              bottom: 10),
-          decoration: const BoxDecoration(
-              border: Border(
-                  bottom: BorderSide(
-            color: Colors.black12,
-            width: 1,
-          ))),
-//        padding: const EdgeInsets.symmetric(horizontal: paddingHorizontal, vertical: 8),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    width: MediaQuery.of(context).size.width * 0.2,
-                    decoration: BoxDecoration(
-                      border: Border.all(width: 3, color: Colors.black12),
+
+    return _buildMachineInUseCard(machine, dataFormat);
+  }
+
+  Widget _buildMachineInUseCard(OrderModel machine, String dataFormat) {
+    String imageUrl =
+        (machine.product?.images == null ||
+            machine.product!.images!.isEmpty ||
+            machine.product!.images![0].link == null)
+        ? ""
+        : "$protocol${AppConfig.instance.values.apiUrl}${machine.product!.images![0].link!}";
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: paddingHorizontal,
+        vertical: 8,
+      ),
+      child: Material(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        elevation: 2,
+        shadowColor: Colors.black.withValues(alpha: 0.08),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: () => _detailMachine(machine),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 56,
+                      height: 56,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.black12),
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: imageUrl.isEmpty
+                            ? Icon(
+                                Icons.water_drop,
+                                color: ColorUtil.bangladeshGreen.withValues(
+                                  alpha: 0.5,
+                                ),
+                                size: 30,
+                              )
+                            : ImageUtil.loadNetWorkImage(
+                                url: imageUrl,
+                                height: 56,
+                                width: 56,
+                              ),
+                      ),
                     ),
-                    child: ImageUtil.loadNetWorkImage(
-                        url: machine.product?.images?[0].link == null
-                            ? ""
-                            : "$protocol${AppConfig.instance.values.apiUrl}${machine.product!.images![0].link!}",
-                        height: MediaQuery.of(context).size.width * 0.16,
-                        width: MediaQuery.of(context).size.width * 0.16),
-                  ),
-                  Container(
-                      padding: EdgeInsets.only(
-                          left: MediaQuery.of(context).size.width * 0.02,
-                          top: MediaQuery.of(context).size.width * 0.01),
-                      width: MediaQuery.of(context).size.width * 0.74,
+                    const SizedBox(width: 12),
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "${machine.product!.name}",
+                            machine.product?.name ?? 'Sản phẩm',
                             style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: ColorUtil.raisinBlack,
-                                fontSize: 16),
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              color: ColorUtil.raisinBlack,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          Wrap(
-                            //mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            spacing: 8.0, // gap between adjacent chips
-                            runSpacing: 4.0, // gap between lines
-                            direction:
-                                Axis.horizontal, // main axis (rows or columns)
-                            children: [
-                              Align(
-                                alignment: Alignment.topLeft,
-                                child: Container(
-                                    padding: EdgeInsets.only(
-                                        top: MediaQuery.of(context).size.width *
-                                            0.01),
-                                    child: (RichText(
-                                        softWrap: true,
-                                        maxLines: 3,
-                                        text: TextSpan(children: [
-                                          const TextSpan(
-                                            text: 'Model: ',
-                                            style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                color:
-                                                    ColorUtil.bangladeshGreen,
-                                                decorationThickness: 1,
-                                                fontSize: 13),
-                                          ),
-                                          TextSpan(
-                                            text: machine.product!.name ?? '',
-                                            style: const TextStyle(
-                                                fontWeight: FontWeight.normal,
-                                                color: ColorUtil.raisinBlack,
-                                                decorationThickness: 1,
-                                                fontSize: 13),
-                                          )
-                                        ])))),
-                              ),
-                              Align(
-                                alignment: Alignment.topRight,
-                                child: Container(
-                                    padding: EdgeInsets.only(
-                                        top: MediaQuery.of(context).size.width *
-                                            0.01),
-                                    child: (RichText(
-                                        softWrap: true,
-                                        maxLines: 3,
-                                        text: TextSpan(children: [
-                                          const TextSpan(
-                                            text: 'Ngày mua: ',
-                                            style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                color:
-                                                    ColorUtil.bangladeshGreen,
-                                                decorationThickness: 1,
-                                                fontSize: 13),
-                                          ),
-                                          TextSpan(
-                                            text: dataFormat,
-                                            style: const TextStyle(
-                                                fontWeight: FontWeight.normal,
-                                                color: ColorUtil.raisinBlack,
-                                                decorationThickness: 1,
-                                                fontSize: 13),
-                                          ),
-                                        ])))),
-                              )
-                            ],
-                          )
+                          const SizedBox(height: 6),
+                          Text(
+                            'Model: ${machine.product?.name ?? ''}',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.grey[700],
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ],
-                      ))
-                ],
-              ),
-            ],
-          ),
-        ));
-  }
-
-  Widget _buildButton({text, isPositive, action}) {
-    return isPositive
-        ? ButtonWidget(
-            color: isPositive ? ColorUtil.bangladeshGreen : Colors.grey,
-            borderRadius: BorderRadius.circular(30),
-            onTap: () {
-              if (action == null) {
-                Navigator.pop(context);
-              } else {
-                action();
-              }
-            },
-            child: Text(
-              text,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 16, color: Colors.white),
-            ))
-        : ElevatedButton(
-            style: ButtonStyle(
-              backgroundColor:
-                  WidgetStateProperty.all<Color>(ColorUtil.white),
-              shape: WidgetStateProperty.all<RoundedRectangleBorder>(
-                RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  side: const BorderSide(
-                    color: ColorUtil.bangladeshGreen,
-                    width: 1,
-                  ),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
+                const Divider(height: 24, color: Color(0xFFEFEFEF)),
+                _buildHistoryInfoRow(
+                  Icons.calendar_today_outlined,
+                  'Ngày mua',
+                  dataFormat,
+                  valueColor: ColorUtil.bangladeshGreen,
+                  isBoldValue: true,
+                ),
+              ],
             ),
-            child: Text(
-              text,
-              style: const TextStyle(color: ColorUtil.bangladeshGreen),
-            ),
-            onPressed: () {
-              if (action == null) {
-                Navigator.pop(context);
-              } else {
-                action();
-              }
-            },
-          );
+          ),
+        ),
+      ),
+    );
   }
 
   Future<void> _cancelTask(TaskModel taskModel) async {
     return showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: const Text(
-              'Vui lòng cho biết lý do bạn hủy dịch vụ',
-              textAlign: TextAlign.center,
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text(
+            'Vui lòng cho biết lý do bạn hủy dịch vụ',
+            textAlign: TextAlign.center,
+          ),
+          content: TextFieldDefault(
+            controller: _feedbackController,
+            maxLines: 5,
+          ),
+          actions: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _buildButtonDialog(
+                  isPositive: false,
+                  text: 'Hủy',
+                  action: () {
+                    Navigator.pop(context);
+                    _feedbackController.clear();
+                  },
+                ),
+                const SizedBox(width: 16),
+                _buildButtonDialog(
+                  isPositive: true,
+                  text: 'Gửi',
+                  action: () {
+                    _bloc.add(
+                      BookingDeleteTaskEvent(
+                        taskModel.id ?? 0,
+                        taskModel.name!,
+                        _feedbackController.text,
+                      ),
+                    );
+                    Navigator.pop(context);
+                    _feedbackController.clear();
+                  },
+                ),
+              ],
             ),
-            content: TextFieldDefault(
-              controller: _feedbackController,
-              maxLines: 5,
-            ),
-            actions: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _buildButtonDialog(
-                      isPositive: false,
-                      text: 'Hủy',
-                      action: () {
-                        Navigator.pop(context);
-                        _feedbackController.clear();
-                      }),
-                  const SizedBox(width: 16),
-                  _buildButtonDialog(
-                      isPositive: true,
-                      text: 'Gửi',
-                      action: () {
-                        _bloc.add(BookingDeleteTaskEvent(taskModel.id ?? 0,
-                            taskModel.name!, _feedbackController.text));
-                        Navigator.pop(context);
-                        _feedbackController.clear();
-                      }),
-                ],
-              )
-            ],
-          );
-        });
+          ],
+        );
+      },
+    );
   }
 
   Widget _buildButtonDialog({isPositive, action, text}) {
@@ -537,33 +557,41 @@ class _HistoryScreenState extends State<HistoryScreen>
 
   StatelessWidget _button(isPositive, action, text) {
     return ButtonWidget(
-        color: isPositive ? ColorUtil.bangladeshGreen : Colors.grey,
-        borderRadius: BorderRadius.circular(30),
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        onTap: () {
-          if (action == null) {
-            Navigator.pop(context);
-          } else {
-            action();
-          }
-        },
-        child: Text(
-          text,
-          textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 16, color: Colors.white),
-        ));
+      color: isPositive ? ColorUtil.bangladeshGreen : Colors.grey,
+      borderRadius: BorderRadius.circular(30),
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      onTap: () {
+        if (action == null) {
+          Navigator.pop(context);
+        } else {
+          action();
+        }
+      },
+      child: Text(
+        text,
+        textAlign: TextAlign.center,
+        style: const TextStyle(fontSize: 16, color: Colors.white),
+      ),
+    );
   }
 
   void _detailTask(TaskModel taskModel) {
-    Navigator.pushNamed(context, Routes.detailBookingScreen,
-        arguments: {'id': taskModel.id});
+    Navigator.pushNamed(
+      context,
+      Routes.detailBookingScreen,
+      arguments: {'id': taskModel.id},
+    );
   }
 
   void _detailMachine(OrderModel orderModel) {
-    Navigator.pushNamed(context, Routes.machineDetail, arguments: {
-      'id_oder': orderModel,
-      'id_user': App.instance.userApp?.phone.toString()
-    });
+    Navigator.pushNamed(
+      context,
+      Routes.machineDetail,
+      arguments: {
+        'id_oder': orderModel,
+        'id_user': App.instance.userApp?.phone.toString(),
+      },
+    );
   }
 
   String _formatDatetime(String? dateTimeString) {

@@ -28,7 +28,9 @@ class MyRichText extends StatelessWidget {
       mainAxisAlignment: mainAxisAlignment,
       children: [
         Flexible(
-            flex: flexStart,child: Text(firstText, style: firstTextStyle)),
+          flex: flexStart,
+          child: Text(firstText, style: firstTextStyle),
+        ),
         Flexible(
           flex: flexEnd,
           child: GestureDetector(

@@ -49,18 +49,18 @@ class UpdateTaskRequest {
       );
 
   Map<String, dynamic> toJson() => {
-        "type": type,
-        "name": name,
-        "des": des,
-        "status": status,
-        "priority": priority,
-        "service_id": serviceId,
-        "time_start": timeStart,
-        "time_end": timeEnd,
-        "staff_id": staffId,
-        "sale_id": saleId,
-        "customer_id": customerId,
-        "order_id": orderId,
-        "product_id": products,
-      };
+    "type": type,
+    "name": name,
+    "des": des,
+    "status": status,
+    "priority": priority,
+    "service_id": serviceId,
+    "time_start": timeStart,
+    "time_end": timeEnd,
+    "staff_id": staffId,
+    "sale_id": saleId,
+    "customer_id": customerId,
+    "order_id": orderId,
+    "product_id": products,
+  };
 }

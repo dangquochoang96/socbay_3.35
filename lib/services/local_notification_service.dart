@@ -40,14 +40,15 @@ class LocaNotificationService {
   }
 
   Future<NotificationDetails> _notificationDetails() async {
-    const AndroidNotificationDetails  androidNotificationDetails =
+    const AndroidNotificationDetails androidNotificationDetails =
         AndroidNotificationDetails(
-        'socbay_push_channel',
-        'Socbay Notifications',
-        channelDescription: 'Push notifications for Socbay',
-        importance: Importance.max,
-        priority: Priority.max,
-        playSound: true);
+          'socbay_push_channel',
+          'Socbay Notifications',
+          channelDescription: 'Push notifications for Socbay',
+          importance: Importance.max,
+          priority: Priority.max,
+          playSound: true,
+        );
     const DarwinNotificationDetails iosNotificationDetails =
         DarwinNotificationDetails();
     return const NotificationDetails(
@@ -76,7 +77,7 @@ class LocaNotificationService {
     required int id,
     required String title,
     required String body,
-    required int seconds
+    required int seconds,
   }) async {
     final details = await _notificationDetails();
     await _locaNotificationService.zonedSchedule(
@@ -97,10 +98,17 @@ class LocaNotificationService {
     required String title,
     required String body,
     required String payload,
-  })async{
+  }) async {
     final details = await _notificationDetails();
-    await _locaNotificationService.show(id, title, body, details, payload: payload);
+    await _locaNotificationService.show(
+      id,
+      title,
+      body,
+      details,
+      payload: payload,
+    );
   }
+
   void onSelectNotification(NotificationResponse? response) {
     print('payload ${response?.payload}');
     if (response?.payload != null && response!.payload!.isNotEmpty) {

@@ -7,7 +7,10 @@ const GOOGLE_MAP_PREFIX = 'https://www.google.com/maps/search/?api=1&query=';
 
 bool get isAndroid => Platform.isAndroid;
 
-Future<void> commonLaunchUrl(String url, {LaunchMode launchMode = LaunchMode.inAppWebView}) async {
+Future<void> commonLaunchUrl(
+  String url, {
+  LaunchMode launchMode = LaunchMode.inAppWebView,
+}) async {
   await launchUrl(Uri.parse(url), mode: launchMode).catchError((e) {
     toast('Invalid URL: $url');
     throw e;

@@ -13,7 +13,6 @@ import '../../widgets/button_widget.dart';
 import '../../widgets/my_app_bar.dart';
 import '../staff/technique/technique_screen.dart';
 
-
 class ChooseFavouriteStaffScreen extends StatefulWidget {
   const ChooseFavouriteStaffScreen({super.key});
 
@@ -44,7 +43,9 @@ class _ChooseFavouriteStaffScreenState
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<ChooseFavouriteStaffBloc, ChooseFavouriteStaffState>(
-        builder: _builder, listener: _listener);
+      builder: _builder,
+      listener: _listener,
+    );
   }
 
   void _listener(BuildContext context, ChooseFavouriteStaffState state) {}
@@ -58,9 +59,7 @@ class _ChooseFavouriteStaffScreenState
         centerTitle: true,
       ),
       body: Visibility(
-        replacement: const Center(
-          child: Text("Trống"),
-        ),
+        replacement: const Center(child: Text("Trống")),
         child: ListView.separated(
           padding: const EdgeInsets.symmetric(
             horizontal: paddingHorizontal,
@@ -76,7 +75,6 @@ class _ChooseFavouriteStaffScreenState
           },
           separatorBuilder: _buildSeparator,
         ),
-
       ),
     );
   }
@@ -103,7 +101,10 @@ class _ChooseFavouriteStaffScreenState
             ClipRRect(
               borderRadius: BorderRadius.circular(50),
               child: ImageUtil.loadNetWorkImage(
-                  url: item.avatar ?? '', height: 50, width: 50),
+                url: item.avatar ?? '',
+                height: 50,
+                width: 50,
+              ),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -120,18 +121,19 @@ class _ChooseFavouriteStaffScreenState
               ),
             ),
             IconButton(
-                onPressed: () {
-                  _onChooseFavouriteStaff(item);
-                },
-                icon: userProfile?.id == item.id
-                    ? const Icon(
-                        Icons.check_box,
-                        color: ColorUtil.bangladeshGreen,
-                      )
-                    : const Icon(
-                        Icons.check_box_outline_blank,
-                        color: ColorUtil.bangladeshGreen,
-                      )),
+              onPressed: () {
+                _onChooseFavouriteStaff(item);
+              },
+              icon: userProfile?.id == item.id
+                  ? const Icon(
+                      Icons.check_box,
+                      color: ColorUtil.bangladeshGreen,
+                    )
+                  : const Icon(
+                      Icons.check_box_outline_blank,
+                      color: ColorUtil.bangladeshGreen,
+                    ),
+            ),
           ],
         ),
       ),
@@ -141,16 +143,17 @@ class _ChooseFavouriteStaffScreenState
   Widget _itemDefault(BuildContext context, int index) {
     return Container(
       decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: ColorUtil.bangladeshGreen),
-          color: ColorUtil.bangladeshGreen),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: ColorUtil.bangladeshGreen),
+        color: ColorUtil.bangladeshGreen,
+      ),
       child: ButtonWidget(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
         borderRadius: BorderRadius.circular(14),
         onTap: () {
           Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (context) => const TechniqueScreen(initialTabIndex: 1,),
+              builder: (context) => const TechniqueScreen(initialTabIndex: 1),
             ),
           );
           _onChooseFavouriteStaff(null);
@@ -159,7 +162,9 @@ class _ChooseFavouriteStaffScreenState
           child: Text(
             "KHÁC",
             style: TextStyle(
-                fontWeight: MyFontWeight.bold, color: ColorUtil.white),
+              fontWeight: MyFontWeight.bold,
+              color: ColorUtil.white,
+            ),
           ),
         ),
       ),
@@ -168,9 +173,7 @@ class _ChooseFavouriteStaffScreenState
 
   void _onChooseFavouriteStaff(UserProfile? userProfile) {
     if (this.userProfile?.id != userProfile?.id) {
-      Navigator.pop(context, {
-        "favouriteStaff": userProfile,
-      });
+      Navigator.pop(context, {"favouriteStaff": userProfile});
     }
   }
 }

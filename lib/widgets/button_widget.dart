@@ -9,15 +9,16 @@ class ButtonWidget extends StatelessWidget {
   final EdgeInsetsGeometry padding;
   final EdgeInsetsGeometry margin;
 
-  const ButtonWidget(
-      {super.key,
-      required this.onTap,
-      required this.child,
-      this.color = Colors.transparent,
-      this.borderRadius,
-      this.padding = EdgeInsets.zero,
-      this.margin = EdgeInsets.zero,
-      this.isEnabled = true});
+  const ButtonWidget({
+    super.key,
+    required this.onTap,
+    required this.child,
+    this.color = Colors.transparent,
+    this.borderRadius,
+    this.padding = EdgeInsets.zero,
+    this.margin = EdgeInsets.zero,
+    this.isEnabled = true,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +26,7 @@ class ButtonWidget extends StatelessWidget {
       padding: margin,
       child: Material(
         color: isEnabled ? color : Colors.transparent,
-        borderRadius: borderRadius?? BorderRadius.circular(8),
+        borderRadius: borderRadius ?? BorderRadius.circular(8),
         child: InkWell(
           splashColor: isEnabled ? null : Colors.transparent,
           enableFeedback: true,
@@ -33,9 +34,7 @@ class ButtonWidget extends StatelessWidget {
           onTap: isEnabled ? onTap : () {},
           child: Ink(
             padding: padding,
-            child: InkWell(
-              child: child,
-            ),
+            child: InkWell(child: child),
           ),
         ),
       ),

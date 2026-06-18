@@ -3,4 +3,5 @@ abstract class TechniqueScreenEvent {
 }
 
 class TechniqueScreenStartedFaEvent extends TechniqueScreenEvent {}
+
 class TechniqueScreenStartedEvent extends TechniqueScreenEvent {}

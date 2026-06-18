@@ -1,4 +1,4 @@
-class ListOrderCoreModel{
+class ListOrderCoreModel {
   static List<String> coreList = [
     "",
     "Thay lõi 1 Karofi - PP 5mcr",
@@ -169,4 +169,3 @@ class ListOrderCoreModel{
     "Khách hủy",
   ];
 }
-

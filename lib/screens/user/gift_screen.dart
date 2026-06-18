@@ -35,23 +35,18 @@ class _GiftScreenState extends State<GiftScreen> with TickerProviderStateMixin {
     super.initState();
     _bloc = BlocProvider.of(context);
     _bloc.add(GiftScreenStartedEvent());
-    _tabController = TabController(
-      length: 2,
-      initialIndex: 0,
-      vsync: this,
-    );
+    _tabController = TabController(length: 2, initialIndex: 0, vsync: this);
     _tabController.addListener(() {
       if (_tabController.index != _tabController.previousIndex) {
         _bloc.add(GiftScreenTabPressEvent(_tabController.index));
       }
     });
 
-
     _reloadGiftStream = App.instance.eventBus
         .on<EventBusReloadGiftEvent>()
         .listen((event) {
-      _bloc.add(GiftScreenStartedEvent());
-    });
+          _bloc.add(GiftScreenStartedEvent());
+        });
   }
 
   @override
@@ -64,7 +59,9 @@ class _GiftScreenState extends State<GiftScreen> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<GiftScreenBloc, GiftScreenState>(
-        builder: _builder, listener: _listener);
+      builder: _builder,
+      listener: _listener,
+    );
   }
 
   void _listener(BuildContext context, GiftScreenState state) {}
@@ -97,7 +94,7 @@ class _GiftScreenState extends State<GiftScreen> with TickerProviderStateMixin {
                   _buildGiftList(_bloc.giftReceiveList, false),
                 ],
               ),
-            )
+            ),
           ],
         ),
       ),
@@ -106,13 +103,15 @@ class _GiftScreenState extends State<GiftScreen> with TickerProviderStateMixin {
 
   Tab _buildTab(text, bool isSelected) {
     return Tab(
-        height: 64,
-        child: Text(
-          text,
-          style: TextStyle(
-              fontSize: 20,
-              color: isSelected ? ColorUtil.bangladeshGreen : Colors.black),
-        ));
+      height: 64,
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: 20,
+          color: isSelected ? ColorUtil.bangladeshGreen : Colors.black,
+        ),
+      ),
+    );
   }
 
   Widget _buildGiftList(List<GiftResponse> list, bool isMyGift) {
@@ -122,58 +121,68 @@ class _GiftScreenState extends State<GiftScreen> with TickerProviderStateMixin {
         visible: _bloc.isLoading || list.isNotEmpty,
         replacement: const Center(
           child: Padding(
-              padding: EdgeInsets.only(bottom: 80), child: Text("Trống")),
+            padding: EdgeInsets.only(bottom: 80),
+            child: Text("Trống"),
+          ),
         ),
         child: AlignedGridView.count(
-            shrinkWrap: true,
-            mainAxisSpacing: 8,
-            crossAxisSpacing: 8,
-            crossAxisCount: 2,
-            itemCount: list.length,
-            itemBuilder: (BuildContext context, int index) {
-              final GiftResponse item = list[index];
-              return GestureDetector(
-                onTap: () {
-                  Navigator.pushNamed(context, Routes.giftDetail,
-                          arguments: {"gift": item, "is_my_gift": isMyGift})
-                      .then((value) {
-                    if (value == true) {
-                      _bloc.add(GiftScreenStartedEvent());
-                    }
-                  });
-                },
-                child: Card(
-                    elevation: 2,
-                    child: Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          ImageUtil.loadNetWorkImage(
-                            url: item.image ?? "",
-                            width: double.infinity,
-                            height: context.width / 2 - paddingHorizontal * 2,
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            item.name ?? "",
-                            maxLines: 1,
-                            style: const TextStyle(
-                                overflow: TextOverflow.ellipsis,
-                                fontSize: 13,
-                                color: ColorUtil.bangladeshGreen),
-                          ),
-                          const SizedBox(height: 8),
-                          Text('${item.point} điểm ',
-                              style: const TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                  color: ColorUtil.brightYellow))
-                        ],
+          shrinkWrap: true,
+          mainAxisSpacing: 8,
+          crossAxisSpacing: 8,
+          crossAxisCount: 2,
+          itemCount: list.length,
+          itemBuilder: (BuildContext context, int index) {
+            final GiftResponse item = list[index];
+            return GestureDetector(
+              onTap: () {
+                Navigator.pushNamed(
+                  context,
+                  Routes.giftDetail,
+                  arguments: {"gift": item, "is_my_gift": isMyGift},
+                ).then((value) {
+                  if (value == true) {
+                    _bloc.add(GiftScreenStartedEvent());
+                  }
+                });
+              },
+              child: Card(
+                elevation: 2,
+                child: Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      ImageUtil.loadNetWorkImage(
+                        url: item.image ?? "",
+                        width: double.infinity,
+                        height: context.width / 2 - paddingHorizontal * 2,
                       ),
-                    )),
-              );
-            }),
+                      const SizedBox(height: 8),
+                      Text(
+                        item.name ?? "",
+                        maxLines: 1,
+                        style: const TextStyle(
+                          overflow: TextOverflow.ellipsis,
+                          fontSize: 13,
+                          color: ColorUtil.bangladeshGreen,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        '${item.point} điểm ',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: ColorUtil.brightYellow,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
       ),
     );
   }

@@ -9,7 +9,8 @@ class HistoryidScreenTabPressEvent extends HistoryidScreenEvent {
 
   HistoryidScreenTabPressEvent(this.index);
 }
-class BookingDeleteidTaskEvent extends HistoryidScreenEvent{
+
+class BookingDeleteidTaskEvent extends HistoryidScreenEvent {
   final int taskId;
   final String name;
   final String des;

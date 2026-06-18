@@ -19,6 +19,7 @@ import 'package:socbay/utils/color_util.dart';
 import 'package:socbay/utils/context_extension.dart';
 import 'package:socbay/utils/image_util.dart';
 import 'package:socbay/widgets/button_widget.dart';
+import 'package:socbay/widgets/loading_indicator.dart';
 import 'package:socbay/widgets/my_app_bar.dart';
 import 'package:socbay/widgets/text_field_default.dart';
 
@@ -54,7 +55,6 @@ class _CoreReplacementServiceScreenState
 
   @override
   void dispose() {
-    _bloc.close();
     _feedbackController.dispose();
     _validateRatingController.dispose();
     super.dispose();
@@ -134,10 +134,34 @@ class _CoreReplacementServiceScreenState
   void _listener(BuildContext context, CoreReplatementServiceState state) {}
 
   Widget _builder(BuildContext context, CoreReplatementServiceState state) {
-    var staffName = _bloc.orderDetailModel?.staff != null
-        ? _bloc.orderDetailModel?.staff?.username
-        : '';
+    final hasData = _hasData;
+    if (_bloc.isLoading) {
+      return Scaffold(
+        appBar: MyAppBar(
+          title: "Chi tiết lần thay lõi",
+          isBackNavigation: true,
+          centerTitle: true,
+        ),
+        body: const SafeArea(
+          child: LoadingIndicator(isLoading: true, child: SizedBox.expand()),
+        ),
+      );
+    }
+
+    if (!hasData) {
+      return Scaffold(
+        appBar: MyAppBar(
+          title: "Chi tiết lần thay lõi",
+          isBackNavigation: true,
+          centerTitle: true,
+        ),
+        body: SafeArea(child: _buildEmptyState()),
+      );
+    }
+
+    final isCustomer = App.instance.userApp?.isUserCustomer() == true;
     return Scaffold(
+      backgroundColor: const Color(0xFFF4F6F8),
       appBar: MyAppBar(
         title: "Chi tiết lần thay lõi",
         isBackNavigation: true,
@@ -145,148 +169,25 @@ class _CoreReplacementServiceScreenState
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.only(bottom: 16),
+          padding: const EdgeInsets.all(16).copyWith(bottom: 80),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            //shrinkWrap: true,
             children: [
-              Container(
-                margin: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: const Color.fromRGBO(4, 107, 80, 1),
-                  ),
-                  borderRadius: BorderRadius.circular(10.0),
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [Expanded(child: _tableAction())],
-                ),
-              ),
-              Container(
-                margin: const EdgeInsets.only(left: 15, right: 15),
-                decoration: const BoxDecoration(
-                  border: Border(
-                    bottom: BorderSide(width: 1.0, color: Colors.black26),
-                  ),
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [Expanded(child: _tablePrice())],
-                ),
-              ),
-              Container(
-                margin: const EdgeInsets.only(left: 15, top: 10, right: 15),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: RichText(
-                    // Bỏ ButtonWidget
-                    text: TextSpan(
-                      children: [
-                        const TextSpan(
-                          text: "Thông tin kỹ thuật viên: ",
-                          style: TextStyle(color: Colors.black),
-                        ),
-                        WidgetSpan(
-                          child: GestureDetector(
-                            // Sử dụng GestureDetector
-                            onTap: () {
-                              _goToStaffInfo(_bloc.orderDetailModel?.staff);
-                            },
-                            child: Text(
-                              staffName!,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w600,
-                                color: ColorUtil.bangladeshGreen,
-                                decorationThickness: 1,
-                                decoration: TextDecoration.underline,
-                                fontSize: 13,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              // Container(
-              //   margin: const EdgeInsets.only(left: 15, top: 10),
-              //   child: Align(
-              //       alignment: Alignment.centerLeft,
-              //       child: ButtonWidget(
-              //         onTap: () {
-              //           _goToStaffInfo(_bloc.orderDetailModel?.staff);
-              //         },
-              //         child: RichText(
-              //           text: TextSpan(children: [
-              //             const TextSpan(
-              //                 text: "Thông tin kỹ thuật viên: ",
-              //                 style: TextStyle(color: Colors.black)),
-              //             TextSpan(
-              //               text: staffName,
-              //               style: const TextStyle(
-              //                   fontWeight: FontWeight.w600,
-              //                   color: ColorUtil.bangladeshGreen,
-              //                   decorationThickness: 1,
-              //                   decoration: TextDecoration.underline,
-              //                   fontSize: 13),
-              //             )
-              //           ]),
-              //         ),
-              //       )),
-              // ),
-              // const SizedBox(height: 10.0),
-              Column(
-                children: [
-                  Align(
-                    alignment: Alignment.bottomCenter,
-                    child: _heading('Đánh giá và nhận xét dịch vụ'),
-                  ),
-                  _ratingBarDisplay(),
-                  Container(
-                    margin: const EdgeInsets.only(left: 15, right: 15),
-                    decoration: const BoxDecoration(
-                      border: Border(
-                        bottom: BorderSide(width: 1.0, color: Colors.black26),
-                      ),
-                    ),
-                    child: Text(_bloc.des),
-                  ),
-                ],
-              ),
-
-              Container(
-                margin: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: const Color.fromRGBO(4, 107, 80, 1),
-                  ),
-                  borderRadius: BorderRadius.circular(10.0),
-                ),
-                child: _tableUpdate(),
-              ),
-              Wrap(
-                spacing: 8.0, // gap between adjacent chips
-                runSpacing: 4.0, // gap between lines
-                direction: Axis.horizontal, // main axis (rows or columns)
-                children: [
-                  Container(
-                    margin: const EdgeInsets.only(left: 15, top: 5),
-                    child: const Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text("Hình ảnh đơn hàng: "),
-                    ),
-                  ),
-                  Container(
-                    margin: const EdgeInsets.only(left: 15, top: 0),
-                    child: _buildMediaRow(),
-                  ),
-                ],
-              ),
+              _buildStaffInfoCard(),
+              _buildActionCard(),
+              _buildPriceCard(),
+              if (_bloc.orderDetailModel?.orderFilterCoresModel != null &&
+                  _bloc.orderDetailModel!.orderFilterCoresModel!.any(
+                    (item) => item.replaceDatePromise != "",
+                  ))
+                _buildUpdateCard(),
+              _buildReviewCard(),
+              if (_bloc.orderDetailModel?.images != null &&
+                  _bloc.orderDetailModel!.images!.isNotEmpty)
+                _buildMediaCard(),
               if (_bloc.orderDetailModel?.paymentStatus == '1') ...[
-                Container(
-                  margin: const EdgeInsets.only(left: 15, top: 0),
+                const SizedBox(height: 16),
+                Center(
                   child: ImageUtil.loadAssetsImage(
                     fileName: Images.successPayment,
                     width: 150,
@@ -297,46 +198,109 @@ class _CoreReplacementServiceScreenState
           ),
         ),
       ),
+      floatingActionButton: isCustomer ? _buildFloatingBookingButton() : null,
       bottomNavigationBar: _showBottomSheetFeedback(),
+    );
+  }
+
+  bool get _hasData {
+    final coreModels = _bloc.orderDetailModel?.orderFilterCoresModel;
+    return _bloc.orderDetailModel != null &&
+        coreModels != null &&
+        coreModels.isNotEmpty;
+  }
+
+  Widget _buildEmptyState() {
+    return const Center(
+      child: Text(
+        "Không có dữ liệu",
+        style: TextStyle(fontSize: 16, color: Colors.black54),
+      ),
+    );
+  }
+
+  Widget _buildFloatingBookingButton() {
+    return Container(
+      height: 40,
+      decoration: BoxDecoration(
+        color: ColorUtil.green,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: ColorUtil.green.withValues(alpha: 0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(20),
+          onTap: () {
+            Navigator.pushNamed(
+              context,
+              Routes.serviceScreen,
+              arguments: {
+                "listService": [],
+                "index": "",
+                "productId": _bloc
+                    .orderDetailModel
+                    ?.orderFilterCoresModel?[0]
+                    .orderDetailId,
+              },
+            );
+          },
+          child: const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.add_circle_outline_rounded,
+                  color: Colors.white,
+                  size: 18,
+                ),
+                SizedBox(width: 6),
+                Text(
+                  "Đặt lịch",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 
   Widget _showBottomSheetFeedback() {
     if (App.instance.userApp?.isUserCustomer() == true) {
-      final buttonWidth = (context.width - 40) / 3;
-      final itemWidth = buttonWidth.clamp(96.0, 140.0);
-
-      ButtonStyle buttonStyle(Color backgroundColor) {
-        return ButtonStyle(
-          backgroundColor: WidgetStateProperty.all(backgroundColor),
-          padding: WidgetStateProperty.all(
-            const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-          ),
-          shape: WidgetStateProperty.all(
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          ),
-          textStyle: WidgetStateProperty.all(
-            const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
-          ),
-        );
-      }
+      final hasPayment = _bloc.orderDetailModel?.paymentStatus == '0';
 
       return SafeArea(
         bottom: true,
         child: Container(
           decoration: BoxDecoration(
             color: Colors.white,
-            border: Border(top: BorderSide(color: Colors.grey.shade200)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.04),
+                blurRadius: 10,
+                offset: const Offset(0, -4),
+              ),
+            ],
+            border: Border(top: BorderSide(color: Colors.grey.shade100)),
           ),
-          padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
-          child: Wrap(
-            alignment: WrapAlignment.center,
-            spacing: 10,
-            runSpacing: 10,
+          padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
+          child: Row(
             children: [
-              SizedBox(
-                width: itemWidth,
-                child: ElevatedButton.icon(
+              Expanded(
+                child: OutlinedButton.icon(
                   onPressed: () {
                     Navigator.pushNamed(
                       context,
@@ -348,63 +312,59 @@ class _CoreReplacementServiceScreenState
                     );
                   },
                   icon: const Icon(
-                    Icons.feedback,
+                    Icons.feedback_outlined,
                     color: ColorUtil.brightYellow,
                     size: 16,
                   ),
                   label: const Text(
                     "Khiếu nại",
-                    style: TextStyle(color: ColorUtil.white, fontSize: 13),
+                    style: TextStyle(
+                      color: ColorUtil.brightYellow,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                    ),
                   ),
-                  style: buttonStyle(ColorUtil.bangladeshGreen),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    side: const BorderSide(
+                      color: ColorUtil.brightYellow,
+                      width: 1.2,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
                 ),
               ),
-              if (_bloc.orderDetailModel?.paymentStatus == '0')
-                SizedBox(
-                  width: itemWidth,
+              if (hasPayment) ...[
+                const SizedBox(width: 10),
+                Expanded(
                   child: ElevatedButton.icon(
                     onPressed: _createPayment,
                     icon: const Icon(
-                      Icons.payment,
-                      color: ColorUtil.brightYellow,
+                      Icons.payment_outlined,
+                      color: Colors.white,
                       size: 16,
                     ),
                     label: const Text(
                       "Thanh toán",
-                      style: TextStyle(color: ColorUtil.white, fontSize: 13),
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                      ),
                     ),
-                    style: buttonStyle(ColorUtil.red),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: ColorUtil.red,
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
                   ),
                 ),
-              SizedBox(
-                width: itemWidth,
-                child: ElevatedButton.icon(
-                  onPressed: () {
-                    Navigator.pushNamed(
-                      context,
-                      Routes.serviceScreen,
-                      arguments: {
-                        "listService": [],
-                        "index": "",
-                        "productId": _bloc
-                            .orderDetailModel
-                            ?.orderFilterCoresModel?[0]
-                            .orderDetailId,
-                      },
-                    );
-                  },
-                  icon: const Icon(
-                    Icons.add,
-                    color: ColorUtil.brightYellow,
-                    size: 16,
-                  ),
-                  label: const Text(
-                    "Đặt lịch",
-                    style: TextStyle(color: ColorUtil.white, fontSize: 13),
-                  ),
-                  style: buttonStyle(ColorUtil.bangladeshGreen),
-                ),
-              ),
+              ],
             ],
           ),
         ),
@@ -414,73 +374,175 @@ class _CoreReplacementServiceScreenState
     }
   }
 
-  Widget _tableAction() {
-    return Table(
-      columnWidths: const {1: FlexColumnWidth(2)},
-      border: TableBorder.symmetric(
-        inside: const BorderSide(
-          width: 1,
-          color: Color.fromRGBO(4, 107, 80, 1),
-        ),
-      ),
-      children: [
-        TableRow(
-          decoration: BoxDecoration(
-            border: Border.all(color: const Color.fromRGBO(4, 107, 80, 1)),
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(10),
-              topRight: Radius.circular(10),
-            ),
-            color: ColorUtil.bangladeshGreen,
+  Widget _buildCard({
+    required String title,
+    required Widget child,
+    IconData? icon,
+    Widget? trailing,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
-          children: const [
-            TableCell(
-              child: Align(
-                alignment: Alignment.center,
-                child: Text(
-                  "Tên lõi",
-                  style: TextStyle(color: ColorUtil.white),
-                ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            decoration: BoxDecoration(
+              color: ColorUtil.bangladeshGreen.withValues(alpha: 0.1),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(16),
               ),
             ),
-            TableCell(
-              child: Align(
-                alignment: Alignment.center,
-                child: Text(
-                  "Thành tiền",
-                  style: TextStyle(color: ColorUtil.white),
-                ),
-              ),
-            ),
-          ],
-        ),
-        if (_bloc.orderDetailModel?.orderFilterCoresModel != null)
-          for (var item in _bloc.orderDetailModel!.orderFilterCoresModel!)
-            if (!(item.price == "0.00" && item.replaceDatePromise != "")) ...[
-              TableRow(
-                children: [
-                  TableCell(
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Padding(
-                        padding: const EdgeInsets.only(
-                          left: 10.0,
-                          top: 3.0,
-                          bottom: 3.0,
-                        ),
-                        child: Text(item.name ?? ""),
-                      ),
+            child: Row(
+              children: [
+                if (icon != null) ...[
+                  Icon(icon, color: ColorUtil.bangladeshGreen, size: 20),
+                  const SizedBox(width: 8),
+                ],
+                Expanded(
+                  child: Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: ColorUtil.bangladeshGreen,
                     ),
                   ),
-                  TableCell(
-                    child: Align(
-                      alignment: Alignment.center,
-                      child: Padding(
-                        padding: const EdgeInsets.only(
-                          left: 10.0,
-                          top: 3.0,
-                          bottom: 3.0,
+                ),
+                if (trailing != null) trailing,
+              ],
+            ),
+          ),
+          Padding(padding: const EdgeInsets.all(16), child: child),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(
+    String label,
+    String value, {
+    Color? valueColor,
+    bool isBold = false,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            flex: 2,
+            child: Text(
+              label,
+              style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+            ),
+          ),
+          Expanded(
+            flex: 3,
+            child: Text(
+              value,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: isBold ? FontWeight.bold : FontWeight.w500,
+                color: valueColor ?? ColorUtil.raisinBlack,
+              ),
+              textAlign: TextAlign.right,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStaffInfoCard() {
+    var staffName = _bloc.orderDetailModel?.staff != null
+        ? _bloc.orderDetailModel?.staff?.username
+        : '';
+    return _buildCard(
+      title: "Thông tin kỹ thuật viên",
+      icon: Icons.person_outline,
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: ColorUtil.bangladeshGreen.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.engineering_outlined,
+              color: ColorUtil.bangladeshGreen,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  "Kỹ thuật viên phụ trách",
+                  style: TextStyle(fontSize: 13, color: Colors.grey),
+                ),
+                const SizedBox(height: 4),
+                GestureDetector(
+                  onTap: () {
+                    _goToStaffInfo(_bloc.orderDetailModel?.staff);
+                  },
+                  child: Text(
+                    staffName ?? 'Không có thông tin',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: ColorUtil.bangladeshGreen,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Icon(Icons.chevron_right, color: Colors.grey),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionCard() {
+    return _buildCard(
+      title: "Thông tin lõi thay",
+      icon: Icons.water_drop_outlined,
+      child: Column(
+        children: [
+          if (_bloc.orderDetailModel?.orderFilterCoresModel != null)
+            for (var item in _bloc.orderDetailModel!.orderFilterCoresModel!)
+              if (!(item.price == "0.00" && item.replaceDatePromise != ""))
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12.0),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        flex: 3,
+                        child: Text(
+                          item.name ?? "",
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
+                      ),
+                      Expanded(
+                        flex: 2,
                         child: Text(
                           (item.price ?? "0")
                               .substring(
@@ -489,19 +551,25 @@ class _CoreReplacementServiceScreenState
                                     ? (item.price ?? "0").indexOf(".")
                                     : null,
                               )
+                              .toString()
                               .toVND(),
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: ColorUtil.red,
+                          ),
+                          textAlign: TextAlign.right,
                         ),
                       ),
-                    ),
+                    ],
                   ),
-                ],
-              ),
-            ],
-      ],
+                ),
+        ],
+      ),
     );
   }
 
-  Widget _tablePrice() {
+  Widget _buildPriceCard() {
     var sumPrice = _bloc.totalPriceForOrder;
     var totalPrice = _bloc.orderDetailModel?.price;
     var discount = _bloc.orderDetailModel?.chietKhau;
@@ -516,244 +584,177 @@ class _CoreReplacementServiceScreenState
     if (_totalPriced == 0) {
       _bloc.orderDetailModel?.paymentStatus == '1';
     }
-    return Table(
-      children: [
-        TableRow(
-          children: [
-            TableCell(
-              child: Container(
-                padding: const EdgeInsets.only(bottom: 8.0),
-                child: const Text("Ngày thực hiện:"),
-              ),
-            ),
-            TableCell(child: Text(_bloc.createDate)),
-          ],
-        ),
-        TableRow(
-          children: [
-            TableCell(
-              child: Container(
-                padding: const EdgeInsets.only(bottom: 8.0),
-                child: const Text("Tổng tiền:"),
-              ),
-            ),
-            TableCell(child: Text((sumPrice.toInt()).toVND())),
-          ],
-        ),
-        if (_bloc.orderDetailModel?.type == '4')
-          TableRow(
-            children: [
-              TableCell(
-                child: Container(
-                  padding: const EdgeInsets.only(bottom: 8.0),
-                  child: const Text("Thuế VAT:"),
-                ),
-              ),
-              TableCell(
-                child: Text(
-                  (_bloc.orderDetailModel?.vatAmount != null)
-                      ? '${_bloc.orderDetailModel?.vatAmount}%'
-                      : '',
-                ),
-              ),
-            ],
-          ),
-        TableRow(
-          children: [
-            TableCell(
-              child: Container(
-                padding: const EdgeInsets.only(bottom: 8.0),
-                child: const Text("Chiết khấu:"),
-              ),
-            ),
-            TableCell(child: Text((discount ?? '0').toVND())),
-          ],
-        ),
-        TableRow(
-          children: [
-            TableCell(
-              child: Container(
-                padding: const EdgeInsets.only(bottom: 8.0),
-                child: const Text("Trừ tích điểm:"),
-              ),
-            ),
-            TableCell(
-              child: Text(
-                (Decimal.parse(subPoint ?? "0") * heso).toString().toVND(),
-              ),
-            ),
-          ],
-        ),
-        TableRow(
-          children: [
-            TableCell(
-              child: Container(
-                padding: const EdgeInsets.only(bottom: 8.0),
-                child: const Text("Tổng tiền thanh toán:"),
-              ),
-            ),
-            TableCell(
-              child: Text(
-                _totalPriced.toString().toVND(),
-                style: const TextStyle(
-                  color: ColorUtil.brightYellow,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ],
-        ),
-        if (_bloc.orderDetailModel?.type == '2')
-          TableRow(
-            children: [
-              TableCell(
-                child: Container(
-                  padding: const EdgeInsets.only(bottom: 8.0),
-                  child: const Text("Tích điểm:"),
-                ),
-              ),
-              TableCell(child: Text((savePoint ?? "0"))),
-            ],
-          ),
-      ],
-    );
-  }
 
-  Widget _tableUpdate() {
-    return Table(
-      border: TableBorder.symmetric(
-        inside: const BorderSide(
-          width: 1,
-          color: Color.fromRGBO(4, 107, 80, 1),
-        ),
-        //outside: const BorderSide(width: 1),
+    return _buildCard(
+      title: "Chi tiết thanh toán",
+      icon: Icons.receipt_long_outlined,
+      child: Column(
+        children: [
+          _buildInfoRow("Ngày thực hiện:", _bloc.createDate),
+          _buildInfoRow("Tổng tiền:", (sumPrice.toInt()).toString().toVND()),
+          if (_bloc.orderDetailModel?.type == '4')
+            _buildInfoRow(
+              "Thuế VAT:",
+              (_bloc.orderDetailModel?.vatAmount != null)
+                  ? '${_bloc.orderDetailModel?.vatAmount}%'
+                  : '',
+            ),
+          _buildInfoRow("Chiết khấu:", (discount ?? '0').toString().toVND()),
+          _buildInfoRow(
+            "Trừ tích điểm:",
+            (Decimal.parse(subPoint ?? "0") * heso).toString().toVND(),
+          ),
+          const Divider(height: 24, color: Color(0xFFEFEFEF)),
+          _buildInfoRow(
+            "Tổng thanh toán:",
+            _totalPriced.toString().toVND(),
+            valueColor: ColorUtil.brightYellow,
+            isBold: true,
+          ),
+          if (_bloc.orderDetailModel?.type == '2')
+            _buildInfoRow(
+              "Tích điểm:",
+              savePoint ?? "0",
+              valueColor: ColorUtil.bangladeshGreen,
+              isBold: true,
+            ),
+        ],
       ),
-      children: [
-        TableRow(
-          decoration: BoxDecoration(
-            border: Border.all(color: const Color.fromRGBO(4, 107, 80, 1)),
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(10),
-              topRight: Radius.circular(10),
-            ),
-            color: ColorUtil.bangladeshGreen,
-          ),
-          children: const [
-            TableCell(
-              child: Align(
-                alignment: Alignment.center,
-                child: Text(
-                  "Tên lõi",
-                  style: TextStyle(color: ColorUtil.white),
+    );
+  }
+
+  Widget _buildUpdateCard() {
+    return _buildCard(
+      title: "Lịch thay lõi tiếp theo",
+      icon: Icons.event_repeat_outlined,
+      child: Column(
+        children: [
+          if (_bloc.orderDetailModel?.orderFilterCoresModel != null)
+            for (var item in _bloc.orderDetailModel!.orderFilterCoresModel!)
+              if (item.replaceDatePromise != "")
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12.0),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        flex: 3,
+                        child: Text(
+                          item.name ?? "",
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        flex: 2,
+                        child: Text(
+                          item.replaceDatePromise ?? "",
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: ColorUtil.bangladeshGreen,
+                          ),
+                          textAlign: TextAlign.right,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildReviewCard() {
+    Widget trailingReviewBtn =
+        (_bloc.rating != 0 ||
+            _bloc.des != "" ||
+            App.instance.userApp?.isUserCustomer() == false)
+        ? const SizedBox()
+        : IconButton(
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+            icon: const Icon(Icons.rate_review_outlined, size: 20),
+            color: ColorUtil.brightYellow,
+            onPressed: () {
+              _ratingAndNote();
+            },
+          );
+
+    return _buildCard(
+      title: "Đánh giá dịch vụ",
+      icon: Icons.star_border_outlined,
+      trailing: trailingReviewBtn,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          _ratingBarDisplay(),
+          if (_bloc.des.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.grey[50],
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.grey[200]!),
+              ),
+              child: Text(
+                _bloc.des,
+                style: const TextStyle(fontSize: 14, color: Colors.black87),
               ),
             ),
-            TableCell(
-              child: Align(
-                alignment: Alignment.center,
-                child: Text(
-                  "Ngày thay tiếp theo",
-                  style: TextStyle(color: ColorUtil.white),
-                ),
+          ] else if (_bloc.rating == 0 &&
+              App.instance.userApp?.isUserCustomer() == true) ...[
+            const SizedBox(height: 12),
+            const Text(
+              "Bạn chưa có đánh giá nào cho dịch vụ này.",
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey,
+                fontStyle: FontStyle.italic,
               ),
             ),
           ],
-        ),
-        if (_bloc.orderDetailModel != null &&
-            _bloc.orderDetailModel!.orderFilterCoresModel != null)
-          for (var item in _bloc.orderDetailModel!.orderFilterCoresModel!)
-            if (item.replaceDatePromise != "") ...[
-              TableRow(
-                children: [
-                  TableCell(
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Padding(
-                        padding: const EdgeInsets.only(
-                          left: 10.0,
-                          top: 3.0,
-                          bottom: 3.0,
-                        ),
-                        child: Text(item.name ?? ""),
-                      ),
-                    ),
-                  ),
-                  TableCell(
-                    child: Align(
-                      alignment: Alignment.center,
-                      child: Padding(
-                        padding: const EdgeInsets.only(top: 3.0, bottom: 3.0),
-                        child: Text(item.replaceDatePromise ?? ""),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-      ],
+        ],
+      ),
     );
   }
 
-  Widget _buildMediaRow() {
-    return _bloc.orderDetailModel != null &&
-            _bloc.orderDetailModel!.images != null &&
-            _bloc.orderDetailModel!.images!.isNotEmpty
-        ? SizedBox(
-            height: 200,
-            width: double.infinity,
-            child: Align(
-              alignment: Alignment.bottomCenter,
-              child: ListView.builder(
-                itemCount: _bloc.orderDetailModel!.images?.length,
-                shrinkWrap: true,
-                scrollDirection: Axis.horizontal,
-                itemBuilder: (BuildContext context, int index) {
-                  return _buildItemMedia(
-                    "$protocol${AppConfig.instance.values.apiUrl}/${_bloc.orderDetailModel!.images![index]}",
-                  );
-                },
+  Widget _buildMediaCard() {
+    return _buildCard(
+      title: "Hình ảnh đơn hàng",
+      icon: Icons.image_outlined,
+      child: SizedBox(
+        height: 100,
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          itemCount: _bloc.orderDetailModel!.images?.length ?? 0,
+          itemBuilder: (context, index) {
+            return Padding(
+              padding: const EdgeInsets.only(right: 12.0),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: SizedBox(
+                  width: 100,
+                  height: 100,
+                  child: Stack(
+                    children: [
+                      _fullScreenHeroWidget(
+                        "$protocol${AppConfig.instance.values.apiUrl}/${_bloc.orderDetailModel!.images![index]}",
+                      ),
+                    ],
+                  ),
+                ),
               ),
-            ),
-          )
-        : Container();
-  }
-
-  Widget _buildItemMedia(String url) {
-    return Row(
-      children: [
-        Stack(children: [_fullScreenHeroWidget(url)]),
-        const SizedBox(width: 5),
-      ],
+            );
+          },
+        ),
+      ),
     );
   }
-
-  Widget _heading(String text) => Padding(
-    padding: const EdgeInsets.only(left: 15),
-    child: Row(
-      children: [
-        Text(
-          text,
-          style: const TextStyle(
-            fontWeight: FontWeight.w400,
-            //fontSize: 13.0,
-            //color: ColorUtil.bangladeshGreen,
-          ),
-        ),
-        _bloc.rating != 0 ||
-                _bloc.des != "" ||
-                App.instance.userApp?.isUserCustomer() == false
-            ? const Icon(Icons.rate_review, color: Colors.white12)
-            : IconButton(
-                icon: const Icon(Icons.rate_review),
-                color: ColorUtil.brightYellow,
-                onPressed: () {
-                  /* Your code */
-                  _ratingAndNote();
-                },
-              ),
-      ],
-    ),
-  );
 
   Widget _ratingBar() {
     return RatingBar.builder(

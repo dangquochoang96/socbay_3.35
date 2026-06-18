@@ -12,7 +12,7 @@ import '../../../data/repository/auth/api_repository.dart';
 class SearchStaffScreenBloc
     extends Bloc<SearchStaffScreenEvent, SearchStaffScreenState> {
   SearchStaffScreenBloc({required this.apiRepository, required this.args})
-      : super(SearchStaffScreenInitialState()) {
+    : super(SearchStaffScreenInitialState()) {
     on<SearchStaffScreenGetStaffEvent>(_mapStartedEventToState);
     on<SearchStaffScreenGetTaskEvent>(_mapTaskEventToState);
   }
@@ -23,13 +23,16 @@ class SearchStaffScreenBloc
   List<UserProfile> staffsInfo = [];
   TaskModel? taskModel;
 
-  FutureOr<void> _mapStartedEventToState(SearchStaffScreenGetStaffEvent event,
-      Emitter<SearchStaffScreenState> emit) async {
+  FutureOr<void> _mapStartedEventToState(
+    SearchStaffScreenGetStaffEvent event,
+    Emitter<SearchStaffScreenState> emit,
+  ) async {
     isLoading = true;
     emit(SearchStaffScreenInitialState());
 
-    final res = await apiRepository
-        .getListStaffByDistance(event.staffByDistanceRequest);
+    final res = await apiRepository.getListStaffByDistance(
+      event.staffByDistanceRequest,
+    );
     if (res.data != null && res.status == HttpStatus.ok) {
       staffsInfo = res.data!;
       add(SearchStaffScreenGetTaskEvent());
@@ -39,7 +42,9 @@ class SearchStaffScreenBloc
   }
 
   FutureOr<void> _mapTaskEventToState(
-      SearchStaffScreenGetTaskEvent event, Emitter<SearchStaffScreenState> emit) async {
+    SearchStaffScreenGetTaskEvent event,
+    Emitter<SearchStaffScreenState> emit,
+  ) async {
     isLoading = true;
     emit(SearchStaffScreenInitialState());
     final result = await apiRepository.getTask(args['id']);

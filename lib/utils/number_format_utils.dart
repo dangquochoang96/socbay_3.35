@@ -5,19 +5,20 @@ import 'package:socbay/utils/parse_util.dart';
 
 abstract class NumberFormatUtil {
   static String currencyFormat(num? price, {int decimalDigits = 4}) {
-    return removeTrailingZeros(NumberFormat.currency(
-            locale: getCurrentRegion(),
-            symbol: '',
-            decimalDigits: decimalDigits)
-        .format(price));
+    return removeTrailingZeros(
+      NumberFormat.currency(
+        locale: getCurrentRegion(),
+        symbol: '',
+        decimalDigits: decimalDigits,
+      ).format(price),
+    );
   }
 
   static String parseToVND(dynamic price, {int decimalDigits = 4}) {
-    if(price == null){
+    if (price == null) {
       return "- - vnđ";
     }
-    return "${currencyFormat(Parse.toNumValue(price),
-            decimalDigits: decimalDigits)} vnđ";
+    return "${currencyFormat(Parse.toNumValue(price), decimalDigits: decimalDigits)} vnđ";
   }
 
   static double parse(String? price) {

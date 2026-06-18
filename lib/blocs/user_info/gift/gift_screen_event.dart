@@ -2,8 +2,7 @@ abstract class GiftScreenEvent {
   const GiftScreenEvent();
 }
 
-class GiftScreenStartedEvent extends GiftScreenEvent{}
-
+class GiftScreenStartedEvent extends GiftScreenEvent {}
 
 class GiftScreenTabPressEvent extends GiftScreenEvent {
   final int index;

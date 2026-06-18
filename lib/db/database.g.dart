@@ -6,21 +6,32 @@ part of 'database.dart';
 // FloorGenerator
 // **************************************************************************
 
+abstract class $AppDatabaseBuilderContract {
+  /// Adds migrations to the builder.
+  $AppDatabaseBuilderContract addMigrations(List<Migration> migrations);
+
+  /// Adds a database [Callback] to the builder.
+  $AppDatabaseBuilderContract addCallback(Callback callback);
+
+  /// Creates the database and initializes it.
+  Future<AppDatabase> build();
+}
+
 // ignore: avoid_classes_with_only_static_members
 class $FloorAppDatabase {
   /// Creates a database builder for a persistent database.
   /// Once a database is built, you should keep a reference to it and re-use it.
-  static _$AppDatabaseBuilder databaseBuilder(String name) =>
+  static $AppDatabaseBuilderContract databaseBuilder(String name) =>
       _$AppDatabaseBuilder(name);
 
   /// Creates a database builder for an in memory database.
   /// Information stored in an in memory database disappears when the process is killed.
   /// Once a database is built, you should keep a reference to it and re-use it.
-  static _$AppDatabaseBuilder inMemoryDatabaseBuilder() =>
+  static $AppDatabaseBuilderContract inMemoryDatabaseBuilder() =>
       _$AppDatabaseBuilder(null);
 }
 
-class _$AppDatabaseBuilder {
+class _$AppDatabaseBuilder implements $AppDatabaseBuilderContract {
   _$AppDatabaseBuilder(this.name);
 
   final String? name;
@@ -29,19 +40,19 @@ class _$AppDatabaseBuilder {
 
   Callback? _callback;
 
-  /// Adds migrations to the builder.
-  _$AppDatabaseBuilder addMigrations(List<Migration> migrations) {
+  @override
+  $AppDatabaseBuilderContract addMigrations(List<Migration> migrations) {
     _migrations.addAll(migrations);
     return this;
   }
 
-  /// Adds a database [Callback] to the builder.
-  _$AppDatabaseBuilder addCallback(Callback callback) {
+  @override
+  $AppDatabaseBuilderContract addCallback(Callback callback) {
     _callback = callback;
     return this;
   }
 
-  /// Creates the database and initializes it.
+  @override
   Future<AppDatabase> build() async {
     final path = name != null
         ? await sqfliteDatabaseFactory.getDatabasePath(name!)
@@ -85,7 +96,7 @@ class _$AppDatabase extends AppDatabase {
       },
       onCreate: (database, version) async {
         await database.execute(
-            'CREATE TABLE IF NOT EXISTS `User` (`id` INTEGER NOT NULL, `username` TEXT, `avatar` TEXT, `email` TEXT, `phone` TEXT, `address` TEXT, `password` TEXT, `type` TEXT, `otp` INTEGER, `birthday` TEXT, `status` INTEGER, `isAgency` INTEGER, `isAdmin` INTEGER, `sex` INTEGER, `point` INTEGER, `lat` REAL, `lng` REAL, `distance` REAL, `createdAt` TEXT, `certification` TEXT, `idCard` TEXT, `idCardImageFront` TEXT, `idCardImageBack` TEXT, `cmt` TEXT, PRIMARY KEY (`id`))');
+            'CREATE TABLE IF NOT EXISTS `User` (`id` INTEGER NOT NULL, `username` TEXT, `avatar` TEXT, `email` TEXT, `phone` TEXT, `address` TEXT, `password` TEXT, `type` TEXT, `typeStaff` TEXT, `otp` INTEGER, `birthday` TEXT, `status` INTEGER, `isAgency` INTEGER, `isAdmin` INTEGER, `sex` INTEGER, `point` INTEGER, `lat` REAL, `lng` REAL, `distance` REAL, `createdAt` TEXT, `certification` TEXT, `cmt` TEXT, PRIMARY KEY (`id`))');
 
         await callback?.onCreate?.call(database, version);
       },
@@ -116,6 +127,7 @@ class _$UserDao extends UserDao {
                   'address': item.address,
                   'password': item.password,
                   'type': item.type,
+                  'typeStaff': item.typeStaff,
                   'otp': item.otp,
                   'birthday': item.birthday,
                   'status': item.status,
@@ -151,6 +163,7 @@ class _$UserDao extends UserDao {
             row['address'] as String?,
             row['password'] as String?,
             row['type'] as String?,
+            row['typeStaff'] as String?,
             row['otp'] as int?,
             row['id'] as int,
             row['birthday'] as String?,
@@ -186,6 +199,7 @@ class _$UserDao extends UserDao {
             row['address'] as String?,
             row['password'] as String?,
             row['type'] as String?,
+            row['typeStaff'] as String?,
             row['otp'] as int?,
             row['id'] as int,
             row['birthday'] as String?,
@@ -218,6 +232,6 @@ class _$UserDao extends UserDao {
 
   @override
   Future<void> insertUser(User user) async {
-    await _userInsertionAdapter.insert(user, OnConflictStrategy.abort);
+    await _userInsertionAdapter.insert(user, OnConflictStrategy.replace);
   }
 }

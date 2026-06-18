@@ -8,5 +8,4 @@ class GiftScreenChangeTabState extends GiftScreenState {
   final int index;
 
   const GiftScreenChangeTabState(this.index);
-
 }

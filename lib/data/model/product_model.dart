@@ -7,6 +7,7 @@ class ProductModel {
   final String? name;
   final String? productCode;
   final String? soCapLoc;
+  int? price, priceSale;
   final String? slug;
   final String? lng;
   final String? meta;
@@ -17,21 +18,24 @@ class ProductModel {
   final MachineModel? machineModel;
   final String? address;
 
-  ProductModel(
-      {this.id,
-        this.userId,
-        this.name,
-        this.productCode,
-        this.soCapLoc,
-        this.slug,
-        this.lng,
-        this.meta,
-        this.content,
-        this.createdAt,
-        this.updatedAt,
-        this.machineModel,
-        this.address,
-        this.images});
+  ProductModel({
+    this.id,
+    this.userId,
+    this.name,
+    this.productCode,
+    this.soCapLoc,
+    this.price,
+    this.priceSale,
+    this.slug,
+    this.lng,
+    this.meta,
+    this.content,
+    this.createdAt,
+    this.updatedAt,
+    this.machineModel,
+    this.address,
+    this.images,
+  });
 
   factory ProductModel.fromJson(Map<String, dynamic> json) => ProductModel(
     id: json['id'] as int?,
@@ -39,6 +43,8 @@ class ProductModel {
     name: json["name"] as String?,
     productCode: json['product_code'] as String?,
     soCapLoc: json['so_cap_loc'] as String?,
+    price: int.tryParse(json["price"] ?? '0'),
+    priceSale: int.tryParse(json["price_sale"] ?? '0'),
     lng: json['lng'] as String?,
     slug: json['slug'] as String?,
     meta: json['meta'] as String?,

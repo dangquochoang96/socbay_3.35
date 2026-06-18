@@ -50,14 +50,18 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<ChangePasswordScreenBloc, ChangePasswordScreenState>(
-        builder: _builder, listener: _listener);
+      builder: _builder,
+      listener: _listener,
+    );
   }
 
   void _listener(BuildContext context, ChangePasswordScreenState state) {
-    if(state is ChangePasswordScreenDoneState){
-      if(state.error!=null){
-        context.showSnackBarError("Thông tin mật khẩu không chính xác, vui lòng nhập lại");
-      }else{
+    if (state is ChangePasswordScreenDoneState) {
+      if (state.error != null) {
+        context.showSnackBarError(
+          "Thông tin mật khẩu không chính xác, vui lòng nhập lại",
+        );
+      } else {
         context.showSnackBarSuccess("Đổi mật khẩu thành công");
         Navigator.pop(context);
       }
@@ -102,8 +106,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               ),
               const SizedBox(height: 32),
               DefaultButton(
-                color:
-                    isEmpty() ? ColorUtil.graniteGray : ColorUtil.bangladeshGreen,
+                color: isEmpty()
+                    ? ColorUtil.graniteGray
+                    : ColorUtil.bangladeshGreen,
                 text: "Lưu",
                 onPressed: _onSavePassword,
               ),
@@ -115,9 +120,12 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     );
   }
 
-  Widget _buildForm(String titleTextField, String placeHolder,
-      TextEditingController controller,
-      {required String type}) {
+  Widget _buildForm(
+    String titleTextField,
+    String placeHolder,
+    TextEditingController controller, {
+    required String type,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -135,8 +143,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
             obscureText: type == _rePasswordType
                 ? isSecureRePassword
                 : type == _passwordType
-                    ? isSecurePassword
-                    : isSecureOldPassword,
+                ? isSecurePassword
+                : isSecureOldPassword,
             keyboardType: TextInputType.text,
             controller: controller,
             cursorColor: ColorUtil.bangladeshGreen,
@@ -144,20 +152,30 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8.0),
                 borderSide: const BorderSide(
-                    color: ColorUtil.bangladeshGreen, width: 0.5),
+                  color: ColorUtil.bangladeshGreen,
+                  width: 0.5,
+                ),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8.0),
                 borderSide: const BorderSide(
-                    color: ColorUtil.bangladeshGreen, width: 0.5),
+                  color: ColorUtil.bangladeshGreen,
+                  width: 0.5,
+                ),
               ),
               hintText: placeHolder,
-              hintStyle:
-                  const TextStyle(color: ColorUtil.silverChalice, fontSize: 13),
-              contentPadding:
-                  const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
-              suffixIconConstraints:
-                  const BoxConstraints(minHeight: 20, minWidth: 20),
+              hintStyle: const TextStyle(
+                color: ColorUtil.silverChalice,
+                fontSize: 13,
+              ),
+              contentPadding: const EdgeInsets.symmetric(
+                vertical: 5,
+                horizontal: 15,
+              ),
+              suffixIconConstraints: const BoxConstraints(
+                minHeight: 20,
+                minWidth: 20,
+              ),
               suffixIcon: GestureDetector(
                 onTap: () {
                   setState(() {
@@ -179,15 +197,15 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                   child: ImageUtil.loadAssetsImage(
                     fileName: type == _rePasswordType
                         ? (isSecureRePassword
-                            ? Images.iconSecurePassword
-                            : Images.iconNotSecurePassword)
+                              ? Images.iconSecurePassword
+                              : Images.iconNotSecurePassword)
                         : type == _passwordType
-                            ? (isSecurePassword
-                                ? Images.iconSecurePassword
-                                : Images.iconNotSecurePassword)
-                            : (isSecureOldPassword
-                                ? Images.iconSecurePassword
-                                : Images.iconNotSecurePassword),
+                        ? (isSecurePassword
+                              ? Images.iconSecurePassword
+                              : Images.iconNotSecurePassword)
+                        : (isSecureOldPassword
+                              ? Images.iconSecurePassword
+                              : Images.iconNotSecurePassword),
                     width: 15,
                     height: 15,
                   ),
@@ -195,7 +213,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               ),
             ),
           ),
-        )
+        ),
       ],
     );
   }
@@ -203,12 +221,19 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   void _onSavePassword() {
     LoggerUtil.log("message ${App.instance.userApp?.password}");
     if (isRePasswordWrong()) {
-      context.showSnackBarError("Thông tin mật khẩu không chính xác,vui lòng nhập lại");
+      context.showSnackBarError(
+        "Thông tin mật khẩu không chính xác,vui lòng nhập lại",
+      );
     } else {
-      _bloc.add(ChangePasswordScreenSubmitChangeEvent(ChangePasswordRequest(
-          oldPassword:  oldPasswordTxtController.text.trim(),
-          password:  passwordTxtController.text.trim(),
-          rePassword:  rePasswordTxtController.text.trim())));
+      _bloc.add(
+        ChangePasswordScreenSubmitChangeEvent(
+          ChangePasswordRequest(
+            oldPassword: oldPasswordTxtController.text.trim(),
+            password: passwordTxtController.text.trim(),
+            rePassword: rePasswordTxtController.text.trim(),
+          ),
+        ),
+      );
     }
   }
 

@@ -9,15 +9,19 @@ import 'package:share_plus/share_plus.dart';
 import 'package:socbay/utils/context_extension.dart';
 import 'package:socbay/widgets/dialog/custom_alert_dialog.dart';
 
-
 int maxSizeVideoKb = 50 * 1024 * 1024;
 int maxSizePhotoKb = 50 * 1024 * 1024;
 
-Future<File?> onGetPhotoFromGallery(
-    {required BuildContext context,
-    required ImagePicker picker,
-    required Function funcPermission}) async {
-  if (await Permission.photos.request().isGranted) {
+Future<File?> onGetPhotoFromGallery({
+  required BuildContext context,
+  required ImagePicker picker,
+  required Function funcPermission,
+}) async {
+  bool isGranted = true;
+  if (Platform.isIOS) {
+    isGranted = await Permission.photos.request().isGranted;
+  }
+  if (isGranted) {
     try {
       final pickedFile = await picker.pickImage(
         source: ImageSource.gallery,
@@ -31,9 +35,9 @@ Future<File?> onGetPhotoFromGallery(
         context.showSnackBar('You have not selected a photo');
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toString())));
     }
   } else {
     funcPermission();
@@ -41,15 +45,18 @@ Future<File?> onGetPhotoFromGallery(
   return null;
 }
 
-Future<List<File>?> onGetMultiPhoto(
-    {required BuildContext context,
-    required ImagePicker picker,
-    required Function funcPermission}) async {
-  if (await Permission.photos.request().isGranted) {
+Future<List<File>?> onGetMultiPhoto({
+  required BuildContext context,
+  required ImagePicker picker,
+  required Function funcPermission,
+}) async {
+  bool isGranted = true;
+  if (Platform.isIOS) {
+    isGranted = await Permission.photos.request().isGranted;
+  }
+  if (isGranted) {
     try {
-      final pickedFiles = await picker.pickMultiImage(
-        imageQuality: 100,
-      );
+      final pickedFiles = await picker.pickMultiImage(imageQuality: 100);
 
       if (pickedFiles.isNotEmpty) {
         final List<File> listFile = [];
@@ -62,9 +69,9 @@ Future<List<File>?> onGetMultiPhoto(
         // showSnackBarError(context: context, message: 'File error');
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toString())));
     }
   } else {
     funcPermission();
@@ -72,9 +79,15 @@ Future<List<File>?> onGetMultiPhoto(
   return null;
 }
 
-Future<File?> onGetVideo(
-    {required BuildContext context, required ImagePicker picker}) async {
-  if (await Permission.photos.request().isGranted) {
+Future<File?> onGetVideo({
+  required BuildContext context,
+  required ImagePicker picker,
+}) async {
+  bool isGranted = true;
+  if (Platform.isIOS) {
+    isGranted = await Permission.photos.request().isGranted;
+  }
+  if (isGranted) {
     try {
       final pickedFile = await picker.pickVideo(source: ImageSource.gallery);
 
@@ -84,9 +97,9 @@ Future<File?> onGetVideo(
         // showSnackBarError(context: context, message: 'File error');
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toString())));
     }
   } else {
     _showPhotoPermissionAlertDialog(context);
@@ -114,18 +127,23 @@ Future<String> getAppPath() async {
   return appDocumentsDirectory.path;
 }
 
-Future saveAndShareImage(
-    {required Uint8List image, String content = ''}) async {
+Future saveAndShareImage({
+  required Uint8List image,
+  String content = '',
+}) async {
   String filePath = '${await getAppPath()}/screenshot_result.png';
+
   File file = File(filePath);
   await file.writeAsBytes(image);
+
   XFile xFile = XFile(filePath);
-  await Share.shareXFiles([xFile], text: content);
+
+  await SharePlus.instance.share(ShareParams(files: [xFile], text: content));
 }
 
 Future shareText({required String content}) async {
   try {
-    await Share.share(content);
+    await SharePlus.instance.share(ShareParams(text: content));
   } catch (e) {
     print('Error sharing text: $e');
   }

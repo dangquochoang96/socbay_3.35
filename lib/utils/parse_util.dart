@@ -71,11 +71,6 @@ abstract class Parse {
     final double rounded = value * 100 * 1000;
     return (rounded.round() / 1000).toString();
   }
-
 }
 
-enum BoolType {
-  boolTypeInvalid,
-  boolTypeFalse,
-  boolTypeTrue,
-}
+enum BoolType { boolTypeInvalid, boolTypeFalse, boolTypeTrue }

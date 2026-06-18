@@ -5,10 +5,11 @@ import 'dart:io';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:socbay/config/app_config.dart';
+import 'package:socbay/constants/api_endpoints.dart';
 import 'package:socbay/data/model/order_detail_model.dart';
 import 'package:socbay/data/model/user_profile.dart';
 import 'package:socbay/data/repository/auth/api_repository.dart';
-import 'package:http/http.dart' as http;
+import 'package:socbay/utils/auth_http.dart' as http;
 import 'package:socbay/utils/logger_util.dart';
 
 import 'comment_technique_event.dart';
@@ -39,10 +40,7 @@ class CommentTechniqueBloc
   }
 
   Future<void> _getProfile() async {
-    var url = Uri.http(
-      AppConfig.instance.values.apiUrl,
-      "/api/user/${(args["id"])}",
-    );
+    var url = AppConfig.instance.apiUri(ApiEndpoints.userById(args["id"]));
     try {
       var res = await http.get(url);
       if (res.statusCode == HttpStatus.ok) {
@@ -56,13 +54,12 @@ class CommentTechniqueBloc
 
   Future<void> _getRating() async {
     int diem = 0;
-    var url = Uri.http(
-      AppConfig.instance.values.apiUrl,
-      "/api/order/get-list-order-rating-by-staff",
-      {'user_id': args["id"].toString()},
-    );
+    var url = AppConfig.instance.apiUri(ApiEndpoints.listOrderRatingByStaff, {
+      'user_id': args["id"].toString(),
+    });
     try {
       var res = await http.get(url);
+      print(res.body);
       if (res.statusCode == HttpStatus.ok) {
         var map = Map<String, dynamic>.from(json.decode(res.body));
         lstOrder = List<OrderDetailModel>.from(
@@ -70,10 +67,6 @@ class CommentTechniqueBloc
         );
         dem = 0;
         lstOrder?.forEach((element) {
-          // if(element.rate != null){
-          //   diem = diem + int.parse(element.rate!);
-          //   dem =dem+1;
-          // }
           diem = diem + int.parse(element.rate!);
           dem = dem + 1;
         });

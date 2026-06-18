@@ -10,18 +10,19 @@ import 'package:socbay/data/response/api_response.dart';
 
 import 'find_staff_event.dart';
 
-class FindStaffBloc extends Bloc<FindStaffEvent, FindStaffState>{
+class FindStaffBloc extends Bloc<FindStaffEvent, FindStaffState> {
   final ApiRepository apiRepository;
   List<UserAddress> listUserAddress = [];
   List<UserProfile> staffsInfo = [];
   bool isLoading = false;
-  FindStaffBloc({required this.apiRepository}):super(FindStaffStartState()){
+  FindStaffBloc({required this.apiRepository}) : super(FindStaffStartState()) {
     on<FindStaffGetUserAddressEvent>(_mapGetListUserAddressEventToState);
     on<FindStaffScreenGetStaffEvent>(_mapStartedEventToState);
   }
   FutureOr<void> _mapGetListUserAddressEventToState(
-      FindStaffGetUserAddressEvent event,
-      Emitter<FindStaffState> emit) async {
+    FindStaffGetUserAddressEvent event,
+    Emitter<FindStaffState> emit,
+  ) async {
     isLoading = true;
     //emit(FindStaffStartState());
     final DefaultResponse result = await apiRepository.getListUserAddress();
@@ -32,13 +33,17 @@ class FindStaffBloc extends Bloc<FindStaffEvent, FindStaffState>{
     isLoading = false;
     emit(FindStaffStartState());
   }
-  FutureOr<void> _mapStartedEventToState(FindStaffScreenGetStaffEvent event,
-      Emitter<FindStaffState> emit) async {
+
+  FutureOr<void> _mapStartedEventToState(
+    FindStaffScreenGetStaffEvent event,
+    Emitter<FindStaffState> emit,
+  ) async {
     isLoading = true;
     emit(FindStaffStartState());
 
-    final res = await apiRepository
-        .getListStaffByDistance(event.staffByDistanceRequest);
+    final res = await apiRepository.getListStaffByDistance(
+      event.staffByDistanceRequest,
+    );
     if (res.data != null && res.status == HttpStatus.ok) {
       staffsInfo = res.data!;
       //add(SearchStaffScreenGetTaskEvent());

@@ -18,20 +18,20 @@ class ProgressModel {
   String? updatedAt;
 
   factory ProgressModel.fromJson(Map<String, dynamic> json) => ProgressModel(
-        id: Parse.toNumValue(json["id"]),
-        taskId: Parse.toNumValue(json["task_id"]),
-        userId: Parse.toNumValue(json["user_id"]),
-        des: json["des"],
-        createdAt: json["created_at"],
-        updatedAt: json["updated_at"],
-      );
+    id: Parse.toNumValue(json["id"]),
+    taskId: Parse.toNumValue(json["task_id"]),
+    userId: Parse.toNumValue(json["user_id"]),
+    des: json["des"],
+    createdAt: json["created_at"],
+    updatedAt: json["updated_at"],
+  );
 
   Map<String, dynamic> toJson() => {
-        "id": id,
-        "task_id": taskId,
-        "user_id": userId,
-        "des": des,
-        "created_at": createdAt,
-        "updated_at": updatedAt,
-      };
+    "id": id,
+    "task_id": taskId,
+    "user_id": userId,
+    "des": des,
+    "created_at": createdAt,
+    "updated_at": updatedAt,
+  };
 }

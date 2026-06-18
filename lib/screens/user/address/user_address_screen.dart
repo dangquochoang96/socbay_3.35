@@ -39,8 +39,8 @@ class _UserAddressScreenState extends State<UserAddressScreen> {
     _eventBusStream = App.instance.eventBus
         .on<EventBusReloadUserAddressEvent>()
         .listen((event) {
-      _bloc.add(UserAddressScreenGetAddressEvent());
-    });
+          _bloc.add(UserAddressScreenGetAddressEvent());
+        });
   }
 
   @override
@@ -52,11 +52,13 @@ class _UserAddressScreenState extends State<UserAddressScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<UserAddressScreenBloc, UserAddressScreenState>(
-        builder: _builder, listener: _listener);
+      builder: _builder,
+      listener: _listener,
+    );
   }
 
   void _listener(BuildContext context, UserAddressScreenState state) {
-    if(_bloc.isChange){
+    if (_bloc.isChange) {
       // Navigator.pushNamed(context, Routes.serviceScreen, arguments: {
       //   "index": "",
       //   "listService": _homeBloc.services,
@@ -68,8 +70,17 @@ class _UserAddressScreenState extends State<UserAddressScreen> {
   }
 
   Widget _builder(BuildContext context, UserAddressScreenState state) {
-    return WillPopScope(
-      onWillPop: _onWillPop,
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+
+        final shouldPop = await _onWillPop();
+
+        if (shouldPop && context.mounted) {
+          Navigator.of(context).pop();
+        }
+      },
       child: Scaffold(
         appBar: MyAppBar(
           title: "Địa chỉ của tôi",
@@ -94,11 +105,15 @@ class _UserAddressScreenState extends State<UserAddressScreen> {
                 ),
                 if (_bloc.listUserAddress.length <= 10)
                   Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: paddingHorizontal),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: paddingHorizontal,
+                    ),
                     child: DefaultOutlinedButton(
                       onPressed: () {
-                        Navigator.pushNamed(context, Routes.addUserAddressScreen);
+                        Navigator.pushNamed(
+                          context,
+                          Routes.addUserAddressScreen,
+                        );
                       },
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -107,10 +122,7 @@ class _UserAddressScreenState extends State<UserAddressScreen> {
                             "Thêm địa chỉ mới",
                             style: TextStyle(color: ColorUtil.bangladeshGreen),
                           ),
-                          Icon(
-                            Icons.add,
-                            color: ColorUtil.bangladeshGreen,
-                          ),
+                          Icon(Icons.add, color: ColorUtil.bangladeshGreen),
                         ],
                       ),
                     ),
@@ -164,7 +176,9 @@ class _UserAddressScreenState extends State<UserAddressScreen> {
           width: double.infinity,
           color: Colors.transparent,
           padding: const EdgeInsets.symmetric(
-              horizontal: paddingHorizontal, vertical: 8),
+            horizontal: paddingHorizontal,
+            vertical: 8,
+          ),
           child: Row(
             children: [
               Expanded(
@@ -183,7 +197,7 @@ class _UserAddressScreenState extends State<UserAddressScreen> {
               ),
               const SizedBox(width: 16),
               if (item.isDefaultAddress())
-                const Icon(Icons.check, color: ColorUtil.bangladeshGreen)
+                const Icon(Icons.check, color: ColorUtil.bangladeshGreen),
             ],
           ),
         ),
@@ -206,8 +220,11 @@ class _UserAddressScreenState extends State<UserAddressScreen> {
         },
       );
     } else if (direction == DismissDirection.startToEnd) {
-      Navigator.pushNamed(context, Routes.addUserAddressScreen,
-          arguments: item);
+      Navigator.pushNamed(
+        context,
+        Routes.addUserAddressScreen,
+        arguments: item,
+      );
     }
   }
 

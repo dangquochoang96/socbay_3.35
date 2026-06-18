@@ -1,4 +1,3 @@
-
 abstract class ServiceScreenState {
   const ServiceScreenState();
 }

@@ -47,7 +47,6 @@ class DefaultFirebaseOptions {
     projectId: 'socbay-9e758',
     storageBucket: 'socbay-9e758.firebasestorage.app',
   );
-
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyD9i9-7wHC6iCRnhUjavEu93P0JQpEDMYc',
     appId: '1:74379867334:ios:9052834f80a0011b2193c7',
@@ -56,7 +55,6 @@ class DefaultFirebaseOptions {
     storageBucket: 'socbay-9e758.firebasestorage.app',
     iosBundleId: 'com.example.socbay',
   );
-
   static const FirebaseOptions web = FirebaseOptions(
     apiKey: 'AIzaSyAi2l2Ckp0GNwU6Zp357sxi9JfYRAuxDf8',
     appId: '1:74379867334:web:e31633cd217d12d92193c7',
@@ -85,5 +83,4 @@ class DefaultFirebaseOptions {
     storageBucket: 'socbay-9e758.firebasestorage.app',
     measurementId: 'G-94SV6C02ED',
   );
-
 }

@@ -43,7 +43,9 @@ class _ProductCategoryScreenState extends State<ProductCategoryScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<ProductCategoryScreenBloc, ProductCategoryScreenState>(
-        builder: _builder, listener: listener);
+      builder: _builder,
+      listener: listener,
+    );
   }
 
   void listener(BuildContext context, ProductCategoryScreenState state) {}
@@ -76,20 +78,24 @@ class _ProductCategoryScreenState extends State<ProductCategoryScreen> {
       if (_bloc.listProductCategoryModel.length - index * 2 <= 2) {
         rowsItem = _bloc.listProductCategoryModel.sublist(index * 2);
       } else {
-        rowsItem =
-            _bloc.listProductCategoryModel.sublist(index * 2, index * 2 + 2);
+        rowsItem = _bloc.listProductCategoryModel.sublist(
+          index * 2,
+          index * 2 + 2,
+        );
       }
     }
 
     return Container(
       margin: const EdgeInsets.symmetric(
-          horizontal: paddingHorizontal, vertical: paddingVertical),
+        horizontal: paddingHorizontal,
+        vertical: paddingVertical,
+      ),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: const BorderRadius.all(Radius.circular(10.0)),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.4),
+            color: Colors.grey.withValues(alpha: 0.4),
             spreadRadius: 5,
             blurRadius: 7,
             offset: const Offset(0, 2), // changes position of shadow
@@ -114,7 +120,7 @@ class _ProductCategoryScreenState extends State<ProductCategoryScreen> {
                 return _itemProduct(productCategoryInfo);
               },
             ),
-          )
+          ),
         ],
       ),
     );
@@ -123,8 +129,11 @@ class _ProductCategoryScreenState extends State<ProductCategoryScreen> {
   Widget _itemProduct(ProductCategory productCategoryInfo) {
     return GestureDetector(
       onTap: () {
-        Navigator.pushNamed(context, Routes.productScreen,
-            arguments: {'cateId': productCategoryInfo.id,"is_back": true});
+        Navigator.pushNamed(
+          context,
+          Routes.productScreen,
+          arguments: {'cateId': productCategoryInfo.id, "is_back": true},
+        );
       },
       child: Card(
         elevation: 2,
@@ -134,21 +143,22 @@ class _ProductCategoryScreenState extends State<ProductCategoryScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               ImageUtil.loadNetWorkImage(
-                  url: productCategoryInfo.image != null
-                      ? "$protocol${AppConfig.instance.values.apiUrl}${productCategoryInfo.image!}"
-                      : "",
-                  fit: BoxFit.contain,
-                  height: context.width / 2.8,
-                  // width: double.infinity
+                url: productCategoryInfo.image != null
+                    ? "$protocol${AppConfig.instance.values.apiUrl}${productCategoryInfo.image!}"
+                    : "",
+                fit: BoxFit.contain,
+                height: context.width / 2.8,
+                // width: double.infinity
               ),
               const SizedBox(height: 8),
               Text(
                 productCategoryInfo.name ?? "",
                 maxLines: 2,
                 style: const TextStyle(
-                    overflow: TextOverflow.ellipsis,
-                    fontSize: 13,
-                    color: ColorUtil.bangladeshGreen),
+                  overflow: TextOverflow.ellipsis,
+                  fontSize: 13,
+                  color: ColorUtil.bangladeshGreen,
+                ),
               ),
               const SizedBox(height: 5),
             ],

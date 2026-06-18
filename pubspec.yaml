@@ -1,7 +1,7 @@
 name: socbay
 description: "A new Flutter project."
 publish_to: "none"
-version: 0.1.0
+version: 3.0.0+1110
 
 environment:
   sdk: ^3.9.2
@@ -30,6 +30,7 @@ dependencies:
   carousel_slider: ^5.1.1
   image_picker: ^1.2.1
   permission_handler: ^12.0.1
+  mobile_scanner: ^7.1.4
   share_plus: ^12.0.1
   uuid: ^4.5.2
   url_launcher: ^6.1.5
@@ -74,6 +75,7 @@ dependencies:
   meta: any
   sqflite: any
   path_provider: any
+  fluttertoast: ^9.0.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -81,6 +83,12 @@ dev_dependencies:
   build_runner: ^2.3.3
   floor_generator: ^1.4.2
   change_app_package_name: ^1.0.0
+  flutter_launcher_icons: ^0.14.4
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/newSocbayLogo.jpg"
 
 dependency_overrides:
   intl: ^0.20.2

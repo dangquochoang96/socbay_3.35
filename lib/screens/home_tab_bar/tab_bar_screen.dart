@@ -32,8 +32,8 @@ class _TabBarScreenState extends State<TabBarScreen> with RouteAware {
     _goToSearchStream = App.instance.eventBus
         .on<EventBusFinishSearchStaffEvent>()
         .listen((event) {
-      _onItemTapped(2);
-    });
+          _onItemTapped(2);
+        });
     super.initState();
   }
 

@@ -33,7 +33,7 @@ class DefaultResponse<T> extends BaseResponse {
       data = json['data'] as T;
     }
     if (json['message'] != null) {
-      message = json['message'] ;
+      message = json['message'];
     }
     // if (json['total'] != null) {
     //   total = Parse.toIntValue(json['total']);
@@ -42,8 +42,8 @@ class DefaultResponse<T> extends BaseResponse {
 
   DefaultResponse.fromJson(Map<dynamic, dynamic> json) {
     data = json['data'] as T;
-    message = json['message'] as String;
-    status = Parse.toIntValue(json['code']);
+    message = json['message']?.toString();
+    status = Parse.toIntValue(json['status'] ?? json['code']);
     //total = Parse.toIntValue(json['total']);
   }
 
@@ -54,30 +54,22 @@ class DefaultResponse<T> extends BaseResponse {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      ApiKeyParam.result: data,
-      'code': status,
-    };
+    return {ApiKeyParam.result: data, 'code': status};
   }
 }
+
 class Error {
   String message = '';
   int code = 0;
 
-  Error({
-    required this.message,
-    code = 0,
-  });
+  Error({required this.message, code = 0});
 
   Error.fromJson(Map<String, dynamic> json) {
     message = json['message'] ?? '';
-    code = json['code'] ?? 0;
+    code = json['status'] ?? json['code'] ?? 0;
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'message': message,
-      'code': code,
-    };
+    return {'message': message, 'code': code};
   }
 }

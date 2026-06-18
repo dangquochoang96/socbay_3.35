@@ -53,18 +53,23 @@ class _AddUserAddressScreenState extends State<AddUserAddressScreen> {
     }
     _bloc = BlocProvider.of(context);
     _nameTextController = TextEditingController(
-        text: userAddress != null ? userAddress?.name : _bloc.user?.username);
+      text: userAddress != null ? userAddress?.name : _bloc.user?.username,
+    );
     _phoneTextController = TextEditingController(
-        text: userAddress != null ? userAddress?.phone : _bloc.user?.phone);
+      text: userAddress != null ? userAddress?.phone : _bloc.user?.phone,
+    );
     _addressTextController = TextEditingController(
-        text: userAddress != null ? userAddress?.address : "");
+      text: userAddress != null ? userAddress?.address : "",
+    );
     _addressDetailTextController = TextEditingController();
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<UserAddressScreenBloc, UserAddressScreenState>(
-        builder: _builder, listener: _listener);
+      builder: _builder,
+      listener: _listener,
+    );
   }
 
   void _listener(BuildContext context, UserAddressScreenState state) {
@@ -97,7 +102,9 @@ class _AddUserAddressScreenState extends State<AddUserAddressScreen> {
         isLoading: _bloc.isLoading,
         child: ListView(
           padding: const EdgeInsets.symmetric(
-              horizontal: paddingHorizontal, vertical: paddingVertical),
+            horizontal: paddingHorizontal,
+            vertical: paddingVertical,
+          ),
           children: [
             _buildTextField(
               controller: _nameTextController,
@@ -121,7 +128,7 @@ class _AddUserAddressScreenState extends State<AddUserAddressScreen> {
               onPressed: _onSubmitAddress,
               text: userAddress != null ? "Sửa" : "Thêm",
               enabled: isAllowSubmit(),
-            )
+            ),
           ],
         ),
       ),
@@ -137,9 +144,9 @@ class _AddUserAddressScreenState extends State<AddUserAddressScreen> {
     return GestureDetector(
       onTap: isAddress
           ? () async {
-              await Navigator.of(context)
-                  .pushNamed(Routes.mapScreen)
-                  .then((value) {
+              await Navigator.of(context).pushNamed(Routes.mapScreen).then((
+                value,
+              ) {
                 if (value == null) return;
                 Map<String, dynamic>? result = value as Map<String, dynamic>?;
                 if (result != null) {
@@ -160,8 +167,9 @@ class _AddUserAddressScreenState extends State<AddUserAddressScreen> {
           onChanged: (String text) {
             setState(() {});
           },
-          keyboardType:
-              isPhoneNumber ? TextInputType.phone : TextInputType.text,
+          keyboardType: isPhoneNumber
+              ? TextInputType.phone
+              : TextInputType.text,
           maxLength: isPhoneNumber ? 10 : null,
           hintText: hintText,
           label: Text(hintText),
@@ -195,29 +203,31 @@ class _AddUserAddressScreenState extends State<AddUserAddressScreen> {
       _bloc.add(
         UserAddressScreenCreateUserAddressEvent(
           UserAddressRequest(
-              name: _nameTextController.text.trim(),
-              phone: _phoneTextController.text.trim(),
-              address: address,
-              lat: _lat ?? -1,
-              lng: _lng ?? -1,
-              isDefault: 0,
-              cityCode: "AGG",
-              stateCode: "dt"),
+            name: _nameTextController.text.trim(),
+            phone: _phoneTextController.text.trim(),
+            address: address,
+            lat: _lat ?? -1,
+            lng: _lng ?? -1,
+            isDefault: 0,
+            cityCode: "AGG",
+            stateCode: "dt",
+          ),
         ),
       );
     } else {
       _bloc.add(
         UserAddressScreenUpdateAddressEvent(
           UserAddressRequest(
-              name: _nameTextController.text.trim(),
-              phone: _phoneTextController.text.trim(),
-              address: address,
-              lat: _lat ?? -1,
-              lng: _lng ?? -1,
-              isDefault: userAddress?.isDefault ?? 0,
-              cityCode: "AGG",
-              stateCode: "dt",
-              id: userAddress?.id ?? ""),
+            name: _nameTextController.text.trim(),
+            phone: _phoneTextController.text.trim(),
+            address: address,
+            lat: _lat ?? -1,
+            lng: _lng ?? -1,
+            isDefault: userAddress?.isDefault ?? 0,
+            cityCode: "AGG",
+            stateCode: "dt",
+            id: userAddress?.id ?? "",
+          ),
         ),
       );
     }

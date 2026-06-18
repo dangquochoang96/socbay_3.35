@@ -1,8 +1,10 @@
 abstract class CoreReplatementServiceEvent {
   const CoreReplatementServiceEvent();
 }
-class CoreReplatementServiceStartEvent extends CoreReplatementServiceEvent{}
-class OrderFeedbackTaskProcessedEvent extends CoreReplatementServiceEvent{
+
+class CoreReplatementServiceStartEvent extends CoreReplatementServiceEvent {}
+
+class OrderFeedbackTaskProcessedEvent extends CoreReplatementServiceEvent {
   final int taskId;
   final String des;
   final double rating;

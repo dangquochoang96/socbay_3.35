@@ -92,9 +92,11 @@ class _TextFiledDebounceState extends State<TextFieldDefault> {
         if (widget.onChangedDebounce != null) {
           if (_debounce?.isActive ?? false) _debounce?.cancel();
           _debounce = Timer(
-              Duration(milliseconds: widget.millisecondDurationDebounce), () {
-            widget.onChangedDebounce!(s);
-          });
+            Duration(milliseconds: widget.millisecondDurationDebounce),
+            () {
+              widget.onChangedDebounce!(s);
+            },
+          );
         }
       },
       onSubmitted: widget.onSubmitted,
@@ -103,7 +105,8 @@ class _TextFiledDebounceState extends State<TextFieldDefault> {
         label: widget.label,
         counterText: '',
         fillColor: ColorUtil.transparent,
-        contentPadding: widget.contentPadding ??
+        contentPadding:
+            widget.contentPadding ??
             const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
         disabledBorder: _outlineInputBorder,
         border: _outlineInputBorder,
@@ -112,8 +115,10 @@ class _TextFiledDebounceState extends State<TextFieldDefault> {
           borderSide: const BorderSide(width: 1, color: ColorUtil.primary),
         ),
         filled: true,
-        hintStyle:
-            const TextStyle(color: ColorUtil.silverChalice, fontSize: 14),
+        hintStyle: const TextStyle(
+          color: ColorUtil.silverChalice,
+          fontSize: 14,
+        ),
         hintText: widget.hintText,
         suffixIcon: widget.suffixIcon,
         prefixIcon: widget.prefixIcon,

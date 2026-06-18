@@ -37,160 +37,189 @@ class _FeedbackScreenState extends State<DetailFeedbackScreen>
   }
 
   @override
-  void dispose(){
+  void dispose() {
     _bloc.close();
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<FeedbackScreenBloc, FeedbackScreenState>(
-        builder: _builder, listener: _listener);
+      builder: _builder,
+      listener: _listener,
+    );
   }
 
   void _listener(BuildContext context, FeedbackScreenState state) {
-    if(state is FeedbackUpdateSuccessState){
+    if (state is FeedbackUpdateSuccessState) {
       context.showSnackBar("Cập nhật thành công!");
       Navigator.pushNamed(
-          context, Routes.staffFeedbackScreen,arguments: {"fbId": "0", "orderId": "0"});
+        context,
+        Routes.staffFeedbackScreen,
+        arguments: {"fbId": "0", "orderId": "0"},
+      );
     }
-    if(state is FeedbackUpdateErrorState){
+    if (state is FeedbackUpdateErrorState) {
       context.showSnackBar("Có lỗi hệ thống xảy ra!");
     }
   }
 
   Widget _builder(BuildContext context, FeedbackScreenState state) {
     return Scaffold(
-        appBar: MyAppBar(
-          isBackNavigation: true,
-          title: 'Góp ý và khiếu nại',
-          centerTitle: true,
+      appBar: MyAppBar(
+        isBackNavigation: true,
+        title: 'Góp ý và khiếu nại',
+        centerTitle: true,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+        child: Column(
+          children: [
+            _buildTable(_bloc.feedbackDetail),
+            const SizedBox(height: 5),
+            const Text(
+              'Video - Hình ảnh:',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            _buildMediaRow(),
+            Row(
+              children: [
+                _buildButton(
+                  text: "Xem chi tiết đơn hàng",
+                  isPositive: true,
+                  action: () {
+                    Navigator.pushNamed(
+                      context,
+                      Routes.coreReplacementServiceScreen,
+                      arguments: {
+                        "orderDetail": OrderDetailModel(
+                          id: int.parse(
+                            _bloc.feedbackDetail.orderId.toString(),
+                          ),
+                        ),
+                      },
+                    );
+                  },
+                ),
+              ],
+            ),
+          ],
         ),
-        body: Padding(
-          padding:const EdgeInsets.symmetric(vertical: 16,horizontal: 16),
-          child: Column(
-            children: [
-              _buildTable(_bloc.feedbackDetail),
-              const SizedBox(height: 5),
-              const Text(
-                'Video - Hình ảnh:',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              _buildMediaRow(),
-              Row(
-                children: [
-                  _buildButton(
-                      text: "Xem chi tiết đơn hàng",
-                      isPositive: true,
-                      action: () {
-                        Navigator.pushNamed(
-                            context, Routes.coreReplacementServiceScreen,
-                            arguments: {"orderDetail": OrderDetailModel(id: int.parse(_bloc.feedbackDetail.orderId.toString()))});
-                      }),
-                ],
-              )
-            ],
-          ),
-        )
+      ),
     );
   }
 
   Widget _buildButton({text, isPositive, action}) {
     return Expanded(
-        child: isPositive
-            ? _button(isPositive, action, text)
-            : ElevatedButton(
-                style: ButtonStyle(
-                  padding: WidgetStateProperty.all<EdgeInsets>(
-                      const EdgeInsets.symmetric(vertical: 10)),
-                  backgroundColor:
-                      WidgetStateProperty.all<Color>(ColorUtil.white),
-                  shape: WidgetStateProperty.all<RoundedRectangleBorder>(
-                    RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                      side: const BorderSide(
-                        color: ColorUtil.bangladeshGreen,
-                        width: 2,
-                      ),
+      child: isPositive
+          ? _button(isPositive, action, text)
+          : ElevatedButton(
+              style: ButtonStyle(
+                padding: WidgetStateProperty.all<EdgeInsets>(
+                  const EdgeInsets.symmetric(vertical: 10),
+                ),
+                backgroundColor: WidgetStateProperty.all<Color>(
+                  ColorUtil.white,
+                ),
+                shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+                  RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    side: const BorderSide(
+                      color: ColorUtil.bangladeshGreen,
+                      width: 2,
                     ),
                   ),
                 ),
-                child: Text(
-                  text,
-                  style: const TextStyle(color: ColorUtil.bangladeshGreen),
-                ),
-                onPressed: () {
-                  if (action == null) {
-                    Navigator.pop(context);
-                  } else {
-                    action();
-                  }
-                },
-              ));
+              ),
+              child: Text(
+                text,
+                style: const TextStyle(color: ColorUtil.bangladeshGreen),
+              ),
+              onPressed: () {
+                if (action == null) {
+                  Navigator.pop(context);
+                } else {
+                  action();
+                }
+              },
+            ),
+    );
   }
 
   StatelessWidget _button(isPositive, action, text) {
     return ButtonWidget(
-        color: isPositive ? ColorUtil.bangladeshGreen : Colors.grey,
-        borderRadius: BorderRadius.circular(10),
-        padding: const EdgeInsets.symmetric(vertical: 10.0,horizontal: 3.0),
-        margin:
-            const EdgeInsets.only(left: 10.0),
-        onTap: () {
-          if (action == null) {
-            Navigator.pop(context);
-          } else {
-            action();
-          }
-        },
-        child: Text(
-          text,
-          textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 16, color: Colors.white),
-        ));
+      color: isPositive ? ColorUtil.bangladeshGreen : Colors.grey,
+      borderRadius: BorderRadius.circular(10),
+      padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 3.0),
+      margin: const EdgeInsets.only(left: 10.0),
+      onTap: () {
+        if (action == null) {
+          Navigator.pop(context);
+        } else {
+          action();
+        }
+      },
+      child: Text(
+        text,
+        textAlign: TextAlign.center,
+        style: const TextStyle(fontSize: 16, color: Colors.white),
+      ),
+    );
   }
 
   Widget _buildTable(FeedBackModel? feedBackModel) {
     return Table(
       children: [
         _buildTableRow(
-            title: 'Mã đơn hàng',
-            content: feedBackModel?.orderId,
-            isHighlight: false),
+          title: 'Mã đơn hàng',
+          content: feedBackModel?.orderId,
+          isHighlight: false,
+        ),
         _buildTableRow(
-            title: 'Trạng thái:',
-            content: feedBackModel?.getStatus(),
-            isHighlight: false),
+          title: 'Trạng thái:',
+          content: feedBackModel?.getStatus(),
+          isHighlight: false,
+        ),
         _buildTableRow(
-            title: 'Mô tả:',
-            content: feedBackModel?.description??"",
-            isHighlight: true),
+          title: 'Mô tả:',
+          content: feedBackModel?.description ?? "",
+          isHighlight: true,
+        ),
         _buildTableRow(
-            title: 'Khách hàng:',
-            content: feedBackModel?.customer?.username,
-            isHighlight: true),
+          title: 'Khách hàng:',
+          content: feedBackModel?.customer?.username,
+          isHighlight: true,
+        ),
         _buildTableRow(
-            title: 'Địa chỉ:',
-            content: feedBackModel?.customer?.address,
-            isHighlight: true),
+          title: 'Địa chỉ:',
+          content: feedBackModel?.customer?.address,
+          isHighlight: true,
+        ),
       ],
     );
   }
 
   TableRow _buildTableRow({title, content, isHighlight}) {
-    return TableRow(children: [
-      Container(
-        padding: const EdgeInsets.only(bottom: 5.0),
-        child: Text(
-          title,
-          style: const TextStyle(
-              color: ColorUtil.raisinBlack, fontWeight: FontWeight.bold),
+    return TableRow(
+      children: [
+        Container(
+          padding: const EdgeInsets.only(bottom: 5.0),
+          child: Text(
+            title,
+            style: const TextStyle(
+              color: ColorUtil.raisinBlack,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
         ),
-      ),
-      Text(
-        content ?? "",
-        style: TextStyle(color: isHighlight ? ColorUtil.bangladeshGreen : null),
-      )
-    ]);
+        Text(
+          content ?? "",
+          style: TextStyle(
+            color: isHighlight ? ColorUtil.bangladeshGreen : null,
+          ),
+        ),
+      ],
+    );
   }
 
   Widget _buildMediaRow() {
@@ -217,9 +246,7 @@ class _FeedbackScreenState extends State<DetailFeedbackScreen>
   Widget _buildItemMedia(String url) {
     return Row(
       children: [
-        Stack(
-          children: [_fullScreenHeroWidget(url)],
-        ),
+        Stack(children: [_fullScreenHeroWidget(url)]),
         const SizedBox(width: 5),
       ],
     );
@@ -235,7 +262,10 @@ class _FeedbackScreenState extends State<DetailFeedbackScreen>
           child: ClipRRect(
             borderRadius: BorderRadius.circular(16),
             child: ImageUtil.loadNetWorkImage(
-                url: "$protocol${AppConfig.instance.values.apiUrl}$img", height: 100, fit: BoxFit.contain),
+              url: "$protocol${AppConfig.instance.values.apiUrl}$img",
+              height: 100,
+              fit: BoxFit.contain,
+            ),
             //fit: BoxFit.cover,
           ),
         ),
@@ -243,9 +273,7 @@ class _FeedbackScreenState extends State<DetailFeedbackScreen>
     );
   }
 
-  Future getImage(
-    ImageSource img,
-  ) async {
+  Future getImage(ImageSource img) async {
     if (await Permission.camera.request().isGranted) {
       // if(_listPath.length  >= 4){
       //   context.showSnackBar('Chỉ được chọn tối đa 4 ảnh!');
@@ -278,6 +306,7 @@ class _FeedbackScreenState extends State<DetailFeedbackScreen>
       );
     }
   }
+
   // Widget _buildButtonDialog({isPositive, action, text}) {
   //   return Expanded(child: _button(isPositive, action, text));
   // }

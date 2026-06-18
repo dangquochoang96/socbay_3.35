@@ -31,11 +31,18 @@ class NotificationDetailScreen extends StatelessWidget {
           children: [
             FullScreenWidget(
               child: Hero(
-                tag: notificationResponse.image!=null?'$protocol${AppConfig.instance.values.apiUrl}${notificationResponse.image}': "",
+                tag: notificationResponse.image != null
+                    ? '$protocol${AppConfig.instance.values.apiUrl}${notificationResponse.image}'
+                    : "",
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(32),
                   child: ImageUtil.loadNetWorkImage(
-                      url: notificationResponse.image!=null? '$protocol${AppConfig.instance.values.apiUrl}${notificationResponse.image}':"", height: context.width - paddingHorizontal * 2, fit: BoxFit.contain),
+                    url: notificationResponse.image != null
+                        ? '$protocol${AppConfig.instance.values.apiUrl}${notificationResponse.image}'
+                        : "",
+                    height: context.width - paddingHorizontal * 2,
+                    fit: BoxFit.contain,
+                  ),
                   //fit: BoxFit.cover,
                 ),
               ),
@@ -45,16 +52,17 @@ class NotificationDetailScreen extends StatelessWidget {
               child: Text(
                 notificationResponse.name ?? "",
                 style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 17,
-                    color: ColorUtil.bangladeshGreen),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 17,
+                  color: ColorUtil.bangladeshGreen,
+                ),
               ),
             ),
             const SizedBox(height: 16),
             Html(data: notificationResponse.des ?? ''),
           ],
         ),
-      )
+      ),
     );
   }
 }

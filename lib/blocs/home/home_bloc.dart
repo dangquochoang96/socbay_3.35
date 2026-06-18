@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:bloc/bloc.dart';
 import 'package:socbay/application.dart';
 import 'package:socbay/config/app_config.dart';
+import 'package:socbay/constants/api_endpoints.dart';
 import 'package:socbay/data/model/banner_model.dart';
 import 'package:socbay/data/model/blog_model.dart';
 import 'package:socbay/data/model/home_service_model.dart';
@@ -16,7 +17,7 @@ import 'package:socbay/data/repository/auth/api_repository.dart';
 import 'package:socbay/utils/logger_util.dart';
 import 'home_event.dart';
 import 'home_state.dart';
-import 'package:http/http.dart' as http;
+import 'package:socbay/utils/auth_http.dart' as http;
 
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
   final ApiRepository apiRepository;
@@ -45,7 +46,9 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   }
 
   FutureOr<void> _mapHomeStartedEventToState(
-      HomeStartedEvent event, Emitter<HomeState> emit) async {
+    HomeStartedEvent event,
+    Emitter<HomeState> emit,
+  ) async {
     if (isLoading) return;
     isLoading = true;
     emit(HomeInitialState());
@@ -59,7 +62,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       _mapGetListServiceEventToState(null, emit),
       _mapGetBannerEventToState(null, emit),
       // _mapGetProductsEventToState(null, emit),
-      _mapGetLastReplaceFilterCore()
+      _mapGetLastReplaceFilterCore(),
     ]).then((value) {
       isLoading = false;
       emit(HomeInitialState());
@@ -67,16 +70,20 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   }
 
   Future<void> _mapGetProductsUsertoState(
-      HomeScreenGetUserProductEvent? event, Emitter<HomeState> emit) async {
+    HomeScreenGetUserProductEvent? event,
+    Emitter<HomeState> emit,
+  ) async {
     try {
-      var url = Uri.http(AppConfig.instance.values.apiUrl,
-          "/api/user/listProduct/${App.instance.userApp?.id.toString()}");
+      var url = AppConfig.instance.apiUri(
+        ApiEndpoints.userProducts(App.instance.userApp?.id.toString()),
+      );
       var res = await http.get(url);
       if (res.statusCode == HttpStatus.ok) {
         var l = Map<String, dynamic>.from(json.decode(res.body));
         var m = Map<String, dynamic>.from(l["data"]);
         lstMachine = List<OrderModel>.from(
-            m["listProducts"].map((model) => OrderModel.fromJson(model)));
+          m["listProducts"].map((model) => OrderModel.fromJson(model)),
+        );
       }
     } catch (exception) {
       LoggerUtil.log(exception.toString());
@@ -85,13 +92,15 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
   Future<void> _mapGetSalesIncome() async {
     try {
-      var url = Uri.http(AppConfig.instance.values.apiUrl,
-          "api/order/sales-income/${App.instance.userApp?.id}");
+      var url = AppConfig.instance.apiUri(
+        ApiEndpoints.orderSalesIncome(App.instance.userApp?.id),
+      );
       var res = await http.get(url);
       if (res.statusCode == HttpStatus.ok) {
         var l = Map<String, dynamic>.from(json.decode(res.body));
         staffSalesIncomes = List<StaffSalesIncomeModel>.from(
-            l["data"].map((model) => StaffSalesIncomeModel.fromJson(model)));
+          l["data"].map((model) => StaffSalesIncomeModel.fromJson(model)),
+        );
         totalOrderAll = 0;
         totalPriceAll = 0;
         totalChietKhauAll = 0;
@@ -116,15 +125,22 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   }
 
   Future<void> _mapGetBlogsToState(
-      HomeScreenGetBlogsEvent? event, Emitter<HomeState> emit) async {
+    HomeScreenGetBlogsEvent? event,
+    Emitter<HomeState> emit,
+  ) async {
     try {
-      var url = Uri.http(
-          AppConfig.instance.values.apiUrl, "/api/blog/list", {'page': "0"});
+      final url = Uri.parse(
+        ApiEndpoints.geyserBlogs,
+      ).replace(queryParameters: {'page': '1'});
       var res = await http.get(url);
       if (res.statusCode == HttpStatus.ok) {
-        var l = Map<String, dynamic>.from(json.decode(res.body));
+        var l = Map<String, dynamic>.from(
+          json.decode(utf8.decode(res.bodyBytes)),
+        );
+        final data = Map<String, dynamic>.from(l["data"]);
         blogs = List<BlogModel>.from(
-            l["data"].map((model) => BlogModel.fromJson(model)));
+          data["data"].map((model) => BlogModel.fromJson(model)),
+        );
       }
     } catch (ex) {
       LoggerUtil.error(ex.toString());
@@ -132,16 +148,20 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   }
 
   Future<void> _mapGetListServiceEventToState(
-      HomeScreenGetListServiceEvent? event, Emitter<HomeState> emit) async {
+    HomeScreenGetListServiceEvent? event,
+    Emitter<HomeState> emit,
+  ) async {
     allServices = App.instance.userApp!.isUserCustomer()
         ? HomeServiceModel.serviceList
         : App.instance.userApp!.isUserRole()
-            ? HomeServiceModel.staffServiceList
-            : HomeServiceModel.staffServiceListSale;
+        ? HomeServiceModel.staffServiceList
+        : HomeServiceModel.staffServiceListSale;
   }
 
   Future<void> _mapGetBannerEventToState(
-      HomeScreenGetListBannerEvent? event, Emitter<HomeState> emit) async {
+    HomeScreenGetListBannerEvent? event,
+    Emitter<HomeState> emit,
+  ) async {
     final res = await apiRepository.getBanners();
     if (res.status == HttpStatus.ok && res.data != null) {
       banners = res.data!;
@@ -166,8 +186,9 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
   Future<void> _mapGetLastReplaceFilterCore() async {
     try {
-      var url = Uri.http(AppConfig.instance.values.apiUrl,
-          "api/order/last-replace-filter-core/${App.instance.userApp?.id}");
+      var url = AppConfig.instance.apiUri(
+        ApiEndpoints.orderLastReplaceFilterCore(App.instance.userApp?.id),
+      );
       var res = await http.get(url);
       if (res.statusCode == HttpStatus.ok) {
         var l = json.decode(res.body) as Map<String, dynamic>;

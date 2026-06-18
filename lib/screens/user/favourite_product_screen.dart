@@ -34,7 +34,9 @@ class _FavouriteProductScreenState extends State<FavouriteProductScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<FavouriteProductScreenBloc, FavouriteProductState>(
-        builder: _builder, listener: _listener);
+      builder: _builder,
+      listener: _listener,
+    );
   }
 
   void _listener(BuildContext context, FavouriteProductState state) {}
@@ -50,20 +52,21 @@ class _FavouriteProductScreenState extends State<FavouriteProductScreen> {
         isLoading: _bloc.isLoading,
         child: Visibility(
           visible: _bloc.isLoading || _bloc.listProduct.isNotEmpty,
-          replacement: const Center(
-            child: Text("Trống"),
-          ),
+          replacement: const Center(child: Text("Trống")),
           child: AlignedGridView.count(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: paddingHorizontal, vertical: 20),
-              shrinkWrap: true,
-              mainAxisSpacing: 8,
-              crossAxisSpacing: 8,
-              crossAxisCount: 2,
-              itemCount: _bloc.listProduct.length,
-              itemBuilder: (BuildContext context, int index) {
-                return _buildItemProduct(_bloc.listProduct[index]);
-              }),
+            padding: const EdgeInsets.symmetric(
+              horizontal: paddingHorizontal,
+              vertical: 20,
+            ),
+            shrinkWrap: true,
+            mainAxisSpacing: 8,
+            crossAxisSpacing: 8,
+            crossAxisCount: 2,
+            itemCount: _bloc.listProduct.length,
+            itemBuilder: (BuildContext context, int index) {
+              return _buildItemProduct(_bloc.listProduct[index]);
+            },
+          ),
         ),
       ),
     );
@@ -75,23 +78,29 @@ class _FavouriteProductScreenState extends State<FavouriteProductScreen> {
       child: ButtonWidget(
         padding: const EdgeInsets.all(8),
         onTap: () {
-          Navigator.pushNamed(context, Routes.productDetail,
-              arguments: itemProduct);
+          Navigator.pushNamed(
+            context,
+            Routes.productDetail,
+            arguments: itemProduct,
+          );
         },
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ImageUtil.loadNetWorkImage(
-                url: itemProduct.images?[0].link ?? "",
-                height: context.width * 0.4,
-                width: context.width * 0.4),
+              url: itemProduct.images?[0].link ?? "",
+              height: context.width * 0.4,
+              width: context.width * 0.4,
+            ),
             const SizedBox(height: 8),
             Text(
               itemProduct.name ?? "",
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
-                  fontSize: 13, color: ColorUtil.bangladeshGreen),
+                fontSize: 13,
+                color: ColorUtil.bangladeshGreen,
+              ),
             ),
             const SizedBox(height: 5),
             // Row(

@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:intl/intl.dart';
 import 'package:socbay/application.dart';
 import 'package:socbay/config/app_config.dart';
+import 'package:socbay/constants/api_endpoints.dart';
 import 'package:socbay/data/data_provider/api_manager.dart';
 import 'package:socbay/data/data_provider/base_api.dart';
 import 'package:socbay/data/model/banner_model.dart';
@@ -30,7 +31,7 @@ import 'package:socbay/data/model/user_profile.dart';
 import 'package:socbay/data/response/api_response.dart';
 import 'package:socbay/utils/logger_util.dart';
 
-import 'package:http/http.dart' as http;
+import 'package:socbay/utils/auth_http.dart' as http;
 import 'package:path/path.dart' as path_manager;
 
 class ApiProvider {
@@ -42,11 +43,10 @@ class ApiProvider {
     try {
       var dio = Dio();
       var response = await dio.post(
-          "$protocol${AppConfig.instance.values.apiUrl}/api/user/setOTP",
-          data: {
-            'phone': phoneNumber,
-          },
-          options: Options(contentType: 'application/json'));
+        AppConfig.instance.apiUrl(ApiEndpoints.setOtp),
+        data: {'phone': phoneNumber},
+        options: Options(contentType: 'application/json'),
+      );
       // print(json.decode(response.toString()));
       var res = Map<String, dynamic>.from(jsonDecode(response.toString()));
       // final res = response.data;
@@ -61,30 +61,51 @@ class ApiProvider {
   }
 
   Future<DefaultResponse<LoginResponse>> login(
-      String phone, String password) async {
+    String phone,
+    String password, [
+    String? fcmToken,
+  ]) async {
     try {
+      LoggerUtil.info('login() request phone=$phone', tag: 'ApiProvider');
+      final bodyParams = {
+        "phone": phone,
+        "pass": password,
+        if (fcmToken != null && fcmToken.isNotEmpty) "fcm_token": fcmToken,
+      };
       final Map resJson = await _baseAPI.request(
         manager: ApiManager(ApiType.login),
-        isUseAccessToken: false,
-        bodyParams: {
-          "phone": phone,
-          "pass": password,
-        },
+        bodyParams: bodyParams,
       );
-      final res = DefaultResponse.fromMap(resJson);
-      if (res.message == "success" && res.data != null) {
+      LoggerUtil.info('login() raw response=$resJson', tag: 'ApiProvider');
+      final res = DefaultResponse.fromJson(Map<String, dynamic>.from(resJson));
+      LoggerUtil.info(
+        'login() parsed status=${res.status} message=${res.message} hasData=${res.data != null}',
+        tag: 'ApiProvider',
+      );
+      if (res.status == 1 && res.data != null) {
         final item = LoginResponse.fromJson(res.data);
-        return DefaultResponse(data: item);
+        LoggerUtil.info(
+          'login() parsed loginResponse tokenPresent=${(item.accessToken ?? '').isNotEmpty} userId=${item.user?.id}',
+          tag: 'ApiProvider',
+        );
+        print("login response ${res.data}");
+        return DefaultResponse(data: item, status: 200, message: res.message);
       } else {
+        LoggerUtil.warning(
+          'login() failed status=${res.status} message=${res.message}',
+          tag: 'ApiProvider',
+        );
         return DefaultResponse(status: res.status, message: res.message);
       }
     } catch (e) {
+      LoggerUtil.error('login() exception=$e', tag: 'ApiProvider');
       return DefaultResponse.withError(Error(message: e.toString()));
     }
   }
 
   Future<DefaultResponse> register(
-      RegisterRequestModel registerRequestModel) async {
+    RegisterRequestModel registerRequestModel,
+  ) async {
     try {
       final Map resJson = await _baseAPI.request(
         manager: ApiManager(ApiType.register),
@@ -108,18 +129,21 @@ class ApiProvider {
   }
 
   Future<DefaultResponse<UserProfile>> updateStaff(
-      UpdateStaffRequestModel updateStaffRequestModel) async {
+    UpdateStaffRequestModel updateStaffRequestModel,
+  ) async {
     try {
-      final Map resJson = await _baseAPI
-          .request(manager: ApiManager(ApiType.updateStaff), bodyParams: {
-        "birthday": updateStaffRequestModel.birthday,
-        "address": updateStaffRequestModel.address,
-        "certification": updateStaffRequestModel.certification,
-        "id_card": updateStaffRequestModel.idCard,
-        "id_card_image_front": updateStaffRequestModel.idCardImageFront,
-        "id_card_image_back": updateStaffRequestModel.idCardImageBack,
-        "services": updateStaffRequestModel.services
-      });
+      final Map resJson = await _baseAPI.request(
+        manager: ApiManager(ApiType.updateStaff),
+        bodyParams: {
+          "birthday": updateStaffRequestModel.birthday,
+          "address": updateStaffRequestModel.address,
+          "certification": updateStaffRequestModel.certification,
+          "id_card": updateStaffRequestModel.idCard,
+          "id_card_image_front": updateStaffRequestModel.idCardImageFront,
+          "id_card_image_back": updateStaffRequestModel.idCardImageBack,
+          "services": updateStaffRequestModel.services,
+        },
+      );
       final res = DefaultResponse.fromMap(resJson);
       if (res.status == 200 && res.data != null) {
         final item = UserProfile.fromJson(res.data);
@@ -171,7 +195,8 @@ class ApiProvider {
   }
 
   Future<DefaultResponse<ProductCategory>> getProductCategoryDetail(
-      int id) async {
+    int id,
+  ) async {
     try {
       final Map resJson = await _baseAPI.request(
         manager: ApiManager(
@@ -190,14 +215,13 @@ class ApiProvider {
     }
   }
 
-  Future<DefaultResponse<List<ProductModel>>> getListProduct(
-      {required int isLike}) async {
+  Future<DefaultResponse<List<ProductModel>>> getListProduct({
+    required int isLike,
+  }) async {
     try {
       final Map resJson = await _baseAPI.request(
         manager: ApiManager(ApiType.getProduct),
-        queryParams: {
-          "is_like": isLike,
-        },
+        queryParams: {"is_like": isLike},
       );
       final res = DefaultResponse.fromMap(resJson);
       if (res.status == 200 && res.data != null) {
@@ -221,7 +245,7 @@ class ApiProvider {
         manager: ApiManager(ApiType.getProduct),
         queryParams: {
           //"user_id": App.instance.userApp?.id,
-          "user_id": 2
+          "user_id": 2,
         },
       );
       final res = DefaultResponse.fromMap(resJson);
@@ -241,11 +265,14 @@ class ApiProvider {
   }
 
   Future<DefaultResponse<ProductModel>> getProductDetail(
-      ProductModel productModel) async {
+    ProductModel productModel,
+  ) async {
     try {
       final Map resJson = await _baseAPI.request(
-        manager: ApiManager(ApiType.getProduct,
-            additionalPath: '/${productModel.id}'),
+        manager: ApiManager(
+          ApiType.getProduct,
+          additionalPath: '/${productModel.id}',
+        ),
       );
       final res = DefaultResponse.fromMap(resJson);
       if (res.status == 200 && res.data != null) {
@@ -262,18 +289,20 @@ class ApiProvider {
     try {
       final Map resJson = await _baseAPI.request(
         manager: ApiManager(ApiType.getBlogs),
-        queryParams: {
-          "page": page,
-        },
+        queryParams: {"page": page},
       );
       final res = DefaultResponse.fromMap(resJson);
-      if (res.status == 200 && res.data != null) {
+      if ((res.status == 200 || res.status == 1) && res.data != null) {
         List<BlogModel> list = [];
         for (final item in res.data ?? []) {
           final model = BlogModel.fromJson(item);
           list.add(model);
         }
-        return DefaultResponse(data: list);
+        return DefaultResponse(
+          data: list,
+          status: res.status,
+          message: res.message,
+        );
       } else {
         return DefaultResponse(status: res.status, message: res.message);
       }
@@ -288,13 +317,20 @@ class ApiProvider {
         manager: ApiManager(ApiType.getBanners),
       );
       final res = DefaultResponse.fromMap(resJson);
-      if (res.status == 200 && res.data != null) {
+      if ((resJson['code'] == 1 || res.status == 200) && res.data != null) {
         List<BannerModel> list = [];
-        for (final item in res.data ?? []) {
-          final model = BannerModel.fromJson(item);
+        if (res.data is List) {
+          for (final item in res.data ?? []) {
+            final model = BannerModel.fromJson(item);
+            list.add(model);
+          }
+        } else if (res.data is Map) {
+          final model = BannerModel.fromJson(
+            Map<String, dynamic>.from(res.data as Map),
+          );
           list.add(model);
         }
-        return DefaultResponse(data: list);
+        return DefaultResponse(data: list, status: HttpStatus.ok);
       } else {
         return DefaultResponse(status: res.status, message: res.message);
       }
@@ -323,15 +359,18 @@ class ApiProvider {
     try {
       var dio = Dio();
       var response = await dio.get(
-          "$protocol${AppConfig.instance.values.apiUrl}/api/notify/list",
-          options: Options(contentType: 'application/json'));
+        AppConfig.instance.apiUrl(ApiEndpoints.notificationList),
+        options: Options(contentType: 'application/json'),
+      );
       var res = Map<String, dynamic>.from(jsonDecode(response.toString()));
       // final res = response.data;
       if (res["code"] != null && res["code"] == 1 && res["data"] != null) {
         var response = DefaultResponse(
-            status: res["code"],
-            data: List<NotificationResponse>.from(res["data"]
-                .map((model) => NotificationResponse.fromJson(model))));
+          status: res["code"],
+          data: List<NotificationResponse>.from(
+            res["data"].map((model) => NotificationResponse.fromJson(model)),
+          ),
+        );
         return response;
       } else {
         return DefaultResponse(message: res["message"]);
@@ -341,12 +380,15 @@ class ApiProvider {
     }
   }
 
-  Future<DefaultResponse<List<GiftResponse>>> getGiftsList(
-      {bool isReceiveList = false}) async {
+  Future<DefaultResponse<List<GiftResponse>>> getGiftsList({
+    bool isReceiveList = false,
+  }) async {
     try {
       final Map resJson = await _baseAPI.request(
-        manager: ApiManager(ApiType.getGiftList,
-            additionalPath: isReceiveList ? "/listReceive" : ''),
+        manager: ApiManager(
+          ApiType.getGiftList,
+          additionalPath: isReceiveList ? "/listReceive" : '',
+        ),
       );
       final res = DefaultResponse.fromMap(resJson);
       if (res.status == 200 && res.data != null) {
@@ -366,10 +408,10 @@ class ApiProvider {
 
   Future<DefaultResponse<List<UserProfile>>> getStaffs({int isLike = 0}) async {
     try {
-      final Map resJson = await _baseAPI
-          .request(manager: ApiManager(ApiType.getStaffs), queryParams: {
-        "is_like": isLike,
-      });
+      final Map resJson = await _baseAPI.request(
+        manager: ApiManager(ApiType.getStaffs),
+        queryParams: {"is_like": isLike},
+      );
       final res = DefaultResponse.fromMap(resJson);
       if (res.status == 200 && res.data != null) {
         List<UserProfile> list = [];
@@ -388,12 +430,12 @@ class ApiProvider {
 
   Future<DefaultResponse> uploadImage({required File file}) async {
     try {
-      final FormData formData = FormData.fromMap(
-        {
-          'file': await MultipartFile.fromFile(file.path,
-              filename: path_manager.basename(file.path)),
-        },
-      );
+      final FormData formData = FormData.fromMap({
+        'file': await MultipartFile.fromFile(
+          file.path,
+          filename: path_manager.basename(file.path),
+        ),
+      });
       final Map resJson = await _baseAPI.request(
         manager: ApiManager(ApiType.uploadImage),
         bodyParams: formData,
@@ -410,7 +452,8 @@ class ApiProvider {
   }
 
   Future<DefaultResponse<UserProfile>> updateUserInfo(
-      UserInfoRequest userInfoRequest) async {
+    UserInfoRequest userInfoRequest,
+  ) async {
     try {
       Map<String, dynamic> bodyParams = {};
       bodyParams["username"] = userInfoRequest.username?.isNotEmpty == true
@@ -429,17 +472,20 @@ class ApiProvider {
           ? userInfoRequest.address
           : (App.instance.userApp?.address ?? '');
       bodyParams["birthday"] = userInfoRequest.birthday?.isNotEmpty == true
-          ? DateFormat('yyyy/MM/dd')
-              .format(DateFormat('dd/MM/yyyy').parse(userInfoRequest.birthday!))
+          ? DateFormat(
+              'yyyy/MM/dd',
+            ).format(DateFormat('dd/MM/yyyy').parse(userInfoRequest.birthday!))
           : (App.instance.userApp?.birthday != null
-              ? DateFormat('yyyy/MM/dd').format(DateFormat('dd/MM/yyyy')
-                  .parse(App.instance.userApp!.birthday!))
-              : '');
+                ? DateFormat('yyyy/MM/dd').format(
+                    DateFormat(
+                      'dd/MM/yyyy',
+                    ).parse(App.instance.userApp!.birthday!),
+                  )
+                : '');
       bodyParams["cmt"] = userInfoRequest.cmt?.isNotEmpty == true
           ? userInfoRequest.cmt
           : (App.instance.userApp?.cmt ?? '');
-      var url = Uri.http(
-          AppConfig.instance.values.apiUrl, "/api/user/updateUser", bodyParams);
+      var url = AppConfig.instance.apiUri(ApiEndpoints.updateUser, bodyParams);
       var res = await http.post(url);
       if (res.statusCode == HttpStatus.ok) {
         var response = Map<String, dynamic>.from(json.decode(res.body));
@@ -457,17 +503,18 @@ class ApiProvider {
   }
 
   Future<DefaultResponse<UserProfile>> changePassword(
-      ChangePasswordRequest changePasswordRequest) async {
+    ChangePasswordRequest changePasswordRequest,
+  ) async {
     try {
       var bodyParams = {
-        "password": changePasswordRequest.oldPassword,
+        "old_pass": changePasswordRequest.oldPassword,
         "new_password": changePasswordRequest.password,
         "new_password_confirm": changePasswordRequest.rePassword,
       };
-      var url = Uri.http(
-          AppConfig.instance.values.apiUrl,
-          "/api/user/${App.instance.userApp!.phone}/changePassWord",
-          bodyParams);
+      var url = AppConfig.instance.apiUri(
+        ApiEndpoints.userChangePassword,
+        bodyParams,
+      );
       var res = await http.post(url);
       if (res.statusCode == HttpStatus.ok) {
         var response = Map<String, dynamic>.from(json.decode(res.body));
@@ -477,7 +524,9 @@ class ApiProvider {
           return DefaultResponse(data: UserProfile.fromJson(response["data"]));
         } else {
           return DefaultResponse(
-              status: response["status"], message: response["message"]);
+            status: response["status"],
+            message: response["message"],
+          );
         }
         // if (response["code"] == 1 && response["data"] != null) {
         //   return DefaultResponse(
@@ -491,7 +540,7 @@ class ApiProvider {
 
       // var dio = Dio();
       // var response = await dio.post(
-      //     "$protocol${AppConfig.instance.values.apiUrl}/api/user/${App.instance.userApp!.phone}/changePassWord",
+      //     AppConfig.instance.apiUrl("/user/${App.instance.userApp!.phone}/changePassWord"),
       //     data: bodyParams,
       //     options: Options(contentType: 'application/json'));
       // final res = response.data;
@@ -506,17 +555,19 @@ class ApiProvider {
   }
 
   Future<DefaultResponse> forgotPassword(
-      NewPasswordRequest newPasswordRequest) async {
+    NewPasswordRequest newPasswordRequest,
+  ) async {
     try {
       var dio = Dio();
       var response = await dio.post(
-          "$protocol${AppConfig.instance.values.apiUrl}/api/user/updateUser",
-          data: {
-            "phone": newPasswordRequest.phone,
-            "password": newPasswordRequest.newPassword,
-            "password_confirmation": newPasswordRequest.newPasswordConfirm
-          },
-          options: Options(contentType: 'application/json'));
+        AppConfig.instance.apiUrl(ApiEndpoints.forgotPassword),
+        data: {
+          "phone": newPasswordRequest.phone,
+          "new_password": newPasswordRequest.newPassword,
+          "new_password_confirm": newPasswordRequest.newPasswordConfirm,
+        },
+        options: Options(contentType: 'application/json'),
+      );
       var res = Map<String, dynamic>.from(jsonDecode(response.toString()));
       // final res = response.data;
       if (res["code"] != null && res["code"] == 1 && res["data"] != null) {
@@ -550,8 +601,9 @@ class ApiProvider {
 
   Future<DefaultResponse<List<HomeServiceModel>>> getListService() async {
     try {
-      final Map resJson =
-          await _baseAPI.request(manager: ApiManager(ApiType.getServices));
+      final Map resJson = await _baseAPI.request(
+        manager: ApiManager(ApiType.getServices),
+      );
       final res = DefaultResponse.fromMap(resJson);
       if (res.status == 200 && res.data != null) {
         List<HomeServiceModel> list = [];
@@ -569,25 +621,28 @@ class ApiProvider {
   }
 
   Future<DefaultResponse> createTask(
-      CreateTaskRequest createTaskRequest) async {
+    CreateTaskRequest createTaskRequest,
+  ) async {
     try {
-      final Map resJson = await _baseAPI
-          .request(manager: ApiManager(ApiType.createTask), bodyParams: {
-        "type": createTaskRequest.type,
-        "name": createTaskRequest.name,
-        "des": createTaskRequest.des,
-        "status": createTaskRequest.status,
-        "priority": createTaskRequest.priority,
-        "serviceId": createTaskRequest.serviceId,
-        "timeStart": createTaskRequest.timeStart,
-        "timeEnd": createTaskRequest.timeEnd,
-        "address": createTaskRequest.address,
-        "lat": createTaskRequest.lat,
-        "lng": createTaskRequest.lng,
-        "staffId": createTaskRequest.staffId,
-        "video": createTaskRequest.video,
-        "images": createTaskRequest.images
-      });
+      final Map resJson = await _baseAPI.request(
+        manager: ApiManager(ApiType.createTask),
+        bodyParams: {
+          "type": createTaskRequest.type,
+          "name": createTaskRequest.name,
+          "des": createTaskRequest.des,
+          "status": createTaskRequest.status,
+          "priority": createTaskRequest.priority,
+          "serviceId": createTaskRequest.serviceId,
+          "timeStart": createTaskRequest.timeStart,
+          "timeEnd": createTaskRequest.timeEnd,
+          "address": createTaskRequest.address,
+          "lat": createTaskRequest.lat,
+          "lng": createTaskRequest.lng,
+          "staffId": createTaskRequest.staffId,
+          "video": createTaskRequest.video,
+          "images": createTaskRequest.images,
+        },
+      );
       final res = DefaultResponse.fromMap(resJson);
       if (res.status == 200 && res.data != null) {
         LoggerUtil.log("res.data ${res.data}");
@@ -604,9 +659,7 @@ class ApiProvider {
     try {
       final Map resJson = await _baseAPI.request(
         manager: ApiManager(ApiType.likeProduct),
-        bodyParams: {
-          "product_id": productId,
-        },
+        bodyParams: {"product_id": productId},
         optionalPath: "/${isLike ? "likeProduct" : "unlikeProduct"}",
       );
       final res = DefaultResponse.fromMap(resJson);
@@ -624,9 +677,7 @@ class ApiProvider {
     try {
       final Map resJson = await _baseAPI.request(
         manager: ApiManager(ApiType.exchangeGift),
-        bodyParams: {
-          "gift_id": giftId,
-        },
+        bodyParams: {"gift_id": giftId},
       );
       final res = DefaultResponse.fromMap(resJson);
       if (res.status == 200 && res.data != null) {
@@ -640,14 +691,17 @@ class ApiProvider {
   }
 
   Future<DefaultResponse<List<UserProfile>>> getListStaffByDistance(
-      StaffByDistanceRequest staffByDistanceRequest) async {
+    StaffByDistanceRequest staffByDistanceRequest,
+  ) async {
     try {
-      final Map resJson = await _baseAPI
-          .request(manager: ApiManager(ApiType.staffByDistance), bodyParams: {
-        "lat": staffByDistanceRequest.lat,
-        "lng": staffByDistanceRequest.lng,
-        "distance": staffByDistanceRequest.distance
-      });
+      final Map resJson = await _baseAPI.request(
+        manager: ApiManager(ApiType.staffByDistance),
+        bodyParams: {
+          "lat": staffByDistanceRequest.lat,
+          "lng": staffByDistanceRequest.lng,
+          "distance": staffByDistanceRequest.distance,
+        },
+      );
       final res = DefaultResponse.fromMap(resJson);
       if (res.status == 200 && res.data != null) {
         LoggerUtil.log("res.data ${res.data}");
@@ -687,25 +741,28 @@ class ApiProvider {
   }
 
   Future<DefaultResponse> updateTask(
-      int id, UpdateTaskRequest updateTaskRequest) async {
+    int id,
+    UpdateTaskRequest updateTaskRequest,
+  ) async {
     try {
       final Map resJson = await _baseAPI.request(
-          manager: ApiManager(ApiType.updateTask, additionalPath: '/$id'),
-          bodyParams: {
-            "type": updateTaskRequest.type,
-            "name": updateTaskRequest.name,
-            "des": updateTaskRequest.des,
-            "status": updateTaskRequest.status,
-            "priority": updateTaskRequest.priority,
-            "service_id": updateTaskRequest.serviceId,
-            "time_start": updateTaskRequest.timeStart,
-            "time_end": updateTaskRequest.timeEnd,
-            "staff_id": updateTaskRequest.staffId,
-            "sale_id": updateTaskRequest.saleId,
-            "customer_id": updateTaskRequest.customerId,
-            "order_id": updateTaskRequest.orderId,
-            "products": updateTaskRequest.products
-          });
+        manager: ApiManager(ApiType.updateTask, additionalPath: '/$id'),
+        bodyParams: {
+          "type": updateTaskRequest.type,
+          "name": updateTaskRequest.name,
+          "des": updateTaskRequest.des,
+          "status": updateTaskRequest.status,
+          "priority": updateTaskRequest.priority,
+          "service_id": updateTaskRequest.serviceId,
+          "time_start": updateTaskRequest.timeStart,
+          "time_end": updateTaskRequest.timeEnd,
+          "staff_id": updateTaskRequest.staffId,
+          "sale_id": updateTaskRequest.saleId,
+          "customer_id": updateTaskRequest.customerId,
+          "order_id": updateTaskRequest.orderId,
+          "products": updateTaskRequest.products,
+        },
+      );
       final res = DefaultResponse.fromMap(resJson);
       if (res.status == 200 && res.data != null) {
         return DefaultResponse(data: res.data);
@@ -720,7 +777,9 @@ class ApiProvider {
   Future<DefaultResponse> likeStaff(int id) async {
     try {
       final Map resJson = await _baseAPI.request(
-          manager: ApiManager(ApiType.likeStaff), bodyParams: {"staff_id": id});
+        manager: ApiManager(ApiType.likeStaff),
+        bodyParams: {"staff_id": id},
+      );
       final res = DefaultResponse.fromMap(resJson);
       if (res.status == 200 && res.data != null) {
         return DefaultResponse(data: res.data);
@@ -735,8 +794,9 @@ class ApiProvider {
   Future<DefaultResponse> unLikeStaff(int id) async {
     try {
       final Map resJson = await _baseAPI.request(
-          manager: ApiManager(ApiType.unlikeStaff),
-          bodyParams: {"staff_id": id});
+        manager: ApiManager(ApiType.unlikeStaff),
+        bodyParams: {"staff_id": id},
+      );
       final res = DefaultResponse.fromMap(resJson);
       if (res.status == 200 && res.data != null) {
         return DefaultResponse(data: res.data);
@@ -751,7 +811,8 @@ class ApiProvider {
   Future<DefaultResponse<List<UserAddress>>> getListUserAddress() async {
     try {
       final Map resJson = await _baseAPI.request(
-          manager: ApiManager(ApiType.getListUserAddress));
+        manager: ApiManager(ApiType.getListUserAddress),
+      );
       final res = DefaultResponse.fromMap(resJson);
       if (res.status == 200 && res.data != null) {
         List<UserAddress> list = [];
@@ -769,7 +830,8 @@ class ApiProvider {
   }
 
   Future<DefaultResponse> createUserAddress(
-      UserAddressRequest userAddressRequest) async {
+    UserAddressRequest userAddressRequest,
+  ) async {
     try {
       var dio = Dio();
       var data = {
@@ -787,8 +849,9 @@ class ApiProvider {
 
       if (userAddressRequest.typeStaff == "1") {
         data['type'] = '2';
-        data['birthday'] = DateFormat('yyyy/MM/dd').format(
-            DateFormat('dd/MM/yyyy').parse(userAddressRequest.birthday!));
+        data['birthday'] = DateFormat(
+          'yyyy/MM/dd',
+        ).format(DateFormat('dd/MM/yyyy').parse(userAddressRequest.birthday!));
         // data['id_card_number'] = userAddressRequest.idCard;
         data['cmt'] = userAddressRequest.cmt;
         data['id_card_image_front'] = userAddressRequest.idCardImageFront;
@@ -797,9 +860,10 @@ class ApiProvider {
       }
 
       var response = await dio.post(
-          "$protocol${AppConfig.instance.values.apiUrl}/api/user/register",
-          data: data,
-          options: Options(contentType: 'application/json'));
+        AppConfig.instance.apiUrl(ApiEndpoints.userRegister),
+        data: data,
+        options: Options(contentType: 'application/json'),
+      );
       var res = Map<String, dynamic>.from(jsonDecode(response.toString()));
       print(res);
       if (res["code"] != null && res["code"] == 1 && res["data"] != null) {
@@ -814,7 +878,8 @@ class ApiProvider {
   }
 
   Future<DefaultResponse> updateUserAddress(
-      UserAddressRequest userAddressRequest) async {
+    UserAddressRequest userAddressRequest,
+  ) async {
     try {
       final Map resJson = await _baseAPI.request(
         manager: ApiManager(ApiType.updateUserAddress),
@@ -858,14 +923,13 @@ class ApiProvider {
     }
   }
 
-  Future<DefaultResponse<List<TaskModel>>> getListTask(
-      {required int page}) async {
+  Future<DefaultResponse<List<TaskModel>>> getListTask({
+    required int page,
+  }) async {
     try {
       final Map resJson = await _baseAPI.request(
         manager: ApiManager(ApiType.getListTask),
-        queryParams: {
-          "page": page,
-        },
+        queryParams: {"page": page},
       );
       final res = DefaultResponse.fromMap(resJson);
       if (res.status == 200 && res.data != null) {
@@ -886,7 +950,9 @@ class ApiProvider {
   Future<DefaultResponse<TaskModel>> getTask(int id) async {
     try {
       final Map resJson = await _baseAPI.request(
-          manager: ApiManager(ApiType.getTask), optionalPath: '/$id');
+        manager: ApiManager(ApiType.getTask),
+        optionalPath: '/$id',
+      );
       final res = DefaultResponse.fromMap(resJson);
       if (res.status == 200 && res.data != null) {
         return DefaultResponse(data: TaskModel.fromJson(res.data));
@@ -901,9 +967,10 @@ class ApiProvider {
   Future<DefaultResponse> deleteTask(int id, String name, String des) async {
     try {
       final Map resJson = await _baseAPI.request(
-          manager: ApiManager(ApiType.deleteTask),
-          bodyParams: {'name': name, 'description': des},
-          optionalPath: '/$id');
+        manager: ApiManager(ApiType.deleteTask),
+        bodyParams: {'name': name, 'description': des},
+        optionalPath: '/$id',
+      );
       final res = DefaultResponse.fromMap(resJson);
       if (res.status == 200 && res.data != null) {
         return DefaultResponse(data: res.data);

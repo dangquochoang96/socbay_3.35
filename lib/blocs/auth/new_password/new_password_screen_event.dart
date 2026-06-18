@@ -4,7 +4,7 @@ abstract class NewPasswordScreenEvent {
   const NewPasswordScreenEvent();
 }
 
-class NewPasswordScreenSubmitEvent extends NewPasswordScreenEvent{
+class NewPasswordScreenSubmitEvent extends NewPasswordScreenEvent {
   final NewPasswordRequest newPasswordRequest;
   const NewPasswordScreenSubmitEvent(this.newPasswordRequest);
 }

@@ -66,7 +66,7 @@ class DefaultButton extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: borderRadius ?? BorderRadius.circular(8),
           ),
-          backgroundColor: enabled?color:ColorUtil.silverChalice,
+          backgroundColor: enabled ? color : ColorUtil.silverChalice,
           padding: padding,
         ),
         child: child ?? Text('$text', style: TextStyle(color: textColor)),

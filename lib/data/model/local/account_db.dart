@@ -5,10 +5,7 @@ class AccountDb {
   String username = '';
   String password = '';
 
-  AccountDb({
-    required this.username,
-    required this.password,
-  });
+  AccountDb({required this.username, required this.password});
 
   AccountDb.fromDbMap(Map map) {
     id = map[columnId];

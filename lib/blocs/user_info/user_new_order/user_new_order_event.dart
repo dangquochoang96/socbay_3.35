@@ -22,17 +22,17 @@ class UserCreateOrderEvent extends UserNewOrderEvent {
   List<String>? images;
   String? address;
   UserCreateOrderEvent(
-      this.productId,
-      this.newProductId,
-      this.lstNew,
-      this.lstMaintain,
-      this.total,
-      this.chietKhau,
-      this.subSavePoint,
-      this.totalPay,
-      this.savePoint,
-      this.paymentType,
-      this.images,
+    this.productId,
+    this.newProductId,
+    this.lstNew,
+    this.lstMaintain,
+    this.total,
+    this.chietKhau,
+    this.subSavePoint,
+    this.totalPay,
+    this.savePoint,
+    this.paymentType,
+    this.images,
   );
 }
 

@@ -59,16 +59,22 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<ForgotPasswordScreenBloc, ForgotPasswordScreenState>(
-        builder: _builder, listener: _listener);
+      builder: _builder,
+      listener: _listener,
+    );
   }
 
   void _listener(BuildContext context, ForgotPasswordScreenState state) {
     if (state is CheckUserExistState) {
       if (state.code == "1") {
-        Navigator.pushNamed(context, Routes.verifyOTP, arguments: {
-          "phone": _textController.text.trim(),
-          "type": VerifyOtpType.forgotPassword
-        }).then((_) {
+        Navigator.pushNamed(
+          context,
+          Routes.verifyOTP,
+          arguments: {
+            "phone": _textController.text.trim(),
+            "type": VerifyOtpType.forgotPassword,
+          },
+        ).then((_) {
           _savePhoneNumber(_textController.text.trim());
         });
       } else {
@@ -88,51 +94,56 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   Widget _builder(BuildContext context, ForgotPasswordScreenState state) {
     return SafeArea(
-        child: Scaffold(
-            bottomNavigationBar: const HotlineWidget(),
-            appBar: MyAppBar(
-              isBackNavigation: true,
-              leadColor: ColorUtil.bangladeshGreen,
-              backgroundColor: Colors.white,
-              systemOverlayStyle: systemUiWhiteStyle,
-            ),
-            body: LoadingIndicator(
-              isLoading: isLoading,
-              child: ListView(
-                physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Scaffold(
+        bottomNavigationBar: const HotlineWidget(),
+        appBar: MyAppBar(
+          isBackNavigation: true,
+          leadColor: ColorUtil.bangladeshGreen,
+          backgroundColor: Colors.white,
+          systemOverlayStyle: systemUiWhiteStyle,
+        ),
+        body: LoadingIndicator(
+          isLoading: isLoading,
+          child: ListView(
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            children: [
+              Column(
                 children: [
-                  Column(
-                    children: [
-                      ImageUtil.loadAssetsImage(
-                          fileName: Images.iconApp1, width: 150),
-                      const SizedBox(height: 100),
-                      const Text(
-                        "Quên mật khẩu?",
-                        style: TextStyle(
-                            fontSize: 20,
-                            color: Colors.black54,
-                            fontWeight: MyFontWeight.bold),
-                      ),
-                      const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 16),
-                        child: Text(
-                          "Hãy nhập tài khoản của bạn để tạo lại mật khẩu",
-                          style: TextStyle(color: Colors.black38),
-                        ),
-                      ),
-                      _buildForm(),
-                      const SizedBox(height: 16),
-                      DefaultButton(
-                        width: double.infinity,
-                        onPressed: _onPressSend,
-                        text: "Gửi",
-                      )
-                    ],
+                  ImageUtil.loadAssetsImage(
+                    fileName: Images.iconApp1,
+                    width: 150,
+                  ),
+                  const SizedBox(height: 100),
+                  const Text(
+                    "Quên mật khẩu?",
+                    style: TextStyle(
+                      fontSize: 20,
+                      color: Colors.black54,
+                      fontWeight: MyFontWeight.bold,
+                    ),
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 16),
+                    child: Text(
+                      "Hãy nhập tài khoản của bạn để tạo lại mật khẩu",
+                      style: TextStyle(color: Colors.black38),
+                    ),
+                  ),
+                  _buildForm(),
+                  const SizedBox(height: 16),
+                  DefaultButton(
+                    width: double.infinity,
+                    onPressed: _onPressSend,
+                    text: "Gửi",
                   ),
                 ],
               ),
-            )));
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _buildForm() {
@@ -142,43 +153,55 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       keyboardType: TextInputType.phone,
       maxLength: 10,
       decoration: InputDecoration(
-          counterText: "",
-          floatingLabelBehavior: FloatingLabelBehavior.always,
-          labelStyle: const TextStyle(
-              color: ColorUtil.bangladeshGreen,
-              fontSize: 18,
-              fontWeight: MyFontWeight.bold),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8.0),
-            borderSide:
-                const BorderSide(color: ColorUtil.bangladeshGreen, width: 0.5),
+        counterText: "",
+        floatingLabelBehavior: FloatingLabelBehavior.always,
+        labelStyle: const TextStyle(
+          color: ColorUtil.bangladeshGreen,
+          fontSize: 18,
+          fontWeight: MyFontWeight.bold,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8.0),
+          borderSide: const BorderSide(
+            color: ColorUtil.bangladeshGreen,
+            width: 0.5,
           ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8.0),
-            borderSide:
-                const BorderSide(color: ColorUtil.bangladeshGreen, width: 0.5),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8.0),
+          borderSide: const BorderSide(
+            color: ColorUtil.bangladeshGreen,
+            width: 0.5,
           ),
-          hintText: "Nhập số điện thoại",
-          hintStyle:
-              const TextStyle(color: ColorUtil.silverChalice, fontSize: 13),
-          contentPadding:
-              const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
-          suffixIconConstraints:
-              const BoxConstraints(minHeight: 10, minWidth: 10),
-          suffixIcon: isHaveData
-              ? GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _textController.text = "";
-                    });
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.all(8),
-                    child: ImageUtil.loadAssetsImage(
-                        fileName: Images.iconClose, width: 16, height: 16),
+        ),
+        hintText: "Nhập số điện thoại",
+        hintStyle: const TextStyle(
+          color: ColorUtil.silverChalice,
+          fontSize: 13,
+        ),
+        contentPadding: const EdgeInsets.symmetric(vertical: 5, horizontal: 15),
+        suffixIconConstraints: const BoxConstraints(
+          minHeight: 10,
+          minWidth: 10,
+        ),
+        suffixIcon: isHaveData
+            ? GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _textController.text = "";
+                  });
+                },
+                child: Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: ImageUtil.loadAssetsImage(
+                    fileName: Images.iconClose,
+                    width: 16,
+                    height: 16,
                   ),
-                )
-              : null),
+                ),
+              )
+            : null,
+      ),
     );
   }
 

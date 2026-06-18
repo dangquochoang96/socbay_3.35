@@ -31,104 +31,108 @@ class OrderDetailModel {
   final List<String>? images;
   final String? productId;
   final String? address;
-  OrderDetailModel(
-      {this.id,
-      this.status,
-      this.userId,
-      this.type,
-      this.price,
-      this.chietKhau,
-      this.tichDiem,
-      this.truTichDiem,
-      this.vatAmount,
-      this.ghichu,
-      this.rate,
-      this.comment,
-      this.createdAt,
-      this.updatedAt,
-      this.origin,
-      this.typePayment,
-      this.paymentStatus,
-      this.saleId,
-      this.orderFilterCoresModel,
-      this.tvNextInsteadDate,
-      this.tvInsteadDate,
-      this.dateOrder,
-      this.staff,
-      this.user,
-      this.images,
-      this.productId,
-      this.address});
+  OrderDetailModel({
+    this.id,
+    this.status,
+    this.userId,
+    this.type,
+    this.price,
+    this.chietKhau,
+    this.tichDiem,
+    this.truTichDiem,
+    this.vatAmount,
+    this.ghichu,
+    this.rate,
+    this.comment,
+    this.createdAt,
+    this.updatedAt,
+    this.origin,
+    this.typePayment,
+    this.paymentStatus,
+    this.saleId,
+    this.orderFilterCoresModel,
+    this.tvNextInsteadDate,
+    this.tvInsteadDate,
+    this.dateOrder,
+    this.staff,
+    this.user,
+    this.images,
+    this.productId,
+    this.address,
+  });
 
-  factory OrderDetailModel.fromJson(Map<String, dynamic> json) =>
-      OrderDetailModel(
-          id: json['id'] as int?,
-          status: json['status'] as String?,
-          userId: json['user_id'] as String?,
-          type: json['type'] as String?,
-          price: json['price'] as String?,
-          chietKhau: json['chiet_khau'] as String?,
-          tichDiem: json['tich_diem'] as String?,
-          truTichDiem: json['tru_tich_diem'] as String?,
-          vatAmount: json['vat'] as String?,
-          ghichu: json['ghichu'] as String?,
-          rate: json['rate'] as String?,
-          comment: json['comment'] as String?,
-          createdAt: json['created_at'] as String?,
-          updatedAt: json['updated_at'] as String?,
-          origin: json['origin'] as String?,
-          typePayment: json['type_payment'] as String?,
-          paymentStatus: json['payment_status'] as String?,
-          saleId: json['sale_id'] as String?,
-          address: json['address'] as String?,
-          orderFilterCoresModel: (json['order_filter_core'] as List<dynamic>?)
-              ?.map((e) =>
-                  OrderFilterCoreModel.fromJson(e as Map<String, dynamic>))
-              .toList(),
-          tvNextInsteadDate:
-              getNextInsteadDate(json['order_filter_core'] as List<dynamic>?),
-          tvInsteadDate:
-              getInsteadDate(json['order_filter_core'] as List<dynamic>?),
-          dateOrder: getDateOrder(json['order_filter_core'] as List<dynamic>?),
-          // staff: json["staff"] != null && json["staff"][0]["staff_info"] != null
-          //     ? UserProfile.fromJson(
-          //         json["staff"][0]["staff_info"] as Map<String, dynamic>)
-          //     : null,
-          staff: json["staff"] != null && 
-                 json["staff"] is List && 
-                 json["staff"].isNotEmpty &&
-                 json["staff"][0]["staff_info"] != null
-              ? UserProfile.fromJson(
-                  json["staff"][0]["staff_info"] as Map<String, dynamic>)
-              : null,
-          user: json["user"] != null
-              ? UserProfile.fromJson(json["user"] as Map<String, dynamic>)
-              : null,
-          images: getImages(json["images"] as List<dynamic>?),
-          productId: getProductId(json['order_filter_core'] as List<dynamic>?));
+  factory OrderDetailModel.fromJson(
+    Map<String, dynamic> json,
+  ) => OrderDetailModel(
+    id: json['id'] as int?,
+    status: json['status'] as String?,
+    userId: json['user_id'] as String?,
+    type: json['type'] as String?,
+    price: json['price'] as String?,
+    chietKhau: json['chiet_khau'] as String?,
+    tichDiem: json['tich_diem'] as String?,
+    truTichDiem: json['tru_tich_diem'] as String?,
+    vatAmount: json['vat'] as String?,
+    ghichu: json['ghichu'] as String?,
+    rate: json['rate'] as String?,
+    comment: json['comment'] as String?,
+    createdAt: json['created_at'] as String?,
+    updatedAt: json['updated_at'] as String?,
+    origin: json['origin'] as String?,
+    typePayment: json['type_payment'] as String?,
+    paymentStatus: json['payment_status'] as String?,
+    saleId: json['sale_id'] as String?,
+    address: json['address'] as String?,
+    orderFilterCoresModel: (json['order_filter_core'] as List<dynamic>?)
+        ?.map((e) => OrderFilterCoreModel.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    tvNextInsteadDate: getNextInsteadDate(
+      json['order_filter_core'] as List<dynamic>?,
+    ),
+    tvInsteadDate: getInsteadDate(json['order_filter_core'] as List<dynamic>?),
+    dateOrder: getDateOrder(json['order_filter_core'] as List<dynamic>?),
+    // staff: json["staff"] != null && json["staff"][0]["staff_info"] != null
+    //     ? UserProfile.fromJson(
+    //         json["staff"][0]["staff_info"] as Map<String, dynamic>)
+    //     : null,
+    staff:
+        json["staff"] != null &&
+            json["staff"] is List &&
+            json["staff"].isNotEmpty &&
+            json["staff"][0]["staff_info"] != null
+        ? UserProfile.fromJson(
+            json["staff"][0]["staff_info"] as Map<String, dynamic>,
+          )
+        : null,
+    user: json["user"] != null
+        ? UserProfile.fromJson(json["user"] as Map<String, dynamic>)
+        : null,
+    images: getImages(json["images"] as List<dynamic>?),
+    productId: getProductId(json['order_filter_core'] as List<dynamic>?),
+  );
 
   Map<String, dynamic> toJson() => <String, dynamic>{
-        'id': id,
-        'status': status,
-        'user_id': userId,
-        'type': type,
-        'price': price,
-        'chiet_khau': chietKhau,
-        'tich_diem': tichDiem,
-        'tru_tich_diem': truTichDiem,
-        'vat': vatAmount,
-        'ghichu': ghichu,
-        'rate': rate,
-        'comment': comment,
-        'created_at': createdAt,
-        'updated_at': updatedAt,
-        'origin': origin,
-        'type_payment': typePayment,
-        'payment_status': paymentStatus,
-        'sale_id': saleId,
-        'order_filter_core': orderFilterCoresModel,
-        'address': address
-      };
+    'id': id,
+    'status': status,
+    'user_id': userId,
+    'type': type,
+    'price': price,
+    'chiet_khau': chietKhau,
+    'tich_diem': tichDiem,
+    'tru_tich_diem': truTichDiem,
+    'vat': vatAmount,
+    'ghichu': ghichu,
+    'rate': rate,
+    'comment': comment,
+    'created_at': createdAt,
+    'updated_at': updatedAt,
+    'origin': origin,
+    'type_payment': typePayment,
+    'payment_status': paymentStatus,
+    'sale_id': saleId,
+    'order_filter_core': orderFilterCoresModel,
+    'address': address,
+  };
   static String getNextInsteadDate(List<dynamic>? tvNextInsteadDate) {
     try {
       var lstOrderFilterCoresModel = tvNextInsteadDate

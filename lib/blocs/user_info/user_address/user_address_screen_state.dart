@@ -10,6 +10,7 @@ class UserAddressScreenCreateAddressSuccessState
 
   const UserAddressScreenCreateAddressSuccessState({this.error = ""});
 }
+
 class UserAddressScreenUpdateAddressSuccessState
     extends UserAddressScreenState {
   final String error;

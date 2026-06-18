@@ -1,4 +1,3 @@
-
 abstract class StaffInfoScreenState {
   const StaffInfoScreenState();
 }

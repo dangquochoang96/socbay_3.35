@@ -34,30 +34,30 @@ class _CommentAndRatingListScreenState
   }
 
   @override
-  void dispose(){
+  void dispose() {
     _bloc.close();
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<CommentAndRatingBloc, CommentAndRatingState>(
-        builder: _builder, listener: _listener);
+      builder: _builder,
+      listener: _listener,
+    );
   }
 
   void _listener(BuildContext context, CommentAndRatingState state) {
-    if(state is CommentAndRatingInitState){
+    if (state is CommentAndRatingInitState) {
       // var lst = _bloc.lstOrder?.where((element) => element.rate != null && element.comment!= null && element.comment!.isNotEmpty ).toList();
       // _lstOrder = lst!= null && lst.isNotEmpty? lst:[];
-      _lstOrder = _bloc.lstOrder??[];
+      _lstOrder = _bloc.lstOrder ?? [];
     }
   }
 
   Widget _builder(BuildContext context, CommentAndRatingState state) {
     return Scaffold(
-      appBar: MyAppBar(
-        title: "Đánh giá và nhận xét",
-        isBackNavigation: true,
-      ),
+      appBar: MyAppBar(title: "Đánh giá và nhận xét", isBackNavigation: true),
       body: RefreshIndicator(
         onRefresh: () async {
           _bloc.add(const CommentAndRatingListEvent());
@@ -73,10 +73,13 @@ class _CommentAndRatingListScreenState
                 child: SizedBox(
                   width: MediaQuery.of(context).size.width * 0.8,
                   child: const Divider(
-                      color: Color(0xFFD6D6D6), thickness: 2, height: 30),
+                    color: Color(0xFFD6D6D6),
+                    thickness: 2,
+                    height: 30,
+                  ),
                 ),
               ),
-              _buildStaffCommentAndRatingList()
+              _buildStaffCommentAndRatingList(),
             ],
           ),
         ),
@@ -91,10 +94,7 @@ class _CommentAndRatingListScreenState
         width: MediaQuery.of(context).size.width * 0.8,
         height: MediaQuery.of(context).size.width * 0.2,
         child: Row(
-          children: [
-            _staffImage(),
-            _staffInfo(),
-          ],
+          children: [_staffImage(), _staffInfo()],
           //height: 300,
         ),
       ),
@@ -107,7 +107,13 @@ class _CommentAndRatingListScreenState
       runSpacing: 4.0, // gap between lines
       //direction: Axis.horizontal, // main axis (rows or columns)
       children: [
-        const Padding(padding: EdgeInsets.only(left: 16,top: 10),child: Text("Các nhận xét đánh giá", style: TextStyle(fontWeight: FontWeight.bold,fontSize: 18),),),
+        const Padding(
+          padding: EdgeInsets.only(left: 16, top: 10),
+          child: Text(
+            "Các nhận xét đánh giá",
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+          ),
+        ),
         Column(
           //mainAxisSize: MainAxisSize.max,
           //crossAxisAlignment: CrossAxisAlignment.start,
@@ -120,7 +126,7 @@ class _CommentAndRatingListScreenState
               itemBuilder: _itemBuilder,
               separatorBuilder: _separateView,
             ),
-            const SizedBox(height: 10)
+            const SizedBox(height: 10),
           ],
         ),
       ],
@@ -130,7 +136,8 @@ class _CommentAndRatingListScreenState
   Widget _itemBuilder(BuildContext context, int index) {
     return Wrap(
       children: [
-        Row(mainAxisSize: MainAxisSize.min,
+        Row(
+          mainAxisSize: MainAxisSize.min,
           // onTap: () {
           //   Navigator.pushNamed(context, Routes.coreReplatementServiceScreen,
           //       arguments: {"orderDetail":_bloc.ordersModel[index]});
@@ -138,92 +145,111 @@ class _CommentAndRatingListScreenState
           //   spacing: 8.0, // gap between adjacent chips
           //   runSpacing: 4.0, // gap between lines
           //   direction: Axis.horizontal, // main axis (rows or columns)
-            children: [
-              FullScreenWidget(
-                child: Hero(
-                  tag: "staffImage$index",
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: ImageUtil.loadNetWorkImage(
-                        url: _lstOrder?[index].user?.avatar != null
-                            ? ("$protocol${AppConfig.instance.values.apiUrl}/${_lstOrder![index].user!.avatar!}")
-                            : "",
-                        height: MediaQuery.of(context).size.width * 0.2 - 15,
-                        width: MediaQuery.of(context).size.width * 0.2 - 15,
-                        fit: BoxFit.contain),
-                    //fit: BoxFit.cover,
+          children: [
+            FullScreenWidget(
+              child: Hero(
+                tag: "staffImage$index",
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: ImageUtil.loadNetWorkImage(
+                    url: _lstOrder?[index].user?.avatar != null
+                        ? ("$protocol${AppConfig.instance.values.apiUrl}/${_lstOrder![index].user!.avatar!}")
+                        : "",
+                    height: MediaQuery.of(context).size.width * 0.2 - 15,
+                    width: MediaQuery.of(context).size.width * 0.2 - 15,
+                    fit: BoxFit.contain,
                   ),
+                  //fit: BoxFit.cover,
                 ),
               ),
-              SizedBox(
-                width: MediaQuery.of(context).size.width * 0.75,
-                child: Column(
-                  children: [
-                    Padding(
-                      padding:
-                      const EdgeInsets.symmetric(horizontal: 30, vertical: 3.0),
-                      child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            _lstOrder?[index].user?.username??"",
-                            style:const TextStyle(
-                                fontSize: 15, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(
+              width: MediaQuery.of(context).size.width * 0.75,
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 30,
+                      vertical: 3.0,
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          _lstOrder?[index].user?.username ?? "",
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
                           ),
-                          RatingBarIndicator(
-                            rating: _lstOrder?[index].rate!=null?double.parse(_lstOrder![index].rate!):0.0,
-                            direction: Axis.horizontal,
-                            unratedColor: Colors.amber.withAlpha(60),
-                            itemCount: 5,
-                            itemSize: 11.0,
-                            itemPadding: const EdgeInsets.symmetric(horizontal: 3.0),
-                            itemBuilder: (context, _) => const Icon(
-                              Icons.star,
-                              color: Colors.amber,
-                            ),
+                        ),
+                        RatingBarIndicator(
+                          rating: _lstOrder?[index].rate != null
+                              ? double.parse(_lstOrder![index].rate!)
+                              : 0.0,
+                          direction: Axis.horizontal,
+                          unratedColor: Colors.amber.withAlpha(60),
+                          itemCount: 5,
+                          itemSize: 11.0,
+                          itemPadding: const EdgeInsets.symmetric(
+                            horizontal: 3.0,
                           ),
-                          // Row(
-                          //   children: [
-                          //
-                          //   ],
-                          // ),
-                          const SizedBox(height: 5),
-                          Align(
-                            alignment: Alignment.centerLeft,
-                            child: Text(_lstOrder?[index].comment??"",
-                                overflow: TextOverflow.ellipsis, // default is .clip
-                                maxLines: 2),
-                            // child: Text("ExpansionTile({Key? key, Widget? leading, required Widget title, "
-                            //     "Widget? subtitle, ValueChanged<bool>? onExpansionChanged, "
-                            //     "List<Widget> children = const <Widget>[], Widget? trailing, "
-                            //     "bool initiallyExpanded = false, bool maintainState = false, "
-                            //     "EdgeInsetsGeometry? tilePadding, CrossAxisAlignment? expandedCrossAxisAlignment, "
-                            //     "Alignment? expandedAlignment, EdgeInsetsGeometry? childrenPadding, Color? backgroundColor, "
-                            //     "Color? collapsedBackgroundColor, Color? textColor, Color? collapsedTextColor, "
-                            //     "Color? iconColor, Color? collapsedIconColor, ShapeBorder? shape, ShapeBorder? collapsedShape, "
-                            //     "Clip? clipBehavior, ListTileControlAffinity? controlAffinity, ExpansionTileController? controller",overflow: TextOverflow.ellipsis, // default is .clip
-                            //     maxLines: 2),
+                          itemBuilder: (context, _) =>
+                              const Icon(Icons.star, color: Colors.amber),
+                        ),
+                        // Row(
+                        //   children: [
+                        //
+                        //   ],
+                        // ),
+                        const SizedBox(height: 5),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            _lstOrder?[index].comment ?? "",
+                            overflow: TextOverflow.ellipsis, // default is .clip
+                            maxLines: 2,
                           ),
-                        ],
+                          // child: Text("ExpansionTile({Key? key, Widget? leading, required Widget title, "
+                          //     "Widget? subtitle, ValueChanged<bool>? onExpansionChanged, "
+                          //     "List<Widget> children = const <Widget>[], Widget? trailing, "
+                          //     "bool initiallyExpanded = false, bool maintainState = false, "
+                          //     "EdgeInsetsGeometry? tilePadding, CrossAxisAlignment? expandedCrossAxisAlignment, "
+                          //     "Alignment? expandedAlignment, EdgeInsetsGeometry? childrenPadding, Color? backgroundColor, "
+                          //     "Color? collapsedBackgroundColor, Color? textColor, Color? collapsedTextColor, "
+                          //     "Color? iconColor, Color? collapsedIconColor, ShapeBorder? shape, ShapeBorder? collapsedShape, "
+                          //     "Clip? clipBehavior, ListTileControlAffinity? controlAffinity, ExpansionTileController? controller",overflow: TextOverflow.ellipsis, // default is .clip
+                          //     maxLines: 2),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Align(
+                    alignment: Alignment.bottomRight,
+                    child: TextButton(
+                      onPressed: () {
+                        Navigator.pushNamed(
+                          context,
+                          Routes.coreReplacementServiceScreen,
+                          arguments: {"orderDetail": _lstOrder![index]},
+                        );
+                      },
+                      style: const ButtonStyle(alignment: Alignment.topRight),
+                      child: const Text(
+                        "Xem chi tiết",
+                        style: TextStyle(
+                          color: ColorUtil.bangladeshGreen,
+                          fontSize: 11,
+                          fontStyle: FontStyle.italic,
+                        ),
                       ),
                     ),
-                    Align(
-                      alignment: Alignment.bottomRight,
-                      child: TextButton(
-                        onPressed: () {
-                          Navigator.pushNamed(
-                              context, Routes.coreReplacementServiceScreen,
-                              arguments: {"orderDetail": _lstOrder![index]});
-                        },
-                        style:const ButtonStyle(alignment: Alignment.topRight),
-                        child:const Text("Xem chi tiết",style: TextStyle(color: ColorUtil.bangladeshGreen,fontSize: 11, fontStyle: FontStyle.italic)),),
-                    )
-                  ],
-                ),
+                  ),
+                ],
               ),
-
-            ]),
+            ),
+          ],
+        ),
 
         Align(
           alignment: Alignment.center,
@@ -236,7 +262,7 @@ class _CommentAndRatingListScreenState
               ),
             ),
           ),
-        )
+        ),
       ],
     );
   }
@@ -248,12 +274,13 @@ class _CommentAndRatingListScreenState
         child: ClipRRect(
           borderRadius: BorderRadius.circular(16),
           child: ImageUtil.loadNetWorkImage(
-              url: _bloc.userProfile?.avatar != null
-                  ? ("$protocol${AppConfig.instance.values.apiUrl}/${_bloc.userProfile!.avatar!}")
-                  : "$protocol${AppConfig.instance.values.apiUrl}/product_images/ten-san-pham-55.jpg",
-              height: MediaQuery.of(context).size.width * 0.18,
-              width: MediaQuery.of(context).size.width * 0.18,
-              fit: BoxFit.contain),
+            url: _bloc.userProfile?.avatar != null
+                ? ("$protocol${AppConfig.instance.values.apiUrl}/${_bloc.userProfile!.avatar!}")
+                : "$protocol${AppConfig.instance.values.apiUrl}/product_images/ten-san-pham-55.jpg",
+            height: MediaQuery.of(context).size.width * 0.18,
+            width: MediaQuery.of(context).size.width * 0.18,
+            fit: BoxFit.contain,
+          ),
           //fit: BoxFit.cover,
         ),
       ),
@@ -270,16 +297,18 @@ class _CommentAndRatingListScreenState
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TextButton(
-                onPressed: () {
-                  _goToStaffInfo(_bloc.userProfile!);
-                },
-                child: Text(
-                  _bloc.userProfile?.username ?? "",
-                  style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
-                      color: ColorUtil.bangladeshGreen),
-                )),
+              onPressed: () {
+                _goToStaffInfo(_bloc.userProfile!);
+              },
+              child: Text(
+                _bloc.userProfile?.username ?? "",
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                  color: ColorUtil.bangladeshGreen,
+                ),
+              ),
+            ),
             Padding(
               padding: const EdgeInsets.only(left: 10),
               child: Text(_bloc.userProfile?.phone ?? ""),
@@ -293,16 +322,17 @@ class _CommentAndRatingListScreenState
                   itemCount: 5,
                   itemSize: 13.0,
                   itemPadding: const EdgeInsets.symmetric(horizontal: 4.0),
-                  itemBuilder: (context, _) => const Icon(
-                    Icons.star,
-                    color: Colors.amber,
-                  ),
+                  itemBuilder: (context, _) =>
+                      const Icon(Icons.star, color: Colors.amber),
                 ),
-                Text("(${_bloc.dem.toString()} đánh giá)",style: const TextStyle(fontSize: 11),)
+                Text(
+                  "(${_bloc.dem.toString()} đánh giá)",
+                  style: const TextStyle(fontSize: 11),
+                ),
               ],
-            )
+            ),
           ],
-        )
+        ),
       ],
     );
   }
@@ -310,12 +340,17 @@ class _CommentAndRatingListScreenState
   Widget _separateView(BuildContext context, int index) {
     return const SizedBox(height: 8);
   }
+
   Future _goToStaffInfo(UserProfile staffInfo) async {
-    await Navigator.pushNamed(context, Routes.staffInfoScreen, arguments: {
-      "id": staffInfo.id,
-      "name": staffInfo.username,
-      //"idService": staffInfo,
-      "staffInfo": staffInfo
-    });
+    await Navigator.pushNamed(
+      context,
+      Routes.staffInfoScreen,
+      arguments: {
+        "id": staffInfo.id,
+        "name": staffInfo.username,
+        //"idService": staffInfo,
+        "staffInfo": staffInfo,
+      },
+    );
   }
 }

@@ -48,7 +48,10 @@ class _GiftDetailScreenState extends State<GiftDetailScreen> {
       isLoading: isLoading,
       child: Scaffold(
         appBar: MyAppBar(
-            isBackNavigation: true, centerTitle: true, title: "Chi tiết quà"),
+          isBackNavigation: true,
+          centerTitle: true,
+          title: "Chi tiết quà",
+        ),
         body: SafeArea(
           child: Column(
             children: [
@@ -64,8 +67,9 @@ class _GiftDetailScreenState extends State<GiftDetailScreen> {
                         ClipRRect(
                           borderRadius: BorderRadius.circular(21),
                           child: ImageUtil.loadNetWorkImage(
-                              url: giftResponse?.image ?? '',
-                              height: context.width - paddingHorizontal * 2),
+                            url: giftResponse?.image ?? '',
+                            height: context.width - paddingHorizontal * 2,
+                          ),
                         ),
                         // Positioned(
                         //   bottom: 0,
@@ -95,29 +99,34 @@ class _GiftDetailScreenState extends State<GiftDetailScreen> {
                       child: Text(
                         "${giftResponse?.name}",
                         style: const TextStyle(
-                            color: ColorUtil.bangladeshGreen,
-                            fontSize: 20,
-                            fontWeight: MyFontWeight.bold),
+                          color: ColorUtil.bangladeshGreen,
+                          fontSize: 20,
+                          fontWeight: MyFontWeight.bold,
+                        ),
                       ),
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text("${giftResponse?.point} điểm",
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: ColorUtil.brightYellow)),
+                        Text(
+                          "${giftResponse?.point} điểm",
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: ColorUtil.brightYellow,
+                          ),
+                        ),
                       ],
                     ),
                     const Divider(color: Colors.grey, thickness: 1, height: 40),
                     const Text(
                       "Mô tả:",
                       style: TextStyle(
-                          color: ColorUtil.bangladeshGreen,
-                          fontWeight: MyFontWeight.bold,
-                          fontSize: 18),
+                        color: ColorUtil.bangladeshGreen,
+                        fontWeight: MyFontWeight.bold,
+                        fontSize: 18,
+                      ),
                     ),
                     Html(data: giftResponse?.description),
                   ],
@@ -139,8 +148,9 @@ class _GiftDetailScreenState extends State<GiftDetailScreen> {
                       setState(() {
                         isLoading = true;
                       });
-                      final res =
-                          await apiRepository.exchangeGift(giftResponse!.id!);
+                      final res = await apiRepository.exchangeGift(
+                        giftResponse!.id!,
+                      );
                       if (res.status == HttpStatus.ok) {
                         CustomAlertDialog.show(
                           context,
@@ -150,12 +160,15 @@ class _GiftDetailScreenState extends State<GiftDetailScreen> {
                           leftAction: () {
                             Navigator.pop(context, true);
                             Navigator.pop(context, true);
-                            App.instance.eventBus.fire(EventBusReloadGiftEvent());
+                            App.instance.eventBus.fire(
+                              EventBusReloadGiftEvent(),
+                            );
                           },
                         );
                       } else {
-                        context
-                            .showSnackBarError(res.message ?? "Có lỗi xảy ra");
+                        context.showSnackBarError(
+                          res.message ?? "Có lỗi xảy ra",
+                        );
                       }
                       setState(() {
                         isLoading = false;
@@ -163,7 +176,7 @@ class _GiftDetailScreenState extends State<GiftDetailScreen> {
                     },
                     text: "Đổi quả",
                   ),
-                )
+                ),
             ],
           ),
         ),

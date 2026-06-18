@@ -6,10 +6,12 @@ import 'package:socbay/application.dart';
 import 'package:socbay/blocs/booking/booking_event.dart';
 import 'package:socbay/blocs/booking/booking_state.dart';
 import 'package:socbay/config/app_config.dart';
+import 'package:socbay/constants/api_endpoints.dart';
 import 'package:socbay/utils/logger_util.dart';
 import '../../data/model/task_model.dart';
 import '../../data/repository/auth/api_repository.dart';
-import 'package:http/http.dart' as http;
+import 'package:socbay/utils/auth_http.dart' as http;
+
 class BookingBloc extends Bloc<BookingEvent, BookingState> {
   final ApiRepository apiRepository;
   bool isLoading = false;
@@ -21,19 +23,24 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
   }
 
   FutureOr<void> _mapBookingStartedEventToState(
-      BookingStartedEvent event, Emitter<BookingState> emit) async {
+    BookingStartedEvent event,
+    Emitter<BookingState> emit,
+  ) async {
     isLoading = true;
     emit(BookingInitialState());
-    try{
-      var url = Uri.http(AppConfig.instance.values.apiUrl,"/api/tasks/customer/${App.instance.userApp?.id.toString()}",{
-        'page':"1"
-      });
+    try {
+      var url = AppConfig.instance.apiUri(
+        ApiEndpoints.tasksByCustomer(App.instance.userApp?.id),
+        {'page': "1"},
+      );
       var res = await http.get(url);
       if (res.statusCode == HttpStatus.ok) {
-        var l = Map<String,dynamic>.from(json.decode(res.body));
-        listTaskModel = List<TaskModel>.from(l["data"].map((model)=> TaskModel.fromJson(model)));
+        var l = Map<String, dynamic>.from(json.decode(res.body));
+        listTaskModel = List<TaskModel>.from(
+          l["data"].map((model) => TaskModel.fromJson(model)),
+        );
       }
-    }catch(exception){
+    } catch (exception) {
       LoggerUtil.log(exception.toString());
     }
     // final result = await apiRepository.getListTask();
@@ -45,17 +52,19 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
   }
 
   Future<void> _mapBookingDeleteTaskEventToState(
-      BookingDeleteTaskEvent event, Emitter<BookingState> emit) async {
+    BookingDeleteTaskEvent event,
+    Emitter<BookingState> emit,
+  ) async {
     isLoading = true;
     emit(BookingInitialState());
-    var url = Uri.http(AppConfig.instance.values.apiUrl,"/api/tasks/xoa",{
+    var url = AppConfig.instance.apiUri(ApiEndpoints.taskDelete, {
       'txt-uid': event.id.toString(),
-      'des':event.des
+      'des': event.des,
     });
     var res1 = await http.post(url);
     if (res1.statusCode == HttpStatus.ok) {
-      var l = Map<String,dynamic>.from(json.decode(res1.body));
-      if(l['status'] == 1){
+      var l = Map<String, dynamic>.from(json.decode(res1.body));
+      if (l['status'] == 1) {
         add(BookingStartedEvent());
       }
     }
@@ -65,6 +74,6 @@ class BookingBloc extends Bloc<BookingEvent, BookingState> {
     //   add(BookingStartedEvent());
     // }
     isLoading = false;
-    emit(BookingInitialState()); 
+    emit(BookingInitialState());
   }
 }

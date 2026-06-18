@@ -4,15 +4,15 @@ abstract class HistoryidCScreenEvent {
 
 class HistoryidCScreenStartedEvent extends HistoryidCScreenEvent {}
 
-class HistotyiDCScreenStartEvent extends HistoryidCScreenEvent{
-}
+class HistotyiDCScreenStartEvent extends HistoryidCScreenEvent {}
 
 class HistoryidCScreenTabPressEvent extends HistoryidCScreenEvent {
   final int index;
 
   HistoryidCScreenTabPressEvent(this.index);
 }
-class BookingDeleteidCTaskEvent extends HistoryidCScreenEvent{
+
+class BookingDeleteidCTaskEvent extends HistoryidCScreenEvent {
   final int taskId;
   final String name;
   final String des;

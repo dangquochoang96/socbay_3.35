@@ -1,5 +1,5 @@
-abstract class ProductCategoryScreenState{
+abstract class ProductCategoryScreenState {
   const ProductCategoryScreenState();
 }
 
-class ProductCategoryScreenInitialState extends ProductCategoryScreenState{}
+class ProductCategoryScreenInitialState extends ProductCategoryScreenState {}

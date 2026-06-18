@@ -2,4 +2,7 @@ include: package:flutter_lints/flutter.yaml
 analyzer:
   errors:
     avoid_print: ignore
+    file_names: ignore
     library_private_types_in_public_api: ignore
+    strict_top_level_inference: ignore
+    use_build_context_synchronously: ignore

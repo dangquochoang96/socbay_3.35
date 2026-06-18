@@ -40,7 +40,9 @@ class _FavouriteStaffScreenState extends State<FavouriteStaffScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<FavouriteStaffBloc, FavouriteStaffState>(
-        builder: _builder, listener: _listener);
+      builder: _builder,
+      listener: _listener,
+    );
   }
 
   void _listener(BuildContext context, FavouriteStaffState state) {}
@@ -54,9 +56,7 @@ class _FavouriteStaffScreenState extends State<FavouriteStaffScreen> {
       ),
       body: Visibility(
         visible: _bloc.isLoading || _bloc.favouriteStaffs.isNotEmpty,
-        replacement: const Center(
-          child: Text("Trống"),
-        ),
+        replacement: const Center(child: Text("Trống")),
         child: ListView.separated(
           padding: const EdgeInsets.symmetric(
             horizontal: paddingHorizontal,
@@ -74,66 +74,65 @@ class _FavouriteStaffScreenState extends State<FavouriteStaffScreen> {
     return const SizedBox(height: 12);
   }
 
-
   Widget _itemBuilder(BuildContext context, int index) {
     final UserProfile item = _bloc.favouriteStaffs[index];
-    return  Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: ColorUtil.bangladeshGreen),
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: ColorUtil.bangladeshGreen),
+      ),
+      child: ButtonWidget(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+        borderRadius: BorderRadius.circular(14),
+        onTap: () {
+          Navigator.pushNamed(
+            context,
+            Routes.staffInfoScreen,
+            arguments: {
+              "id": item.id,
+              "name": item.username,
+              "staffInfo": item,
+            },
+          );
+        },
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(50),
+              child: ImageUtil.loadNetWorkImage(
+                url: item.avatar ?? '',
+                height: 50,
+                width: 50,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "${item.username}",
+                    style: const TextStyle(fontWeight: MyFontWeight.bold),
+                  ),
+                  Text("${item.phone}"),
+                ],
+              ),
+            ),
+            const IconButton(
+              onPressed: null, // Disable the message button
+              icon: Icon(Icons.message, color: ColorUtil.bangladeshGreen),
+            ),
+            IconButton(
+              onPressed: () async {
+                final url = "tel:${item.phone}";
+                await launchUrl(Uri.parse(url));
+              },
+              icon: const Icon(Icons.call, color: Colors.red),
+            ),
+          ],
         ),
-        child: ButtonWidget(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-          borderRadius: BorderRadius.circular(14),
-          onTap: () {  Navigator.pushNamed(context, Routes.staffInfoScreen, arguments: {
-            "id": item.id,
-            "name": item.username,
-            "staffInfo": item
-          }); },
-          child: Row(
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(50),
-                child: ImageUtil.loadNetWorkImage(
-                  url: item.avatar ?? '',
-                  height: 50,
-                  width: 50,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "${item.username}",
-                      style: const TextStyle(fontWeight: MyFontWeight.bold),
-                    ),
-                    Text("${item.phone}"),
-                  ],
-                ),
-              ),
-              const IconButton(
-                onPressed: null, // Disable the message button
-                icon: Icon(
-                  Icons.message,
-                  color: ColorUtil.bangladeshGreen,
-                ),
-              ),
-              IconButton(
-                onPressed: () async {
-                  final url = "tel:${item.phone}";
-                  await launchUrl(Uri.parse(url));
-                },
-                icon: const Icon(
-                  Icons.call,
-                  color: Colors.red,
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
+      ),
+    );
   }
 }

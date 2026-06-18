@@ -8,5 +8,4 @@ class MyStyles {
   factory MyStyles.of(BuildContext context) {
     return MyStyles(Theme.of(context));
   }
-
 }

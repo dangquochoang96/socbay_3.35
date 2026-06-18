@@ -14,24 +14,31 @@ class OnePayPaygateView extends StatefulWidget {
   OnPayResult? onPayResult;
   OnPayFail? onPayFail;
 
-  OnePayPaygateView(
-      {super.key, required this.paymentEntity, this.onPayResult, this.onPayFail});
+  OnePayPaygateView({
+    super.key,
+    required this.paymentEntity,
+    this.onPayResult,
+    this.onPayFail,
+  });
 
   @override
   // ignore: no_logic_in_create_state, library_private_types_in_public_api
   _OnePayPaygateViewState createState() => _OnePayPaygateViewState(
-        paymentEntity: paymentEntity,
-        onPayResult: onPayResult,
-        onPayFail: onPayFail,
-      );
+    paymentEntity: paymentEntity,
+    onPayResult: onPayResult,
+    onPayFail: onPayFail,
+  );
 }
 
 class _OnePayPaygateViewState extends State<OnePayPaygateView> {
   OPPaymentEntity paymentEntity;
   OnPayResult? onPayResult;
   OnPayFail? onPayFail;
-  _OnePayPaygateViewState(
-      {required this.paymentEntity, this.onPayResult, this.onPayFail});
+  _OnePayPaygateViewState({
+    required this.paymentEntity,
+    this.onPayResult,
+    this.onPayFail,
+  });
   StreamSubscription<Uri>? _subscription;
   WebViewController? _webViewController;
 
@@ -50,17 +57,18 @@ class _OnePayPaygateViewState extends State<OnePayPaygateView> {
           onPageFinished: (String url) {},
           onWebResourceError: (WebResourceError error) {
             var errorResult = OPErrorResult(
-                errorCase: OnePayErrorCase.NOT_CONNECT_WEB_ONEPAY);
+              errorCase: OnePayErrorCase.NOT_CONNECT_WEB_ONEPAY,
+            );
             onPayFail?.call(errorResult);
           },
           onUrlChange: (UrlChange change) {},
         ),
       );
-    
+
     // Load the initial payment URL
     var url = paymentEntity.createUrlPayment();
     _webViewController!.loadRequest(Uri.parse(url));
-    
+
     _subscription = AppLinks().uriLinkStream.listen((uri) {
       handleDeeplink(uri.toString());
     });
@@ -118,12 +126,7 @@ class _OnePayPaygateViewState extends State<OnePayPaygateView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: WebViewWidget(
-          controller: _webViewController!,
-
-        ),
-      ),
+      body: SafeArea(child: WebViewWidget(controller: _webViewController!)),
     );
   }
 
@@ -136,7 +139,8 @@ class _OnePayPaygateViewState extends State<OnePayPaygateView> {
       isSuccess = true;
     }
     Navigator.pop(context);
-    onPayResult?.call(OPPaymentResult(
+    onPayResult?.call(
+      OPPaymentResult(
         isSuccess: isSuccess,
         amount: queries["vpc_Amount"],
         card: queries["vpc_Card"],
@@ -148,7 +152,9 @@ class _OnePayPaygateViewState extends State<OnePayPaygateView> {
         orderInfo: queries["vpc_OrderInfo"],
         payChannel: queries["vpc_PayChannel"],
         transactionNo: queries["vpc_TransactionNo"],
-        version: queries["vpc_Version"]));
+        version: queries["vpc_Version"],
+      ),
+    );
   }
 
   void openCustomUrl(String url) {
