@@ -5,12 +5,14 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:socbay/blocs/retail_order/retail_order_bloc.dart';
 import 'package:socbay/blocs/retail_order/retail_order_event.dart';
 import 'package:socbay/blocs/retail_order/retail_order_state.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:socbay/application.dart';
+import 'package:socbay/components/qr_reader_view.dart';
 import 'package:socbay/config/app_config.dart';
 import 'package:socbay/constants/api_endpoints.dart';
 import 'package:socbay/constants/constants.dart';
@@ -19,6 +21,7 @@ import 'package:socbay/data/model/user_profile.dart';
 import 'package:socbay/utils/auth_http.dart' as http;
 import 'package:socbay/utils/color_util.dart';
 import 'package:socbay/utils/image_util.dart';
+import 'package:socbay/widgets/dialog/custom_alert_dialog.dart';
 import 'package:socbay/widgets/my_app_bar.dart';
 
 class CreateRetailOrderScreen extends StatefulWidget {
@@ -103,6 +106,74 @@ class _CreateRetailOrderScreenState extends State<CreateRetailOrderScreen> {
     }
   }
 
+  void _addProduct(ProductModel product) {
+    setState(() {
+      final index = _selectedProducts.indexWhere(
+        (p) => p.product.id == product.id,
+      );
+      if (index >= 0) {
+        _selectedProducts[index].quantity++;
+      } else {
+        _selectedProducts.add(
+          SelectedProduct(
+            product: product,
+            quantity: 1,
+            price: product.priceSale ?? product.price ?? 0,
+          ),
+        );
+      }
+    });
+    Fluttertoast.showToast(msg: "Đã thêm ${product.name}");
+  }
+
+  Future<void> _scanBarcode() async {
+    if (await Permission.camera.request().isGranted) {
+      final barcode = await Navigator.push<String>(
+        context,
+        MaterialPageRoute(
+          builder: (context) => QrcodeReaderView(
+            onScan: (result) async {
+              Navigator.pop(context, result);
+            },
+          ),
+        ),
+      );
+      if (barcode != null && barcode.isNotEmpty) {
+        try {
+          final url = AppConfig.instance.apiUri(
+            ApiEndpoints.getProductByBarcode(barcode),
+          );
+          final response = await http.get(url);
+          if (response.statusCode == HttpStatus.ok) {
+            final jsonRes = json.decode(response.body);
+            if (jsonRes['code'] == 1 && jsonRes['data'] != null) {
+              final product = ProductModel.fromJson(jsonRes['data']);
+              _addProduct(product);
+            } else {
+              Fluttertoast.showToast(msg: 'Không tìm thấy sản phẩm với mã này');
+            }
+          } else {
+            Fluttertoast.showToast(msg: 'Lỗi tải thông tin sản phẩm');
+          }
+        } catch (e) {
+          Fluttertoast.showToast(msg: 'Đã xảy ra lỗi: $e');
+        }
+      }
+    } else {
+      CustomAlertDialog.show(
+        context,
+        leftText: "Cài đặt",
+        rightText: "Hủy",
+        isLeftPositive: true,
+        leftAction: () {
+          Navigator.pop(context);
+          openAppSettings();
+        },
+        content: 'Vui lòng cấp quyền truy cập camera.',
+      );
+    }
+  }
+
   void _openProductSearch() {
     showModalBottomSheet(
       context: context,
@@ -122,23 +193,7 @@ class _CreateRetailOrderScreenState extends State<CreateRetailOrderScreen> {
               child: ProductSearchBottomSheet(
                 scrollController: controller,
                 onProductSelected: (product) {
-                  setState(() {
-                    final index = _selectedProducts.indexWhere(
-                      (p) => p.product.id == product.id,
-                    );
-                    if (index >= 0) {
-                      _selectedProducts[index].quantity++;
-                    } else {
-                      _selectedProducts.add(
-                        SelectedProduct(
-                          product: product,
-                          quantity: 1,
-                          price: product.priceSale ?? product.price ?? 0,
-                        ),
-                      );
-                    }
-                  });
-                  Fluttertoast.showToast(msg: "Đã thêm ${product.name}");
+                  _addProduct(product);
                 },
               ),
             );
@@ -171,14 +226,14 @@ class _CreateRetailOrderScreenState extends State<CreateRetailOrderScreen> {
       "user_id": userId,
       "customer_id": userId,
       "sale_id": userId,
-      "status": "0",
+      "status": "1",
       "order_user_name": name,
       "order_user_phone": phone,
       "order_user_address": address,
       "notes": _notesController.text.trim(),
       "order_date": DateFormat("yyyy-MM-ddTHH:mm").format(_selectedDate),
       "products_json": jsonEncode(productsJson),
-      "is_socbay": true,
+      "is_socbay": "true",
     };
 
     BlocProvider.of<RetailOrderBloc>(
@@ -457,17 +512,34 @@ class _CreateRetailOrderScreenState extends State<CreateRetailOrderScreen> {
                   color: ColorUtil.raisinBlack,
                 ),
               ),
-              TextButton.icon(
-                onPressed: _openProductSearch,
-                icon: const Icon(Icons.add_shopping_cart, size: 18),
-                label: const Text("Thêm"),
-                style: TextButton.styleFrom(
-                  foregroundColor: ColorUtil.bangladeshGreen,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
+              Row(
+                children: [
+                  TextButton.icon(
+                    onPressed: _scanBarcode,
+                    icon: const Icon(Icons.qr_code_scanner, size: 18),
+                    label: const Text("Quét Mã"),
+                    style: TextButton.styleFrom(
+                      foregroundColor: ColorUtil.bangladeshGreen,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                    ),
                   ),
-                ),
+                  const SizedBox(width: 8),
+                  TextButton.icon(
+                    onPressed: _openProductSearch,
+                    icon: const Icon(Icons.add_shopping_cart, size: 18),
+                    label: const Text("Thêm"),
+                    style: TextButton.styleFrom(
+                      foregroundColor: ColorUtil.bangladeshGreen,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
