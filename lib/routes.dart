@@ -20,7 +20,6 @@ import 'package:socbay/blocs/product/product_view_more/product_view_more_screen_
 import 'package:socbay/blocs/product_category/product_category_bloc.dart';
 import 'package:socbay/blocs/staff/comment_and_rating_list/comment_and_rating_list_bloc.dart';
 import 'package:socbay/blocs/staff/new_order/staff_new_order_bloc.dart';
-import 'package:socbay/blocs/staff/new_order/staff_new_rent_order_bloc.dart';
 import 'package:socbay/blocs/staff/new_task/staff_service_screen_bloc.dart';
 import 'package:socbay/blocs/staff/new_task_sale/staff_service_screen_sale_bloc.dart';
 import 'package:socbay/blocs/staff/order/order_manager_bloc.dart';
@@ -511,10 +510,13 @@ class Routes {
               child: const StaffNewOrderScreen(),
             );
           case createRentOrderScreen:
-            return BlocProvider<StaffNewRentOrderBloc>(
-              create: (ctx) => StaffNewRentOrderBloc(
+            return BlocProvider<StaffNewOrderBloc>(
+              create: (ctx) => StaffNewOrderBloc(
                 apiRepository: apiRepository,
-                args: settings.arguments as Map<String, dynamic>,
+                args: {
+                  ...settings.arguments as Map<String, dynamic>,
+                  'isRent': true,
+                },
               ),
               child: const StaffNewOrderScreen(isRent: true),
             );

@@ -1,4 +1,3 @@
-import 'package:socbay/application.dart';
 import 'package:socbay/constants/api_endpoints.dart';
 
 enum HttpMethod { get, post, put, del }

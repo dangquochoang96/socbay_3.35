@@ -30,10 +30,18 @@ class StaffNewOrderBloc extends Bloc<StaffNewOrderEvent, StaffNewOrderState> {
   List<OrderModel> listProducts = [];
   List<ProductModel> listProductsAll = [];
   bool isLoading = false;
-  int total = 0, chietKhau = 0, subSavePoint = 0, totalPay = 0, savePoint = 0;
+  int total = 0,
+      chietKhau = 0,
+      subSavePoint = 0,
+      totalPay = 0,
+      savePoint = 0,
+      vatAmount = 0;
+  num vatPercentage = 0;
   int paymentType = 1;
   OrderDetailModel? orderDetail;
   List<String> paths = [];
+
+  bool get isRent => args['isRent'] == true;
   StaffNewOrderBloc({required this.apiRepository, required this.args})
     : super(StaffNewOrderInitialState()) {
     on<StaffNewOrderInitEvent>(_mapChangeTypeServiceEventToState);
@@ -43,15 +51,20 @@ class StaffNewOrderBloc extends Bloc<StaffNewOrderEvent, StaffNewOrderState> {
     on<StaffNewOrderUploadImageEvent>(_mapUploadImageEventToState);
   }
 
-  Future<FutureOr<void>> _mapChangeTypeServiceEventToState(
+  Future<void> _mapChangeTypeServiceEventToState(
     StaffNewOrderInitEvent event,
     Emitter<StaffNewOrderState> emit,
   ) async {
+    if (args['id'] == null) {
+      return;
+    }
     try {
       isLoading = true;
       emit(StaffNewOrderInitialState());
       //Get info task
-      var url = AppConfig.instance.apiUri(ApiEndpoints.taskById(args['id']));
+      var url = isRent
+          ? AppConfig.instance.apiUri(ApiEndpoints.rentTaskById(args['id']))
+          : AppConfig.instance.apiUri(ApiEndpoints.taskById(args['id']));
       var res = await http.get(url);
       if (res.statusCode == HttpStatus.ok) {
         var l = Map<String, dynamic>.from(json.decode(res.body));
@@ -72,7 +85,7 @@ class StaffNewOrderBloc extends Bloc<StaffNewOrderEvent, StaffNewOrderState> {
         emit(StaffNewOrderInitialState());
       }
     } catch (ex) {
-      LoggerUtil.log(jsonEncode(ex));
+      LoggerUtil.log(ex.toString());
     }
   }
 
@@ -130,7 +143,7 @@ class StaffNewOrderBloc extends Bloc<StaffNewOrderEvent, StaffNewOrderState> {
     try {
       if (event.productId == 0) {
         if (event.newProductId != null && event.newProductId != 0) {
-          var url = AppConfig.instance.apiUri(ApiEndpoints.orderCreate, {
+          var queryParams = {
             'user_id': taskModel?.customer?.id.toString() ?? "0",
             'listProducts': event.newProductId.toString(),
             'price': '0',
@@ -145,7 +158,22 @@ class StaffNewOrderBloc extends Bloc<StaffNewOrderEvent, StaffNewOrderState> {
             'type_payment': event.paymentType.toString(),
             'staff': App.instance.userApp?.id.toString() ?? '',
             'sale_id': taskModel?.saleId?.toString(),
-          });
+          };
+          if (isRent) {
+            queryParams.addAll({
+              'type': '3',
+              'monthly_rent': event.monthlyRent.toString(),
+              'rental_period': event.rentalPeriod.toString(),
+              'deposits': event.deposits.toString(),
+              'rental_end_date': DateFormat(
+                "yyyy-MM-dd",
+              ).format(event.rentalEndDate),
+            });
+          }
+          var url = AppConfig.instance.apiUri(
+            ApiEndpoints.orderCreate,
+            queryParams,
+          );
 
           var res = await http.post(url);
           if (res.statusCode == HttpStatus.ok) {
@@ -219,6 +247,7 @@ class StaffNewOrderBloc extends Bloc<StaffNewOrderEvent, StaffNewOrderState> {
                     ? '4'
                     : '2'
               : (listNextDate.replaceAll(',', '').isEmpty ? '4' : '2'),
+          if (isRent) ...{'type': '4', 'vat': event.vatAmount.toString()},
           'tich_diem': event.savePoint.toString(),
           'tru_diem': event.subSavePoint.toString(),
           'type_payment': event.paymentType.toString(),
@@ -262,22 +291,26 @@ class StaffNewOrderBloc extends Bloc<StaffNewOrderEvent, StaffNewOrderState> {
             var m = Map<String, dynamic>.from(l["data"]);
             var n = Map<String, dynamic>.from(m["order"]);
             orderDetail = OrderDetailModel(id: n["id"]);
-            var urleditTask = AppConfig.instance
-                .apiUri(ApiEndpoints.taskEdit(taskModel?.id), {
-                  'type_task': taskModel?.type.toString(),
-                  'name': taskModel?.name ?? "",
-                  'des': taskModel?.des ?? "",
-                  'status': '3',
-                  'priority': taskModel?.priority?.toString() ?? '0',
-                  'time_start': DateFormat(
-                    'dd/MM/yyyy HH:ss',
-                  ).format(DateTime.parse(taskModel!.timeStart.toString())),
-                  'time_end': "",
-                  'staff': App.instance.userApp?.id.toString(),
-                  'user_create': App.instance.userApp?.id.toString(),
-                  'product_id': event.productId.toString(),
-                  'order_id': orderDetail?.id.toString(),
-                });
+            var urleditTask = AppConfig.instance.apiUri(
+              isRent
+                  ? ApiEndpoints.rentTaskEdit(taskModel?.id)
+                  : ApiEndpoints.taskEdit(taskModel?.id),
+              {
+                'type_task': taskModel?.type.toString(),
+                'name': taskModel?.name ?? "",
+                'des': taskModel?.des ?? "",
+                'status': '3',
+                'priority': taskModel?.priority?.toString() ?? '0',
+                'time_start': DateFormat(
+                  'dd/MM/yyyy HH:ss',
+                ).format(DateTime.parse(taskModel!.timeStart.toString())),
+                'time_end': "",
+                'staff': App.instance.userApp?.id.toString(),
+                'user_create': App.instance.userApp?.id.toString(),
+                'product_id': event.productId.toString(),
+                'order_id': orderDetail?.id.toString(),
+              },
+            );
             var resEditTask = await http.post(urleditTask);
             if (resEditTask.statusCode == HttpStatus.ok &&
                 (event.lstNew.isNotEmpty || event.lstMaintain.isNotEmpty)) {
@@ -336,7 +369,7 @@ class StaffNewOrderBloc extends Bloc<StaffNewOrderEvent, StaffNewOrderState> {
         emit(const ServiceScreenUploadImageFailedState('Error'));
       }
     } catch (ex) {
-      LoggerUtil.error(json.encode(ex));
+      LoggerUtil.error(ex.toString());
     }
   }
 
@@ -355,7 +388,7 @@ class StaffNewOrderBloc extends Bloc<StaffNewOrderEvent, StaffNewOrderState> {
       );
       await apiRepository.updateUserInfo(userInfo);
     } catch (ex) {
-      LoggerUtil.log(json.encode(ex));
+      LoggerUtil.log(ex.toString());
     }
   }
 }

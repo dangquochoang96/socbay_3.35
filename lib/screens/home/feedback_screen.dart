@@ -8,7 +8,6 @@ import 'package:socbay/blocs/home/feedback/feedback_screen_bloc.dart';
 import 'package:socbay/blocs/home/feedback/feedback_screen_event.dart';
 import 'package:socbay/blocs/home/feedback/feedback_screen_state.dart';
 import 'package:socbay/config/app_config.dart';
-import 'package:socbay/constants/constants.dart';
 import 'package:socbay/data/model/order_filter_core_model.dart';
 import 'package:socbay/routes.dart';
 import 'package:socbay/utils/color_util.dart';
@@ -373,7 +372,6 @@ class _FeedbackScreenState extends State<FeedbackScreen>
     IconData iconPrefix,
     IconData? iconSuffix, {
     bool isReadOnly = false,
-    bool haveSuffixIcon = false,
   }) {
     return TextFormField(
       readOnly: isReadOnly,
@@ -682,20 +680,6 @@ class _FeedbackScreenState extends State<FeedbackScreen>
     return dateTime.substring(0, 10);
   }
 
-  // void _onChooseMedia() async {
-  //   File? file = await onGetPhotoFromGallery(
-  //       context: context, funcPermission: () {}, picker: _picker);
-  //   if (file != null) {
-  //     setState(() {
-  //       if (_listFile.length < 4) {
-  //         _listFile.add(file);
-  //       } else {
-  //         context.showSnackBar('Chỉ được chọn tối đa 4 ảnh!');
-  //         return;
-  //       }
-  //     });
-  //   }
-  // }
   void _onChooseImages() async {
     Navigator.of(context).pop();
     List<File>? files = await onGetMultiPhoto(

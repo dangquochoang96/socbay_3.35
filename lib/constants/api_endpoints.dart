@@ -145,7 +145,7 @@ abstract final class ApiEndpoints {
   // ORDER
   // =========================
   static const orderCreate = '/socbay/order/them';
-  static const orderSaveRepair = '/socbay/order/save-repair';
+  static const orderSaveRepair = '/socbay/order/create-service-order';
   static const orderByPhone = '/socbay/order/phone';
   static const listOrderRatingByStaff =
       '/socbay/order/get-list-order-rating-by-staff';

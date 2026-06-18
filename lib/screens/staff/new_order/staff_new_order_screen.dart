@@ -9,7 +9,6 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:socbay/blocs/staff/new_order/staff_new_order_bloc.dart';
 import 'package:socbay/blocs/staff/new_order/staff_new_order_event.dart';
 import 'package:socbay/blocs/staff/new_order/staff_new_order_state.dart';
-import 'package:socbay/blocs/staff/new_order/staff_new_rent_order_bloc.dart';
 import 'package:socbay/config/app_config.dart';
 import 'package:socbay/data/model/bill_data.dart';
 import 'package:socbay/data/model/list_order_core_model.dart';
@@ -80,9 +79,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
   final FocusNode _focusNode = FocusNode();
   @override
   void initState() {
-    _bloc = widget.isRent
-        ? BlocProvider.of<StaffNewRentOrderBloc>(context)
-        : BlocProvider.of<StaffNewOrderBloc>(context);
+    _bloc = BlocProvider.of<StaffNewOrderBloc>(context);
     _bloc.add(StaffNewOrderInitEvent());
     String dateDefault = DateTime.now()
         .add(Duration(days: widget.isRent ? 91 : 183))
@@ -141,23 +138,28 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
       _isLoadingWarehouse = true;
     });
     try {
-      final url = AppConfig.instance.apiUri(ApiEndpoints.listWarehouseByUser(user.id.toString()));
+      final url = AppConfig.instance.apiUri(
+        ApiEndpoints.listWarehouseByUser(user.id.toString()),
+      );
       final response = await http.get(url);
       if (response.statusCode == HttpStatus.ok) {
         final jsonRes = json.decode(response.body);
-        if (jsonRes['code'] == 1 && jsonRes['data'] != null && jsonRes['data']['data_wasehouse'] != null) {
+        if (jsonRes['code'] == 1 &&
+            jsonRes['data'] != null &&
+            jsonRes['data']['data_wasehouse'] != null) {
           final List<dynamic> whData = jsonRes['data']['data_wasehouse'];
           final whList = warehouseListFromJson(whData);
-          
+
           final List<String> items = [];
           for (var wh in whList) {
             final name = wh.product?.name;
-            final qtyExist = double.tryParse(wh.quantityExist ?? '0')?.toInt() ?? 0;
+            final qtyExist =
+                double.tryParse(wh.quantityExist ?? '0')?.toInt() ?? 0;
             if (name != null && name.isNotEmpty && qtyExist > 0) {
               items.add(name);
             }
           }
-          
+
           setState(() {
             _ktvWarehouseCores = items;
             _isLoadingWarehouse = false;
@@ -206,12 +208,6 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.isRent) {
-      return BlocConsumer<StaffNewRentOrderBloc, StaffNewOrderState>(
-        builder: _builder,
-        listener: _listener,
-      );
-    }
     return BlocConsumer<StaffNewOrderBloc, StaffNewOrderState>(
       builder: _builder,
       listener: _listener,
@@ -794,20 +790,18 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                     List<OrderFilterCoreModel> lst2 = [];
                     for (var item in lstKeyValueCores) {
                       if (item.key.text.isNotEmpty) {
-                        if (item.value.text.trim().isEmpty) {
-                          context.showSnackBar(
-                            'Vui lòng nhập thành tiền cho ${item.key.text}',
-                          );
-                          return;
-                        }
+                        String priceText = item.value.text.trim();
+                        String priceValue = priceText.isEmpty
+                            ? "0"
+                            : priceText
+                                  .replaceAll(".", "")
+                                  .replaceAll("đ", "")
+                                  .nonBreaking
+                                  .trim();
                         lst1.add(
                           OrderFilterCoreModel(
                             name: item.key.text,
-                            price: item.value.text
-                                .replaceAll(".", "")
-                                .replaceAll("đ", "")
-                                .nonBreaking
-                                .trim(),
+                            price: priceValue,
                           ),
                         );
                       }
@@ -951,20 +945,18 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                     List<OrderFilterCoreModel> lst2 = [];
                     for (var item in lstKeyValueCores) {
                       if (item.key.text.isNotEmpty) {
-                        if (item.value.text.trim().isEmpty) {
-                          context.showSnackBar(
-                            'Vui lòng nhập thành tiền cho ${item.key.text}',
-                          );
-                          return;
-                        }
+                        String priceText = item.value.text.trim();
+                        String priceValue = priceText.isEmpty
+                            ? "0"
+                            : priceText
+                                  .replaceAll(".", "")
+                                  .replaceAll("đ", "")
+                                  .nonBreaking
+                                  .trim();
                         lst1.add(
                           OrderFilterCoreModel(
                             name: item.key.text,
-                            price: item.value.text
-                                .replaceAll(".", "")
-                                .replaceAll("đ", "")
-                                .nonBreaking
-                                .trim(),
+                            price: priceValue,
                           ),
                         );
                       }
@@ -1365,7 +1357,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
               child: Row(
                 children: [
                   Expanded(
-                    flex: 1,
+                    flex: 2,
                     child: _isLoadingWarehouse
                         ? const Center(
                             child: SizedBox(
@@ -1374,11 +1366,12 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                               child: CircularProgressIndicator(strokeWidth: 2),
                             ),
                           )
-                        : DropdownButtonFormField<String>(
-                            isExpanded: true,
-                            value: _ktvWarehouseCores.contains(lstKeyValueCores[i].key.text)
-                                ? lstKeyValueCores[i].key.text
-                                : null,
+                        : TextFormField(
+                            controller: lstKeyValueCores[i].key,
+                            readOnly: true,
+                            onTap: () {
+                              _showCoreSearchSelector(context, i);
+                            },
                             decoration: InputDecoration(
                               hintText: _ktvWarehouseCores.isEmpty
                                   ? 'Kho trống!'
@@ -1390,33 +1383,41 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                               ),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(8),
-                                borderSide: BorderSide(color: Colors.grey.shade300),
+                                borderSide: BorderSide(
+                                  color: Colors.grey.shade300,
+                                ),
                               ),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(8),
-                                borderSide: BorderSide(color: Colors.grey.shade300),
-                              ),
-                            ),
-                            items: _ktvWarehouseCores.map((String value) {
-                              return DropdownMenuItem<String>(
-                                value: value,
-                                child: Text(
-                                  value,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(fontSize: 13),
+                                borderSide: BorderSide(
+                                  color: Colors.grey.shade300,
                                 ),
-                              );
-                            }).toList(),
-                            onChanged: (newValue) {
-                              setState(() {
-                                lstKeyValueCores[i].key.text = newValue ?? '';
-                              });
-                            },
+                              ),
+                              suffixIcon:
+                                  lstKeyValueCores[i].key.text.isNotEmpty
+                                  ? IconButton(
+                                      padding: EdgeInsets.zero,
+                                      constraints: const BoxConstraints(),
+                                      icon: const Icon(Icons.clear, size: 16),
+                                      onPressed: () {
+                                        setState(() {
+                                          lstKeyValueCores[i].key.clear();
+                                          lstKeyValueCores[i].value.clear();
+                                          _recalculateTotal();
+                                        });
+                                      },
+                                    )
+                                  : const Icon(
+                                      Icons.arrow_drop_down,
+                                      color: Colors.grey,
+                                    ),
+                            ),
+                            style: const TextStyle(fontSize: 13),
                           ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 8),
                   Expanded(
-                    flex: 1,
+                    flex: 2,
                     child: TextField(
                       controller: lstKeyValueCores[i].value,
                       textAlign: TextAlign.right,
@@ -1459,52 +1460,27 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                                     : formattedText.length,
                               ),
                             );
-                            _bloc.total = 0;
-                            for (var item in lstKeyValueCores) {
-                              _bloc.total +=
-                                  int.tryParse(
-                                    item.value.text
-                                        .replaceAll(".", "")
-                                        .replaceAll("đ", "")
-                                        .nonBreaking
-                                        .trim(),
-                                  ) ??
-                                  0;
-                            }
-                            var chietkhau = chietKhauController.text;
-                            if (_bloc.total > _bloc.subSavePoint * 1000) {
-                              subSavePointController.text = _bloc.subSavePoint
-                                  .toString();
-                            }
-                            _bloc.totalPay =
-                                _bloc.total -
-                                (int.tryParse(
-                                      chietkhau
-                                          .replaceAll(".", "")
-                                          .replaceAll("đ", "")
-                                          .nonBreaking
-                                          .trim(),
-                                    ) ??
-                                    0) -
-                                (int.tryParse(subSavePointController.text) ??
-                                        0) *
-                                    1000;
-                            if (_bloc.totalPay < 0) {
-                              _bloc.totalPay = 0;
-                              _bloc.savePoint = 0;
-                              subSavePointController.text = "0";
-                              return;
-                            }
-                            if (_bloc.totalPay > _bloc.subSavePoint * 1000) {
-                              subSavePointController.text = _bloc.subSavePoint
-                                  .toString();
-                            }
-                            _bloc.savePoint = (_bloc.totalPay * 3 / 100000)
-                                .ceil();
+                            _recalculateTotal();
                           });
                         }
                       },
                     ),
+                  ),
+                  const SizedBox(width: 8),
+                  IconButton(
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                    icon: const Icon(
+                      Icons.delete_outline,
+                      color: Colors.red,
+                      size: 20,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        lstKeyValueCores.removeAt(i);
+                        _recalculateTotal();
+                      });
+                    },
                   ),
                 ],
               ),
@@ -1691,6 +1667,167 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
         ),
       );
     }
+  }
+
+  void _recalculateTotal() {
+    _bloc.total = 0;
+    for (var item in lstKeyValueCores) {
+      _bloc.total +=
+          int.tryParse(
+            item.value.text
+                .replaceAll(".", "")
+                .replaceAll("đ", "")
+                .nonBreaking
+                .trim(),
+          ) ??
+          0;
+    }
+    var chietkhau = chietKhauController.text;
+    if (_bloc.total > _bloc.subSavePoint * 1000) {
+      subSavePointController.text = _bloc.subSavePoint.toString();
+    }
+    _bloc.totalPay =
+        _bloc.total -
+        (int.tryParse(
+              chietkhau
+                  .replaceAll(".", "")
+                  .replaceAll("đ", "")
+                  .nonBreaking
+                  .trim(),
+            ) ??
+            0) -
+        (int.tryParse(subSavePointController.text) ?? 0) * 1000;
+    if (_bloc.totalPay < 0) {
+      _bloc.totalPay = 0;
+      _bloc.savePoint = 0;
+      subSavePointController.text = "0";
+      return;
+    }
+    if (_bloc.totalPay > _bloc.subSavePoint * 1000) {
+      subSavePointController.text = _bloc.subSavePoint.toString();
+    }
+    _bloc.savePoint = (_bloc.totalPay * 3 / 100000).ceil();
+  }
+
+  void _showCoreSearchSelector(BuildContext context, int index) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (BuildContext context) {
+        String searchQuery = "";
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setModalState) {
+            final filteredList = _ktvWarehouseCores
+                .where(
+                  (core) =>
+                      core.toLowerCase().contains(searchQuery.toLowerCase()),
+                )
+                .toList();
+
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom,
+              ),
+              child: Container(
+                constraints: BoxConstraints(
+                  maxHeight: MediaQuery.of(context).size.height * 0.6,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                      decoration: BoxDecoration(
+                        border: Border(
+                          bottom: BorderSide(color: Colors.grey.shade200),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'Chọn lõi / máy',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          IconButton(
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                            icon: const Icon(Icons.close),
+                            onPressed: () => Navigator.pop(context),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: TextField(
+                        autofocus: true,
+                        decoration: InputDecoration(
+                          hintText: 'Tìm kiếm lõi...',
+                          prefixIcon: const Icon(Icons.search),
+                          isDense: true,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 10,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(color: Colors.grey.shade300),
+                          ),
+                        ),
+                        onChanged: (val) {
+                          setModalState(() {
+                            searchQuery = val;
+                          });
+                        },
+                      ),
+                    ),
+                    Expanded(
+                      child: filteredList.isEmpty
+                          ? const Center(
+                              child: Text(
+                                'Không tìm thấy lõi phù hợp',
+                                style: TextStyle(color: Colors.grey),
+                              ),
+                            )
+                          : ListView.builder(
+                              shrinkWrap: true,
+                              itemCount: filteredList.length,
+                              itemBuilder: (context, i) {
+                                final item = filteredList[i];
+                                return ListTile(
+                                  title: Text(
+                                    item,
+                                    style: const TextStyle(fontSize: 14),
+                                  ),
+                                  onTap: () {
+                                    setState(() {
+                                      lstKeyValueCores[index].key.text = item;
+                                    });
+                                    Navigator.pop(context);
+                                  },
+                                );
+                              },
+                            ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 
   void _showModalBottomSheetMedia() {

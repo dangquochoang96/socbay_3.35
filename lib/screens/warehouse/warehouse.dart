@@ -478,7 +478,7 @@ class _WarehouseScreenState extends State<WarehouseScreen>
     Map<int, int> selectedQuantities = {};
     Map<int, TextEditingController> quantityControllers = {};
     Map<int, TextEditingController> priceControllers = {};
-    List<Warehouse> filteredWarehouseList = List.from(_allWarehouses);
+    List<Warehouse> filteredWarehouseList = [];
 
     for (var warehouse in _allWarehouses) {
       selectedQuantities[warehouse.id] = 0;
@@ -599,6 +599,21 @@ class _WarehouseScreenState extends State<WarehouseScreen>
       baseTotal += (baseTotal * vatPercentage / 100);
 
       totalPriceController.text = _formatCurrency(baseTotal.toStringAsFixed(0));
+    }
+
+    void setQuantity(
+      int warehouseId,
+      int qty,
+      int maxQuantity,
+      StateSetter dialogSetState,
+    ) {
+      if (qty < 0) qty = 0;
+      if (qty > maxQuantity) qty = maxQuantity;
+      dialogSetState(() {
+        selectedQuantities[warehouseId] = qty;
+        quantityControllers[warehouseId]?.text = qty.toString();
+      });
+      updateTotalPrice();
     }
 
     final warehouseBloc = context.read<WarehouseBloc>();
@@ -945,156 +960,507 @@ class _WarehouseScreenState extends State<WarehouseScreen>
                         TextField(
                           controller: searchController,
                           decoration: InputDecoration(
-                            hintText: 'Tìm kiếm sản phẩm...',
+                            hintText: 'Tìm kiếm sản phẩm theo tên hoặc mã...',
                             prefixIcon: const Icon(Icons.search),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
+                            suffixIcon: searchController.text.isNotEmpty
+                                ? IconButton(
+                                    icon: const Icon(Icons.clear),
+                                    onPressed: () {
+                                      searchController.clear();
+                                      dialogSetState(() {
+                                        filteredWarehouseList.clear();
+                                      });
+                                    },
+                                  )
+                                : null,
                           ),
                           onChanged: (value) {
                             dialogSetState(() {
-                              filteredWarehouseList = _allWarehouses.where((
-                                warehouse,
-                              ) {
-                                final name = warehouse.product?.name ?? '';
-                                return name.toLowerCase().contains(
-                                  value.toLowerCase(),
-                                );
-                              }).toList();
+                              final query = value.trim().toLowerCase();
+                              if (query.isEmpty) {
+                                filteredWarehouseList.clear();
+                              } else {
+                                filteredWarehouseList = _allWarehouses.where((
+                                  warehouse,
+                                ) {
+                                  final name = warehouse.product?.name ?? '';
+                                  final code =
+                                      warehouse.product?.productCode ?? '';
+                                  return name.toLowerCase().contains(query) ||
+                                      code.toLowerCase().contains(query);
+                                }).toList();
+                              }
                             });
                           },
                         ),
                         const SizedBox(height: 16),
-                        ListView.builder(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: filteredWarehouseList.length,
-                          itemBuilder: (ctx, index) {
-                            final warehouse = filteredWarehouseList[index];
-                            final product = warehouse.product;
-                            final maxQuantity = _safeParseInt(
-                              warehouse.quantityExist,
-                            );
-                            if (maxQuantity <= 0)
-                              return const SizedBox.shrink();
+                        Builder(
+                          builder: (context) {
+                            final isSearching = searchController.text
+                                .trim()
+                                .isNotEmpty;
+                            final displayedList = isSearching
+                                ? filteredWarehouseList
+                                : _allWarehouses
+                                      .where(
+                                        (w) =>
+                                            (selectedQuantities[w.id] ?? 0) > 0,
+                                      )
+                                      .toList();
 
-                            return Card(
-                              margin: const EdgeInsets.only(bottom: 12),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                side: BorderSide(color: Colors.grey.shade200),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(12),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      product?.name ?? '',
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 14,
+                            if (displayedList.isEmpty) {
+                              return Center(
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 32,
+                                  ),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        isSearching
+                                            ? Icons.search_off
+                                            : Icons.inventory_2_outlined,
+                                        size: 48,
+                                        color: Colors.grey.shade400,
+                                      ),
+                                      const SizedBox(height: 12),
+                                      Text(
+                                        isSearching
+                                            ? 'Không tìm thấy sản phẩm phù hợp'
+                                            : 'Chưa có sản phẩm nào được chọn',
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.grey,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        isSearching
+                                            ? 'Thử tìm kiếm với từ khóa khác'
+                                            : 'Quét mã QR hoặc tìm kiếm ở trên để thêm sản phẩm xuất kho',
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          color: Colors.grey.shade500,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            }
+
+                            return ListView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: displayedList.length,
+                              itemBuilder: (ctx, index) {
+                                final warehouse = displayedList[index];
+                                final product = warehouse.product;
+                                final maxQuantity = _safeParseInt(
+                                  warehouse.quantityExist,
+                                );
+                                final currentQty =
+                                    selectedQuantities[warehouse.id] ?? 0;
+
+                                if (isSearching && currentQty == 0) {
+                                  // Compact view in search results
+                                  return Card(
+                                    margin: const EdgeInsets.only(bottom: 8),
+                                    elevation: 0,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                      side: BorderSide(
+                                        color: Colors.grey.shade200,
                                       ),
                                     ),
-                                    const SizedBox(height: 8),
-                                    Row(
-                                      children: [
-                                        Expanded(
-                                          child: Text(
-                                            'Tồn kho: $maxQuantity',
-                                            style: TextStyle(
-                                              color: Colors.grey[600],
-                                            ),
+                                    child: ListTile(
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                            horizontal: 12,
+                                            vertical: 4,
                                           ),
+                                      title: Text(
+                                        product?.name ?? '',
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 13,
                                         ),
-                                        SizedBox(
-                                          width: 120,
-                                          height: 40,
-                                          child: TextField(
-                                            controller:
-                                                quantityControllers[warehouse
-                                                    .id],
-                                            keyboardType: TextInputType.number,
-                                            decoration: const InputDecoration(
-                                              labelText: 'Số lượng',
-                                              border: OutlineInputBorder(),
-                                              contentPadding:
-                                                  EdgeInsets.symmetric(
-                                                    horizontal: 8,
-                                                    vertical: 4,
-                                                  ),
-                                            ),
-                                            onChanged: (val) {
-                                              int qty = int.tryParse(val) ?? 0;
-                                              if (qty > maxQuantity) {
-                                                qty = maxQuantity;
-                                                quantityControllers[warehouse
-                                                        .id]!
-                                                    .text = qty
-                                                    .toString();
-                                              }
-                                              dialogSetState(() {
-                                                selectedQuantities[warehouse
-                                                        .id] =
-                                                    qty;
-                                              });
-                                              updateTotalPrice();
-                                            },
-                                          ),
+                                      ),
+                                      subtitle: Text(
+                                        'Tồn: $maxQuantity | Giá: ${_formatCurrency(product?.price)} đ',
+                                        style: TextStyle(
+                                          color: Colors.grey[600],
+                                          fontSize: 11,
                                         ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Row(
-                                      children: [
-                                        Expanded(
-                                          child: Text(
-                                            'Giá bán mặc định: ${_formatCurrency(product?.price)} đ',
-                                            style: TextStyle(
-                                              color: Colors.grey[600],
-                                              fontSize: 12,
-                                            ),
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          width: 160,
-                                          height: 40,
-                                          child: TextField(
-                                            controller:
-                                                priceControllers[warehouse.id],
-                                            keyboardType: TextInputType.number,
-                                            decoration: const InputDecoration(
-                                              labelText: 'Giá xuất (đ)',
-                                              border: OutlineInputBorder(),
-                                              contentPadding:
-                                                  EdgeInsets.symmetric(
-                                                    horizontal: 8,
-                                                    vertical: 4,
-                                                  ),
-                                            ),
-                                            onChanged: (val) {
-                                              final clean = _parseCurrency(val);
-                                              if (clean.isNotEmpty) {
-                                                priceControllers[warehouse.id]!
-                                                    .value = TextEditingValue(
-                                                  text: _formatCurrency(clean),
-                                                  selection:
-                                                      TextSelection.collapsed(
-                                                        offset: _formatCurrency(
-                                                          clean,
-                                                        ).length,
-                                                      ),
+                                      ),
+                                      trailing: currentQty == 0
+                                          ? ElevatedButton(
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: ColorUtil
+                                                    .bangladeshGreen
+                                                    .withValues(alpha: 0.1),
+                                                foregroundColor:
+                                                    ColorUtil.bangladeshGreen,
+                                                elevation: 0,
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      horizontal: 12,
+                                                      vertical: 4,
+                                                    ),
+                                                minimumSize: const Size(60, 32),
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(6),
+                                                ),
+                                              ),
+                                              onPressed: () {
+                                                setQuantity(
+                                                  warehouse.id,
+                                                  1,
+                                                  maxQuantity,
+                                                  dialogSetState,
                                                 );
-                                              }
-                                              updateTotalPrice();
-                                            },
-                                          ),
+                                              },
+                                              child: const Text(
+                                                'Thêm',
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 12,
+                                                ),
+                                              ),
+                                            )
+                                          : Container(
+                                              decoration: BoxDecoration(
+                                                border: Border.all(
+                                                  color:
+                                                      ColorUtil.bangladeshGreen,
+                                                ),
+                                                borderRadius:
+                                                    BorderRadius.circular(6),
+                                              ),
+                                              child: Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  IconButton(
+                                                    icon: const Icon(
+                                                      Icons.remove,
+                                                      size: 14,
+                                                      color: ColorUtil
+                                                          .bangladeshGreen,
+                                                    ),
+                                                    padding: EdgeInsets.zero,
+                                                    constraints:
+                                                        const BoxConstraints(
+                                                          minWidth: 28,
+                                                          minHeight: 28,
+                                                        ),
+                                                    onPressed: () {
+                                                      setQuantity(
+                                                        warehouse.id,
+                                                        currentQty - 1,
+                                                        maxQuantity,
+                                                        dialogSetState,
+                                                      );
+                                                    },
+                                                  ),
+                                                  Text(
+                                                    '$currentQty',
+                                                    style: const TextStyle(
+                                                      fontSize: 12,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      color: ColorUtil
+                                                          .bangladeshGreen,
+                                                    ),
+                                                  ),
+                                                  IconButton(
+                                                    icon: const Icon(
+                                                      Icons.add,
+                                                      size: 14,
+                                                      color: ColorUtil
+                                                          .bangladeshGreen,
+                                                    ),
+                                                    padding: EdgeInsets.zero,
+                                                    constraints:
+                                                        const BoxConstraints(
+                                                          minWidth: 28,
+                                                          minHeight: 28,
+                                                        ),
+                                                    onPressed: () {
+                                                      setQuantity(
+                                                        warehouse.id,
+                                                        currentQty + 1,
+                                                        maxQuantity,
+                                                        dialogSetState,
+                                                      );
+                                                    },
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                    ),
+                                  );
+                                }
+
+                                // Detailed view for selected items
+                                return Card(
+                                  margin: const EdgeInsets.only(bottom: 12),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    side: BorderSide(
+                                      color: Colors.grey.shade200,
+                                    ),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(12),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Expanded(
+                                              child: Text(
+                                                product?.name ?? '',
+                                                style: const TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 14,
+                                                ),
+                                              ),
+                                            ),
+                                            IconButton(
+                                              icon: const Icon(
+                                                Icons.delete_outline,
+                                                color: Colors.red,
+                                                size: 20,
+                                              ),
+                                              padding: EdgeInsets.zero,
+                                              constraints:
+                                                  const BoxConstraints(),
+                                              onPressed: () {
+                                                setQuantity(
+                                                  warehouse.id,
+                                                  0,
+                                                  maxQuantity,
+                                                  dialogSetState,
+                                                );
+                                              },
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    'Tồn kho: $maxQuantity',
+                                                    style: TextStyle(
+                                                      color: Colors.grey[600],
+                                                      fontSize: 12,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(height: 4),
+                                                  Text(
+                                                    'Giá bán mặc định: ${_formatCurrency(product?.price)} đ',
+                                                    style: TextStyle(
+                                                      color: Colors.grey[600],
+                                                      fontSize: 12,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                            Container(
+                                              decoration: BoxDecoration(
+                                                border: Border.all(
+                                                  color: Colors.grey.shade300,
+                                                ),
+                                                borderRadius:
+                                                    BorderRadius.circular(6),
+                                              ),
+                                              child: Row(
+                                                children: [
+                                                  IconButton(
+                                                    icon: const Icon(
+                                                      Icons.remove,
+                                                      size: 16,
+                                                    ),
+                                                    padding: EdgeInsets.zero,
+                                                    constraints:
+                                                        const BoxConstraints(
+                                                          minWidth: 32,
+                                                          minHeight: 32,
+                                                        ),
+                                                    onPressed: () {
+                                                      setQuantity(
+                                                        warehouse.id,
+                                                        currentQty - 1,
+                                                        maxQuantity,
+                                                        dialogSetState,
+                                                      );
+                                                    },
+                                                  ),
+                                                  SizedBox(
+                                                    width: 40,
+                                                    height: 32,
+                                                    child: TextField(
+                                                      controller:
+                                                          quantityControllers[warehouse
+                                                              .id],
+                                                      keyboardType:
+                                                          TextInputType.number,
+                                                      textAlign:
+                                                          TextAlign.center,
+                                                      style: const TextStyle(
+                                                        fontSize: 13,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                      ),
+                                                      decoration:
+                                                          const InputDecoration(
+                                                            border: InputBorder
+                                                                .none,
+                                                            contentPadding:
+                                                                EdgeInsets.only(
+                                                                  bottom: 12,
+                                                                ),
+                                                          ),
+                                                      onChanged: (val) {
+                                                        int qty =
+                                                            int.tryParse(val) ??
+                                                            0;
+                                                        setQuantity(
+                                                          warehouse.id,
+                                                          qty,
+                                                          maxQuantity,
+                                                          dialogSetState,
+                                                        );
+                                                      },
+                                                    ),
+                                                  ),
+                                                  IconButton(
+                                                    icon: const Icon(
+                                                      Icons.add,
+                                                      size: 16,
+                                                    ),
+                                                    padding: EdgeInsets.zero,
+                                                    constraints:
+                                                        const BoxConstraints(
+                                                          minWidth: 32,
+                                                          minHeight: 32,
+                                                        ),
+                                                    onPressed: () {
+                                                      setQuantity(
+                                                        warehouse.id,
+                                                        currentQty + 1,
+                                                        maxQuantity,
+                                                        dialogSetState,
+                                                      );
+                                                    },
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 12),
+                                        Row(
+                                          children: [
+                                            const Text(
+                                              'Giá xuất (đ):',
+                                              style: TextStyle(
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Expanded(
+                                              child: SizedBox(
+                                                height: 36,
+                                                child: TextField(
+                                                  controller:
+                                                      priceControllers[warehouse
+                                                          .id],
+                                                  keyboardType:
+                                                      TextInputType.number,
+                                                  style: const TextStyle(
+                                                    fontSize: 13,
+                                                  ),
+                                                  decoration: InputDecoration(
+                                                    isDense: true,
+                                                    contentPadding:
+                                                        const EdgeInsets.symmetric(
+                                                          horizontal: 10,
+                                                          vertical: 8,
+                                                        ),
+                                                    border: OutlineInputBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            6,
+                                                          ),
+                                                      borderSide: BorderSide(
+                                                        color: Colors
+                                                            .grey
+                                                            .shade300,
+                                                      ),
+                                                    ),
+                                                    enabledBorder:
+                                                        OutlineInputBorder(
+                                                          borderRadius:
+                                                              BorderRadius.circular(
+                                                                6,
+                                                              ),
+                                                          borderSide:
+                                                              BorderSide(
+                                                                color: Colors
+                                                                    .grey
+                                                                    .shade300,
+                                                              ),
+                                                        ),
+                                                  ),
+                                                  onChanged: (val) {
+                                                    final clean =
+                                                        _parseCurrency(val);
+                                                    if (clean.isNotEmpty) {
+                                                      priceControllers[warehouse
+                                                              .id]!
+                                                          .value = TextEditingValue(
+                                                        text: _formatCurrency(
+                                                          clean,
+                                                        ),
+                                                        selection:
+                                                            TextSelection.collapsed(
+                                                              offset:
+                                                                  _formatCurrency(
+                                                                    clean,
+                                                                  ).length,
+                                                            ),
+                                                      );
+                                                    }
+                                                    updateTotalPrice();
+                                                  },
+                                                ),
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ],
                                     ),
-                                  ],
-                                ),
-                              ),
+                                  ),
+                                );
+                              },
                             );
                           },
                         ),
@@ -1309,12 +1675,6 @@ class _WarehouseScreenState extends State<WarehouseScreen>
             _filteredWarehouseList = List.from(_allWarehouses);
           }
 
-          if (_filteredWarehouseList.isEmpty) {
-            return const Center(
-              child: Text('Không tìm thấy sản phẩm nào trong kho'),
-            );
-          }
-
           return Column(
             children: [
               Padding(
@@ -1389,189 +1749,213 @@ class _WarehouseScreenState extends State<WarehouseScreen>
                 child: RefreshIndicator(
                   color: ColorUtil.bangladeshGreen,
                   onRefresh: () async => _fetchData(isRefresh: true),
-                  child: ListView.builder(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 4,
-                    ),
-                    itemCount: _filteredWarehouseList.length,
-                    itemBuilder: (ctx, index) {
-                      final item = _filteredWarehouseList[index];
-                      final product = item.product;
-                      final stock = _safeParseInt(item.quantityExist);
-                      final imageUrl = _getImageUrl(
-                        product?.images?.isNotEmpty == true
-                            ? product?.images![0].link
-                            : null,
-                      );
-
-                      Color accentColor = ColorUtil.bangladeshGreen;
-                      if (stock <= 0) {
-                        accentColor = Colors.grey;
-                      } else if (stock < 5) {
-                        accentColor = Colors.orange;
-                      }
-
-                      return Container(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.03),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
+                  child: _filteredWarehouseList.isEmpty
+                      ? ListView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          children: const [
+                            SizedBox(height: 100),
+                            Center(
+                              child: Text(
+                                'Không tìm thấy sản phẩm nào trong kho',
+                                style: TextStyle(color: Colors.grey),
+                              ),
                             ),
                           ],
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
-                          child: IntrinsicHeight(
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                Container(width: 5, color: accentColor),
-                                Expanded(
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(12),
-                                    child: Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        ClipRRect(
-                                          borderRadius: BorderRadius.circular(
-                                            8,
-                                          ),
-                                          child: Container(
-                                            width: 80,
-                                            height: 80,
-                                            color: Colors.grey.shade100,
-                                            child: imageUrl.isNotEmpty
-                                                ? Image.network(
-                                                    imageUrl,
-                                                    fit: BoxFit.cover,
-                                                    errorBuilder: (_, _, _) =>
-                                                        const Icon(
-                                                          Icons
-                                                              .image_not_supported,
-                                                          color: Colors.grey,
-                                                        ),
-                                                  )
-                                                : const Icon(
-                                                    Icons.image_outlined,
-                                                    color: Colors.grey,
-                                                  ),
-                                          ),
-                                        ),
-                                        const SizedBox(width: 12),
-                                        Expanded(
-                                          child: Column(
+                        )
+                      : ListView.builder(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 4,
+                          ),
+                          itemCount: _filteredWarehouseList.length,
+                          itemBuilder: (ctx, index) {
+                            final item = _filteredWarehouseList[index];
+                            final product = item.product;
+                            final stock = _safeParseInt(item.quantityExist);
+                            final imageUrl = _getImageUrl(
+                              product?.images?.isNotEmpty == true
+                                  ? product?.images![0].link
+                                  : null,
+                            );
+
+                            Color accentColor = ColorUtil.bangladeshGreen;
+                            if (stock <= 0) {
+                              accentColor = Colors.grey;
+                            } else if (stock < 5) {
+                              accentColor = Colors.orange;
+                            }
+
+                            return Container(
+                              margin: const EdgeInsets.only(bottom: 12),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.03),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: IntrinsicHeight(
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.stretch,
+                                    children: [
+                                      Container(width: 5, color: accentColor),
+                                      Expanded(
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(12),
+                                          child: Row(
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
                                             children: [
-                                              Text(
-                                                product?.name ??
-                                                    'Sản phẩm không tên',
-                                                style: const TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 14,
-                                                ),
-                                                maxLines: 2,
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                              const SizedBox(height: 4),
-                                              Text(
-                                                'Mã: ${product?.productCode ?? 'N/A'}',
-                                                style: TextStyle(
-                                                  color: Colors.grey.shade600,
-                                                  fontSize: 12,
-                                                ),
-                                              ),
-                                              const SizedBox(height: 8),
-                                              if (item.quantityPrices != null &&
-                                                  item
-                                                      .quantityPrices!
-                                                      .isNotEmpty)
-                                                ...item.quantityPrices!.map(
-                                                  (qp) => Padding(
-                                                    padding:
-                                                        const EdgeInsets.only(
-                                                          bottom: 2,
-                                                        ),
-                                                    child: Row(
-                                                      children: [
-                                                        Text(
-                                                          '≥ ${qp.quantity} sp: ',
-                                                          style:
-                                                              const TextStyle(
-                                                                fontSize: 11,
+                                              ClipRRect(
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
+                                                child: Container(
+                                                  width: 80,
+                                                  height: 80,
+                                                  color: Colors.grey.shade100,
+                                                  child: imageUrl.isNotEmpty
+                                                      ? Image.network(
+                                                          imageUrl,
+                                                          fit: BoxFit.cover,
+                                                          errorBuilder:
+                                                              (
+                                                                _,
+                                                                _,
+                                                                _,
+                                                              ) => const Icon(
+                                                                Icons
+                                                                    .image_not_supported,
                                                                 color:
                                                                     Colors.grey,
                                                               ),
+                                                        )
+                                                      : const Icon(
+                                                          Icons.image_outlined,
+                                                          color: Colors.grey,
                                                         ),
-                                                        Text(
-                                                          '${_formatCurrency(qp.price)} đ',
-                                                          style:
-                                                              const TextStyle(
-                                                                fontSize: 11,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .bold,
-                                                                color:
-                                                                    Colors.red,
+                                                ),
+                                              ),
+                                              const SizedBox(width: 12),
+                                              Expanded(
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                      product?.name ??
+                                                          'Sản phẩm không tên',
+                                                      style: const TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        fontSize: 14,
+                                                      ),
+                                                      maxLines: 2,
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                    ),
+                                                    const SizedBox(height: 4),
+                                                    Text(
+                                                      'Mã: ${product?.productCode ?? 'N/A'}',
+                                                      style: TextStyle(
+                                                        color: Colors
+                                                            .grey
+                                                            .shade600,
+                                                        fontSize: 12,
+                                                      ),
+                                                    ),
+                                                    const SizedBox(height: 8),
+                                                    if (item.quantityPrices !=
+                                                            null &&
+                                                        item
+                                                            .quantityPrices!
+                                                            .isNotEmpty)
+                                                      ...item.quantityPrices!.map(
+                                                        (qp) => Padding(
+                                                          padding:
+                                                              const EdgeInsets.only(
+                                                                bottom: 2,
                                                               ),
+                                                          child: Row(
+                                                            children: [
+                                                              Text(
+                                                                '≥ ${qp.quantity} sp: ',
+                                                                style: const TextStyle(
+                                                                  fontSize: 11,
+                                                                  color: Colors
+                                                                      .grey,
+                                                                ),
+                                                              ),
+                                                              Text(
+                                                                '${_formatCurrency(qp.price)} đ',
+                                                                style: const TextStyle(
+                                                                  fontSize: 11,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold,
+                                                                  color: Colors
+                                                                      .red,
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
                                                         ),
-                                                      ],
+                                                      )
+                                                    else
+                                                      Text(
+                                                        'Giá: ${_formatCurrency(product?.price)} đ',
+                                                        style: const TextStyle(
+                                                          color: Colors.red,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          fontSize: 13,
+                                                        ),
+                                                      ),
+                                                  ],
+                                                ),
+                                              ),
+                                              Column(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.end,
+                                                children: [
+                                                  _buildBadge(
+                                                    'Tồn: $stock',
+                                                    accentColor.withValues(
+                                                      alpha: 0.1,
+                                                    ),
+                                                    accentColor,
+                                                  ),
+                                                  const SizedBox(height: 8),
+                                                  Text(
+                                                    'Xuất: ${item.quantityExport ?? '0'}',
+                                                    style: TextStyle(
+                                                      color:
+                                                          Colors.grey.shade500,
+                                                      fontSize: 11,
                                                     ),
                                                   ),
-                                                )
-                                              else
-                                                Text(
-                                                  'Giá: ${_formatCurrency(product?.price)} đ',
-                                                  style: const TextStyle(
-                                                    color: Colors.red,
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 13,
-                                                  ),
-                                                ),
+                                                ],
+                                              ),
                                             ],
                                           ),
                                         ),
-                                        Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.end,
-                                          children: [
-                                            _buildBadge(
-                                              'Tồn: $stock',
-                                              accentColor.withValues(
-                                                alpha: 0.1,
-                                              ),
-                                              accentColor,
-                                            ),
-                                            const SizedBox(height: 8),
-                                            Text(
-                                              'Xuất: ${item.quantityExport ?? '0'}',
-                                              style: TextStyle(
-                                                color: Colors.grey.shade500,
-                                                fontSize: 11,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
+                                      ),
+                                    ],
                                   ),
                                 ),
-                              ],
-                            ),
-                          ),
+                              ),
+                            );
+                          },
                         ),
-                      );
-                    },
-                  ),
                 ),
               ),
             ],

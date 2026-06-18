@@ -122,7 +122,7 @@ class _RetailOrderScreenState extends State<RetailOrderScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: MyAppBar(title: "Đơn Hàng Bán Lẻ", isBackNavigation: true),
+      appBar: MyAppBar(title: "Đơn Nhập Vật Liệu", isBackNavigation: true),
       backgroundColor: const Color(0xfff7f8fa),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
