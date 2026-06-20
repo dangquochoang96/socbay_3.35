@@ -15,7 +15,7 @@ import 'package:socbay/blocs/tab_bar/tab_bar_event.dart';
 import 'package:socbay/blocs/task/task_screen_bloc.dart';
 import 'package:socbay/blocs/task/task_screen_event.dart';
 import 'package:socbay/config/app_config.dart';
-import 'package:socbay/constants/api_endpoints.dart';
+import 'package:socbay/data/data_provider/api_endpoints.dart';
 import 'package:socbay/data/model/home_service_model.dart';
 import 'package:socbay/data/model/machine_model.dart';
 import 'package:socbay/data/model/order_model.dart';

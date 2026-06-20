@@ -1,13 +1,21 @@
 import 'dart:async';
+import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:image/image.dart' as img;
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as path_manager;
+import 'package:socbay/application.dart';
 import 'package:socbay/blocs/retail_order/retail_order_bloc.dart';
 import 'package:socbay/blocs/retail_order/retail_order_event.dart';
 import 'package:socbay/blocs/retail_order/retail_order_state.dart';
 import 'package:socbay/config/app_config.dart';
 import 'package:socbay/constants/constants.dart';
 import 'package:socbay/data/model/retail_order_model.dart';
+import 'package:socbay/data/model/retail_warehouse_model.dart';
 import 'package:socbay/utils/color_util.dart';
 import 'package:socbay/utils/image_util.dart';
 import 'package:socbay/widgets/my_app_bar.dart';
@@ -122,7 +130,7 @@ class _RetailOrderScreenState extends State<RetailOrderScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: MyAppBar(title: "Đơn Nhập Vật Liệu", isBackNavigation: true),
+      appBar: MyAppBar(title: "Đơn Nhập Vật Tư", isBackNavigation: true),
       backgroundColor: const Color(0xfff7f8fa),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
@@ -331,7 +339,7 @@ class _RetailOrderScreenState extends State<RetailOrderScreen> {
     final statusColor = _getStatusColor(order.status);
     final orderCode = (order.code != null && order.code!.isNotEmpty)
         ? order.code!
-        : 'BB_${order.id}';
+        : 'SB_${order.id}';
 
     double productTotal = 0;
     if (order.orderdetails != null) {
@@ -530,6 +538,36 @@ class _RetailOrderScreenState extends State<RetailOrderScreen> {
                     ),
                   ],
                 ),
+                if (order.status == '4') ...[
+                  const SizedBox(height: 12),
+                  const Divider(height: 1, color: Color(0xfff1f2f6)),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: () => _showReceiveOrderDialog(order),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: ColorUtil.bangladeshGreen,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
+                      icon: const Icon(
+                        Icons.check_circle_outline,
+                        color: Colors.white,
+                      ),
+                      label: const Text(
+                        "Đã Nhận Hàng",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
@@ -678,5 +716,489 @@ class _RetailOrderScreenState extends State<RetailOrderScreen> {
         ],
       ),
     );
+  }
+
+  void _showReceiveOrderDialog(RetailOrder order) async {
+    final shipment = order.retailOrderShipment;
+    if (shipment == null ||
+        shipment.shipmentUsers == null ||
+        shipment.shipmentUsers!.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Không tìm thấy thông tin phân công giao hàng!'),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+      return;
+    }
+
+    final currentUserId = App.instance.userApp?.id?.toString();
+    RetailOrderShipmentAssign? myAssignment;
+    for (var assign in shipment.shipmentUsers!) {
+      if (assign.userId == currentUserId) {
+        myAssignment = assign;
+        break;
+      }
+    }
+    myAssignment ??= shipment.shipmentUsers!.first;
+
+    final assignmentId = myAssignment.id.toString();
+
+    final result = await showDialog<Map<String, dynamic>>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) =>
+          ReceiveOrderDialog(orderCode: order.code ?? 'SB_${order.id}'),
+    );
+
+    if (result != null) {
+      final String note = result['note'];
+      final List<File> images = result['images'];
+
+      if (!mounted) return;
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(color: ColorUtil.bangladeshGreen),
+        ),
+      );
+
+      try {
+        String successMessage = 'Cập nhật trạng thái đã nhận hàng thành công!';
+        // Upload images one by one sequentially
+        for (int i = 0; i < images.length; i++) {
+          final response = await _bloc.apiRepository.storeAssignmentImage(
+            id: assignmentId,
+            note: note,
+            image: images[i],
+          );
+          print(response.message);
+
+          if (response.status != 200 &&
+              response.status != 1 &&
+              !(response.message == null && response.data != null)) {
+            throw Exception(
+              response.message ?? 'Cập nhật ảnh thứ ${i + 1} thất bại!',
+            );
+          }
+
+          if (response.message != null && response.message!.isNotEmpty) {
+            successMessage = response.message!;
+          }
+        }
+
+        if (mounted) Navigator.pop(context); // Close loading spinner
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(successMessage),
+              backgroundColor: ColorUtil.bangladeshGreen,
+            ),
+          );
+          _onRefresh();
+        }
+      } catch (e) {
+        if (mounted) Navigator.pop(context); // Close loading spinner
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Lỗi: ${e.toString()}'),
+              backgroundColor: Colors.redAccent,
+            ),
+          );
+        }
+      }
+    }
+  }
+}
+
+class ReceiveOrderDialog extends StatefulWidget {
+  final String orderCode;
+
+  const ReceiveOrderDialog({super.key, required this.orderCode});
+
+  @override
+  State<ReceiveOrderDialog> createState() => _ReceiveOrderDialogState();
+}
+
+class _ReceiveOrderDialogState extends State<ReceiveOrderDialog> {
+  final TextEditingController _noteController = TextEditingController();
+  final List<File> _images = [];
+  final ImagePicker _picker = ImagePicker();
+  bool _isLoading = false;
+  final _formKey = GlobalKey<FormState>();
+
+  Future<File> _resizeImage(File imageFile) async {
+    Uint8List imageBytes = await imageFile.readAsBytes();
+    img.Image? originalImage = img.decodeImage(imageBytes);
+
+    if (originalImage == null) throw Exception('Không thể đọc ảnh');
+
+    const maxWidth = 800.0;
+    const maxHeight = 800.0;
+    double ratio = originalImage.width / originalImage.height;
+
+    int newWidth = originalImage.width;
+    int newHeight = originalImage.height;
+
+    if (originalImage.width > maxWidth || originalImage.height > maxHeight) {
+      if (ratio > 1) {
+        newWidth = maxWidth.toInt();
+        newHeight = maxWidth ~/ ratio;
+      } else {
+        newHeight = maxHeight.toInt();
+        newWidth = (maxHeight * ratio).toInt();
+      }
+    }
+
+    img.Image resizedImage = img.copyResize(
+      originalImage,
+      width: newWidth,
+      height: newHeight,
+      interpolation: img.Interpolation.linear,
+    );
+
+    final directory = await getTemporaryDirectory();
+    final resizedFile = File(
+      '${directory.path}/resized_${DateTime.now().millisecondsSinceEpoch}_${_images.length}.jpg',
+    );
+    await resizedFile.writeAsBytes(img.encodeJpg(resizedImage, quality: 85));
+
+    return resizedFile;
+  }
+
+  Future<void> _showImageSourceOptions() async {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (BuildContext context) {
+        return SafeArea(
+          child: Wrap(
+            children: <Widget>[
+              ListTile(
+                leading: const Icon(
+                  Icons.photo_camera,
+                  color: ColorUtil.bangladeshGreen,
+                ),
+                title: const Text('Chụp ảnh mới (Camera)'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  _getImageFromCamera();
+                },
+              ),
+              ListTile(
+                leading: const Icon(
+                  Icons.photo_library,
+                  color: ColorUtil.bangladeshGreen,
+                ),
+                title: const Text('Chọn từ thư viện (Gallery)'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  _getImagesFromGallery();
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _getImageFromCamera() async {
+    final XFile? image = await _picker.pickImage(source: ImageSource.camera);
+    if (image != null) {
+      _processImages([image]);
+    }
+  }
+
+  Future<void> _getImagesFromGallery() async {
+    final List<XFile> images = await _picker.pickMultiImage();
+    if (images.isNotEmpty) {
+      _processImages(images);
+    }
+  }
+
+  Future<void> _processImages(List<XFile> images) async {
+    setState(() {
+      _isLoading = true;
+    });
+    try {
+      for (var image in images) {
+        final File resizedImage = await _resizeImage(File(image.path));
+        setState(() {
+          _images.add(resizedImage);
+        });
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Lỗi xử lý ảnh: $e')));
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _removeImage(int index) {
+    setState(() {
+      _images.removeAt(index);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Form(
+        key: _formKey,
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Xác Nhận Nhận Hàng',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: ColorUtil.raisinBlack,
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close, color: Colors.grey),
+                      onPressed: () => Navigator.pop(context),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Đơn hàng: ${widget.orderCode}',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey[600],
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _noteController,
+                  maxLines: 3,
+                  decoration: InputDecoration(
+                    labelText: 'Ghi chú nhận hàng',
+                    hintText:
+                        'Nhập ghi chú (ví dụ: người nhận, tình trạng vật tư...)',
+                    alignLabelWithHint: true,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    contentPadding: const EdgeInsets.all(12),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Vui lòng nhập ghi chú';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Hình ảnh thực tế (Yêu cầu ít nhất 1 ảnh)',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: ColorUtil.raisinBlack,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                _images.isEmpty
+                    ? InkWell(
+                        onTap: _isLoading ? null : _showImageSourceOptions,
+                        child: Container(
+                          height: 120,
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey[300]!),
+                            borderRadius: BorderRadius.circular(8),
+                            color: const Color(0xfff7f8fa),
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.add_a_photo_outlined,
+                                size: 36,
+                                color: Colors.grey[400],
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Bấm để chọn/chụp ảnh',
+                                style: TextStyle(
+                                  color: Colors.grey[600],
+                                  fontSize: 13,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                    : GridView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 3,
+                              crossAxisSpacing: 8,
+                              mainAxisSpacing: 8,
+                            ),
+                        itemCount: _images.length + 1,
+                        itemBuilder: (context, index) {
+                          if (index == _images.length) {
+                            return InkWell(
+                              onTap: _isLoading
+                                  ? null
+                                  : _showImageSourceOptions,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  border: Border.all(color: Colors.grey[300]!),
+                                  borderRadius: BorderRadius.circular(8),
+                                  color: const Color(0xfff7f8fa),
+                                ),
+                                child: Icon(
+                                  Icons.add_a_photo_outlined,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                            );
+                          }
+                          return Stack(
+                            children: [
+                              Positioned.fill(
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Image.file(
+                                    _images[index],
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                              ),
+                              Positioned(
+                                top: 4,
+                                right: 4,
+                                child: GestureDetector(
+                                  onTap: () => _removeImage(index),
+                                  child: Container(
+                                    decoration: const BoxDecoration(
+                                      color: Colors.black54,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    padding: const EdgeInsets.all(4),
+                                    child: const Icon(
+                                      Icons.close,
+                                      size: 14,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                const SizedBox(height: 24),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    OutlinedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: Colors.grey),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                      ),
+                      child: const Text(
+                        'Hủy',
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    ElevatedButton(
+                      onPressed: _isLoading
+                          ? null
+                          : () {
+                              if (_formKey.currentState!.validate()) {
+                                if (_images.isEmpty) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                        'Vui lòng chọn ít nhất 1 hình ảnh!',
+                                      ),
+                                      backgroundColor: Colors.redAccent,
+                                    ),
+                                  );
+                                  return;
+                                }
+                                Navigator.pop(context, {
+                                  'note': _noteController.text.trim(),
+                                  'images': _images,
+                                });
+                              }
+                            },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: ColorUtil.bangladeshGreen,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 12,
+                        ),
+                      ),
+                      child: _isLoading
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : const Text(
+                              'Nhận Hàng',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _noteController.dispose();
+    super.dispose();
   }
 }

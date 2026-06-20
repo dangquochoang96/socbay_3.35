@@ -8,7 +8,7 @@ import 'package:socbay/blocs/staff/new_task_sale/staff_service_screen_sale_state
 import 'package:socbay/data/repository/auth/api_repository.dart';
 import 'package:socbay/application.dart';
 import 'package:socbay/config/app_config.dart';
-import 'package:socbay/constants/api_endpoints.dart';
+import 'package:socbay/data/data_provider/api_endpoints.dart';
 import 'package:socbay/data/model/home_service_model.dart';
 import 'package:socbay/data/model/order_model.dart';
 import 'package:socbay/data/model/task_model.dart';

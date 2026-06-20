@@ -5,7 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:socbay/blocs/machine/machine_detail/machine_detail_event.dart';
 import 'package:socbay/blocs/machine/machine_detail/machine_detail_state.dart';
 import 'package:socbay/config/app_config.dart';
-import 'package:socbay/constants/api_endpoints.dart';
+import 'package:socbay/data/data_provider/api_endpoints.dart';
 import 'package:socbay/data/model/order_detail_model.dart';
 import 'package:socbay/data/model/order_rent_model.dart';
 import 'package:socbay/data/model/order_model.dart';

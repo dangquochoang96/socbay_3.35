@@ -29,6 +29,7 @@ class StaffCreateOrderEvent extends StaffNewOrderEvent {
   List<String>? images;
   String? newAddress;
   String? newAddressSP;
+  String? ghichu;
   StaffCreateOrderEvent(
     this.productId,
     this.newProductId,
@@ -49,6 +50,7 @@ class StaffCreateOrderEvent extends StaffNewOrderEvent {
     this.rentalPeriod,
     this.deposits,
     this.rentalEndDate,
+    this.ghichu,
   );
 }
 

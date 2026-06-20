@@ -7,7 +7,7 @@ import 'package:socbay/application.dart';
 import 'package:socbay/blocs/home/staff_info/staff_info_screen_event.dart';
 import 'package:socbay/blocs/home/staff_info/staff_info_screen_state.dart';
 import 'package:socbay/config/app_config.dart';
-import 'package:socbay/constants/api_endpoints.dart';
+import 'package:socbay/data/data_provider/api_endpoints.dart';
 import 'package:socbay/utils/logger_util.dart';
 
 import '../../../data/model/order_detail_model.dart';

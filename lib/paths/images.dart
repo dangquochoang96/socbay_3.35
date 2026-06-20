@@ -31,4 +31,6 @@ class Images {
   static const String iconinventory = "inventory.jpg";
   static const String iconRemovComen = "comenandremov2.png";
   static const String successPayment = "da-thanh-toan.jpg";
+  static const String warehouseImport = "nhapvattu.jpg";
+  static const String ktvWarehouse = "khocanhan.jpg";
 }

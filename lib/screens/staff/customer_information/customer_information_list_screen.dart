@@ -29,11 +29,27 @@ class _CustomerInformationListScreenState
   List<UserProfile> _filteredUsers = [];
 
   late final UserProfile? iss;
+  bool get _isSearchEmpty =>
+      _nameController.text.trim().isEmpty &&
+      _phoneController.text.trim().isEmpty &&
+      _addressController.text.trim().isEmpty;
+
   @override
   void initState() {
     _bloc = BlocProvider.of(context);
     _bloc.add(CustomerInformationListStartEvent());
+    _nameController.addListener(_onSearchFieldChanged);
+    _phoneController.addListener(_onSearchFieldChanged);
+    _addressController.addListener(_onSearchFieldChanged);
     super.initState();
+  }
+
+  void _onSearchFieldChanged() {
+    if (_isSearchEmpty && _filteredUsers.isNotEmpty) {
+      setState(() {
+        _filteredUsers = [];
+      });
+    }
   }
 
   void _filterUsers() {
@@ -43,7 +59,7 @@ class _CustomerInformationListScreenState
 
     setState(() {
       if (nameFilter.isEmpty && phoneFilter.isEmpty && addressFilter.isEmpty) {
-        _filteredUsers = _bloc.users;
+        _filteredUsers = [];
       } else {
         _filteredUsers = _bloc.users.where((element) {
           if (element.username != null && nameFilter.isNotEmpty) {
@@ -108,6 +124,9 @@ class _CustomerInformationListScreenState
 
   @override
   void dispose() {
+    _nameController.removeListener(_onSearchFieldChanged);
+    _phoneController.removeListener(_onSearchFieldChanged);
+    _addressController.removeListener(_onSearchFieldChanged);
     _nameController.dispose();
     _phoneController.dispose();
     _addressController.dispose();
@@ -148,13 +167,17 @@ class _CustomerInformationListScreenState
                       _buildSearchFormCard(),
                       const SizedBox(height: 12),
                       _buildSearchButton(),
-                      const SizedBox(height: 16),
-                      _buildResultsHeader(),
+                      if (!_isSearchEmpty) ...[
+                        const SizedBox(height: 16),
+                        _buildResultsHeader(),
+                      ],
                     ],
                   ),
                 ),
               ),
-              if (_filteredUsers.isEmpty)
+              if (_isSearchEmpty)
+                const SliverToBoxAdapter(child: SizedBox.shrink())
+              else if (_filteredUsers.isEmpty)
                 SliverToBoxAdapter(child: _buildNoResults())
               else
                 SliverPadding(

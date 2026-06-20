@@ -6,7 +6,7 @@ import 'package:socbay/application.dart';
 import 'package:socbay/blocs/booking/booking_event.dart';
 import 'package:socbay/blocs/booking/booking_state.dart';
 import 'package:socbay/config/app_config.dart';
-import 'package:socbay/constants/api_endpoints.dart';
+import 'package:socbay/data/data_provider/api_endpoints.dart';
 import 'package:socbay/utils/logger_util.dart';
 import '../../data/model/task_model.dart';
 import '../../data/repository/auth/api_repository.dart';

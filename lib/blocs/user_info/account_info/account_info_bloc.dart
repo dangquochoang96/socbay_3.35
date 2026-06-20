@@ -6,7 +6,7 @@ import 'package:socbay/application.dart';
 import 'package:socbay/blocs/user_info/account_info/account_info_event.dart';
 import 'package:socbay/blocs/user_info/account_info/account_info_state.dart';
 import 'package:socbay/config/app_config.dart';
-import 'package:socbay/constants/api_endpoints.dart';
+import 'package:socbay/data/data_provider/api_endpoints.dart';
 import 'package:socbay/data/model/request/user_info_request.dart';
 import 'package:socbay/data/model/user_profile.dart';
 import 'package:socbay/data/repository/auth/api_repository.dart';

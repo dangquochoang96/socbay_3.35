@@ -9,7 +9,7 @@ import 'package:socbay/application.dart';
 import 'package:socbay/blocs/staff/new_order/staff_new_order_event.dart';
 import 'package:socbay/blocs/staff/new_order/staff_new_order_state.dart';
 import 'package:socbay/config/app_config.dart';
-import 'package:socbay/constants/api_endpoints.dart';
+import 'package:socbay/data/data_provider/api_endpoints.dart';
 import 'package:socbay/data/model/order_detail_model.dart';
 import 'package:socbay/data/model/order_filter_core_model.dart';
 import 'package:socbay/data/model/order_model.dart';
@@ -247,7 +247,9 @@ class StaffNewOrderBloc extends Bloc<StaffNewOrderEvent, StaffNewOrderState> {
                     ? '4'
                     : '2'
               : (listNextDate.replaceAll(',', '').isEmpty ? '4' : '2'),
-          if (isRent) ...{'type': '4', 'vat': event.vatAmount.toString()},
+          if (isRent) ...{'type': '4'},
+          'vat': event.vatAmount.toString(),
+          'ghichu': event.ghichu,
           'tich_diem': event.savePoint.toString(),
           'tru_diem': event.subSavePoint.toString(),
           'type_payment': event.paymentType.toString(),

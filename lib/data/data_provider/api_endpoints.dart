@@ -173,4 +173,6 @@ abstract final class ApiEndpoints {
   static String refundWarehouse(Object? id) => '/riha/warehouse_refund/$id';
   static const retailOrder = '/retailOrder';
   static const createRetailOrder = '/retailOrder/createRetailOrder';
+  static String retailOrderShipConfirm(Object? id) =>
+      '/retailOrderShip/$id/storeAssignmentImage';
 }

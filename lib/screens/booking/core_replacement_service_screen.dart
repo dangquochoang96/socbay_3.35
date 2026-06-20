@@ -592,13 +592,12 @@ class _CoreReplacementServiceScreenState
         children: [
           _buildInfoRow("Ngày thực hiện:", _bloc.createDate),
           _buildInfoRow("Tổng tiền:", (sumPrice.toInt()).toString().toVND()),
-          if (_bloc.orderDetailModel?.type == '4')
-            _buildInfoRow(
-              "Thuế VAT:",
-              (_bloc.orderDetailModel?.vatAmount != null)
-                  ? '${_bloc.orderDetailModel?.vatAmount}%'
-                  : '',
-            ),
+          _buildInfoRow(
+            "Thuế VAT:",
+            (_bloc.orderDetailModel?.vatAmount != null)
+                ? '${_bloc.orderDetailModel?.vatAmount}%'
+                : '',
+          ),
           _buildInfoRow("Chiết khấu:", (discount ?? '0').toString().toVND()),
           _buildInfoRow(
             "Trừ tích điểm:",

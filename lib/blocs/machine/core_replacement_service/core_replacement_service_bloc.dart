@@ -6,7 +6,7 @@ import 'package:socbay/application.dart';
 import 'package:socbay/blocs/machine/core_replacement_service/core_replacement_service_event.dart';
 import 'package:socbay/blocs/machine/core_replacement_service/core_replacement_service_state.dart';
 import 'package:socbay/config/app_config.dart';
-import 'package:socbay/constants/api_endpoints.dart';
+import 'package:socbay/data/data_provider/api_endpoints.dart';
 import 'package:socbay/data/model/order_detail_model.dart';
 import 'package:socbay/data/model/order_filter_core_model.dart';
 import 'package:socbay/data/repository/auth/api_repository.dart';

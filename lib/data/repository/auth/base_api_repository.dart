@@ -98,4 +98,9 @@ abstract class BaseApiRepository {
   Future<DefaultResponse> deleteTask(int id, String name, String des);
   Future<DefaultResponse<List<TaskModel>>> getListTask({int page = 1});
   Future<DefaultResponse<TaskModel>> getTask(int id);
+  Future<DefaultResponse> storeAssignmentImage({
+    required String id,
+    required String note,
+    required File image,
+  });
 }

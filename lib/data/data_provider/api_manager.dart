@@ -1,4 +1,4 @@
-import 'package:socbay/constants/api_endpoints.dart';
+import 'package:socbay/data/data_provider/api_endpoints.dart';
 
 enum HttpMethod { get, post, put, del }
 
@@ -43,6 +43,7 @@ enum ApiType {
 
   ///MEDIA
   uploadImage,
+  storeAssignmentImage,
 
   ///SERVICE
   createTask,
@@ -155,6 +156,12 @@ class ApiManager {
       case ApiType.uploadImage:
         return ApiConfig(
           path: ApiEndpoints.uploadImage,
+          method: HttpMethod.post,
+          headers: _defaultHeaders,
+        );
+      case ApiType.storeAssignmentImage:
+        return ApiConfig(
+          path: ApiEndpoints.retailOrderShipConfirm(additionalPath),
           method: HttpMethod.post,
           headers: _defaultHeaders,
         );

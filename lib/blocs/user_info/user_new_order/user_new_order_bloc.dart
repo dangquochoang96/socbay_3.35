@@ -7,7 +7,7 @@ import 'package:socbay/application.dart';
 import 'package:socbay/blocs/user_info/user_new_order/user_new_order_event.dart';
 import 'package:socbay/blocs/user_info/user_new_order/user_new_order_state.dart';
 import 'package:socbay/config/app_config.dart';
-import 'package:socbay/constants/api_endpoints.dart';
+import 'package:socbay/data/data_provider/api_endpoints.dart';
 import 'package:socbay/data/model/order_detail_model.dart';
 import 'package:socbay/data/model/order_filter_core_model.dart';
 import 'package:socbay/data/model/order_model.dart';

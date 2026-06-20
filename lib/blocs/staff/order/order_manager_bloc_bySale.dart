@@ -6,7 +6,7 @@ import 'package:socbay/application.dart';
 import 'package:socbay/blocs/staff/order/order_manager_event.dart';
 import 'package:socbay/blocs/staff/order/order_manager_state.dart';
 import 'package:socbay/config/app_config.dart';
-import 'package:socbay/constants/api_endpoints.dart';
+import 'package:socbay/data/data_provider/api_endpoints.dart';
 import 'package:socbay/data/model/order_detail_model.dart';
 import 'package:socbay/data/model/staff_order_detail_model.dart';
 import 'package:socbay/data/model/staff_sales_income_model.dart';

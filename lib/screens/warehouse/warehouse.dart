@@ -13,7 +13,7 @@ import 'package:socbay/blocs/warehouse/warehouse_bloc.dart';
 import 'package:socbay/blocs/warehouse/warehouse_event.dart';
 import 'package:socbay/blocs/warehouse/warehouse_state.dart';
 import 'package:socbay/config/app_config.dart';
-import 'package:socbay/constants/api_endpoints.dart';
+import 'package:socbay/data/data_provider/api_endpoints.dart';
 import 'package:socbay/data/model/warehouse_model.dart';
 import 'package:socbay/data/model/user_profile.dart';
 import 'package:socbay/utils/color_util.dart';

@@ -1,11 +1,12 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:socbay/utils/auth_http.dart' as http;
 
 import 'package:dio/dio.dart';
 import 'package:intl/intl.dart';
 import 'package:socbay/application.dart';
 import 'package:socbay/config/app_config.dart';
-import 'package:socbay/constants/api_endpoints.dart';
+import 'package:socbay/data/data_provider/api_endpoints.dart';
 import 'package:socbay/data/data_provider/api_manager.dart';
 import 'package:socbay/data/data_provider/base_api.dart';
 import 'package:socbay/data/model/banner_model.dart';
@@ -977,6 +978,47 @@ class ApiProvider {
       } else {
         return DefaultResponse(status: res.status, message: res.message);
       }
+    } catch (e) {
+      return DefaultResponse.withError(Error(message: e.toString()));
+    }
+  }
+
+  Future<DefaultResponse> storeAssignmentImage({
+    required String id,
+    required String note,
+    required File image,
+  }) async {
+    try {
+      final String url = AppConfig.instance.apiUrl(
+        ApiEndpoints.retailOrderShipConfirm(id),
+      );
+
+      final request = http.MultipartRequest('POST', Uri.parse(url));
+
+      // Add fields matching the other working app
+      request.fields['note'] = note;
+      request.fields['retail_shipment_assigment_user_id'] = id;
+      request.fields['image'] = image.toString(); // Exact string mapping of File
+
+      // Add actual image file stream
+      final stream = http.ByteStream(image.openRead());
+      final length = await image.length();
+      final filename = image.path.split('/').last;
+
+      final multipartFile = http.MultipartFile(
+        'image',
+        stream,
+        length,
+        filename: filename,
+      );
+      request.files.add(multipartFile);
+
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+
+      final Map resJson = json.decode(response.body);
+      final res = DefaultResponse.fromJson(Map<String, dynamic>.from(resJson));
+      return res;
     } catch (e) {
       return DefaultResponse.withError(Error(message: e.toString()));
     }

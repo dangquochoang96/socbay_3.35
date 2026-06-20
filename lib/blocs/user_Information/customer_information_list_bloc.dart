@@ -5,7 +5,7 @@ import 'dart:io';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:socbay/utils/auth_http.dart' as http;
 import '../../config/app_config.dart';
-import 'package:socbay/constants/api_endpoints.dart';
+import 'package:socbay/data/data_provider/api_endpoints.dart';
 import '../../data/repository/auth/api_repository.dart';
 import 'customer_information_list_event.dart';
 import 'customer_information_list_state.dart';

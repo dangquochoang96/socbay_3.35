@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:bloc/bloc.dart';
 import 'package:socbay/application.dart';
 import 'package:socbay/config/app_config.dart';
-import 'package:socbay/constants/api_endpoints.dart';
+import 'package:socbay/data/data_provider/api_endpoints.dart';
 import 'package:socbay/data/model/banner_model.dart';
 import 'package:socbay/data/model/blog_model.dart';
 import 'package:socbay/data/model/home_service_model.dart';

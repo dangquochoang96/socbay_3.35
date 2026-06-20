@@ -29,7 +29,7 @@ import 'package:socbay/widgets/textfield_search.dart';
 import 'package:socbay/utils/context_extension.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:socbay/application.dart';
-import 'package:socbay/constants/api_endpoints.dart';
+import 'package:socbay/data/data_provider/api_endpoints.dart';
 import 'package:socbay/data/model/warehouse_model.dart';
 import 'package:socbay/utils/auth_http.dart' as http;
 import 'dart:convert';
@@ -65,6 +65,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
   final TextEditingController _monthlyPaymentController =
       TextEditingController();
   final TextEditingController _vatController = TextEditingController();
+  final TextEditingController _noteController = TextEditingController();
 
   TextEditingController chietKhauController = TextEditingController();
   TextEditingController subSavePointController = TextEditingController();
@@ -203,6 +204,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
     _bloc.close();
     lstKeyValueCores.clear();
     lstKeyValueMaintainCores.clear();
+    _noteController.dispose();
     super.dispose();
   }
 
@@ -370,6 +372,19 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                           decoration: const InputDecoration(
                             border: InputBorder.none,
                             hintText: 'Nhập vị trí lắp đặt...',
+                          ),
+                        ),
+                      ),
+                    ),
+                    _buildInputRow(
+                      'Ghi chú',
+                      _buildTextFieldWrapper(
+                        TextField(
+                          controller: _noteController,
+                          maxLines: 3,
+                          decoration: const InputDecoration(
+                            border: InputBorder.none,
+                            hintText: 'Nhập ghi chú...',
                           ),
                         ),
                       ),
@@ -567,120 +582,44 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                                   subSavePointController.text = _bloc
                                       .subSavePoint
                                       .toString();
-                                  var chietKhau = chietKhauController.text;
-                                  var totalPay =
-                                      _bloc.total -
-                                      (int.tryParse(
-                                            chietKhau
-                                                .replaceAll(".", "")
-                                                .replaceAll("đ", "")
-                                                .nonBreaking
-                                                .trim(),
-                                          ) ??
-                                          0) -
-                                      1000 * _bloc.subSavePoint;
-                                  _bloc.totalPay = totalPay > 0 ? totalPay : 0;
-                                  _bloc.savePoint =
-                                      (_bloc.totalPay * 3 / 100000).ceil();
+                                  _recalculateTotal();
                                 });
                               } else {
                                 setState(() {
-                                  var chietKhau = chietKhauController.text;
-                                  var totalPay =
-                                      _bloc.total -
-                                      (int.tryParse(
-                                            chietKhau
-                                                .replaceAll(".", "")
-                                                .replaceAll("đ", "")
-                                                .nonBreaking
-                                                .trim(),
-                                          ) ??
-                                          0) -
-                                      1000 * (int.tryParse(text) ?? 0);
-                                  _bloc.totalPay = totalPay > 0 ? totalPay : 0;
-                                  _bloc.savePoint =
-                                      (_bloc.totalPay * 3 / 100000).ceil();
+                                  _recalculateTotal();
                                 });
                               }
                             } else {
                               setState(() {
-                                var chietKhau = chietKhauController.text;
-                                var totalPay =
-                                    _bloc.total -
-                                    (int.tryParse(
-                                          chietKhau
-                                              .replaceAll(".", "")
-                                              .replaceAll("đ", "")
-                                              .nonBreaking
-                                              .trim(),
-                                        ) ??
-                                        0);
-                                _bloc.totalPay = totalPay > 0 ? totalPay : 0;
-                                _bloc.savePoint = (_bloc.totalPay * 3 / 100000)
-                                    .ceil();
+                                _recalculateTotal();
                               });
                             }
                           },
                         ),
                       ),
                     ),
-                    if (widget.isRent)
-                      _buildInputRow(
-                        'Thuế VAT (%)',
-                        _buildTextFieldWrapper(
-                          TextField(
-                            controller: _vatController,
-                            style: const TextStyle(color: ColorUtil.red),
-                            keyboardType: TextInputType.number,
-                            inputFormatters: [
-                              FilteringTextInputFormatter.digitsOnly,
-                            ],
-                            decoration: const InputDecoration(
-                              border: InputBorder.none,
-                              hintText: 'Nhập % VAT...',
-                            ),
-                            onChanged: (text) {
-                              if (text.isNotEmpty) {
-                                _bloc.vatPercentage =
-                                    double.tryParse(text) ?? 0;
-                                _bloc.vatAmount =
-                                    (_bloc.totalPay * _bloc.vatPercentage / 100)
-                                        .round();
-                                setState(() {
-                                  _bloc.totalPay =
-                                      _bloc.total +
-                                      _bloc.vatAmount -
-                                      (int.tryParse(
-                                            chietKhauController.text
-                                                .replaceAll(".", "")
-                                                .replaceAll("đ", "")
-                                                .nonBreaking
-                                                .trim(),
-                                          ) ??
-                                          0);
-                                  _bloc.savePoint =
-                                      (_bloc.totalPay * 3 / 100000).ceil();
-                                });
-                              } else {
-                                setState(() {
-                                  _bloc.totalPay =
-                                      _bloc.total -
-                                      (int.tryParse(
-                                            chietKhauController.text
-                                                .replaceAll(".", "")
-                                                .replaceAll("đ", "")
-                                                .nonBreaking
-                                                .trim(),
-                                          ) ??
-                                          0);
-                                  _bloc.savePoint =
-                                      (_bloc.totalPay * 3 / 100000).ceil();
-                                });
-                              }
-                            },
+                    _buildInputRow(
+                      'Thuế VAT (%)',
+                      _buildTextFieldWrapper(
+                        TextField(
+                          controller: _vatController,
+                          style: const TextStyle(color: ColorUtil.red),
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
+                          decoration: const InputDecoration(
+                            border: InputBorder.none,
+                            hintText: 'Nhập % VAT...',
                           ),
+                          onChanged: (text) {
+                            setState(() {
+                              _recalculateTotal();
+                            });
+                          },
                         ),
                       ),
+                    ),
                     const Divider(color: Color(0xFFF1F5F9), height: 32),
                     _buildInfoRow(
                       'Tổng thanh toán',
@@ -844,7 +783,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                                 .trim(),
                           ) ??
                           0,
-                      vat: 0,
+                      vat: int.tryParse(_vatController.text) ?? 0,
                       totalPay: _bloc.totalPay,
                       savePoint: _bloc.savePoint,
                       subSavePoint: (_bloc.total == 0 && _bloc.totalPay == 0)
@@ -853,6 +792,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                       paymentType: _bloc.paymentType,
                       images: _listPath,
                       staff: _bloc.taskModel?.staff?.username,
+                      ghichu: _noteController.text,
                     );
 
                     Navigator.pushNamed(
@@ -1003,7 +943,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                         _bloc.totalPay,
                         _bloc.savePoint,
                         _bloc.paymentType,
-                        widget.isRent ? _vatController.text : '0',
+                        _vatController.text.isEmpty ? '0' : _vatController.text,
                         _listPath,
                         addressCustomerController.text,
                         addressCustomerControllerSP.text,
@@ -1023,6 +963,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                                   .trim()
                             : '0',
                         widget.isRent ? _selectedEndDate : DateTime.now(),
+                        _noteController.text,
                       ),
                     );
                   },
@@ -1269,7 +1210,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: const BoxDecoration(
-            color: ColorUtil.green,
+            color: ColorUtil.bangladeshGreen,
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(16),
               topRight: Radius.circular(16),
@@ -1279,7 +1220,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text(
-                "Chi tiết lần thay lõi",
+                "Vật tư thay thế",
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -1368,14 +1309,18 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                           )
                         : TextFormField(
                             controller: lstKeyValueCores[i].key,
-                            readOnly: true,
-                            onTap: () {
-                              _showCoreSearchSelector(context, i);
-                            },
+                            readOnly: !lstKeyValueCores[i].isManualInput,
+                            onTap: lstKeyValueCores[i].isManualInput
+                                ? null
+                                : () {
+                                    _showCoreSearchSelector(context, i);
+                                  },
                             decoration: InputDecoration(
-                              hintText: _ktvWarehouseCores.isEmpty
-                                  ? 'Kho trống!'
-                                  : 'Chọn lõi/máy...',
+                              hintText: lstKeyValueCores[i].isManualInput
+                                  ? 'Nhập trường hợp khác'
+                                  : (_ktvWarehouseCores.isEmpty
+                                        ? 'Kho trống!'
+                                        : 'Chọn lõi/máy...'),
                               isDense: true,
                               contentPadding: const EdgeInsets.symmetric(
                                 horizontal: 12,
@@ -1403,6 +1348,8 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                                         setState(() {
                                           lstKeyValueCores[i].key.clear();
                                           lstKeyValueCores[i].value.clear();
+                                          lstKeyValueCores[i].isManualInput =
+                                              false;
                                           _recalculateTotal();
                                         });
                                       },
@@ -1496,7 +1443,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: const BoxDecoration(
-            color: ColorUtil.green,
+            color: ColorUtil.bangladeshGreen,
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(16),
               topRight: Radius.circular(16),
@@ -1682,30 +1629,38 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
           ) ??
           0;
     }
+
     var chietkhau = chietKhauController.text;
+    int discount =
+        int.tryParse(
+          chietkhau.replaceAll(".", "").replaceAll("đ", "").nonBreaking.trim(),
+        ) ??
+        0;
+
+    int subPoints = int.tryParse(subSavePointController.text) ?? 0;
     if (_bloc.total > _bloc.subSavePoint * 1000) {
-      subSavePointController.text = _bloc.subSavePoint.toString();
+      if (subPoints > _bloc.subSavePoint) {
+        subPoints = _bloc.subSavePoint;
+        subSavePointController.text = subPoints.toString();
+      }
+    } else {
+      if (subPoints > _bloc.subSavePoint) {
+        subPoints = _bloc.subSavePoint;
+        subSavePointController.text = subPoints.toString();
+      }
     }
-    _bloc.totalPay =
-        _bloc.total -
-        (int.tryParse(
-              chietkhau
-                  .replaceAll(".", "")
-                  .replaceAll("đ", "")
-                  .nonBreaking
-                  .trim(),
-            ) ??
-            0) -
-        (int.tryParse(subSavePointController.text) ?? 0) * 1000;
-    if (_bloc.totalPay < 0) {
-      _bloc.totalPay = 0;
-      _bloc.savePoint = 0;
-      subSavePointController.text = "0";
-      return;
+
+    int subSavePointVal = subPoints * 1000;
+    int baseAmount = _bloc.total - discount - subSavePointVal;
+    if (baseAmount < 0) {
+      baseAmount = 0;
     }
-    if (_bloc.totalPay > _bloc.subSavePoint * 1000) {
-      subSavePointController.text = _bloc.subSavePoint.toString();
-    }
+
+    double vatPercent = double.tryParse(_vatController.text) ?? 0;
+    _bloc.vatPercentage = vatPercent;
+    _bloc.vatAmount = (baseAmount * vatPercent / 100).round();
+
+    _bloc.totalPay = baseAmount + _bloc.vatAmount;
     _bloc.savePoint = (_bloc.totalPay * 3 / 100000).ceil();
   }
 
@@ -1721,12 +1676,20 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
         String searchQuery = "";
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setModalState) {
-            final filteredList = _ktvWarehouseCores
-                .where(
-                  (core) =>
-                      core.toLowerCase().contains(searchQuery.toLowerCase()),
-                )
-                .toList();
+            final List<String> filteredList = [];
+            const String manualOption = "Lắp đặt, VSBD, Khác";
+            if (searchQuery.isEmpty ||
+                manualOption.toLowerCase().contains(
+                  searchQuery.toLowerCase(),
+                )) {
+              filteredList.add(manualOption);
+            }
+            filteredList.addAll(
+              _ktvWarehouseCores.where(
+                (core) =>
+                    core.toLowerCase().contains(searchQuery.toLowerCase()),
+              ),
+            );
 
             return Padding(
               padding: EdgeInsets.only(
@@ -1812,7 +1775,15 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                                   ),
                                   onTap: () {
                                     setState(() {
-                                      lstKeyValueCores[index].key.text = item;
+                                      if (item == manualOption) {
+                                        lstKeyValueCores[index].isManualInput =
+                                            true;
+                                        lstKeyValueCores[index].key.text = "";
+                                      } else {
+                                        lstKeyValueCores[index].isManualInput =
+                                            false;
+                                        lstKeyValueCores[index].key.text = item;
+                                      }
                                     });
                                     Navigator.pop(context);
                                   },
@@ -2181,7 +2152,8 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
 class KeyValue {
   late TextEditingController key;
   late TextEditingController value;
+  bool isManualInput;
 
   //late TextEditingController selectedDate;
-  KeyValue(this.key, this.value);
+  KeyValue(this.key, this.value, {this.isManualInput = false});
 }

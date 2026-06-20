@@ -14,7 +14,7 @@ import 'package:intl/intl.dart';
 import 'package:socbay/application.dart';
 import 'package:socbay/components/qr_reader_view.dart';
 import 'package:socbay/config/app_config.dart';
-import 'package:socbay/constants/api_endpoints.dart';
+import 'package:socbay/data/data_provider/api_endpoints.dart';
 import 'package:socbay/constants/constants.dart';
 import 'package:socbay/data/model/product_model.dart';
 import 'package:socbay/data/model/user_profile.dart';

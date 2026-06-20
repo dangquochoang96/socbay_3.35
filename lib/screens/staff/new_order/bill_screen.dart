@@ -137,6 +137,11 @@ class _BillScreenState extends State<BillScreen> {
                   'SDT: ${billData.phone}',
                   style: const TextStyle(fontSize: 18),
                 ),
+                if (billData.ghichu != null && billData.ghichu!.isNotEmpty)
+                  Text(
+                    'Ghi chú: ${billData.ghichu}',
+                    style: const TextStyle(fontSize: 18),
+                  ),
                 const SizedBox(height: 20.0),
                 Table(
                   border: TableBorder.all(),

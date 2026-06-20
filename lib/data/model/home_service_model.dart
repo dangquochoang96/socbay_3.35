@@ -94,12 +94,12 @@ class HomeServiceModel {
       name: 'GÓP Ý & KHIẾU NẠI',
     ),
     HomeServiceModel(
-      image: Images.iconNews,
-      des: 'Quản lý đơn nhập vật liệu',
-      name: 'Nhập Vật Liệu',
+      image: Images.warehouseImport,
+      des: 'Quản lý đơn nhập vật tư',
+      name: 'Nhập Vật Tư',
     ),
     HomeServiceModel(
-      image: Images.iconinventory,
+      image: Images.ktvWarehouse,
       des: 'Kho Cá Nhân của KTV',
       name: 'KHO CÁ NHÂN',
     ),

@@ -7,7 +7,7 @@ import 'package:socbay/application.dart';
 import 'package:socbay/blocs/root/root_event.dart';
 import 'package:socbay/blocs/root/root_state.dart';
 import 'package:socbay/config/app_config.dart';
-import 'package:socbay/constants/api_endpoints.dart';
+import 'package:socbay/data/data_provider/api_endpoints.dart';
 import 'package:socbay/data/model/user_profile.dart';
 import 'package:socbay/db/database.dart';
 import 'package:socbay/db/object_mapper/object_mapper.dart';

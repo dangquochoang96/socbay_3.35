@@ -248,4 +248,17 @@ class ApiRepository extends BaseApiRepository {
   Future<DefaultResponse> deleteTask(int id, String name, String des) {
     return _apiProvider.deleteTask(id, name, des);
   }
+
+  @override
+  Future<DefaultResponse> storeAssignmentImage({
+    required String id,
+    required String note,
+    required File image,
+  }) {
+    return _apiProvider.storeAssignmentImage(
+      id: id,
+      note: note,
+      image: image,
+    );
+  }
 }
