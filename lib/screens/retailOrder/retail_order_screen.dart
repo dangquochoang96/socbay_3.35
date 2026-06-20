@@ -35,6 +35,7 @@ class _RetailOrderScreenState extends State<RetailOrderScreen> {
   final ScrollController _scrollController = ScrollController();
   String _searchQuery = "";
   Timer? _debounce;
+  final Set<String> _expandedOrderIds = {};
 
   @override
   void initState() {
@@ -340,6 +341,23 @@ class _RetailOrderScreenState extends State<RetailOrderScreen> {
     final orderCode = (order.code != null && order.code!.isNotEmpty)
         ? order.code!
         : 'SB_${order.id}';
+    final String orderIdStr = order.id.toString();
+    final bool isExpanded = _expandedOrderIds.contains(orderIdStr);
+
+    final currentUserId = App.instance.userApp?.id?.toString();
+    bool hasUploadedProof = false;
+    if (order.retailOrderShipment?.shipmentUsers != null) {
+      for (var assign in order.retailOrderShipment!.shipmentUsers!) {
+        if (assign.userId == currentUserId) {
+          final hasImages = assign.images != null && assign.images!.isNotEmpty;
+          final hasNote = assign.note != null && assign.note!.isNotEmpty;
+          if (hasImages || hasNote) {
+            hasUploadedProof = true;
+          }
+          break;
+        }
+      }
+    }
 
     double productTotal = 0;
     if (order.orderdetails != null) {
@@ -454,125 +472,271 @@ class _RetailOrderScreenState extends State<RetailOrderScreen> {
           ),
           const Divider(height: 1, color: Color(0xfff1f2f6)),
 
-          // Product list
-          if (order.orderdetails != null && order.orderdetails!.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+          // Toggle Expand Button
+          InkWell(
+            onTap: () {
+              setState(() {
+                if (isExpanded) {
+                  _expandedOrderIds.remove(orderIdStr);
+                } else {
+                  _expandedOrderIds.add(orderIdStr);
+                }
+              });
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text(
-                    "Sản phẩm",
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: ColorUtil.raisinBlack,
+                  Text(
+                    isExpanded ? "Thu gọn" : "Xem chi tiết",
+                    style: const TextStyle(
+                      color: ColorUtil.bangladeshGreen,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
-                  const SizedBox(height: 12),
-                  ...order.orderdetails!.map(
-                    (detail) => _buildProductItem(detail),
+                  Icon(
+                    isExpanded
+                        ? Icons.keyboard_arrow_up
+                        : Icons.keyboard_arrow_down,
+                    color: ColorUtil.bangladeshGreen,
                   ),
                 ],
               ),
             ),
+          ),
           const Divider(height: 1, color: Color(0xfff1f2f6)),
 
-          // Footer / Total
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          if (isExpanded) ...[
+            // Product list
+            if (order.orderdetails != null &&
+                order.orderdetails!.isNotEmpty) ...[
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
-                      "Tạm tính",
-                      style: TextStyle(fontSize: 13, color: Colors.grey),
-                    ),
-                    Text(
-                      _formatCurrency(productTotal),
-                      style: const TextStyle(
-                        fontSize: 13,
-                        color: ColorUtil.raisinBlack,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      "Phí vận chuyển",
-                      style: TextStyle(fontSize: 13, color: Colors.grey),
-                    ),
-                    Text(
-                      _formatCurrency(shipFee),
-                      style: const TextStyle(
-                        fontSize: 13,
-                        color: ColorUtil.raisinBlack,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      "Tổng thanh toán",
+                      "Sản phẩm",
                       style: TextStyle(
-                        fontSize: 15,
+                        fontSize: 14,
                         fontWeight: FontWeight.bold,
                         color: ColorUtil.raisinBlack,
                       ),
                     ),
-                    Text(
-                      _formatCurrency(grandTotal),
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: ColorUtil.bangladeshGreen,
-                      ),
+                    const SizedBox(height: 12),
+                    ...order.orderdetails!.map(
+                      (detail) => _buildProductItem(detail),
                     ),
                   ],
                 ),
-                if (order.status == '4') ...[
-                  const SizedBox(height: 12),
-                  const Divider(height: 1, color: Color(0xfff1f2f6)),
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: () => _showReceiveOrderDialog(order),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: ColorUtil.bangladeshGreen,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+              ),
+              const Divider(height: 1, color: Color(0xfff1f2f6)),
+            ],
+
+            // Shipment Info
+            if (order.retailOrderShipment != null) ...[
+              _buildShipmentInfo(order.retailOrderShipment!),
+              const Divider(height: 1, color: Color(0xfff1f2f6)),
+            ],
+
+            // Cost and Total
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        "Tạm tính",
+                        style: TextStyle(fontSize: 13, color: Colors.grey),
+                      ),
+                      Text(
+                        _formatCurrency(productTotal),
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: ColorUtil.raisinBlack,
                         ),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
                       ),
-                      icon: const Icon(
-                        Icons.check_circle_outline,
-                        color: Colors.white,
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        "Phí vận chuyển",
+                        style: TextStyle(fontSize: 13, color: Colors.grey),
                       ),
-                      label: const Text(
-                        "Đã Nhận Hàng",
+                      Text(
+                        _formatCurrency(shipFee),
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: ColorUtil.raisinBlack,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        "Tổng thanh toán",
                         style: TextStyle(
-                          color: Colors.white,
+                          fontSize: 15,
                           fontWeight: FontWeight.bold,
-                          fontSize: 14,
+                          color: ColorUtil.raisinBlack,
                         ),
+                      ),
+                      Text(
+                        _formatCurrency(grandTotal),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: ColorUtil.bangladeshGreen,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+
+          if (order.status == '4' && !hasUploadedProof) ...[
+            const Divider(height: 1, color: Color(0xfff1f2f6)),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () => _showReceiveOrderDialog(order),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: ColorUtil.bangladeshGreen,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  icon: const Icon(
+                    Icons.check_circle_outline,
+                    color: Colors.white,
+                  ),
+                  label: const Text(
+                    "Đã Nhận Hàng",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildShipmentInfo(RetailOrderShipment shipment) {
+    final usersWithInfo =
+        shipment.shipmentUsers
+            ?.where(
+              (u) =>
+                  (u.note != null && u.note!.isNotEmpty) ||
+                  (u.images != null && u.images!.isNotEmpty),
+            )
+            .toList() ??
+        [];
+
+    if (usersWithInfo.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Text(
+            "Thông tin giao hàng",
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: ColorUtil.raisinBlack,
+            ),
+          ),
+        ),
+        ...usersWithInfo.map((user) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16.0,
+              vertical: 8.0,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (user.user != null)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8.0),
+                    child: Text(
+                      "Shipper: ${user.user?.username ?? ''}",
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: ColorUtil.raisinBlack,
                       ),
                     ),
                   ),
-                ],
+                if (user.note != null && user.note!.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8.0),
+                    child: _buildInfoRow(
+                      Icons.note_alt_outlined,
+                      "Ghi chú",
+                      user.note!,
+                    ),
+                  ),
+                if (user.images != null && user.images!.isNotEmpty)
+                  GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 3,
+                          crossAxisSpacing: 8,
+                          mainAxisSpacing: 8,
+                        ),
+                    itemCount: user.images!.length,
+                    itemBuilder: (context, index) {
+                      final imageUrl = user.images![index].image;
+                      if (imageUrl == null || imageUrl.isEmpty) {
+                        return const SizedBox.shrink();
+                      }
+                      final fullUrl = ImageUtil.getUrlFromStoragePath(imageUrl);
+                      print(fullUrl);
+                      return ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Container(
+                          color: const Color(0xfff1f2f6),
+                          child: ImageUtil.loadNetWorkImage(
+                            url: fullUrl,
+                            fit: BoxFit.cover,
+                            height: 100,
+                            width: 100,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                const SizedBox(height: 8),
               ],
             ),
-          ),
-        ],
-      ),
+          );
+        }),
+        const Divider(height: 1, color: Color(0xfff1f2f6)),
+      ],
     );
   }
 
@@ -653,7 +817,7 @@ class _RetailOrderScreenState extends State<RetailOrderScreen> {
     if (product?.images != null && product!.images!.isNotEmpty) {
       final link = product.images![0].link;
       if (link != null && link.isNotEmpty) {
-        imageUrl = "$protocol${AppConfig.instance.values.apiUrl}$link";
+        imageUrl = ImageUtil.getUrlFromPath(link);
       }
     }
 

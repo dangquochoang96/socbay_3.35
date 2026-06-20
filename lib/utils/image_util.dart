@@ -2,8 +2,25 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import '../constants/assets_path.dart';
+import '../config/app_config.dart';
 
 class ImageUtil {
+  static String get _host => "$protocol${AppConfig.instance.values.apiUrl}";
+
+  static String getUrlFromPath(String path) {
+    if (path.isEmpty) {
+      return '';
+    }
+    return _host + (path.startsWith('/') ? path : '/$path');
+  }
+
+  static String getUrlFromStoragePath(String path) {
+    final storagePath = path.replaceFirst('public/', '');
+    if (path.isEmpty) {
+      return '';
+    }
+    return '$_host/storage/$storagePath';
+  }
   static Widget loadNetWorkImage({
     required String url,
     BoxFit fit = BoxFit.cover,
