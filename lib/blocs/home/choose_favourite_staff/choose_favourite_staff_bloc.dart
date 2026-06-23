@@ -7,7 +7,7 @@ import 'package:socbay/application.dart';
 import 'package:socbay/config/app_config.dart';
 import 'package:socbay/data/data_provider/api_endpoints.dart';
 
-import '../../../data/model/user_profile.dart';
+import '../../../data/model/user_model.dart';
 import '../../../data/repository/auth/api_repository.dart';
 import 'choose_favourite_staff_event.dart';
 import 'choose_favourite_staff_state.dart';
@@ -22,7 +22,7 @@ class ChooseFavouriteStaffBloc
 
   final ApiRepository apiRepository;
   Map<String, dynamic> args;
-  List<UserProfile> favouriteStaffs = [];
+  List<UserModel> favouriteStaffs = [];
   bool isLoading = false;
 
   FutureOr<void> _mapStartedEventToState(
@@ -37,8 +37,8 @@ class ChooseFavouriteStaffBloc
     var res = await http.get(url);
     if (res.statusCode == HttpStatus.ok) {
       var l = Map<String, dynamic>.from(json.decode(res.body));
-      favouriteStaffs = List<UserProfile>.from(
-        l["data"].map((model) => UserProfile.fromJson(model)),
+      favouriteStaffs = List<UserModel>.from(
+        l["data"].map((model) => UserModel.fromJson(model)),
       );
     }
     // final res = await apiRepository.getStaffs(isLike: 1);

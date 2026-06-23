@@ -7,7 +7,7 @@ import 'package:socbay/blocs/home/hotline/hotline_screen_event.dart';
 import 'package:socbay/blocs/home/hotline/hotline_screen_state.dart';
 import 'package:socbay/config/app_config.dart';
 import 'package:socbay/data/data_provider/api_endpoints.dart';
-import 'package:socbay/data/model/user_profile.dart';
+import 'package:socbay/data/model/user_model.dart';
 import 'package:socbay/data/repository/auth/api_repository.dart';
 import 'package:socbay/utils/auth_http.dart' as http;
 
@@ -17,7 +17,7 @@ class HotlineScreenBloc extends Bloc<HotlineScreenEvent, HotlineScreenState> {
   }
 
   final ApiRepository apiRepository;
-  List<UserProfile> users = [];
+  List<UserModel> users = [];
   bool isLoading = false;
 
   FutureOr<void> _mapStartedEventToState(
@@ -30,8 +30,8 @@ class HotlineScreenBloc extends Bloc<HotlineScreenEvent, HotlineScreenState> {
     var res = await http.get(url);
     if (res.statusCode == HttpStatus.ok) {
       var l = Map<String, dynamic>.from(json.decode(res.body));
-      users = List<UserProfile>.from(
-        l["data"].map((model) => UserProfile.fromJson(model)),
+      users = List<UserModel>.from(
+        l["data"].map((model) => UserModel.fromJson(model)),
       );
     }
     // final res = await apiRepository.getListSupporters();

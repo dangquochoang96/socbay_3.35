@@ -9,7 +9,7 @@ import 'package:socbay/data/data_provider/api_endpoints.dart';
 import '../../data/repository/auth/api_repository.dart';
 import 'customer_information_list_event.dart';
 import 'customer_information_list_state.dart';
-import 'package:socbay/data/model/user_profile.dart';
+import 'package:socbay/data/model/user_model.dart';
 
 class CustomerInformationListBloc
     extends Bloc<CustomerInformationListEvent, CustomerInformationListState> {
@@ -27,7 +27,7 @@ class CustomerInformationListBloc
   }
 
   final ApiRepository apiRepository;
-  List<UserProfile> users = [];
+  List<UserModel> users = [];
 
   bool isLoading = false;
 
@@ -54,8 +54,8 @@ class CustomerInformationListBloc
         final Map<String, dynamic> data = json.decode(response.body);
         final List<dynamic> userData = data["data"];
 
-        final List<UserProfile> searchedUsers = userData
-            .map((model) => UserProfile.fromJson(model))
+        final List<UserModel> searchedUsers = userData
+            .map((model) => UserModel.fromJson(model))
             .toList();
         users = searchedUsers;
         emit(CustomerInformationListLoadedState(users));

@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:socbay/blocs/evaluate/evaluate_bloc.dart';
 import '../../blocs/evaluate/evaluate_event.dart';
 import '../../blocs/evaluate/evaluate_state.dart';
-import '../../data/model/user_profile.dart';
+import '../../data/model/user_model.dart';
 import '../../routes.dart';
 import '../../utils/color_util.dart';
 import '../../utils/image_util.dart';
@@ -47,7 +47,7 @@ class _FeedbackkListState extends State<FeedbackkScreen> {
 
   void _listener(BuildContext context, EvaluateScreenState state) {}
 
-  String _getRoleName(UserProfile user) {
+  String _getRoleName(UserModel user) {
     if (user.isUserSale()) return "Kinh doanh";
     if (user.isUserRole()) return "Kỹ thuật viên";
     return "Nhân viên";
@@ -144,7 +144,7 @@ class _FeedbackkListState extends State<FeedbackkScreen> {
     );
   }
 
-  Widget _buildUserCard(BuildContext context, UserProfile item) {
+  Widget _buildUserCard(BuildContext context, UserModel item) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8),
       decoration: BoxDecoration(
@@ -313,7 +313,7 @@ class _FeedbackkListState extends State<FeedbackkScreen> {
     );
   }
 
-  Widget _buildAvatar(UserProfile item) {
+  Widget _buildAvatar(UserModel item) {
     final avatarUrl = item.avatar ?? '';
     if (avatarUrl.isEmpty) {
       final initial = (item.username != null && item.username!.isNotEmpty)

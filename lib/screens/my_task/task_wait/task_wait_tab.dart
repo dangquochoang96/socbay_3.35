@@ -14,7 +14,7 @@ import 'package:socbay/widgets/button_widget.dart';
 import 'package:socbay/widgets/indicator_loadmore.dart';
 import 'package:socbay/widgets/loading_indicator.dart';
 
-import '../../../data/model/user_profile.dart';
+import '../../../data/model/user_model.dart';
 
 class TaskWaitTab extends StatefulWidget {
   const TaskWaitTab({super.key});
@@ -28,7 +28,7 @@ class _TaskWaitState extends State<TaskWaitTab> {
   late ScrollController _scrollController;
   late TextEditingController _feedbackController;
   int _page = 0;
-  UserProfile? _favouriteStaff;
+  UserModel? _favouriteStaff;
 
   @override
   void initState() {
@@ -221,7 +221,7 @@ class _TaskWaitState extends State<TaskWaitTab> {
                 null,
                 value: _favouriteStaff?.username ?? "",
                 onTap: () async {
-                  UserProfile? selectedStaff = await _onChooseFavouriteStaff();
+                  UserModel? selectedStaff = await _onChooseFavouriteStaff();
                   if (selectedStaff != null) {
                     usernameController.text = selectedStaff.username!;
                     setState(() {
@@ -312,7 +312,7 @@ class _TaskWaitState extends State<TaskWaitTab> {
     );
   }
 
-  Future<UserProfile?> _onChooseFavouriteStaff() async {
+  Future<UserModel?> _onChooseFavouriteStaff() async {
     Navigator.of(context)
         .push(
           MaterialPageRoute(

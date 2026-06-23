@@ -37,7 +37,7 @@ import 'package:socbay/widgets/text_field_default.dart';
 import 'package:image/image.dart' as img;
 
 import '../../../application.dart';
-import '../../../data/model/user_profile.dart';
+import '../../../data/model/user_model.dart';
 import '../../my_task/my_task/my_task_tab.dart';
 import '../technique/technique_screen.dart';
 
@@ -76,7 +76,7 @@ class _ServiceScreenState extends State<StaffServiceScreen> {
   late final ImagePicker _picker;
   final customerController = TextEditingController();
   late TabBarBloc _tabBarBloc;
-  UserProfile? _favouriteStaff;
+  UserModel? _favouriteStaff;
 
   @override
   void initState() {

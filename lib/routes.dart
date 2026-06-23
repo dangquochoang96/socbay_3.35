@@ -106,6 +106,8 @@ import 'screens/staff/order_manager/order_mng_screen_bySale.dart';
 import 'package:socbay/blocs/retail_order/retail_order_bloc.dart';
 import 'package:socbay/screens/retailOrder/retail_order_screen.dart';
 import 'package:socbay/screens/warehouse/warehouse.dart';
+import 'package:socbay/blocs/hr_management/hr_management_bloc.dart';
+import 'package:socbay/screens/hr_management/hr_management_summary.dart';
 
 class Routes {
   static const String root = '/';
@@ -172,6 +174,7 @@ class Routes {
   static const String orderManagerScreenBySale = '/orderManagerScreenBySale';
   static const String retailOrderScreen = '/retailOrderScreen';
   static const String warehouseScreen = '/warehouseScreen';
+  static const String hrManagementSummary = '/hrManagementSummary';
   CupertinoPageRoute routePage(RouteSettings settings) {
     return CupertinoPageRoute(
       settings: settings,
@@ -184,7 +187,7 @@ class Routes {
           case userProfileScreen:
             return BlocProvider<UserScreenBloc>(
               create: (context) => UserScreenBloc(apiRepository: apiRepository),
-              child: const UserProfileScreen(),
+              child: const UserModelScreen(),
             );
           case accountInfoScreen:
             return BlocProvider<AccountInfoBloc>(
@@ -580,6 +583,11 @@ class Routes {
             );
           case warehouseScreen:
             return const WarehouseUI();
+          case hrManagementSummary:
+            return BlocProvider<HRManagementBloc>(
+              create: (context) => HRManagementBloc(apiRepository: apiRepository),
+              child: const HRManagementSummaryScreen(),
+            );
         }
         return const Scaffold();
       },

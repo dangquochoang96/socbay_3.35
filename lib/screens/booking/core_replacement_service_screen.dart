@@ -11,7 +11,7 @@ import 'package:socbay/blocs/machine/core_replacement_service/core_replacement_s
 import 'package:socbay/blocs/machine/core_replacement_service/core_replacement_service_event.dart';
 import 'package:socbay/blocs/machine/core_replacement_service/core_replacement_service_state.dart';
 import 'package:socbay/config/app_config.dart';
-import 'package:socbay/data/model/user_profile.dart';
+import 'package:socbay/data/model/user_model.dart';
 import 'package:socbay/onepay_paygate/onepay_paygate_flutter.dart';
 import 'package:socbay/paths/images.dart';
 import 'package:socbay/routes.dart';
@@ -901,7 +901,7 @@ class _CoreReplacementServiceScreenState
     );
   }
 
-  Future _goToStaffInfo(UserProfile? staffInfo) async {
+  Future _goToStaffInfo(UserModel? staffInfo) async {
     await Navigator.pushNamed(
       context,
       Routes.staffInfoScreen,

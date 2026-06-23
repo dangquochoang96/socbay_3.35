@@ -8,7 +8,7 @@ import 'package:socbay/blocs/user_info/account_info/account_info_state.dart';
 import 'package:socbay/config/app_config.dart';
 import 'package:socbay/data/data_provider/api_endpoints.dart';
 import 'package:socbay/data/model/request/user_info_request.dart';
-import 'package:socbay/data/model/user_profile.dart';
+import 'package:socbay/data/model/user_model.dart';
 import 'package:socbay/data/repository/auth/api_repository.dart';
 import 'package:socbay/utils/auth_http.dart' as http;
 import 'package:path/path.dart';
@@ -27,7 +27,7 @@ class AccountInfoBloc extends Bloc<AccountInfoEvent, AccountInfoState> {
 
   final ApiRepository apiRepository;
   bool isLoading = false;
-  UserProfile? user;
+  UserModel? user;
   String path = "";
 
   FutureOr<void> _mapGetInfoState(
@@ -42,7 +42,7 @@ class AccountInfoBloc extends Bloc<AccountInfoEvent, AccountInfoState> {
       List<User> usrs = await database.userDao.findAllUsers();
       await database.close();
       var usr = usrs.first;
-      final userprofileGetMapper = UserToUserProfile();
+      final userprofileGetMapper = UserToUserModel();
       App.instance.userApp = userprofileGetMapper(usr);
       user = App.instance.userApp;
     } else {
@@ -72,7 +72,7 @@ class AccountInfoBloc extends Bloc<AccountInfoEvent, AccountInfoState> {
       if (resUpdateUserInfo.data != null && resUpdateUserInfo.status == 1) {
         user = resUpdateUserInfo.data;
         if ((user?.id ?? 0) > 0) {
-          final userGetMapper = UserProfileToUser();
+          final userGetMapper = UserModelToUser();
           final usr = userGetMapper(user!);
           await database.userDao.deleteAllUser();
           await database.userDao.insertUser(usr);

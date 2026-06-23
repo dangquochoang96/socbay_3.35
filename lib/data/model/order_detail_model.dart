@@ -1,6 +1,6 @@
 import 'package:intl/intl.dart';
 import 'package:socbay/data/model/order_filter_core_model.dart';
-import 'package:socbay/data/model/user_profile.dart';
+import 'package:socbay/data/model/user_model.dart';
 import 'package:socbay/utils/logger_util.dart';
 
 class OrderDetailModel {
@@ -26,8 +26,8 @@ class OrderDetailModel {
   final String? tvNextInsteadDate;
   final String? tvInsteadDate;
   final DateTime? dateOrder;
-  final UserProfile? staff;
-  final UserProfile? user;
+  final UserModel? staff;
+  final UserModel? user;
   final List<String>? images;
   final String? productId;
   final String? address;
@@ -92,7 +92,7 @@ class OrderDetailModel {
     tvInsteadDate: getInsteadDate(json['order_filter_core'] as List<dynamic>?),
     dateOrder: getDateOrder(json['order_filter_core'] as List<dynamic>?),
     // staff: json["staff"] != null && json["staff"][0]["staff_info"] != null
-    //     ? UserProfile.fromJson(
+    //     ? UserModel.fromJson(
     //         json["staff"][0]["staff_info"] as Map<String, dynamic>)
     //     : null,
     staff:
@@ -100,12 +100,12 @@ class OrderDetailModel {
             json["staff"] is List &&
             json["staff"].isNotEmpty &&
             json["staff"][0]["staff_info"] != null
-        ? UserProfile.fromJson(
+        ? UserModel.fromJson(
             json["staff"][0]["staff_info"] as Map<String, dynamic>,
           )
         : null,
     user: json["user"] != null
-        ? UserProfile.fromJson(json["user"] as Map<String, dynamic>)
+        ? UserModel.fromJson(json["user"] as Map<String, dynamic>)
         : null,
     images: getImages(json["images"] as List<dynamic>?),
     productId: getProductId(json['order_filter_core'] as List<dynamic>?),

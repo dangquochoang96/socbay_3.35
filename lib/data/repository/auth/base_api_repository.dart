@@ -19,6 +19,8 @@ import 'package:socbay/data/model/request/user_address_request.dart';
 import 'package:socbay/data/model/request/user_info_request.dart';
 import 'package:socbay/data/model/task_model.dart';
 import 'package:socbay/data/model/user_address.dart';
+import 'package:socbay/data/model/user_model.dart';
+import 'package:socbay/data/model/kpi_model.dart';
 import 'package:socbay/data/model/user_profile.dart';
 import 'package:socbay/data/response/api_response.dart';
 
@@ -26,7 +28,7 @@ abstract class BaseApiRepository {
   ///AUTH
   Future<DefaultResponse> setOTP(String phoneNumber);
   Future<DefaultResponse> checkOTP(String phoneNumber, int otp);
-  Future<DefaultResponse> registerAccount(UserProfile param);
+  Future<DefaultResponse> registerAccount(UserModel param);
   Future<DefaultResponse<LoginResponse>> loginAccount(
     String phone,
     String password, [
@@ -34,27 +36,27 @@ abstract class BaseApiRepository {
   ]);
   Future<DefaultResponse> register(RegisterRequestModel registerRequestModel);
   Future<DefaultResponse> forgotPassword(NewPasswordRequest newPasswordRequest);
-  Future<DefaultResponse<UserProfile>> getUserInfo();
+  Future<DefaultResponse<UserModel>> getUserInfo();
   Future<DefaultResponse> logout();
 
   ///USER
-  Future<DefaultResponse<UserProfile>> changePassword(
+  Future<DefaultResponse<UserModel>> changePassword(
     ChangePasswordRequest changePasswordRequest,
   );
   Future<DefaultResponse<List<NotificationResponse>>> getNotifications();
-  Future<DefaultResponse<UserProfile>> updateUserInfo(
+  Future<DefaultResponse<UserModel>> updateUserInfo(
     UserInfoRequest userInfoRequest,
   );
   Future<DefaultResponse<List<GiftResponse>>> getGiftList({
     bool isReceive = false,
   });
   Future<DefaultResponse> exchangeGift(int giftId);
-  Future<DefaultResponse<List<UserProfile>>> getStaffs({int isLike = 0});
-  Future<DefaultResponse<List<UserProfile>>> getListSupporters();
+  Future<DefaultResponse<List<UserModel>>> getStaffs({int isLike = 0});
+  Future<DefaultResponse<List<UserModel>>> getListSupporters();
   Future<DefaultResponse> updateStaff(
     UpdateStaffRequestModel updateStaffRequestModel,
   );
-  Future<DefaultResponse<List<UserProfile>>> getListStaffByDistance(
+  Future<DefaultResponse<List<UserModel>>> getListStaffByDistance(
     StaffByDistanceRequest staffByDistanceRequest,
   );
   Future<DefaultResponse> likeStaff(int id);
@@ -103,4 +105,5 @@ abstract class BaseApiRepository {
     required String note,
     required File image,
   });
+  Future<DefaultResponse<UserProfile>> getKPIs(String userId);
 }

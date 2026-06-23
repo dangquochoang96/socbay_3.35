@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:socbay/blocs/home/hotline/hotline_screen_event.dart';
 import 'package:socbay/blocs/home/hotline/hotline_screen_state.dart';
-import 'package:socbay/data/model/user_profile.dart';
+import 'package:socbay/data/model/user_model.dart';
 import 'package:socbay/utils/image_util.dart';
 import 'package:socbay/utils/theme_util.dart';
 import 'package:socbay/widgets/loading_indicator.dart';
@@ -49,7 +49,7 @@ class _HotlineScreenState extends State<HotlineScreen> {
 
   void _listener(BuildContext context, HotlineScreenState state) {}
 
-  String _getRoleName(UserProfile user) {
+  String _getRoleName(UserModel user) {
     if (user.isUserSale()) return "Kinh doanh";
     if (user.isUserRole()) return "Kỹ thuật viên";
     return "Nhân viên";
@@ -148,7 +148,7 @@ class _HotlineScreenState extends State<HotlineScreen> {
     );
   }
 
-  Widget _buildUserCard(BuildContext context, UserProfile item) {
+  Widget _buildUserCard(BuildContext context, UserModel item) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8),
       decoration: BoxDecoration(
@@ -330,7 +330,7 @@ class _HotlineScreenState extends State<HotlineScreen> {
     );
   }
 
-  Widget _buildAvatar(UserProfile item) {
+  Widget _buildAvatar(UserModel item) {
     final avatarUrl = item.avatar ?? '';
     if (avatarUrl.isEmpty) {
       final initial = (item.username != null && item.username!.isNotEmpty)

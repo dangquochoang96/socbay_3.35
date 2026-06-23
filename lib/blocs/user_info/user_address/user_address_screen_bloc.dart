@@ -7,7 +7,7 @@ import 'package:socbay/blocs/user_info/user_address/user_address_screen_event.da
 import 'package:socbay/blocs/user_info/user_address/user_address_screen_state.dart';
 import 'package:socbay/data/model/request/user_address_request.dart';
 import 'package:socbay/data/model/user_address.dart';
-import 'package:socbay/data/model/user_profile.dart';
+import 'package:socbay/data/model/user_model.dart';
 import 'package:socbay/data/repository/auth/api_repository.dart';
 
 class UserAddressScreenBloc
@@ -25,7 +25,7 @@ class UserAddressScreenBloc
   bool isLoading = false;
   bool isChange = false;
   List<UserAddress> listUserAddress = [];
-  UserProfile? user = App.instance.userApp;
+  UserModel? user = App.instance.userApp;
 
   FutureOr<void> _mapGetAddressToState(
     UserAddressScreenGetAddressEvent event,

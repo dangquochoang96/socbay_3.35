@@ -8,7 +8,7 @@ import 'package:socbay/blocs/user_info/user_screen_event.dart';
 import 'package:socbay/blocs/user_info/user_screen_state.dart';
 import 'package:socbay/data/model/local/account_db.dart';
 import 'package:socbay/data/model/request/user_info_request.dart';
-import 'package:socbay/data/model/user_profile.dart';
+import 'package:socbay/data/model/user_model.dart';
 import 'package:socbay/data/repository/auth/api_repository.dart';
 import 'package:socbay/data/response/api_response.dart';
 import 'package:socbay/db/database.dart';
@@ -16,7 +16,7 @@ import 'package:socbay/db/database.dart';
 class UserScreenBloc extends Bloc<UserScreenEvent, UserScreenState> {
   late ApiRepository apiRepository;
   bool isLoading = false;
-  UserProfile? user = App.instance.userApp;
+  UserModel? user = App.instance.userApp;
   List<AccountDb> accounts = [];
 
   UserScreenBloc({required this.apiRepository})

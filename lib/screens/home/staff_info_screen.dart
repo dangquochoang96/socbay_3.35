@@ -9,7 +9,7 @@ import 'package:socbay/blocs/home/staff_info/staff_info_screen_event.dart';
 import 'package:socbay/blocs/home/staff_info/staff_info_screen_state.dart';
 import 'package:socbay/config/app_config.dart';
 import 'package:socbay/constants/constants.dart';
-import 'package:socbay/data/model/user_profile.dart';
+import 'package:socbay/data/model/user_model.dart';
 import 'package:socbay/paths/images.dart';
 import 'package:socbay/utils/color_util.dart';
 import 'package:socbay/utils/image_util.dart';
@@ -29,7 +29,7 @@ class StaffInfoScreen extends StatefulWidget {
 
 class _StaffInfoScreenState extends State<StaffInfoScreen> {
   late StaffInfoScreenBloc _bloc;
-  late UserProfile staffInfo;
+  late UserModel staffInfo;
 
   List<OrderDetailModel>? _lstOrder;
   bool isPickDone = false;

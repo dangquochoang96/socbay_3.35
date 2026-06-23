@@ -16,7 +16,7 @@ import 'package:socbay/data/event_bus/event_bus_event.dart';
 import 'package:socbay/data/model/home_service_model.dart';
 import 'package:socbay/data/model/request/staff_by_distance_request.dart';
 import 'package:socbay/data/model/user_address.dart';
-import 'package:socbay/data/model/user_profile.dart';
+import 'package:socbay/data/model/user_model.dart';
 import 'package:socbay/paths/images.dart';
 import 'package:socbay/routes.dart';
 import 'package:socbay/utils/color_util.dart';
@@ -269,7 +269,7 @@ class _SearchStaffScreenState extends State<SearchStaffScreen> {
     );
   }
 
-  Future _goToStaffInfo(UserProfile staffInfo) async {
+  Future _goToStaffInfo(UserModel staffInfo) async {
     await Navigator.pushNamed(
       context,
       Routes.staffInfoScreen,
@@ -303,7 +303,7 @@ class _SearchStaffScreenState extends State<SearchStaffScreen> {
   }
 
   Widget _itemBuilder(BuildContext context, int index) {
-    final UserProfile staffInfo = _bloc.staffsInfo[index];
+    final UserModel staffInfo = _bloc.staffsInfo[index];
     return GestureDetector(
       onTap: () {
         _goToStaffInfo(staffInfo);

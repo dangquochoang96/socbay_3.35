@@ -1,5 +1,5 @@
 import 'package:decimal/decimal.dart';
-import 'package:socbay/data/model/user_profile.dart';
+import 'package:socbay/data/model/user_model.dart';
 import 'package:socbay/utils/parse_util.dart';
 
 import 'task_detail_action_model.dart';
@@ -10,7 +10,7 @@ class TaskProcessedModel {
   late final Decimal? discount; // chiết khấu
   late final int? subPoint; // số tích điểm được sử dụng để thanh toán
   late final Decimal? totalPriced; // tổng tiền cuối cùng phải trả
-  late final UserProfile? staff; // thông tin thợ
+  late final UserModel? staff; // thông tin thợ
   late final List<String>? images; // danh sách hóa đơn của đơn hàng
   late final List<TaskDetailActionModel>? progress;
   late final String? createdAt; // ngày tạo
@@ -35,7 +35,7 @@ class TaskProcessedModel {
         subPoint: int.parse(json["sub_point"]),
         totalPriced: Decimal.parse(json["total_priced"]),
         staff: json["staff"] != null
-            ? UserProfile.fromJson(json["staff"] as Map<String, dynamic>)
+            ? UserModel.fromJson(json["staff"] as Map<String, dynamic>)
             : null,
         images: json["images"] != null
             ? (json["images"].map<String>((e) => e.toString())).toList()

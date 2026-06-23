@@ -18,7 +18,7 @@ import 'package:socbay/data/model/home_service_model.dart';
 import 'package:socbay/data/model/machine_model.dart';
 import 'package:socbay/data/model/order_model.dart';
 import 'package:socbay/data/model/request/create_task_request.dart';
-import 'package:socbay/data/model/user_profile.dart';
+import 'package:socbay/data/model/user_model.dart';
 import 'package:socbay/screens/home_tab_bar/tab_bar_screen.dart';
 import 'package:socbay/utils/color_util.dart';
 import 'package:socbay/utils/context_extension.dart';
@@ -57,7 +57,7 @@ class _ServiceScreenState extends State<ServiceScreen> {
   String _dateStart = '';
   String _timeStart = '';
   // UserAddress? _userAddress;
-  UserProfile? _favouriteStaff;
+  UserModel? _favouriteStaff;
   // int? _serviceId;
 
   DateTime? selectedDate;

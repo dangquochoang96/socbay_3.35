@@ -20,14 +20,14 @@ import 'package:url_launcher/url_launcher.dart';
 
 const BorderRadius borderTextField = BorderRadius.all(Radius.circular(13));
 
-class UserProfileScreen extends StatefulWidget {
-  const UserProfileScreen({super.key});
+class UserModelScreen extends StatefulWidget {
+  const UserModelScreen({super.key});
 
   @override
-  State<UserProfileScreen> createState() => _UserProfileScreenState();
+  State<UserModelScreen> createState() => _UserModelScreenState();
 }
 
-class _UserProfileScreenState extends State<UserProfileScreen> {
+class _UserModelScreenState extends State<UserModelScreen> {
   late UserScreenBloc _bloc;
   // late final ImagePicker _picker;
 
@@ -88,6 +88,11 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               }, Colors.grey),
               buildSection("Kĩ thuật viên yêu thích", Icons.favorite, () {
                 Navigator.pushNamed(context, Routes.favouriteStaff);
+              }, Colors.grey),
+            ],
+            if (App.instance.userApp?.isUserCustomer() != true) ...[
+              buildSection("Chấm công & KPI", Icons.analytics_outlined, () {
+                Navigator.pushNamed(context, Routes.hrManagementSummary);
               }, Colors.grey),
             ],
             buildSection("Đổi mật khẩu", Icons.change_circle, () {

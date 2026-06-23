@@ -8,7 +8,7 @@ import 'dart:convert';
 
 import 'package:socbay/data/model/list_image_model.dart';
 import 'package:socbay/data/model/retail_order_model.dart';
-import 'package:socbay/data/model/user_profile.dart';
+import 'package:socbay/data/model/user_model.dart';
 
 //RetailOrderShipmentUserImage
 RetailOrderShipmentUserImage retailOrderShipmentUserImageFromJson(String str) =>
@@ -122,7 +122,7 @@ class RetailOrderShipmentAssign {
   String? note;
   String? createdAt;
   List<RetailOrderShipmentUserImage>? images;
-  UserProfile? user;
+  UserModel? user;
 
   RetailOrderShipmentAssign({
     this.id,
@@ -170,7 +170,7 @@ class RetailOrderShipmentAssign {
                   (x) => RetailOrderShipmentUserImage.fromJson(x),
                 ),
               ),
-        user: json["user"] == null ? null : UserProfile.fromJson(json["user"]),
+        user: json["user"] == null ? null : UserModel.fromJson(json["user"]),
       );
 
   Map<String, dynamic> toJson() => {
@@ -303,7 +303,7 @@ class RetailOrderAssUserWarehouse {
   List<ReturnImages>? images;
   String? quantity;
   String? status;
-  UserProfile? user;
+  UserModel? user;
   RetailOrderDetails? retailOrderDetail;
 
   RetailOrderAssUserWarehouse({
@@ -340,7 +340,7 @@ class RetailOrderAssUserWarehouse {
             : listReturnImagesFromJson(json["images"]),
         quantity: _asString(json["quantity"]),
         status: _asString(json["status"]),
-        user: json["user"] == null ? null : UserProfile.fromJson(json["user"]),
+        user: json["user"] == null ? null : UserModel.fromJson(json["user"]),
         retailOrderDetail: json.containsKey('order_detail')
             ? RetailOrderDetails.fromJson(json["order_detail"])
             : null,
@@ -363,7 +363,7 @@ class RetailOrderAssUserPack {
   String? userId;
   String? quantity;
   String? status;
-  UserProfile? user;
+  UserModel? user;
   RetailOrderDetails? retailOrderDetail;
   RetailOrderPack? pack;
 
@@ -398,7 +398,7 @@ class RetailOrderAssUserPack {
         userId: _asString(json["user_id"]),
         quantity: _asString(json["quantity"]),
         status: _asString(json["status"]),
-        user: json["user"] == null ? null : UserProfile.fromJson(json["user"]),
+        user: json["user"] == null ? null : UserModel.fromJson(json["user"]),
         retailOrderDetail: json["order_detail"] != null
             ? RetailOrderDetails.fromJson(json["order_detail"])
             : null,

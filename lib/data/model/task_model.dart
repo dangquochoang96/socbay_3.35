@@ -1,5 +1,5 @@
 import 'package:socbay/data/model/product_model.dart';
-import 'package:socbay/data/model/user_profile.dart';
+import 'package:socbay/data/model/user_model.dart';
 import 'package:socbay/utils/logger_util.dart';
 import 'package:socbay/utils/parse_util.dart';
 
@@ -23,8 +23,8 @@ class TaskModel {
   final String? productId;
   final String? orderId;
   final ProductModel? productInfo;
-  final UserProfile? staff;
-  final UserProfile? customer;
+  final UserModel? staff;
+  final UserModel? customer;
   final List<String>? images;
 
   TaskModel({
@@ -75,10 +75,10 @@ class TaskModel {
         ? ProductModel.fromJson(json["product_info"])
         : null,
     staff: json["staff"] != null
-        ? UserProfile.fromJson(json["staff"] as Map<String, dynamic>)
+        ? UserModel.fromJson(json["staff"] as Map<String, dynamic>)
         : null,
     customer: json["customer"] != null
-        ? UserProfile.fromJson(json["customer"] as Map<String, dynamic>)
+        ? UserModel.fromJson(json["customer"] as Map<String, dynamic>)
         : null,
     images: getImages(json["images"] as List<dynamic>?),
   );

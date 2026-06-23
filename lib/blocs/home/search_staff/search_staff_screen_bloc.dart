@@ -5,7 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:socbay/blocs/home/search_staff/search_staff_screen_event.dart';
 import 'package:socbay/blocs/home/search_staff/search_staff_screen_state.dart';
 import 'package:socbay/data/model/task_model.dart';
-import 'package:socbay/data/model/user_profile.dart';
+import 'package:socbay/data/model/user_model.dart';
 
 import '../../../data/repository/auth/api_repository.dart';
 
@@ -20,7 +20,7 @@ class SearchStaffScreenBloc
   final ApiRepository apiRepository;
   Map<String, dynamic> args;
   bool isLoading = false;
-  List<UserProfile> staffsInfo = [];
+  List<UserModel> staffsInfo = [];
   TaskModel? taskModel;
 
   FutureOr<void> _mapStartedEventToState(

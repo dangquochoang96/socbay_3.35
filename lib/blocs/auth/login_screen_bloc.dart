@@ -4,7 +4,7 @@ import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
 import 'package:socbay/application.dart';
 import 'package:socbay/data/model/login_response.dart';
-import 'package:socbay/data/model/user_profile.dart';
+import 'package:socbay/data/model/user_model.dart';
 import 'package:socbay/data/repository/auth/api_repository.dart';
 import 'package:socbay/db/database.dart';
 import 'package:socbay/db/object_mapper/object_mapper.dart';
@@ -45,7 +45,7 @@ class LoginScreenBloc extends Bloc<LoginScreenEvent, LoginScreenState> {
 
       if (result.data != null && result.status == 200) {
         final loginResponse = result.data as LoginResponse;
-        final UserProfile? userProfile = loginResponse.user;
+        final UserModel? userProfile = loginResponse.user;
         LoggerUtil.info(
           'login response parsed tokenPresent=${(loginResponse.accessToken ?? '').isNotEmpty} userId=${userProfile?.id}',
           tag: tag,
@@ -97,7 +97,7 @@ class LoginScreenBloc extends Bloc<LoginScreenEvent, LoginScreenState> {
           final database = await $FloorAppDatabase
               .databaseBuilder('socbay.db')
               .build();
-          final userGetMapper = UserProfileToUser();
+          final userGetMapper = UserModelToUser();
           final user = userGetMapper(userProfile);
           await database.userDao.deleteAllUser();
           await database.userDao.insertUser(user);

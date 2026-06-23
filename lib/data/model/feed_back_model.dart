@@ -1,5 +1,5 @@
 import 'package:socbay/data/model/order_detail_model.dart';
-import 'package:socbay/data/model/user_profile.dart';
+import 'package:socbay/data/model/user_model.dart';
 import 'package:socbay/utils/logger_util.dart';
 
 class FeedBackModel {
@@ -12,8 +12,8 @@ class FeedBackModel {
   final String? type;
   final String? createdAt;
   final String? updatedAt;
-  final UserProfile? user;
-  final UserProfile? customer;
+  final UserModel? user;
+  final UserModel? customer;
   final OrderDetailModel? orderInfo;
   final List<String>? images;
 
@@ -44,10 +44,10 @@ class FeedBackModel {
     createdAt: json['created_at'] as String?,
     updatedAt: json['updatedAt'] as String?,
     user: json['user'] != null
-        ? UserProfile.fromJson(json['user'] as Map<String, dynamic>)
+        ? UserModel.fromJson(json['user'] as Map<String, dynamic>)
         : null,
     customer: json['customer'] != null
-        ? UserProfile.fromJson(json['customer'] as Map<String, dynamic>)
+        ? UserModel.fromJson(json['customer'] as Map<String, dynamic>)
         : null,
     orderInfo: json['order_info'] != null
         ? OrderDetailModel.fromJson(json['order_info'] as Map<String, dynamic>)

@@ -12,7 +12,7 @@ import 'package:socbay/data/model/order_filter_core_model.dart';
 import 'package:socbay/data/model/order_model.dart';
 import 'package:socbay/data/model/product_model.dart';
 import 'package:socbay/data/model/staff_sales_income_model.dart';
-import 'package:socbay/data/model/user_profile.dart';
+import 'package:socbay/data/model/user_model.dart';
 import 'package:socbay/data/repository/auth/api_repository.dart';
 import 'package:socbay/utils/logger_util.dart';
 import 'home_event.dart';
@@ -21,14 +21,14 @@ import 'package:socbay/utils/auth_http.dart' as http;
 
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
   final ApiRepository apiRepository;
-  UserProfile? user;
+  UserModel? user;
   List<OrderModel> lstMachine = [];
   List<BlogModel> blogs = [];
   List<ProductModel> products = [];
   List<BannerModel> banners = [];
   List<HomeServiceModel> services = [];
   List<HomeServiceModel> allServices = [];
-  List<UserProfile> favouriteStaffs = [];
+  List<UserModel> favouriteStaffs = [];
   List<StaffSalesIncomeModel> staffSalesIncomes = [];
   List<OrderFilterCoreModel> orderFilterCore = [];
   bool isLoading = false;

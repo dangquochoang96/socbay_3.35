@@ -7,7 +7,7 @@ import 'dart:convert';
 import 'package:socbay/data/model/list_image_model.dart';
 import 'package:socbay/data/model/product_model.dart';
 import 'package:socbay/data/model/retail_warehouse_model.dart';
-import 'package:socbay/data/model/user_profile.dart';
+import 'package:socbay/data/model/user_model.dart';
 
 List<RetailOrder> listRetailOrderFromJson(dynamic str) =>
     List<RetailOrder>.from(str.map((x) => RetailOrder.fromJson(x)));
@@ -70,9 +70,9 @@ class RetailOrder {
   List<ReturnImages>? imagesConfirm;
   DateTime? createdAt;
   DateTime? updatedAt;
-  UserProfile? customer;
-  UserProfile? users;
-  UserProfile? sale;
+  UserModel? customer;
+  UserModel? users;
+  UserModel? sale;
   List<RetailOrderDetails>? orderdetails;
   List<RetailPayment>? retailPayment;
   List<StatusLogs>? statusLogs;
@@ -197,10 +197,10 @@ class RetailOrder {
         ? null
         : DateTime.parse(json["updated_at"]),
     customer: json["customer"] != null
-        ? UserProfile.fromJson(json["customer"])
+        ? UserModel.fromJson(json["customer"])
         : null,
-    users: json["users"] != null ? UserProfile.fromJson(json["users"]) : null,
-    sale: json["sale"] != null ? UserProfile.fromJson(json["sale"]) : null,
+    users: json["users"] != null ? UserModel.fromJson(json["users"]) : null,
+    sale: json["sale"] != null ? UserModel.fromJson(json["sale"]) : null,
     orderdetails: json["orderdetails"] != null
         ? listRetailOrderDetailFromJson(json["orderdetails"])
         : null,

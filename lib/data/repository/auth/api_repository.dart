@@ -20,6 +20,8 @@ import 'package:socbay/data/model/request/user_address_request.dart';
 import 'package:socbay/data/model/request/user_info_request.dart';
 import 'package:socbay/data/model/task_model.dart';
 import 'package:socbay/data/model/user_address.dart';
+import 'package:socbay/data/model/user_model.dart';
+import 'package:socbay/data/model/kpi_model.dart';
 import 'package:socbay/data/model/user_profile.dart';
 import 'package:socbay/data/provider/api_provider.dart';
 import 'package:socbay/data/repository/auth/base_api_repository.dart';
@@ -54,7 +56,7 @@ class ApiRepository extends BaseApiRepository {
   }
 
   @override
-  Future<DefaultResponse> registerAccount(UserProfile param) {
+  Future<DefaultResponse> registerAccount(UserModel param) {
     throw UnimplementedError();
   }
 
@@ -64,7 +66,7 @@ class ApiRepository extends BaseApiRepository {
   }
 
   @override
-  Future<DefaultResponse<UserProfile>> getUserInfo() {
+  Future<DefaultResponse<UserModel>> getUserInfo() {
     return _apiProvider.getUserInfo();
   }
 
@@ -127,7 +129,7 @@ class ApiRepository extends BaseApiRepository {
   }
 
   @override
-  Future<DefaultResponse<List<UserProfile>>> getStaffs({int isLike = 0}) {
+  Future<DefaultResponse<List<UserModel>>> getStaffs({int isLike = 0}) {
     return _apiProvider.getStaffs(isLike: isLike);
   }
 
@@ -141,17 +143,17 @@ class ApiRepository extends BaseApiRepository {
       _apiProvider.uploadImage(file: file);
 
   @override
-  Future<DefaultResponse<UserProfile>> updateUserInfo(
+  Future<DefaultResponse<UserModel>> updateUserInfo(
     UserInfoRequest userInfoRequest,
   ) => _apiProvider.updateUserInfo(userInfoRequest);
 
   @override
-  Future<DefaultResponse<UserProfile>> updateStaff(
+  Future<DefaultResponse<UserModel>> updateStaff(
     UpdateStaffRequestModel updateStaffRequestModel,
   ) => _apiProvider.updateStaff(updateStaffRequestModel);
 
   @override
-  Future<DefaultResponse<UserProfile>> changePassword(
+  Future<DefaultResponse<UserModel>> changePassword(
     ChangePasswordRequest changePasswordRequest,
   ) {
     return _apiProvider.changePassword(changePasswordRequest);
@@ -181,14 +183,14 @@ class ApiRepository extends BaseApiRepository {
   }
 
   @override
-  Future<DefaultResponse<List<UserProfile>>> getListStaffByDistance(
+  Future<DefaultResponse<List<UserModel>>> getListStaffByDistance(
     StaffByDistanceRequest staffByDistanceRequest,
   ) {
     return _apiProvider.getListStaffByDistance(staffByDistanceRequest);
   }
 
   @override
-  Future<DefaultResponse<List<UserProfile>>> getListSupporters() {
+  Future<DefaultResponse<List<UserModel>>> getListSupporters() {
     return _apiProvider.getListSupporters();
   }
 
@@ -260,5 +262,10 @@ class ApiRepository extends BaseApiRepository {
       note: note,
       image: image,
     );
+  }
+
+  @override
+  Future<DefaultResponse<UserProfile>> getKPIs(String userId) {
+    return _apiProvider.getKPIs(userId);
   }
 }

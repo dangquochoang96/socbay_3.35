@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:socbay/blocs/FindStaff/find_staff_state.dart';
 import 'package:socbay/data/model/user_address.dart';
-import 'package:socbay/data/model/user_profile.dart';
+import 'package:socbay/data/model/user_model.dart';
 import 'package:socbay/data/repository/auth/api_repository.dart';
 import 'package:socbay/data/response/api_response.dart';
 
@@ -13,7 +13,7 @@ import 'find_staff_event.dart';
 class FindStaffBloc extends Bloc<FindStaffEvent, FindStaffState> {
   final ApiRepository apiRepository;
   List<UserAddress> listUserAddress = [];
-  List<UserProfile> staffsInfo = [];
+  List<UserModel> staffsInfo = [];
   bool isLoading = false;
   FindStaffBloc({required this.apiRepository}) : super(FindStaffStartState()) {
     on<FindStaffGetUserAddressEvent>(_mapGetListUserAddressEventToState);

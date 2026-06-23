@@ -8,7 +8,7 @@ import 'package:socbay/blocs/root/root_event.dart';
 import 'package:socbay/blocs/root/root_state.dart';
 import 'package:socbay/config/app_config.dart';
 import 'package:socbay/data/data_provider/api_endpoints.dart';
-import 'package:socbay/data/model/user_profile.dart';
+import 'package:socbay/data/model/user_model.dart';
 import 'package:socbay/db/database.dart';
 import 'package:socbay/db/object_mapper/object_mapper.dart';
 import 'package:socbay/services/push_notification_service.dart';
@@ -72,7 +72,7 @@ class RootBloc extends Bloc<RootEvent, RootState> {
         emit(Unauthenticated());
       } else {
         final localUser = currentUser.first;
-        App.instance.userApp = UserToUserProfile()(localUser);
+        App.instance.userApp = UserToUserModel()(localUser);
         LoggerUtil.info(
           'AppStarted -> local session restored userId=${localUser.id}',
           tag: tag,
@@ -89,7 +89,7 @@ class RootBloc extends Bloc<RootEvent, RootState> {
           );
           var map = Map<String, dynamic>.from(json.decode(resJson.toString()));
           if (_isApiSuccess(map)) {
-            UserProfile userProfile = UserProfile.fromJson(map['data']);
+            UserModel userProfile = UserModel.fromJson(map['data']);
             if ((userProfile.id ?? 0) <= 0) {
               LoggerUtil.warning(
                 'AppStarted -> invalid user id from API',
@@ -104,7 +104,7 @@ class RootBloc extends Bloc<RootEvent, RootState> {
             await PushNotificationService.instance.setAuthenticatedUser(
               userProfile.id.toString(),
             );
-            final userGetMapper = UserProfileToUser();
+            final userGetMapper = UserModelToUser();
             final user = userGetMapper(userProfile);
             await database.userDao.deleteAllUser();
             await database.userDao.insertUser(user);
@@ -154,7 +154,7 @@ class RootBloc extends Bloc<RootEvent, RootState> {
           );
           var map = Map<String, dynamic>.from(json.decode(resJson.toString()));
           if (_isApiSuccess(map)) {
-            UserProfile userProfile = UserProfile.fromJson(map['data']);
+            UserModel userProfile = UserModel.fromJson(map['data']);
             if ((userProfile.id ?? 0) <= 0) {
               LoggerUtil.warning(
                 'AppStarted web/other -> invalid user id from API',

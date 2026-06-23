@@ -22,7 +22,7 @@ import 'package:socbay/data/model/order_model.dart';
 import 'package:socbay/data/model/product_model.dart';
 import 'package:socbay/data/model/request/create_task_request.dart';
 import 'package:socbay/data/model/request/user_address_request.dart';
-import 'package:socbay/data/model/user_profile.dart';
+import 'package:socbay/data/model/user_model.dart';
 import 'package:socbay/routes.dart';
 import 'package:socbay/screens/staff/technique/technique_screen.dart';
 import 'package:socbay/utils/color_util.dart';
@@ -71,7 +71,7 @@ class _StaffServiceSaleScreenState extends State<StaffServiceSaleScreen> {
   int _currentSelectedProductValue = 0;
   String _dateStart = '';
   String _timeStart = '';
-  UserProfile? _favouriteStaff;
+  UserModel? _favouriteStaff;
   late TaskOrderType _selectedOrderType;
 
   bool _addNewCustomer = false;

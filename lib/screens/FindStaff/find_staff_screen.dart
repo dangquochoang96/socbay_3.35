@@ -11,7 +11,7 @@ import 'package:socbay/blocs/FindStaff/find_staff_state.dart';
 import 'package:socbay/constants/constants.dart';
 import 'package:socbay/data/model/request/staff_by_distance_request.dart';
 import 'package:socbay/data/model/user_address.dart';
-// import 'package:socbay/data/model/user_profile.dart';
+// import 'package:socbay/data/model/user_model.dart';
 import 'package:socbay/paths/images.dart';
 import 'package:socbay/utils/color_util.dart';
 import 'package:socbay/utils/context_extension.dart';
@@ -169,7 +169,7 @@ class _SearchStaffScreenState extends State<FindStaffScreen> {
   //   return const SizedBox(height: 12);
   // }
   // Widget _itemBuilder(BuildContext context, int index) {
-  //   final UserProfile staffInfo = _bloc.staffsInfo[index];
+  //   final UserModel staffInfo = _bloc.staffsInfo[index];
   //   return GestureDetector(
   //     onTap: () {
   //       _goToStaffInfo(staffInfo);
@@ -212,7 +212,7 @@ class _SearchStaffScreenState extends State<FindStaffScreen> {
   //         )),
   //   );
   // }
-  // Future _goToStaffInfo(UserProfile staffInfo) async {
+  // Future _goToStaffInfo(UserModel staffInfo) async {
   //   // await Navigator.pushNamed(context, Routes.staffInfoScreen, arguments: {
   //   //   "id": _bloc.args["id"],
   //   //   "name": _listNameService[_index ?? 0],

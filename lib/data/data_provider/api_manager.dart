@@ -51,6 +51,7 @@ enum ApiType {
   getListTask,
   getTask,
   deleteTask,
+  getKPIByUser,
 }
 
 class ApiConfig {
@@ -277,6 +278,12 @@ class ApiManager {
         return ApiConfig(
           path: '${ApiEndpoints.taskDelete}$additionalPath',
           method: HttpMethod.del,
+          headers: _defaultHeaders,
+        );
+      case ApiType.getKPIByUser:
+        return ApiConfig(
+          path: ApiEndpoints.kpiByUser(additionalPath),
+          method: HttpMethod.get,
           headers: _defaultHeaders,
         );
     }

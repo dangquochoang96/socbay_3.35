@@ -15,7 +15,7 @@ import 'package:socbay/blocs/warehouse/warehouse_state.dart';
 import 'package:socbay/config/app_config.dart';
 import 'package:socbay/data/data_provider/api_endpoints.dart';
 import 'package:socbay/data/model/warehouse_model.dart';
-import 'package:socbay/data/model/user_profile.dart';
+import 'package:socbay/data/model/user_model.dart';
 import 'package:socbay/utils/color_util.dart';
 import 'package:socbay/utils/auth_http.dart' as http;
 import 'package:socbay/widgets/my_app_bar.dart';
@@ -470,7 +470,7 @@ class _WarehouseScreenState extends State<WarehouseScreen>
     DateTime selectedDate = DateTime.now();
 
     final layerLink = LayerLink();
-    List<UserProfile> dialogSearchResults = [];
+    List<UserModel> dialogSearchResults = [];
     bool dialogIsSearching = false;
     final FocusNode dialogPhoneFocusNode = FocusNode();
     OverlayEntry? overlayEntry;
@@ -500,7 +500,7 @@ class _WarehouseScreenState extends State<WarehouseScreen>
       }
     });
 
-    void dialogSelectUser(UserProfile user, StateSetter dialogSetState) {
+    void dialogSelectUser(UserModel user, StateSetter dialogSetState) {
       dialogSetState(() {
         phoneController.text = user.phone ?? '';
         nameController.text = user.username ?? '';

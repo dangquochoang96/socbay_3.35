@@ -30,7 +30,7 @@ class ChangePasswordScreenBloc
       var db = await $FloorAppDatabase.databaseBuilder('socbay.db').build();
       if ((res.data?.id ?? 0) > 0) {
         await db.userDao.deleteAllUser();
-        final userGetMapper = UserProfileToUser();
+        final userGetMapper = UserModelToUser();
         final usr = userGetMapper(res.data!);
         await db.userDao.insertUser(usr);
       }

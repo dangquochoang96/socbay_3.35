@@ -28,11 +28,13 @@ import 'package:socbay/data/model/request/user_address_request.dart';
 import 'package:socbay/data/model/request/user_info_request.dart';
 import 'package:socbay/data/model/task_model.dart';
 import 'package:socbay/data/model/user_address.dart';
+import 'package:socbay/data/model/user_model.dart';
+import 'package:socbay/data/model/kpi_model.dart';
 import 'package:socbay/data/model/user_profile.dart';
+import 'package:socbay/data/model/user_attendance_model.dart';
 import 'package:socbay/data/response/api_response.dart';
 import 'package:socbay/utils/logger_util.dart';
 
-import 'package:socbay/utils/auth_http.dart' as http;
 import 'package:path/path.dart' as path_manager;
 
 class ApiProvider {
@@ -129,7 +131,7 @@ class ApiProvider {
     }
   }
 
-  Future<DefaultResponse<UserProfile>> updateStaff(
+  Future<DefaultResponse<UserModel>> updateStaff(
     UpdateStaffRequestModel updateStaffRequestModel,
   ) async {
     try {
@@ -147,7 +149,7 @@ class ApiProvider {
       );
       final res = DefaultResponse.fromMap(resJson);
       if (res.status == 200 && res.data != null) {
-        final item = UserProfile.fromJson(res.data);
+        final item = UserModel.fromJson(res.data);
         return DefaultResponse(data: item);
       } else {
         return DefaultResponse(status: res.status, message: res.message);
@@ -157,14 +159,14 @@ class ApiProvider {
     }
   }
 
-  Future<DefaultResponse<UserProfile>> getUserInfo() async {
+  Future<DefaultResponse<UserModel>> getUserInfo() async {
     try {
       final Map resJson = await _baseAPI.request(
         manager: ApiManager(ApiType.userInfo),
       );
       final res = DefaultResponse.fromMap(resJson);
       if (res.status == 200 && res.data != null) {
-        final item = UserProfile.fromJson(res.data);
+        final item = UserModel.fromJson(res.data);
         return DefaultResponse(data: item);
       } else {
         return DefaultResponse(status: res.status, message: res.message);
@@ -407,7 +409,7 @@ class ApiProvider {
     }
   }
 
-  Future<DefaultResponse<List<UserProfile>>> getStaffs({int isLike = 0}) async {
+  Future<DefaultResponse<List<UserModel>>> getStaffs({int isLike = 0}) async {
     try {
       final Map resJson = await _baseAPI.request(
         manager: ApiManager(ApiType.getStaffs),
@@ -415,9 +417,9 @@ class ApiProvider {
       );
       final res = DefaultResponse.fromMap(resJson);
       if (res.status == 200 && res.data != null) {
-        List<UserProfile> list = [];
+        List<UserModel> list = [];
         for (final item in res.data ?? []) {
-          final model = UserProfile.fromJson(item);
+          final model = UserModel.fromJson(item);
           list.add(model);
         }
         return DefaultResponse(data: list);
@@ -452,7 +454,7 @@ class ApiProvider {
     }
   }
 
-  Future<DefaultResponse<UserProfile>> updateUserInfo(
+  Future<DefaultResponse<UserModel>> updateUserInfo(
     UserInfoRequest userInfoRequest,
   ) async {
     try {
@@ -491,7 +493,7 @@ class ApiProvider {
       if (res.statusCode == HttpStatus.ok) {
         var response = Map<String, dynamic>.from(json.decode(res.body));
         if (response["code"] == 1 && response["data"] != null) {
-          return DefaultResponse(data: UserProfile.fromJson(response["data"]));
+          return DefaultResponse(data: UserModel.fromJson(response["data"]));
         } else {
           return DefaultResponse(message: response["message"]);
         }
@@ -503,7 +505,7 @@ class ApiProvider {
     }
   }
 
-  Future<DefaultResponse<UserProfile>> changePassword(
+  Future<DefaultResponse<UserModel>> changePassword(
     ChangePasswordRequest changePasswordRequest,
   ) async {
     try {
@@ -522,7 +524,7 @@ class ApiProvider {
         if (response["status"] != null &&
             response["status"] == 1 &&
             response["data"] != null) {
-          return DefaultResponse(data: UserProfile.fromJson(response["data"]));
+          return DefaultResponse(data: UserModel.fromJson(response["data"]));
         } else {
           return DefaultResponse(
             status: response["status"],
@@ -531,7 +533,7 @@ class ApiProvider {
         }
         // if (response["code"] == 1 && response["data"] != null) {
         //   return DefaultResponse(
-        //       data: UserProfile.fromJson(response["data"]));
+        //       data: UserModel.fromJson(response["data"]));
         // } else {
         //   return DefaultResponse(message: response["message"]);
         // }
@@ -546,7 +548,7 @@ class ApiProvider {
       //     options: Options(contentType: 'application/json'));
       // final res = response.data;
       // if (res["status"]!=null && res["status"] == 1 && res.data != null) {
-      //   return DefaultResponse(data: UserProfile.fromJson(res.data));
+      //   return DefaultResponse(data: UserModel.fromJson(res.data));
       // } else {
       //   return DefaultResponse(status: res.status, message: res.message);
       // }
@@ -691,7 +693,7 @@ class ApiProvider {
     }
   }
 
-  Future<DefaultResponse<List<UserProfile>>> getListStaffByDistance(
+  Future<DefaultResponse<List<UserModel>>> getListStaffByDistance(
     StaffByDistanceRequest staffByDistanceRequest,
   ) async {
     try {
@@ -706,9 +708,9 @@ class ApiProvider {
       final res = DefaultResponse.fromMap(resJson);
       if (res.status == 200 && res.data != null) {
         LoggerUtil.log("res.data ${res.data}");
-        List<UserProfile> list = [];
+        List<UserModel> list = [];
         for (final item in res.data ?? []) {
-          final model = UserProfile.fromJson(item);
+          final model = UserModel.fromJson(item);
           list.add(model);
         }
         return DefaultResponse(data: list);
@@ -720,16 +722,16 @@ class ApiProvider {
     }
   }
 
-  Future<DefaultResponse<List<UserProfile>>> getListSupporters() async {
+  Future<DefaultResponse<List<UserModel>>> getListSupporters() async {
     try {
       final Map resJson = await _baseAPI.request(
         manager: ApiManager(ApiType.getListSupporters),
       );
       final res = DefaultResponse.fromMap(resJson);
       if (res.status == 200 && res.data != null) {
-        List<UserProfile> list = [];
+        List<UserModel> list = [];
         for (final item in res.data ?? []) {
-          final model = UserProfile.fromJson(item);
+          final model = UserModel.fromJson(item);
           list.add(model);
         }
         return DefaultResponse(data: list);
@@ -998,7 +1000,8 @@ class ApiProvider {
       // Add fields matching the other working app
       request.fields['note'] = note;
       request.fields['retail_shipment_assigment_user_id'] = id;
-      request.fields['image'] = image.toString(); // Exact string mapping of File
+      request.fields['image'] = image
+          .toString(); // Exact string mapping of File
 
       // Add actual image file stream
       final stream = http.ByteStream(image.openRead());
@@ -1019,6 +1022,51 @@ class ApiProvider {
       final Map resJson = json.decode(response.body);
       final res = DefaultResponse.fromJson(Map<String, dynamic>.from(resJson));
       return res;
+    } catch (e) {
+      return DefaultResponse.withError(Error(message: e.toString()));
+    }
+  }
+
+  Future<DefaultResponse<UserProfile>> getKPIs(String userId) async {
+    try {
+      final Map resJson = await _baseAPI.request(
+        manager: ApiManager(ApiType.getKPIByUser, additionalPath: userId),
+      );
+      final res = DefaultResponse.fromJson(Map<String, dynamic>.from(resJson));
+      if (res.status == 200 || res.status == 1) {
+        final baseProfile = App.instance.userApp?.userProfile;
+
+        final kpiData = resJson['data'] != null
+            ? KPIDataResponse.fromJson(Map<String, dynamic>.from(resJson['data']))
+            : null;
+
+        final attendances = resJson['data_attendances'] != null
+            ? userAttendancesListFromJson(resJson['data_attendances'])
+            : null;
+
+        final parsed = UserProfile(
+          id: baseProfile?.id,
+          userId: baseProfile?.userId ?? userId,
+          bankInfo: baseProfile?.bankInfo,
+          bankQr: baseProfile?.bankQr,
+          basicSalary: baseProfile?.basicSalary,
+          bhxh: baseProfile?.bhxh,
+          totalIncome: baseProfile?.totalIncome,
+          typeStaff: baseProfile?.typeStaff,
+          typeContract: baseProfile?.typeContract,
+          infoContract: baseProfile?.infoContract,
+          monthContract: baseProfile?.monthContract,
+          level: baseProfile?.level,
+          description: baseProfile?.description,
+          dayOff: baseProfile?.dayOff,
+          user: baseProfile?.user ?? App.instance.userApp,
+          kpi: kpiData,
+          userAttendances: attendances,
+        );
+        return DefaultResponse(data: parsed, status: res.status, message: res.message);
+      } else {
+        return DefaultResponse(status: res.status, message: res.message);
+      }
     } catch (e) {
       return DefaultResponse.withError(Error(message: e.toString()));
     }

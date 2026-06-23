@@ -3,7 +3,7 @@ import 'package:socbay/data/model/local/account_db.dart';
 import 'package:socbay/services/push_notification_service.dart';
 import 'package:socbay/utils/logger_util.dart';
 import 'package:socbay/utils/secure_storage_utils.dart';
-import 'data/model/user_profile.dart';
+import 'data/model/user_model.dart';
 
 class App {
   ///Singleton factory
@@ -25,7 +25,7 @@ class App {
   static String versionApi = "v1.0";
   EventBus eventBus = EventBus();
 
-  UserProfile? userApp;
+  UserModel? userApp;
 
   AccountDb? initAccount;
 

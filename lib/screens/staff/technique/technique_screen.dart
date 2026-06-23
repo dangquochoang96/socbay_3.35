@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:socbay/data/model/user_profile.dart';
+import 'package:socbay/data/model/user_model.dart';
 import 'package:socbay/widgets/my_app_bar.dart';
 import '../../../blocs/technique/technique_screen_bloc.dart';
 import '../../../blocs/technique/technique_screen_event.dart';
@@ -13,7 +13,7 @@ class TechniqueScreen extends StatefulWidget {
   const TechniqueScreen({
     super.key,
     required int initialTabIndex,
-    UserProfile? favoriteStaff,
+    UserModel? favoriteStaff,
   });
 
   @override
@@ -28,7 +28,7 @@ class _TechniqueScreenState extends State<TechniqueScreen>
   String _searchQuery = '';
   int index = 0;
   bool isLoading = false;
-  late UserProfile userProfile;
+  late UserModel userProfile;
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +43,7 @@ class _TechniqueScreenState extends State<TechniqueScreen>
     super.initState();
     _searchController = TextEditingController();
     _bloc = BlocProvider.of(context);
-    userProfile = _bloc.args['favouriteStaff'] as UserProfile? ?? UserProfile();
+    userProfile = _bloc.args['favouriteStaff'] as UserModel? ?? UserModel();
     _bloc.add(TechniqueScreenStartedFaEvent());
     _bloc.add(TechniqueScreenStartedEvent());
     _tabController = TabController(length: 2, initialIndex: 0, vsync: this);
@@ -66,7 +66,7 @@ class _TechniqueScreenState extends State<TechniqueScreen>
 
   void _listener(BuildContext context, state) {}
 
-  String _getRoleName(UserProfile user) {
+  String _getRoleName(UserModel user) {
     if (user.isUserSale()) return "Kinh doanh";
     if (user.isUserRole()) return "Kỹ thuật viên";
     return "Nhân viên";
@@ -176,7 +176,7 @@ class _TechniqueScreenState extends State<TechniqueScreen>
     );
   }
 
-  Widget _buildList(List<UserProfile> sourceList, bool isFavoriteTab) {
+  Widget _buildList(List<UserModel> sourceList, bool isFavoriteTab) {
     final filteredUsers = sourceList.where((user) {
       final name = (user.username ?? '').toLowerCase();
       final phone = (user.phone ?? '').toLowerCase();
@@ -199,7 +199,7 @@ class _TechniqueScreenState extends State<TechniqueScreen>
     );
   }
 
-  Widget _buildUserCard(BuildContext context, UserProfile item) {
+  Widget _buildUserCard(BuildContext context, UserModel item) {
     final isSelected = userProfile.id == item.id;
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8),
@@ -384,7 +384,7 @@ class _TechniqueScreenState extends State<TechniqueScreen>
     );
   }
 
-  Widget _buildAvatar(UserProfile item) {
+  Widget _buildAvatar(UserModel item) {
     final avatarUrl = item.avatar ?? '';
     if (avatarUrl.isEmpty) {
       final initial = (item.username != null && item.username!.isNotEmpty)
@@ -482,10 +482,10 @@ class _TechniqueScreenState extends State<TechniqueScreen>
     );
   }
 
-  void _onChooseFavouriteStaff(UserProfile? userProfile) {
+  void _onChooseFavouriteStaff(UserModel? userProfile) {
     if (this.userProfile.id != userProfile?.id) {
       Navigator.pop(context, {
-        "initialUserProfile": userProfile,
+        "initialUserModel": userProfile,
         "favouriteStaff": userProfile,
       });
     }

@@ -9,7 +9,7 @@ import 'package:socbay/blocs/staff/comment_and_rating_list/comment_and_rating_li
 import 'package:socbay/config/app_config.dart';
 import 'package:socbay/data/data_provider/api_endpoints.dart';
 import 'package:socbay/data/model/order_detail_model.dart';
-import 'package:socbay/data/model/user_profile.dart';
+import 'package:socbay/data/model/user_model.dart';
 import 'package:socbay/data/repository/auth/api_repository.dart';
 import 'package:socbay/utils/auth_http.dart' as http;
 import 'package:socbay/utils/logger_util.dart';
@@ -21,7 +21,7 @@ class CommentAndRatingBloc
     on<CommentAndRatingListEvent>(_mapGetListCommentAndRatingEventToState);
   }
   final ApiRepository apiRepository;
-  UserProfile? userProfile;
+  UserModel? userProfile;
   double rating = 0;
   int dem = 0;
   bool isLoading = true;
@@ -45,7 +45,7 @@ class CommentAndRatingBloc
       var res = await http.get(url);
       if (res.statusCode == HttpStatus.ok) {
         var map = Map<String, dynamic>.from(json.decode(res.body));
-        userProfile = UserProfile.fromJson(map["data"]);
+        userProfile = UserModel.fromJson(map["data"]);
       }
     } catch (ex) {
       LoggerUtil.log(ex.toString());

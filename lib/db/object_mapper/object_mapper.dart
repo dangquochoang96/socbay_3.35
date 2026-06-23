@@ -1,13 +1,13 @@
-import 'package:socbay/data/model/user_profile.dart';
+import 'package:socbay/data/model/user_model.dart';
 import 'package:socbay/db/entity/users.dart';
 
 abstract class Mapper<FROM, TO> {
   TO call(FROM object);
 }
 
-class UserProfileToUser implements Mapper<UserProfile, User> {
+class UserModelToUser implements Mapper<UserModel, User> {
   @override
-  User call(UserProfile object) {
+  User call(UserModel object) {
     return User(
       object.username,
       object.avatar,
@@ -35,10 +35,10 @@ class UserProfileToUser implements Mapper<UserProfile, User> {
   }
 }
 
-class UserToUserProfile implements Mapper<User, UserProfile> {
+class UserToUserModel implements Mapper<User, UserModel> {
   @override
-  UserProfile call(User object) {
-    return UserProfile(
+  UserModel call(User object) {
+    return UserModel(
       username: object.username,
       avatar: object.avatar,
       email: object.email,

@@ -1,5 +1,5 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:socbay/data/model/user_profile.dart';
+import 'package:socbay/data/model/user_model.dart';
 
 class SecureStorageUtil {
   static const userAppStorageKey = 'userApp';
@@ -35,17 +35,17 @@ class SecureStorageUtil {
     await storage.deleteAll();
   }
 
-  Future setCurrentUserLogin(String key, UserProfile userProfile) async {
+  Future setCurrentUserLogin(String key, UserModel userProfile) async {
     await storage.write(key: "$key-id", value: userProfile.id.toString());
     await storage.write(key: "$key-username", value: userProfile.username);
     await storage.write(key: "$key-password", value: userProfile.password);
   }
 
-  Future<UserProfile> getCurrentUserLogin() async {
+  Future<UserModel> getCurrentUserLogin() async {
     var id = await storage.read(key: "$currentUser-id");
     var username = await storage.read(key: "$currentUser-username");
     var password = await storage.read(key: "$currentUser-password");
-    return UserProfile(
+    return UserModel(
       id: int.parse(id ?? "0"),
       username: username,
       password: password,

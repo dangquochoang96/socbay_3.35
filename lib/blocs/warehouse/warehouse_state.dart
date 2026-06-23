@@ -1,5 +1,5 @@
 import 'package:socbay/data/model/warehouse_model.dart';
-import 'package:socbay/data/model/user_profile.dart';
+import 'package:socbay/data/model/user_model.dart';
 
 abstract class WarehouseState {
   const WarehouseState();
@@ -29,7 +29,7 @@ class WarehouseLoadFailure extends WarehouseState {
 class UserSearchLoading extends WarehouseState {}
 
 class UserSearchSuccess extends WarehouseState {
-  final List<UserProfile> users;
+  final List<UserModel> users;
 
   const UserSearchSuccess({required this.users});
 }

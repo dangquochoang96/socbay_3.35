@@ -12,7 +12,7 @@ import 'package:socbay/data/model/home_service_model.dart';
 import 'package:socbay/data/model/order_model.dart';
 import 'package:socbay/data/model/task_model.dart';
 import 'package:socbay/data/model/user_address.dart';
-import 'package:socbay/data/model/user_profile.dart';
+import 'package:socbay/data/model/user_model.dart';
 import 'package:socbay/data/repository/auth/api_repository.dart';
 import 'package:socbay/utils/logger_util.dart';
 
@@ -29,7 +29,7 @@ class StaffServiceScreenBloc
   List<OrderModel> listProducts = [];
   List<TaskModel> listTaskModel = [];
   List<String> paths = [];
-  UserProfile? customerInfor;
+  UserModel? customerInfor;
   StaffServiceScreenBloc({required this.apiRepository, required this.args})
     : super(StaffServiceScreenInitialState()) {
     on<StaffServiceScreenChangeTypeServiceEvent>(
@@ -182,7 +182,7 @@ class StaffServiceScreenBloc
         var l = Map<String, dynamic>.from(json.decode(res.body));
         if (l['success'] == true) {
           var m = Map<String, dynamic>.from(l["data"]);
-          customerInfor = UserProfile.fromJson(m['users']);
+          customerInfor = UserModel.fromJson(m['users']);
           await _getProductByUser(customerInfor?.id ?? 0);
           emit(
             StaffServiceScreenCheckCustomerSuccessState(

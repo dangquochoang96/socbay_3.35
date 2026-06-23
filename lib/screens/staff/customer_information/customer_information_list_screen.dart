@@ -7,7 +7,7 @@ import 'package:socbay/widgets/my_app_bar.dart';
 import '../../../blocs/user_Information/customer_information_list_bloc.dart';
 import '../../../blocs/user_Information/customer_information_list_event.dart';
 import '../../../blocs/user_Information/customer_information_list_state.dart';
-import '../../../data/model/user_profile.dart';
+import '../../../data/model/user_model.dart';
 import '../../../routes.dart';
 import '../../../utils/color_util.dart';
 
@@ -26,9 +26,9 @@ class _CustomerInformationListScreenState
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
-  List<UserProfile> _filteredUsers = [];
+  List<UserModel> _filteredUsers = [];
 
-  late final UserProfile? iss;
+  late final UserModel? iss;
   bool get _isSearchEmpty =>
       _nameController.text.trim().isEmpty &&
       _phoneController.text.trim().isEmpty &&
@@ -377,7 +377,7 @@ class _CustomerInformationListScreenState
     );
   }
 
-  Widget _buildCustomerCard(UserProfile item, int index) {
+  Widget _buildCustomerCard(UserModel item, int index) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 2,
@@ -508,7 +508,7 @@ class _CustomerInformationListScreenState
     );
   }
 
-  void _navigateToDetails(UserProfile item) {
+  void _navigateToDetails(UserModel item) {
     int? seclt = item.id;
     String? phonee = item.phone;
     Navigator.pushNamed(

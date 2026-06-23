@@ -13,7 +13,7 @@ import 'package:socbay/data/model/home_service_model.dart';
 import 'package:socbay/data/model/order_model.dart';
 import 'package:socbay/data/model/task_model.dart';
 import 'package:socbay/data/model/user_address.dart';
-import 'package:socbay/data/model/user_profile.dart';
+import 'package:socbay/data/model/user_model.dart';
 import 'package:socbay/utils/logger_util.dart';
 
 import 'package:socbay/utils/auth_http.dart' as http;
@@ -29,7 +29,7 @@ class StaffServiceSaleScreenBloc
   List<OrderModel> listProducts = [];
   List<String> paths = [];
   List<HomeServiceModel> listService = [];
-  UserProfile? customerInfo;
+  UserModel? customerInfo;
 
   StaffServiceSaleScreenBloc({
     required this.apiRepository,
@@ -197,7 +197,7 @@ class StaffServiceSaleScreenBloc
         var l = Map<String, dynamic>.from(json.decode(res.body));
         if (l['success'] == true) {
           var m = Map<String, dynamic>.from(l["data"]);
-          customerInfo = UserProfile.fromJson(m['users']);
+          customerInfo = UserModel.fromJson(m['users']);
           print(customerInfo);
           await _getProductByUser(customerInfo?.id ?? 0);
           emit(

@@ -11,7 +11,7 @@ import 'package:socbay/data/data_provider/api_endpoints.dart';
 import 'package:socbay/utils/logger_util.dart';
 
 import '../../../data/model/order_detail_model.dart';
-import '../../../data/model/user_profile.dart';
+import '../../../data/model/user_model.dart';
 import '../../../data/repository/auth/api_repository.dart';
 import 'package:socbay/utils/auth_http.dart' as http;
 
@@ -28,12 +28,12 @@ class StaffInfoScreenBloc
   final ApiRepository apiRepository;
   bool isLoading = false;
   Map<String, dynamic> args;
-  List<UserProfile> favouriteStaffs = [];
+  List<UserModel> favouriteStaffs = [];
   bool isFavourite = false;
   String localte = "";
   List<String> services = [];
 
-  UserProfile? userProfile;
+  UserModel? userProfile;
   double rating = 0;
   int dem = 0;
   List<OrderDetailModel>? lstOrder;
@@ -51,17 +51,17 @@ class StaffInfoScreenBloc
       var res = await http.get(url);
       if (res.statusCode == HttpStatus.ok) {
         var l = Map<String, dynamic>.from(json.decode(res.body));
-        favouriteStaffs = List<UserProfile>.from(
-          l["data"].map((model) => UserProfile.fromJson(model)),
+        favouriteStaffs = List<UserModel>.from(
+          l["data"].map((model) => UserModel.fromJson(model)),
         );
         for (var i in favouriteStaffs) {
-          if (i.id == (args["staffInfo"] as UserProfile).id) {
+          if (i.id == (args["staffInfo"] as UserModel).id) {
             isFavourite = true;
           }
         }
       }
       var url1 = AppConfig.instance.apiUri(
-        ApiEndpoints.userStaffDetail((args["staffInfo"] as UserProfile).id),
+        ApiEndpoints.userStaffDetail((args["staffInfo"] as UserModel).id),
       );
       var res1 = await http.get(url1);
       if (res1.statusCode == HttpStatus.ok) {
@@ -141,7 +141,7 @@ class StaffInfoScreenBloc
       var res = await http.get(url);
       if (res.statusCode == HttpStatus.ok) {
         var map = Map<String, dynamic>.from(json.decode(res.body));
-        userProfile = UserProfile.fromJson(map["data"]);
+        userProfile = UserModel.fromJson(map["data"]);
       }
     } catch (ex) {
       LoggerUtil.log(ex.toString());

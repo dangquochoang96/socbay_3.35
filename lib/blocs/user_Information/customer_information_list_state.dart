@@ -1,4 +1,4 @@
-import 'package:socbay/data/model/user_profile.dart';
+import 'package:socbay/data/model/user_model.dart';
 
 abstract class CustomerInformationListState {
   const CustomerInformationListState();
@@ -8,7 +8,7 @@ class CustomerInformationListInitialState
     extends CustomerInformationListState {}
 
 class CustomerInformationListLoadedState extends CustomerInformationListState {
-  final List<UserProfile> customerInformationList;
+  final List<UserModel> customerInformationList;
 
   const CustomerInformationListLoadedState(this.customerInformationList);
 

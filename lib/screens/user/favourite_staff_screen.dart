@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:socbay/blocs/user_info/favourite_staff/favourite_staff_event.dart';
 import 'package:socbay/blocs/user_info/favourite_staff/favourite_staff_bloc.dart';
 import 'package:socbay/constants/constants.dart';
-import 'package:socbay/data/model/user_profile.dart';
+import 'package:socbay/data/model/user_model.dart';
 import 'package:socbay/utils/color_util.dart';
 import 'package:socbay/utils/image_util.dart';
 import 'package:socbay/utils/theme_util.dart';
@@ -75,7 +75,7 @@ class _FavouriteStaffScreenState extends State<FavouriteStaffScreen> {
   }
 
   Widget _itemBuilder(BuildContext context, int index) {
-    final UserProfile item = _bloc.favouriteStaffs[index];
+    final UserModel item = _bloc.favouriteStaffs[index];
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(14),

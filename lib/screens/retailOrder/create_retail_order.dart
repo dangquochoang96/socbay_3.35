@@ -17,7 +17,7 @@ import 'package:socbay/config/app_config.dart';
 import 'package:socbay/data/data_provider/api_endpoints.dart';
 import 'package:socbay/constants/constants.dart';
 import 'package:socbay/data/model/product_model.dart';
-import 'package:socbay/data/model/user_profile.dart';
+import 'package:socbay/data/model/user_model.dart';
 import 'package:socbay/utils/auth_http.dart' as http;
 import 'package:socbay/utils/color_util.dart';
 import 'package:socbay/utils/image_util.dart';
@@ -33,7 +33,7 @@ class CreateRetailOrderScreen extends StatefulWidget {
 }
 
 class _CreateRetailOrderScreenState extends State<CreateRetailOrderScreen> {
-  UserProfile? _currentUser;
+  UserModel? _currentUser;
   DateTime _selectedDate = DateTime.now();
   final TextEditingController _notesController = TextEditingController();
 

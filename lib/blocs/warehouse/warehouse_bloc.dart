@@ -7,7 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:socbay/config/app_config.dart';
 import 'package:socbay/data/data_provider/api_endpoints.dart';
 import 'package:socbay/data/model/warehouse_model.dart';
-import 'package:socbay/data/model/user_profile.dart';
+import 'package:socbay/data/model/user_model.dart';
 import 'package:socbay/utils/auth_http.dart' as http;
 
 import 'warehouse_event.dart';
@@ -106,7 +106,7 @@ class WarehouseBloc extends Bloc<WarehouseEvent, WarehouseState> {
         final jsonRes = json.decode(response.body);
         if (jsonRes['code'] == 1 && jsonRes['data'] != null) {
           final List<dynamic> userData = jsonRes['data'];
-          final users = userData.map((u) => UserProfile.fromJson(u)).toList();
+          final users = userData.map((u) => UserModel.fromJson(u)).toList();
           emit(UserSearchSuccess(users: users));
         } else {
           emit(

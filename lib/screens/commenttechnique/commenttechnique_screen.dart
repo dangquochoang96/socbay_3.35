@@ -4,7 +4,7 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:full_screen_image_null_safe/full_screen_image_null_safe.dart';
 import 'package:socbay/config/app_config.dart';
 import 'package:socbay/data/model/order_detail_model.dart';
-import 'package:socbay/data/model/user_profile.dart';
+import 'package:socbay/data/model/user_model.dart';
 import 'package:socbay/routes.dart';
 import 'package:socbay/utils/color_util.dart';
 import 'package:socbay/utils/image_util.dart';
@@ -319,7 +319,7 @@ class _CommentTechniqueListScreenState
     return const SizedBox(height: 8);
   }
 
-  Future _goToStaffInfo(UserProfile staffInfo) async {
+  Future _goToStaffInfo(UserModel staffInfo) async {
     await Navigator.pushNamed(
       context,
       Routes.staffInfoScreen,

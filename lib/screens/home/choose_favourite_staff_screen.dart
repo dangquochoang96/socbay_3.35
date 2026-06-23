@@ -5,7 +5,7 @@ import 'package:socbay/blocs/home/choose_favourite_staff/choose_favourite_staff_
 import 'package:socbay/blocs/home/choose_favourite_staff/choose_favourite_staff_state.dart';
 
 import '../../constants/constants.dart';
-import '../../data/model/user_profile.dart';
+import '../../data/model/user_model.dart';
 import '../../utils/color_util.dart';
 import '../../utils/image_util.dart';
 import '../../utils/theme_util.dart';
@@ -24,13 +24,13 @@ class ChooseFavouriteStaffScreen extends StatefulWidget {
 class _ChooseFavouriteStaffScreenState
     extends State<ChooseFavouriteStaffScreen> {
   late final ChooseFavouriteStaffBloc _bloc;
-  late UserProfile? userProfile;
+  late UserModel? userProfile;
 
   @override
   void initState() {
     _bloc = BlocProvider.of(context);
     _bloc.add(ChooseFavouriteStaffStartedEvent());
-    userProfile = _bloc.args['favouriteStaff'] as UserProfile?;
+    userProfile = _bloc.args['favouriteStaff'] as UserModel?;
     super.initState();
   }
 
@@ -84,7 +84,7 @@ class _ChooseFavouriteStaffScreenState
   }
 
   Widget _itemBuilder(BuildContext context, int index) {
-    final UserProfile item = _bloc.favouriteStaffs[index];
+    final UserModel item = _bloc.favouriteStaffs[index];
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(14),
@@ -171,7 +171,7 @@ class _ChooseFavouriteStaffScreenState
     );
   }
 
-  void _onChooseFavouriteStaff(UserProfile? userProfile) {
+  void _onChooseFavouriteStaff(UserModel? userProfile) {
     if (this.userProfile?.id != userProfile?.id) {
       Navigator.pop(context, {"favouriteStaff": userProfile});
     }

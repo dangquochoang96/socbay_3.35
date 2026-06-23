@@ -10,7 +10,7 @@ import 'package:socbay/config/app_config.dart';
 import 'package:socbay/constants/constants.dart';
 import 'package:socbay/data/model/home_service_model.dart';
 import 'package:socbay/data/model/request/update_task_request.dart';
-import 'package:socbay/data/model/user_profile.dart';
+import 'package:socbay/data/model/user_model.dart';
 import 'package:socbay/screens/staff/technique/technique_screen.dart';
 import 'package:socbay/utils/color_util.dart';
 import 'package:socbay/utils/context_extension.dart';
@@ -47,7 +47,7 @@ class _EditRentServiceScreenState extends State<EditRentServiceScreen> {
   var resultLocation = {};
   DateTime? selectedDate;
   TimeOfDay? selectedTime;
-  UserProfile? _favouriteStaff;
+  UserModel? _favouriteStaff;
   late final ImagePicker _picker;
   // ignore: prefer_typing_uninitialized_variables
   var _parsedDate;

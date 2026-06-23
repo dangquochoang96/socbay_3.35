@@ -1,135 +1,111 @@
-import 'package:socbay/data/model/home_service_model.dart';
-import 'package:socbay/data/model/task_model.dart';
-import 'package:socbay/utils/parse_util.dart';
+// To parse this JSON data, do
+//
+//     final userProfile = userProfileFromJson(jsonString);
 
-import 'order_model.dart';
+import 'dart:convert';
+
+import 'package:socbay/data/model/kpi_model.dart';
+import 'package:socbay/data/model/user_attendance_model.dart';
+import 'package:socbay/data/model/user_model.dart';
+
+UserProfile userProfileFromJson(String str) =>
+    UserProfile.fromJson(json.decode(str));
+
+List<UserProfile> userProfileListFromJson(dynamic str) =>
+    List<UserProfile>.from(str.map((x) => UserProfile.fromJson(x)));
+
+String userProfileToJson(UserProfile data) => json.encode(data.toJson());
 
 class UserProfile {
-  final int? id;
-  final String? username;
-  final String? avatar;
-  final String? email;
-  final String? phone;
-  final String? address;
-  final String? password;
-  final String? type;
-  final String? typeStaff;
-  final int? otp;
-  final String? birthday;
-  final int? status;
-  final int? isAgency;
-  final int? isAdmin;
-  final int? sex;
-  final int? point;
-  final double? lat;
-  final double? lng;
-  final double? distance;
-  final String? createdAt;
-  final String? certification;
-  final List<HomeServiceModel>? services;
-  final String? cmt;
-  final String? idCardImageFront;
-  final String? idCardImageBack;
-  final TaskModel? taskmodel;
-  final OrderModel? ordermodel;
+  int? id;
+  String? userId;
+  String? bankInfo;
+  String? bankQr;
+  String? basicSalary;
+  String? bhxh;
+  String? totalIncome;
+  String? typeStaff;
+  String? typeContract;
+  String? infoContract;
+  String? monthContract;
+  String? level;
+  String? description;
+  String? dayOff;
+  KPIDataResponse? kpi;
+  KPIDataResponse? endYearKPI;
+  UserModel? user;
+  UserAttendances? userAttendance;
+  List<UserAttendances>? userAttendances;
 
   UserProfile({
-    this.username,
-    this.avatar,
-    this.email,
-    this.phone,
-    this.address,
-    this.password,
-    this.type,
-    this.typeStaff,
-    this.otp,
     this.id,
-    this.birthday,
-    this.status,
-    this.isAgency,
-    this.isAdmin,
-    this.sex,
-    this.point,
-    this.lat,
-    this.lng,
-    this.distance,
-    this.createdAt,
-    this.certification,
-    this.services,
-    this.taskmodel,
-    this.ordermodel,
-    this.cmt,
-    this.idCardImageFront,
-    this.idCardImageBack,
+    this.userId,
+    this.bankInfo,
+    this.bankQr,
+    this.basicSalary,
+    this.bhxh,
+    this.totalIncome,
+    this.typeStaff,
+    this.typeContract,
+    this.infoContract,
+    this.monthContract,
+    this.level,
+    this.description,
+    this.dayOff,
+    this.kpi,
+    this.endYearKPI,
+    this.user,
+    this.userAttendance,
+    this.userAttendances,
   });
 
   factory UserProfile.fromJson(Map<String, dynamic> json) => UserProfile(
-    id: Parse.toIntValue(json['id']),
-    username: json['username'],
-    avatar: json['avartar'],
-    email: json['email'],
-    phone: json['phone'] as String?,
-    address: json['address'],
-    password: json['password'],
-    type: json['type'],
-    typeStaff: json['type_staff'],
-    otp: Parse.toIntValue(json['otp']),
-    birthday: json['birthday'],
-    status: Parse.toIntValue(json['status']),
-    isAgency: Parse.toIntValue(json['is_agency']),
-    isAdmin: Parse.toIntValue(json['is_admin']),
-    sex: Parse.toIntValue(json['sex']),
-    point: Parse.toIntValue(json['tich_diem']),
-    lat: Parse.toDoubleValue(['lat']),
-    lng: Parse.toDoubleValue(['lng']),
-    distance: Parse.toDoubleValue(json['distance']),
-    createdAt: json['created_at'],
-    certification: json['certification'],
-    services: ((json['service'] as List<HomeServiceModel>?)?.map(
-      (e) => e,
-    ))?.toList(),
-    taskmodel: json["customer"] != null
-        ? TaskModel.fromJson(json["customer"])
-        : null,
-    ordermodel: json["listProducts"] != null
-        ? OrderModel.fromJson(json["listProducts"])
-        : null,
-    cmt: json['cmt'],
-    idCardImageFront: json['id_card_image_front'],
-    idCardImageBack: json['id_card_image_back'],
+    id: json["id"],
+    userId: json["user_id"],
+    bankInfo: json["bank_info"],
+    bankQr: json["bank_qr"],
+    basicSalary: json["basic_salary"],
+    bhxh: json["bhxh"],
+    totalIncome: json["total"],
+    typeStaff: json["type_staff"],
+    typeContract: json["type_contract"],
+    infoContract: json["info_contract"],
+    monthContract: json["month_contract"],
+    level: json["level"],
+    description: json["description"],
+    dayOff: json["day_off"],
+    kpi: json["kpis"] == null ? null : KPIDataResponse.fromJson(json["kpis"]),
+    endYearKPI: json["late_year"] == null
+        ? null
+        : KPIDataResponse.fromJson(json["late_year"]),
+    user: json["user"] == null ? null : UserModel.fromJson(json["user"]),
+    userAttendance: json["user_attendance"] == null
+        ? null
+        : UserAttendances.fromJson(json["user_attendance"]),
+    userAttendances: json["data_attendances"] == null
+        ? null
+        : userAttendancesListFromJson(json["data_attendances"]),
   );
 
   Map<String, dynamic> toJson() => {
-    'id': id,
-    'username': username,
-    'avatar': avatar,
-    'birthday': birthday,
-    'phone': phone,
-    'address': address,
-    'status': status,
-    'is_agency': isAgency,
-    'type': type,
-    'type_staff': typeStaff,
-    'is_admin': isAdmin,
-    'sex': sex,
-    'tich_diem': point,
-    'lat': lat,
-    'lng': lng,
-    'distance': distance,
-    'created_at': createdAt,
-    'certification': certification,
-    'services': services,
-    'cmt': cmt,
-    'idCardImageFront': idCardImageFront,
-    'idCardImageBack': idCardImageBack,
+    "id": id,
+    "user_id": userId,
+    "bank_info": bankInfo,
+    "bank_qr": bankQr,
+    "basic_salary": basicSalary,
+    "bhxh": bhxh,
+    "total_income": totalIncome,
+    "type_staff": typeStaff,
+    "type_contract": typeContract,
+    "info_contract": infoContract,
+    "month_contract": monthContract,
+    "level": level,
+    "description": description,
+    "day_off": dayOff,
+    "kpi": kpi?.data,
+    "late_year": endYearKPI?.data,
+    "data_attendances": userAttendances != null
+        ? List<dynamic>.from(userAttendances!.map((x) => x.toJson()))
+        : null,
   };
-
-  // bool isUserRole() => type == "2";
-  // bool isUserCustomer() => type == "1";
-  // bool isUserSale() => type == "3";
-
-  bool isUserRole() => type == "2" && ["1", "3", "5"].contains(typeStaff);
-  bool isUserCustomer() => type == "1" && typeStaff == "0";
-  bool isUserSale() =>
-      type == "2" && ["2", "4", "6", "7", "8"].contains(typeStaff);
 }
