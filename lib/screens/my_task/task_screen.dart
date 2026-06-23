@@ -49,16 +49,52 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
       appBar: MyAppBar(title: "Công việc", isBackNavigation: false),
       body: Column(
         children: [
-          TabBar(
-            controller: _tabController,
-            isScrollable: true,
-            indicatorColor: ColorUtil.bangladeshGreen,
-            tabs: [
-              _buildTab('Trong ngày'),
-              _buildTab('Tồn đọng'),
-              _buildTab('Thuê'),
-              _buildTab('Tồn đọng thuê'),
-            ],
+          Container(
+            height: 46,
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF3F4F6),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: const Color(0xFFE5E7EB), width: 1),
+            ),
+            child: TabBar(
+              controller: _tabController,
+              isScrollable: true,
+              tabAlignment: TabAlignment.start,
+              dividerColor: Colors.transparent,
+              indicatorSize: TabBarIndicatorSize.tab,
+              indicator: BoxDecoration(
+                color: ColorUtil.bangladeshGreen,
+                borderRadius: BorderRadius.circular(8),
+                boxShadow: [
+                  BoxShadow(
+                    color: ColorUtil.bangladeshGreen.withValues(alpha: 0.2),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              labelColor: Colors.white,
+              unselectedLabelColor: ColorUtil.graniteGray,
+              labelStyle: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 13,
+              ),
+              unselectedLabelStyle: const TextStyle(
+                fontWeight: FontWeight.w500,
+                fontSize: 13,
+              ),
+              indicatorWeight: 0,
+              indicatorPadding: EdgeInsets.zero,
+              labelPadding: const EdgeInsets.symmetric(horizontal: 16),
+              tabs: [
+                _buildTab('Trong ngày', Icons.today_rounded),
+                _buildTab('Tồn đọng', Icons.pending_actions_rounded),
+                _buildTab('Thuê', Icons.handshake_rounded),
+                _buildTab('Tồn đọng thuê', Icons.history_toggle_off_rounded),
+              ],
+            ),
           ),
           Expanded(
             child: IndexedStack(
@@ -76,12 +112,11 @@ class _TaskScreenState extends State<TaskScreen> with TickerProviderStateMixin {
     );
   }
 
-  Tab _buildTab(text) {
+  Tab _buildTab(String text, IconData icon) {
     return Tab(
-      height: 36,
-      child: Text(
-        text,
-        style: const TextStyle(color: ColorUtil.bangladeshGreen, fontSize: 20),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [Icon(icon, size: 16), const SizedBox(width: 6), Text(text)],
       ),
     );
   }

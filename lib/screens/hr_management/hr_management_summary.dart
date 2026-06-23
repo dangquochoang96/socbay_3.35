@@ -435,10 +435,10 @@ class _HRManagementSummaryScreenState extends State<HRManagementSummaryScreen>
     final earlyLeaveDays = schedules
         .where((s) => (s.earlyLeaveMinutes ?? 0) > 0)
         .length;
-    final totalWorkingHours = schedules.fold<num>(
-      0,
-      (sum, s) => sum + (s.totalWorkHours ?? 0),
-    );
+    // final totalWorkingHours = schedules.fold<num>(
+    //   0,
+    //   (sum, s) => sum + (s.totalWorkHours ?? 0),
+    // );
     // final overtimeHours = schedules.fold<num>(
     //   0,
     //   (sum, s) => sum + (s.overtimeHours ?? 0),
@@ -465,11 +465,11 @@ class _HRManagementSummaryScreenState extends State<HRManagementSummaryScreen>
         'isDeduction': missingDays > 0,
         'icon': Icons.warning_amber_rounded,
       },
-      {
-        'label': 'Tổng số giờ làm việc',
-        'value': '$totalWorkingHours giờ',
-        'icon': Icons.hourglass_empty,
-      },
+      // {
+      //   'label': 'Tổng số giờ làm việc',
+      //   'value': '$totalWorkingHours giờ',
+      //   'icon': Icons.hourglass_empty,
+      // },
       {
         'label': 'Ngày đi muộn',
         'value': '$lateDays ngày',
