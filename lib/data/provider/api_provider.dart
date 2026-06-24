@@ -164,10 +164,10 @@ class ApiProvider {
       final Map resJson = await _baseAPI.request(
         manager: ApiManager(ApiType.userInfo),
       );
-      final res = DefaultResponse.fromMap(resJson);
-      if (res.status == 200 && res.data != null) {
+      final res = DefaultResponse.fromJson(resJson);
+      if ((res.status == 200 || res.status == 1) && res.data != null) {
         final item = UserModel.fromJson(res.data);
-        return DefaultResponse(data: item);
+        return DefaultResponse(data: item, status: 200);
       } else {
         return DefaultResponse(status: res.status, message: res.message);
       }

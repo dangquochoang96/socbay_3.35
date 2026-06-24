@@ -99,8 +99,10 @@ class _HRManagementSummaryScreenState extends State<HRManagementSummaryScreen>
       builder: (context, state) {
         final isLoading = state is HRManagementLoading;
         UserProfile? userProfile;
+        UserProfile? userInfoProfile;
         if (state is HRManagementLoaded) {
           userProfile = state.userProfile;
+          userInfoProfile = state.userInfoProfile;
         }
 
         return Scaffold(
@@ -138,7 +140,7 @@ class _HRManagementSummaryScreenState extends State<HRManagementSummaryScreen>
                           _buildTimeAttendanceTab(userProfile),
                           _buildWorkContentTab(userProfile),
                           _buildKPITab(userProfile),
-                          _buildIncomeTab(userProfile),
+                          _buildIncomeTab(userProfile, userInfoProfile),
                         ],
                       ),
                     ),
@@ -156,7 +158,7 @@ class _HRManagementSummaryScreenState extends State<HRManagementSummaryScreen>
     final username =
         profile.user?.username ?? App.instance.userApp?.username ?? 'Nhân viên';
     final avatar = profile.user?.avatar ?? App.instance.userApp?.avatar ?? '';
-    final level = profile.level ?? 'Kỹ thuật viên';
+    // final level = profile.level ?? 'Kỹ thuật viên';
     final description = profile.description ?? 'Chưa có mô tả';
 
     return Container(
@@ -205,18 +207,18 @@ class _HRManagementSummaryScreenState extends State<HRManagementSummaryScreen>
                     horizontal: 8,
                     vertical: 2,
                   ),
-                  decoration: BoxDecoration(
-                    color: ColorUtil.bangladeshGreen.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    level,
-                    style: GoogleFonts.roboto(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: ColorUtil.bangladeshGreen,
-                    ),
-                  ),
+                  // decoration: BoxDecoration(
+                  //   color: ColorUtil.bangladeshGreen.withValues(alpha: 0.1),
+                  //   borderRadius: BorderRadius.circular(12),
+                  // ),
+                  // child: Text(
+                  //   level,
+                  //   style: GoogleFonts.roboto(
+                  //     fontSize: 12,
+                  //     fontWeight: FontWeight.w600,
+                  //     color: ColorUtil.bangladeshGreen,
+                  //   ),
+                  // ),
                 ),
                 const SizedBox(height: 6),
                 Text(
@@ -796,7 +798,7 @@ class _HRManagementSummaryScreenState extends State<HRManagementSummaryScreen>
   }
 
   // Tab 4: Income details & Payslip calculation
-  Widget _buildIncomeTab(UserProfile? profile) {
+  Widget _buildIncomeTab(UserProfile? profile, UserProfile? userInfoProfile) {
     final schedules = _getFilteredSchedules(profile);
     final kpis = _getKPIsForSelectedMonth(profile);
 
@@ -815,8 +817,13 @@ class _HRManagementSummaryScreenState extends State<HRManagementSummaryScreen>
       (sum, s) => sum + (s.workingDay ?? 0),
     );
 
-    final basicSalaryMonthly = int.tryParse(profile?.basicSalary ?? '0') ?? 0;
-    final bhxhAmount = double.tryParse(profile?.bhxh ?? '0') ?? 0;
+    final basicSalaryMonthly =
+        int.tryParse(
+          userInfoProfile?.basicSalary ?? profile?.basicSalary ?? '0',
+        ) ??
+        0;
+    final bhxhAmount =
+        double.tryParse(userInfoProfile?.bhxh ?? profile?.bhxh ?? '0') ?? 0;
 
     final salaryPerDay = totalDays > 0 ? basicSalaryMonthly / totalDays : 0.0;
     final salaryPerHour = salaryPerDay / 8;
@@ -851,7 +858,11 @@ class _HRManagementSummaryScreenState extends State<HRManagementSummaryScreen>
       calculatedBasicSalary = basicSalaryMonthly.toDouble();
     }
 
-    final allowance = double.tryParse(profile?.totalIncome ?? '0') ?? 0;
+    final allowance =
+        double.tryParse(
+          userInfoProfile?.totalIncome ?? profile?.totalIncome ?? '0',
+        ) ??
+        0;
 
     final netSalary =
         calculatedBasicSalary +

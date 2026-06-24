@@ -14,11 +14,12 @@ class HRManagementLoading extends HRManagementState {}
 
 class HRManagementLoaded extends HRManagementState {
   final UserProfile userProfile;
+  final UserProfile? userInfoProfile;
 
-  const HRManagementLoaded({required this.userProfile});
+  const HRManagementLoaded({required this.userProfile, this.userInfoProfile});
 
   @override
-  List<Object?> get props => [userProfile];
+  List<Object?> get props => [userProfile, userInfoProfile];
 }
 
 class HRManagementError extends HRManagementState {
