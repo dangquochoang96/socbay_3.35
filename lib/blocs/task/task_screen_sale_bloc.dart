@@ -163,6 +163,9 @@ class TaskScreenSaleBloc extends Bloc<TaskScreenEvent, TaskScreenState> {
         'dd/MM/yyyy HH:mm',
       ).format(DateTime.parse(event.timeStart.toString())),
     };
+    if (event.address != null) {
+      params["address"] = event.address;
+    }
 
     var url = AppConfig.instance.apiUri(
       ApiEndpoints.taskEdit(event.taskId.toString()),
@@ -210,6 +213,9 @@ class TaskScreenSaleBloc extends Bloc<TaskScreenEvent, TaskScreenState> {
         'dd/MM/yyyy HH:mm',
       ).format(DateTime.parse(event.timeStart.toString())),
     };
+    if (event.address != null) {
+      params["address"] = event.address;
+    }
     var url = AppConfig.instance.apiUri(
       ApiEndpoints.taskEdit(event.taskId.toString()),
     );

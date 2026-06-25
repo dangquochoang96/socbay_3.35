@@ -14,7 +14,6 @@ import 'package:socbay/utils/scroll_util.dart';
 import 'package:socbay/widgets/button_widget.dart';
 import 'package:socbay/widgets/indicator_loadmore.dart';
 import 'package:socbay/widgets/loading_indicator.dart';
-import 'package:socbay/widgets/text_field_default.dart';
 
 class MyTaskTab extends StatefulWidget {
   const MyTaskTab({super.key});
@@ -28,6 +27,7 @@ class _MyTaskTabState extends State<MyTaskTab> {
   late ScrollController _scrollController;
 
   late TextEditingController _feedbackController;
+  late TextEditingController _addressController;
   var _isRefresh = true;
   String _dateStart = '';
   String _timeStart = '';
@@ -43,6 +43,7 @@ class _MyTaskTabState extends State<MyTaskTab> {
     _isRefresh = false;
     _scrollController = ScrollController();
     _feedbackController = TextEditingController();
+    _addressController = TextEditingController();
     _scrollController.addListener(() {
       if (_bloc.isClosed) _bloc = BlocProvider.of(context);
       scrollPaginationListener(
@@ -84,6 +85,7 @@ class _MyTaskTabState extends State<MyTaskTab> {
   void dispose() {
     _scrollController.dispose();
     _feedbackController.dispose();
+    _addressController.dispose();
     super.dispose();
   }
 
@@ -376,6 +378,7 @@ class _MyTaskTabState extends State<MyTaskTab> {
   }
 
   Future<void> _updateTask(TaskModel taskModel) async {
+    _addressController.text = '';
     int? selectedOption = 5;
     DateTime tempDateTime = DateTime.parse(
       taskModel.timeStart ?? DateTime.now().toString(),
@@ -387,116 +390,235 @@ class _MyTaskTabState extends State<MyTaskTab> {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              title: const Text('Lý do hẹn lại', textAlign: TextAlign.center),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+              backgroundColor: Colors.white,
+              surfaceTintColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 8),
+              contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+              title: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  _buildFormDoubleHorizontal(
-                    'Hẹn lại giờ',
-                    Icons.calendar_today,
-                    Icons.av_timer_sharp,
-                    firstValue: _dateStart,
-                    secondValue: _timeStart,
-                    onTapFirst: () async {
-                      final DateTime? picked = await showDatePicker(
-                        context: context,
-                        locale: const Locale("vi", "VN"),
-                        initialDate: selectedDate ?? DateTime.now(),
-                        firstDate: DateTime.now(),
-                        lastDate: DateTime.now().add(const Duration(days: 365)),
-                      );
-                      if (picked != null && picked != selectedDate) {
-                        selectedDate = picked;
-                        setState(() {
-                          _dateStart = selectedDate!.toDateString(
-                            format: "dd/MM/yyyy",
-                          );
-                          tempDateTime = DateTime(
-                            picked.year,
-                            picked.month,
-                            picked.day,
-                            tempDateTime.hour,
-                            tempDateTime.minute,
-                          );
-                        });
-                      }
-                    },
-                    onTapSecond: () async {
-                      final TimeOfDay? picked = await showTimePicker(
-                        context: context,
-                        initialTime: selectedTime ?? TimeOfDay.now(),
-                      );
-                      if (picked != null && picked != selectedTime) {
-                        selectedTime = picked;
-                        setState(() {
-                          final hour = picked.hour.toString().padLeft(2, "0");
-                          final minute = picked.minute.toString().padLeft(
-                            2,
-                            "0",
-                          );
-                          _timeStart = "$hour:$minute";
-                          tempDateTime = DateTime(
-                            tempDateTime.year,
-                            tempDateTime.month,
-                            tempDateTime.day,
-                            picked.hour,
-                            picked.minute,
-                          );
-                          print("X1");
-                          print(tempDateTime);
-                        });
-                      }
-                    },
+                  Icon(
+                    Icons.history_toggle_off,
+                    color: ColorUtil.bangladeshGreen,
                   ),
-                  const SizedBox(height: 16),
-                  TextFieldDefault(
-                    controller: _feedbackController,
-                    maxLines: 3,
-                    hintText: 'Lý do',
-                  ),
-                  const SizedBox(height: 16),
-                  RadioGroup<int>(
-                    groupValue: selectedOption,
-                    onChanged: (int? value) {
-                      setState(() {
-                        selectedOption = value;
-                      });
-                    },
-                    child: Column(
-                      // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        Row(
-                          children: [
-                            Radio<int>(value: 5),
-                            const Text(
-                              'Nhận Đơn',
-                              style: TextStyle(fontSize: 12),
-                            ),
-                          ],
-                        ),
-                        Row(
-                          children: [
-                            Radio<int>(value: 1),
-                            const Text(
-                              'Không nhận Đơn',
-                              style: TextStyle(fontSize: 12),
-                            ),
-                          ],
-                        ),
-                        Row(
-                          children: [
-                            Radio<int>(value: 2),
-                            const Text(
-                              'Khách hàng hủy',
-                              style: TextStyle(fontSize: 12),
-                            ),
-                          ],
-                        ),
-                      ],
+                  SizedBox(width: 8),
+                  Text(
+                    'Lý do hẹn lại',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: ColorUtil.raisinBlack,
                     ),
                   ),
                 ],
+              ),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _buildFormDoubleHorizontal(
+                      'Hẹn lại giờ',
+                      Icons.calendar_today,
+                      Icons.av_timer_sharp,
+                      firstValue: _dateStart,
+                      secondValue: _timeStart,
+                      onTapFirst: () async {
+                        final DateTime? picked = await showDatePicker(
+                          context: context,
+                          locale: const Locale("vi", "VN"),
+                          initialDate: selectedDate ?? DateTime.now(),
+                          firstDate: DateTime.now(),
+                          lastDate: DateTime.now().add(
+                            const Duration(days: 365),
+                          ),
+                        );
+                        if (picked != null && picked != selectedDate) {
+                          selectedDate = picked;
+                          setState(() {
+                            _dateStart = selectedDate!.toDateString(
+                              format: "dd/MM/yyyy",
+                            );
+                            tempDateTime = DateTime(
+                              picked.year,
+                              picked.month,
+                              picked.day,
+                              tempDateTime.hour,
+                              tempDateTime.minute,
+                            );
+                          });
+                        }
+                      },
+                      onTapSecond: () async {
+                        final TimeOfDay? picked = await showTimePicker(
+                          context: context,
+                          initialTime: selectedTime ?? TimeOfDay.now(),
+                        );
+                        if (picked != null && picked != selectedTime) {
+                          selectedTime = picked;
+                          setState(() {
+                            final hour = picked.hour.toString().padLeft(2, "0");
+                            final minute = picked.minute.toString().padLeft(
+                              2,
+                              "0",
+                            );
+                            _timeStart = "$hour:$minute";
+                            tempDateTime = DateTime(
+                              tempDateTime.year,
+                              tempDateTime.month,
+                              tempDateTime.day,
+                              picked.hour,
+                              picked.minute,
+                            );
+                            print("X1");
+                            print(tempDateTime);
+                          });
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: _addressController,
+                      maxLines: 2,
+                      decoration: InputDecoration(
+                        labelText: 'Địa chỉ mới của khách hàng',
+                        labelStyle: TextStyle(
+                          color: Colors.grey.shade600,
+                          fontSize: 13,
+                        ),
+                        hintText: 'Nhập địa chỉ mới của khách hàng (nếu có)',
+                        hintStyle: TextStyle(
+                          color: Colors.grey.shade400,
+                          fontSize: 13,
+                        ),
+                        prefixIcon: const Icon(
+                          Icons.location_on_outlined,
+                          color: ColorUtil.bangladeshGreen,
+                          size: 20,
+                        ),
+                        filled: true,
+                        fillColor: Colors.grey.shade50,
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: Colors.grey.shade300,
+                            width: 1.0,
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(
+                            color: ColorUtil.bangladeshGreen,
+                            width: 1.5,
+                          ),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 10,
+                        ),
+                      ),
+                      style: const TextStyle(fontSize: 13),
+                    ),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: _feedbackController,
+                      maxLines: 3,
+                      decoration: InputDecoration(
+                        labelText: 'Lý do',
+                        labelStyle: TextStyle(
+                          color: Colors.grey.shade600,
+                          fontSize: 13,
+                        ),
+                        hintText: 'Nhập lý do hẹn lại',
+                        hintStyle: TextStyle(
+                          color: Colors.grey.shade400,
+                          fontSize: 13,
+                        ),
+                        prefixIcon: const Icon(
+                          Icons.edit_note_outlined,
+                          color: ColorUtil.bangladeshGreen,
+                          size: 20,
+                        ),
+                        filled: true,
+                        fillColor: Colors.grey.shade50,
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: Colors.grey.shade300,
+                            width: 1.0,
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(
+                            color: ColorUtil.bangladeshGreen,
+                            width: 1.5,
+                          ),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 10,
+                        ),
+                      ),
+                      style: const TextStyle(fontSize: 13),
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Trạng thái đơn hàng',
+                      style: TextStyle(
+                        color: ColorUtil.raisinBlack,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [5, 1, 2].map((val) {
+                        final isSelected = selectedOption == val;
+                        String label = '';
+                        if (val == 5) label = 'Nhận Đơn';
+                        if (val == 1) label = 'Không nhận Đơn';
+                        if (val == 2) label = 'Khách hàng hủy';
+                        return ChoiceChip(
+                          label: Text(
+                            label,
+                            style: TextStyle(
+                              color: isSelected ? Colors.white : Colors.black87,
+                              fontWeight: isSelected
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
+                              fontSize: 13,
+                            ),
+                          ),
+                          selected: isSelected,
+                          selectedColor: ColorUtil.bangladeshGreen,
+                          backgroundColor: Colors.grey.shade100,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                            side: BorderSide(
+                              color: isSelected
+                                  ? ColorUtil.bangladeshGreen
+                                  : Colors.grey.shade300,
+                              width: 1,
+                            ),
+                          ),
+                          onSelected: (bool selected) {
+                            if (selected) {
+                              setState(() {
+                                selectedOption = val;
+                              });
+                            }
+                          },
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                ),
               ),
               actions: [
                 Row(
@@ -508,6 +630,7 @@ class _MyTaskTabState extends State<MyTaskTab> {
                       action: () {
                         Navigator.pop(context);
                         _feedbackController.clear();
+                        _addressController.clear();
                       },
                     ),
                     const SizedBox(width: 16),
@@ -526,6 +649,7 @@ class _MyTaskTabState extends State<MyTaskTab> {
                               selectedOption.toString(),
                               taskModel.priority ?? "1",
                               tempDateTime.toString(),
+                              address: _addressController.text,
                             ),
                           );
 
@@ -535,6 +659,7 @@ class _MyTaskTabState extends State<MyTaskTab> {
 
                           Navigator.pop(context);
                           _feedbackController.clear();
+                          _addressController.clear();
                         } else {
                           _bloc.add(
                             StaffTaskScreenUpdateTaskDoneEvent(
@@ -545,11 +670,13 @@ class _MyTaskTabState extends State<MyTaskTab> {
                               selectedOption.toString(),
                               taskModel.priority ?? "1",
                               tempDateTime.toString(),
+                              address: _addressController.text,
                             ),
                           );
 
                           Navigator.pop(context);
                           _feedbackController.clear();
+                          _addressController.clear();
                         }
                       },
                     ),
@@ -601,42 +728,44 @@ class _MyTaskTabState extends State<MyTaskTab> {
       children: [
         Text(
           titleTextField,
-          style: const TextStyle(color: ColorUtil.raisinBlack, fontSize: 15),
+          style: const TextStyle(
+            color: ColorUtil.raisinBlack,
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+          ),
         ),
-        const SizedBox(height: 5),
+        const SizedBox(height: 8),
         Row(
           children: [
             Expanded(
-              flex: 2,
-              child: Container(
-                height: 40,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8.0),
-                  border: Border.all(
-                    color: ColorUtil.bangladeshGreen,
-                    width: 0.5,
+              flex: 3,
+              child: GestureDetector(
+                onTap: onTapFirst,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 10,
                   ),
-                ),
-                child: GestureDetector(
-                  onTap: onTapFirst,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade50,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.grey.shade300),
+                  ),
                   child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.only(left: 10.0),
-                        child: Icon(
-                          iconPrefixFirst,
-                          color: ColorUtil.spanishGray,
-                        ),
+                      Icon(
+                        iconPrefixFirst,
+                        size: 20,
+                        color: ColorUtil.bangladeshGreen,
                       ),
-                      const SizedBox(width: 5),
-                      Flexible(
+                      const SizedBox(width: 8),
+                      Expanded(
                         child: Text(
-                          firstValue.isEmpty ? 'dd/MM/yyyy' : firstValue,
+                          firstValue.isEmpty ? 'Chọn ngày' : firstValue,
                           style: TextStyle(
+                            fontSize: 13,
                             color: firstValue.isEmpty
-                                ? ColorUtil.silverChalice
+                                ? Colors.grey.shade400
                                 : ColorUtil.raisinBlack,
                           ),
                         ),
@@ -646,38 +775,36 @@ class _MyTaskTabState extends State<MyTaskTab> {
                 ),
               ),
             ),
-            const SizedBox(width: 5),
+            const SizedBox(width: 12),
             Expanded(
-              flex: 1,
-              child: Container(
-                height: 40,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8.0),
-                  border: Border.all(
-                    color: ColorUtil.bangladeshGreen,
-                    width: 0.5,
+              flex: 2,
+              child: GestureDetector(
+                onTap: onTapSecond,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 10,
                   ),
-                ),
-                child: GestureDetector(
-                  onTap: onTapSecond,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade50,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.grey.shade300),
+                  ),
                   child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.only(left: 2.0),
-                        child: Icon(
-                          iconPrefixSecond,
-                          color: ColorUtil.spanishGray,
-                        ),
+                      Icon(
+                        iconPrefixSecond,
+                        size: 20,
+                        color: ColorUtil.bangladeshGreen,
                       ),
-                      const SizedBox(width: 5),
-                      Flexible(
+                      const SizedBox(width: 8),
+                      Expanded(
                         child: Text(
-                          secondValue.isEmpty ? 'hh:mm' : secondValue,
+                          secondValue.isEmpty ? 'Giờ' : secondValue,
                           style: TextStyle(
+                            fontSize: 13,
                             color: secondValue.isEmpty
-                                ? ColorUtil.silverChalice
+                                ? Colors.grey.shade400
                                 : ColorUtil.raisinBlack,
                           ),
                         ),

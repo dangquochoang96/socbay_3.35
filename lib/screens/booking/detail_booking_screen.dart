@@ -288,7 +288,11 @@ class _DetailBookingScreenState extends State<DetailBookingScreen> {
               ),
             ),
           if (taskModel?.noti != null && taskModel!.noti!.isNotEmpty)
-            _buildInfoRow("Thông báo:", taskModel.noti!),
+            _buildInfoRow(
+              "Thông báo:",
+              taskModel.noti!,
+              valueColor: ColorUtil.red,
+            ),
         ],
       ),
     );
@@ -392,9 +396,8 @@ class _DetailBookingScreenState extends State<DetailBookingScreen> {
                         taskModel?.customer?.address ?? "",
                         style: const TextStyle(
                           fontSize: 14,
-                          color: ColorUtil.brightYellow,
-                          fontWeight: FontWeight.w500,
-                          decoration: TextDecoration.underline,
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
                         ),
                         textAlign: TextAlign.right,
                       ),
@@ -439,9 +442,8 @@ class _DetailBookingScreenState extends State<DetailBookingScreen> {
                         taskModel?.productInfo?.address ?? "",
                         style: const TextStyle(
                           fontSize: 14,
-                          color: ColorUtil.brightYellow,
-                          fontWeight: FontWeight.w500,
-                          decoration: TextDecoration.underline,
+                          color: Color(0xFF1976D2),
+                          fontWeight: FontWeight.bold,
                         ),
                         textAlign: TextAlign.right,
                       ),

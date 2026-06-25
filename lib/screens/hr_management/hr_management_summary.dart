@@ -159,7 +159,8 @@ class _HRManagementSummaryScreenState extends State<HRManagementSummaryScreen>
         profile.user?.username ?? App.instance.userApp?.username ?? 'Nhân viên';
     final avatar = profile.user?.avatar ?? App.instance.userApp?.avatar ?? '';
     // final level = profile.level ?? 'Kỹ thuật viên';
-    final description = profile.description ?? 'Chưa có mô tả';
+    // final description = profile.description ?? 'Chưa có mô tả';
+    final userRole = App.instance.userApp?.typeStaff;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -222,7 +223,25 @@ class _HRManagementSummaryScreenState extends State<HRManagementSummaryScreen>
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  description,
+                  userRole == "0"
+                      ? 'Khách hàng'
+                      : userRole == "1"
+                      ? 'Kỹ Thuật'
+                      : userRole == "2"
+                      ? 'Kinh Doanh'
+                      : userRole == "3"
+                      ? 'Giao Hàng'
+                      : userRole == "5"
+                      ? 'Kho'
+                      : userRole == "4"
+                      ? 'Kế Toán'
+                      : userRole == "6"
+                      ? 'Marketing'
+                      : userRole == "7"
+                      ? 'CNTT'
+                      : userRole == "8"
+                      ? 'Nhân Sự'
+                      : 'Người dùng',
                   style: GoogleFonts.roboto(
                     fontSize: 13,
                     color: ColorUtil.graniteGray,

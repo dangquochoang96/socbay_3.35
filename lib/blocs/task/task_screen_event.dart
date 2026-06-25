@@ -52,6 +52,7 @@ class StaffTaskScreenUpdateTaskDoneEvent extends TaskScreenEvent {
   final String status;
   final String priority;
   final String timeStart;
+  final String? address;
   const StaffTaskScreenUpdateTaskDoneEvent(
     this.taskId,
     this.name,
@@ -59,8 +60,9 @@ class StaffTaskScreenUpdateTaskDoneEvent extends TaskScreenEvent {
     this.des,
     this.status,
     this.priority,
-    this.timeStart,
-  );
+    this.timeStart, {
+    this.address,
+  });
 }
 
 class StaffTaskScreenUpdateTaskDayDoneEvent extends TaskScreenEvent {
@@ -71,6 +73,7 @@ class StaffTaskScreenUpdateTaskDayDoneEvent extends TaskScreenEvent {
   final String status;
   final String priority;
   final String timeStart;
+  final String? address;
   const StaffTaskScreenUpdateTaskDayDoneEvent(
     this.taskId,
     this.name,
@@ -78,6 +81,7 @@ class StaffTaskScreenUpdateTaskDayDoneEvent extends TaskScreenEvent {
     this.des,
     this.status,
     this.priority,
-    this.timeStart,
-  );
+    this.timeStart, {
+    this.address,
+  });
 }

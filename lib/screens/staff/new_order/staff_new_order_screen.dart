@@ -655,58 +655,19 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                     const SizedBox(height: 12),
                     RadioGroup<int>(
                       groupValue: _bloc.paymentType,
-                      onChanged: (int? index) {
-                        if (index != null) {
-                          setState(() {
-                            _bloc.paymentType = index;
-                          });
-                        }
+                      onChanged: (int? value) {
+                        if (value == null) return;
+
+                        setState(() {
+                          _bloc.paymentType = value;
+                        });
                       },
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
-                          Column(
-                            children: [
-                              const Text(
-                                'Tiền mặt',
-                                style: TextStyle(fontSize: 13),
-                              ),
-                              const SizedBox(height: 4),
-                              Radio<int>(
-                                value: 1,
-                                groupValue: _bloc.paymentType,
-                                onChanged: (v) =>
-                                    setState(() => _bloc.paymentType = v ?? 1),
-                              ),
-                            ],
-                          ),
-                          Column(
-                            children: [
-                              const Text(
-                                'Chuyển khoản',
-                                style: TextStyle(fontSize: 13),
-                              ),
-                              const SizedBox(height: 4),
-                              Radio<int>(
-                                value: 2,
-                                groupValue: _bloc.paymentType,
-                                onChanged: (v) =>
-                                    setState(() => _bloc.paymentType = v ?? 2),
-                              ),
-                            ],
-                          ),
-                          Column(
-                            children: [
-                              const Text('Ví', style: TextStyle(fontSize: 13)),
-                              const SizedBox(height: 4),
-                              Radio<int>(
-                                value: 3,
-                                groupValue: _bloc.paymentType,
-                                onChanged: (v) =>
-                                    setState(() => _bloc.paymentType = v ?? 3),
-                              ),
-                            ],
-                          ),
+                          _paymentItem('Tiền mặt', 1),
+                          _paymentItem('Chuyển khoản', 2),
+                          _paymentItem('Ví', 3),
                         ],
                       ),
                     ),
@@ -2145,6 +2106,23 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
       ),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
       child: child,
+    );
+  }
+
+  Widget _paymentItem(String title, int value) {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _bloc.paymentType = value;
+        });
+      },
+      child: Column(
+        children: [
+          Text(title, style: const TextStyle(fontSize: 13)),
+          const SizedBox(height: 4),
+          Radio<int>(value: value),
+        ],
+      ),
     );
   }
 }

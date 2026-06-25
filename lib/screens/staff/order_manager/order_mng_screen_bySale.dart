@@ -59,14 +59,21 @@ class _OrderManagerScreenState extends State<OrderManagerScreenBySale> {
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
       var end = myDateRange?.end ?? DateTime.now();
-      var start = myDateRange?.start ?? DateTime(DateTime.now().year, DateTime.now().month, 1);
-      if (!_bloc.isLoading && !_bloc.isLoadMoreLoading && _bloc.currentPage < _bloc.lastPage) {
+      var start =
+          myDateRange?.start ??
+          DateTime(DateTime.now().year, DateTime.now().month, 1);
+      if (!_bloc.isLoading &&
+          !_bloc.isLoadMoreLoading &&
+          _bloc.currentPage < _bloc.lastPage) {
         _bloc.add(
           OrderManagerListEvent(
             start: start.toString(),
-            end: end.add(const Duration(seconds: (23 * 60 + 59) * 60)).toString(),
+            end: end
+                .add(const Duration(seconds: (23 * 60 + 59) * 60))
+                .toString(),
             page: _bloc.currentPage + 1,
           ),
         );
@@ -122,7 +129,10 @@ class _OrderManagerScreenState extends State<OrderManagerScreenBySale> {
                 horizontal: paddingHorizontal,
                 vertical: paddingVertical,
               ),
-              itemCount: 1 + _bloc.staffLstOrders.length + (_bloc.isLoadMoreLoading ? 1 : 0),
+              itemCount:
+                  1 +
+                  _bloc.staffLstOrders.length +
+                  (_bloc.isLoadMoreLoading ? 1 : 0),
               itemBuilder: (context, index) {
                 if (index == 0) {
                   return _buildHeader();
@@ -140,7 +150,10 @@ class _OrderManagerScreenState extends State<OrderManagerScreenBySale> {
                 }
 
                 final orderIndex = index - 1;
-                return _buildOrderCard(context, _bloc.staffLstOrders[orderIndex]);
+                return _buildOrderCard(
+                  context,
+                  _bloc.staffLstOrders[orderIndex],
+                );
               },
             ),
           ),
@@ -207,16 +220,16 @@ class _OrderManagerScreenState extends State<OrderManagerScreenBySale> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.08),
+        color: color.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.15), width: 1),
+        border: Border.all(color: color.withValues(alpha: 0.15), width: 1),
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.15),
+              color: color.withValues(alpha: 0.15),
               shape: BoxShape.circle,
             ),
             child: Icon(icon, color: color, size: 20),
@@ -310,17 +323,14 @@ class _OrderManagerScreenState extends State<OrderManagerScreenBySale> {
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [
-            ColorUtil.green,
-            ColorUtil.green.withOpacity(0.85),
-          ],
+          colors: [ColorUtil.green, ColorUtil.green.withValues(alpha: 0.85)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: ColorUtil.green.withOpacity(0.3),
+            color: ColorUtil.green.withValues(alpha: 0.3),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -355,7 +365,7 @@ class _OrderManagerScreenState extends State<OrderManagerScreenBySale> {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+              color: Colors.white.withValues(alpha: 0.2),
               shape: BoxShape.circle,
             ),
             child: const Icon(
@@ -394,16 +404,16 @@ class _OrderManagerScreenState extends State<OrderManagerScreenBySale> {
 
   Widget _buildStatusBadge(String? status) {
     String text = 'Thay lõi';
-    Color bgColor = ColorUtil.green.withOpacity(0.1);
+    Color bgColor = ColorUtil.green.withValues(alpha: 0.1);
     Color textColor = ColorUtil.green;
 
     if (status == '0') {
       text = 'Lắp máy';
-      bgColor = ColorUtil.brightYellow.withOpacity(0.1);
+      bgColor = ColorUtil.brightYellow.withValues(alpha: 0.1);
       textColor = ColorUtil.brightYellow;
     } else if (status == '1') {
       text = 'Vệ sinh';
-      bgColor = Colors.blue.withOpacity(0.1);
+      bgColor = Colors.blue.withValues(alpha: 0.1);
       textColor = Colors.blue;
     }
 
@@ -426,20 +436,23 @@ class _OrderManagerScreenState extends State<OrderManagerScreenBySale> {
 
   Widget _buildOrderCard(BuildContext context, StaffOrderDetailModel order) {
     Decimal heso = Decimal.parse("1000");
-    var finalPrice = (Decimal.parse(order.price ?? "0") -
+    var finalPrice =
+        (Decimal.parse(order.price ?? "0") -
         Decimal.parse(order.truTichDiem ?? "0") * heso -
         Decimal.parse(order.chietKhau ?? "0"));
     String formattedPrice = finalPrice.toBigInt().toVND();
 
-    double rating = order.rate != null ? double.tryParse(order.rate!) ?? 0.0 : 0.0;
+    double rating = order.rate != null
+        ? double.tryParse(order.rate!) ?? 0.0
+        : 0.0;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 2,
-      shadowColor: Colors.black.withOpacity(0.05),
+      shadowColor: Colors.black.withValues(alpha: 0.05),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: Colors.grey.withOpacity(0.1), width: 1),
+        side: BorderSide(color: Colors.grey.withValues(alpha: 0.1), width: 1),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -461,10 +474,15 @@ class _OrderManagerScreenState extends State<OrderManagerScreenBySale> {
               ],
             ),
             const SizedBox(height: 12),
-            if (order.tvInsteadDate != null && order.tvInsteadDate!.isNotEmpty) ...[
+            if (order.tvInsteadDate != null &&
+                order.tvInsteadDate!.isNotEmpty) ...[
               Row(
                 children: [
-                  const Icon(Icons.calendar_today, size: 14, color: ColorUtil.spanishGray),
+                  const Icon(
+                    Icons.calendar_today,
+                    size: 14,
+                    color: ColorUtil.spanishGray,
+                  ),
                   const SizedBox(width: 8),
                   const Text(
                     "Ngày thay: ",
@@ -485,10 +503,15 @@ class _OrderManagerScreenState extends State<OrderManagerScreenBySale> {
               ),
               const SizedBox(height: 6),
             ],
-            if (order.tvNextInsteadDate != null && order.tvNextInsteadDate!.isNotEmpty) ...[
+            if (order.tvNextInsteadDate != null &&
+                order.tvNextInsteadDate!.isNotEmpty) ...[
               Row(
                 children: [
-                  const Icon(Icons.event, size: 14, color: ColorUtil.spanishGray),
+                  const Icon(
+                    Icons.event,
+                    size: 14,
+                    color: ColorUtil.spanishGray,
+                  ),
                   const SizedBox(width: 8),
                   const Text(
                     "Ngày thay tiếp: ",
@@ -566,13 +589,14 @@ class _OrderManagerScreenState extends State<OrderManagerScreenBySale> {
                       context,
                       Routes.coreReplacementServiceScreen,
                       arguments: {
-                        "orderDetail": OrderDetailModel(
-                          id: order.id,
-                        ),
+                        "orderDetail": OrderDetailModel(id: order.id),
                       },
                     );
                   },
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 8,
+                  ),
                   borderRadius: BorderRadius.circular(20.0),
                   color: ColorUtil.brightYellow,
                   child: const Row(

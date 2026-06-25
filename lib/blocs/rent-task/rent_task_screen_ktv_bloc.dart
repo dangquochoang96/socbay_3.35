@@ -164,6 +164,9 @@ class RentTaskScreenKTVBloc
         'dd/MM/yyyy HH:mm',
       ).format(DateTime.parse(event.timeStart.toString())),
     };
+    if (event.address != null) {
+      params["address"] = event.address;
+    }
 
     var url = AppConfig.instance.apiUri(
       ApiEndpoints.rentTaskEdit(event.taskId.toString()),

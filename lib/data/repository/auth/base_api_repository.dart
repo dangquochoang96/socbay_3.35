@@ -20,7 +20,6 @@ import 'package:socbay/data/model/request/user_info_request.dart';
 import 'package:socbay/data/model/task_model.dart';
 import 'package:socbay/data/model/user_address.dart';
 import 'package:socbay/data/model/user_model.dart';
-import 'package:socbay/data/model/kpi_model.dart';
 import 'package:socbay/data/model/user_profile.dart';
 import 'package:socbay/data/response/api_response.dart';
 

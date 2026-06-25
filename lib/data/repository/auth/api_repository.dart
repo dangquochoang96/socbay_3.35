@@ -21,7 +21,6 @@ import 'package:socbay/data/model/request/user_info_request.dart';
 import 'package:socbay/data/model/task_model.dart';
 import 'package:socbay/data/model/user_address.dart';
 import 'package:socbay/data/model/user_model.dart';
-import 'package:socbay/data/model/kpi_model.dart';
 import 'package:socbay/data/model/user_profile.dart';
 import 'package:socbay/data/provider/api_provider.dart';
 import 'package:socbay/data/repository/auth/base_api_repository.dart';
@@ -257,11 +256,7 @@ class ApiRepository extends BaseApiRepository {
     required String note,
     required File image,
   }) {
-    return _apiProvider.storeAssignmentImage(
-      id: id,
-      note: note,
-      image: image,
-    );
+    return _apiProvider.storeAssignmentImage(id: id, note: note, image: image);
   }
 
   @override

@@ -256,7 +256,7 @@ class _MachineDetailScreenState extends State<MachineDetailScreen> {
         itemBuilder: (context, index) {
           return _buildOrderRentItem(orderRentList[index]);
         },
-        separatorBuilder: (_, __) => const Padding(
+        separatorBuilder: (_, _) => const Padding(
           padding: EdgeInsets.symmetric(vertical: 8.0),
           child: Divider(color: Color(0xFFEEEEEE)),
         ),
@@ -328,7 +328,7 @@ class _MachineDetailScreenState extends State<MachineDetailScreen> {
         shrinkWrap: true,
         itemCount: _bloc.ordersModel.length,
         itemBuilder: _itemBuilder,
-        separatorBuilder: (_, __) => const Padding(
+        separatorBuilder: (_, _) => const Padding(
           padding: EdgeInsets.symmetric(vertical: 12.0),
           child: Divider(color: Color(0xFFEEEEEE)),
         ),
