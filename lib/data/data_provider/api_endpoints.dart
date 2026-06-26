@@ -122,6 +122,7 @@ abstract final class ApiEndpoints {
   static const taskCreate = '/socbay/tasks/them';
   static const taskDelete = '/socbay/tasks/xoa';
   static const tasksPending = '/socbay/tasks/ton-dong';
+  static const tasksTimeline = '/socbay/tasks/timeline';
 
   static String tasksByCustomer(Object? customerId) =>
       '/socbay/tasks/customer/$customerId';
@@ -175,7 +176,7 @@ abstract final class ApiEndpoints {
   static const createRetailOrder = '/retailOrder/createRetailOrder';
   static String retailOrderShipConfirm(Object? id) =>
       '/retailOrderShip/$id/storeAssignmentImage';
-  
+
   // =========================
   // KPI
   // =========================

@@ -1,7 +1,7 @@
 name: socbay
 description: "A new Flutter project."
 publish_to: "none"
-version: 3.0.0+1110
+version: 3.0.2+1113
 
 environment:
   sdk: ^3.9.2
@@ -76,6 +76,7 @@ dependencies:
   sqflite: any
   path_provider: any
   fluttertoast: ^9.0.0
+  syncfusion_flutter_calendar: ^32.1.23
 dev_dependencies:
   flutter_test:
     sdk: flutter

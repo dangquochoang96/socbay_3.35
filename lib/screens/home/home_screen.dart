@@ -749,17 +749,9 @@ class _HomeScreenState extends State<HomeScreen> {
             Navigator.pushNamed(context, Routes.feedbackkScreen);
           } else if (index == 3) {
             Navigator.pushNamed(context, Routes.staffCustomerInformationList);
+          } else if (index == 4) {
+            Navigator.pushNamed(context, Routes.taskTimelineScreen);
           }
-          // else if (index == 4) {
-          //   Navigator.pushNamed(
-          //     context,
-          //     Routes.rentBookingServiceScreen,
-          //     arguments: {
-          //       "index": index.toString(),
-          //       "listService": _bloc.services,
-          //     },
-          //   );
-          // }
         }
       },
       child: Container(

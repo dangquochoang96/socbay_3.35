@@ -399,11 +399,11 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                       Icons.inventory_2_outlined,
                     ),
                     _buildInputRow(
-                      'Sản phẩm đã có',
+                      'THAY LÕI/SỬA CHỮA CHỌN SẢN PHẨM ĐÃ CÓ',
                       _buildDropdownFieldPruducts(),
                     ),
                     _buildInputRow(
-                      'Thêm sản phẩm mới nếu chưa có',
+                      'LẮP ĐẶT MÁY MỚI THÌ CHỌN SẢN PHẨM MÁY LỌC NƯỚC',
                       _selectNewProduct(),
                     ),
                   ],
@@ -532,28 +532,47 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                           ),
                           onChanged: (text) {
                             if (text.isNotEmpty) {
-                              var money = text
+                              var moneyText = text
                                   .replaceAll(".", "")
                                   .replaceAll("đ", "")
                                   .nonBreaking
                                   .trim();
-                              setState(() {
-                                _bloc.totalPay =
-                                    _bloc.total -
-                                    (int.tryParse(money) ?? 0) -
-                                    (int.tryParse(
-                                              subSavePointController.text,
-                                            ) ??
-                                            0) *
-                                        1000;
-                                _bloc.savePoint = (_bloc.totalPay * 3 / 100000)
-                                    .ceil();
-                                chietKhauController.value = TextEditingValue(
-                                  text: money.toVND(),
-                                  selection: TextSelection.collapsed(
-                                    offset: money.toVND().length - 2,
-                                  ),
+                              int money = int.tryParse(moneyText) ?? 0;
+                              if (money > _bloc.total) {
+                                context.showSnackBar(
+                                  "Chiết khấu không được vượt quá tổng tiền!",
                                 );
+                                setState(() {
+                                  String formattedText = _bloc.total
+                                      .toString()
+                                      .toVND();
+                                  chietKhauController.value = TextEditingValue(
+                                    text: formattedText,
+                                    selection: TextSelection.collapsed(
+                                      offset: formattedText.length > 2
+                                          ? formattedText.length - 2
+                                          : formattedText.length,
+                                    ),
+                                  );
+                                  _recalculateTotal();
+                                });
+                              } else {
+                                setState(() {
+                                  String formattedText = moneyText.toVND();
+                                  chietKhauController.value = TextEditingValue(
+                                    text: formattedText,
+                                    selection: TextSelection.collapsed(
+                                      offset: formattedText.length > 2
+                                          ? formattedText.length - 2
+                                          : formattedText.length,
+                                    ),
+                                  );
+                                  _recalculateTotal();
+                                });
+                              }
+                            } else {
+                              setState(() {
+                                _recalculateTotal();
                               });
                             }
                           },
@@ -576,11 +595,39 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                           ),
                           onChanged: (text) {
                             if (text.isNotEmpty) {
-                              if (int.parse(text) > _bloc.subSavePoint) {
-                                context.showSnackBarSuccess("Không đủ điểm!");
+                              int subPoints = int.tryParse(text) ?? 0;
+                              var chietkhau = chietKhauController.text;
+                              int discount =
+                                  int.tryParse(
+                                    chietkhau
+                                        .replaceAll(".", "")
+                                        .replaceAll("đ", "")
+                                        .nonBreaking
+                                        .trim(),
+                                  ) ??
+                                  0;
+                              int maxAllowedPointsValue =
+                                  _bloc.total - discount;
+                              if (maxAllowedPointsValue < 0) {
+                                maxAllowedPointsValue = 0;
+                              }
+                              int maxAllowedPoints =
+                                  maxAllowedPointsValue ~/ 1000;
+
+                              if (subPoints > _bloc.subSavePoint) {
+                                context.showSnackBar("Không đủ điểm!");
                                 setState(() {
                                   subSavePointController.text = _bloc
                                       .subSavePoint
+                                      .toString();
+                                  _recalculateTotal();
+                                });
+                              } else if (subPoints > maxAllowedPoints) {
+                                context.showSnackBar(
+                                  "Số điểm trừ không được vượt quá số tiền thanh toán!",
+                                );
+                                setState(() {
+                                  subSavePointController.text = maxAllowedPoints
                                       .toString();
                                   _recalculateTotal();
                                 });
@@ -1598,15 +1645,33 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
         ) ??
         0;
 
+    if (discount > _bloc.total) {
+      discount = _bloc.total;
+      chietKhauController.value = TextEditingValue(
+        text: discount.toString().toVND(),
+        selection: TextSelection.collapsed(
+          offset: discount.toString().toVND().length > 2
+              ? discount.toString().toVND().length - 2
+              : discount.toString().toVND().length,
+        ),
+      );
+    }
+
     int subPoints = int.tryParse(subSavePointController.text) ?? 0;
-    if (_bloc.total > _bloc.subSavePoint * 1000) {
-      if (subPoints > _bloc.subSavePoint) {
-        subPoints = _bloc.subSavePoint;
-        subSavePointController.text = subPoints.toString();
-      }
-    } else {
-      if (subPoints > _bloc.subSavePoint) {
-        subPoints = _bloc.subSavePoint;
+    int maxAllowedPointsValue = _bloc.total - discount;
+    if (maxAllowedPointsValue < 0) {
+      maxAllowedPointsValue = 0;
+    }
+    int maxAllowedPoints = maxAllowedPointsValue ~/ 1000;
+
+    int maxPointsLimit = _bloc.subSavePoint;
+    if (maxPointsLimit > maxAllowedPoints) {
+      maxPointsLimit = maxAllowedPoints;
+    }
+
+    if (subPoints > maxPointsLimit) {
+      subPoints = maxPointsLimit;
+      if (subSavePointController.text != subPoints.toString()) {
         subSavePointController.text = subPoints.toString();
       }
     }
@@ -1767,23 +1832,25 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
       useSafeArea: true,
       context: context,
       builder: (BuildContext context) {
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.image),
-              title: const Text('Image'),
-              onTap: _onChooseImages,
-            ),
-            ListTile(
-              leading: const Icon(Icons.photo_camera),
-              title: const Text('Camera'),
-              onTap: () {
-                getImage(ImageSource.camera);
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.image),
+                title: const Text('Image'),
+                onTap: _onChooseImages,
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_camera),
+                title: const Text('Camera'),
+                onTap: () {
+                  getImage(ImageSource.camera);
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          ),
         );
       },
     );

@@ -125,6 +125,11 @@ class HomeServiceModel {
       des: 'Thông tin khách hàng',
       name: 'Thông tin khách hàng',
     ),
+    HomeServiceModel(
+      image: Images.iconStats,
+      des: 'Timeline công việc kỹ thuật',
+      name: 'Timeline công việc',
+    ),
   ];
   static List<HomeServiceModel> taskServiceList = [
     HomeServiceModel(

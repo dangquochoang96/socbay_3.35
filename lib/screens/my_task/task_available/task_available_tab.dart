@@ -117,7 +117,6 @@ class _TaskAvailableTabState extends State<TaskAvailableTab> {
       isLoading: _bloc.isLoading,
       child: RefreshIndicator(
         onRefresh: () async {
-          print("LOADINGGGG");
           _bloc.add(
             const StaffTaskScreenGetTaskAssigedEvent(isRefresh: true, page: 0),
           );

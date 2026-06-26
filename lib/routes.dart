@@ -108,6 +108,8 @@ import 'package:socbay/screens/retailOrder/retail_order_screen.dart';
 import 'package:socbay/screens/warehouse/warehouse.dart';
 import 'package:socbay/blocs/hr_management/hr_management_bloc.dart';
 import 'package:socbay/screens/hr_management/hr_management_summary.dart';
+import 'package:socbay/blocs/task_timeline/task_timeline_bloc.dart';
+import 'package:socbay/screens/task_timeline/timeline.dart';
 
 class Routes {
   static const String root = '/';
@@ -175,6 +177,7 @@ class Routes {
   static const String retailOrderScreen = '/retailOrderScreen';
   static const String warehouseScreen = '/warehouseScreen';
   static const String hrManagementSummary = '/hrManagementSummary';
+  static const String taskTimelineScreen = '/taskTimelineScreen';
   CupertinoPageRoute routePage(RouteSettings settings) {
     return CupertinoPageRoute(
       settings: settings,
@@ -587,6 +590,11 @@ class Routes {
             return BlocProvider<HRManagementBloc>(
               create: (context) => HRManagementBloc(apiRepository: apiRepository),
               child: const HRManagementSummaryScreen(),
+            );
+          case taskTimelineScreen:
+            return BlocProvider<TaskTimelineBloc>(
+              create: (context) => TaskTimelineBloc(),
+              child: const TaskTimelineScreen(),
             );
         }
         return const Scaffold();

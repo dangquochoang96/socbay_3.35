@@ -218,7 +218,7 @@ class _OrderManagerScreenState extends State<OrderManagerScreen> {
     required Color color,
   }) {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(12),
@@ -227,14 +227,14 @@ class _OrderManagerScreenState extends State<OrderManagerScreen> {
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
               color: color.withValues(alpha: 0.15),
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, color: color, size: 20),
+            child: Icon(icon, color: color, size: 16),
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: 8),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -242,18 +242,18 @@ class _OrderManagerScreenState extends State<OrderManagerScreen> {
                 Text(
                   title,
                   style: const TextStyle(
-                    fontSize: 12,
+                    fontSize: 11,
                     fontWeight: FontWeight.w500,
                     color: ColorUtil.graniteGray,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 2),
                 Text(
                   value,
                   style: const TextStyle(
-                    fontSize: 16,
+                    fontSize: 14,
                     fontWeight: FontWeight.bold,
                     color: ColorUtil.raisinBlack,
                   ),
@@ -279,7 +279,7 @@ class _OrderManagerScreenState extends State<OrderManagerScreen> {
                 color: ColorUtil.primary,
               ),
             ),
-            const SizedBox(width: 10),
+            const SizedBox(width: 8),
             Expanded(
               child: _buildStatCard(
                 title: 'Đơn phát sinh',
@@ -290,7 +290,7 @@ class _OrderManagerScreenState extends State<OrderManagerScreen> {
             ),
           ],
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 8),
         Row(
           children: [
             Expanded(
@@ -301,7 +301,7 @@ class _OrderManagerScreenState extends State<OrderManagerScreen> {
                 color: Colors.blue,
               ),
             ),
-            const SizedBox(width: 10),
+            const SizedBox(width: 8),
             Expanded(
               child: _buildStatCard(
                 title: 'Đơn lắp máy',
@@ -319,8 +319,8 @@ class _OrderManagerScreenState extends State<OrderManagerScreen> {
   Widget _buildRevenueCard() {
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.symmetric(vertical: 16),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [ColorUtil.green, ColorUtil.green.withValues(alpha: 0.85)],
@@ -346,24 +346,24 @@ class _OrderManagerScreenState extends State<OrderManagerScreen> {
                 'TỔNG DOANH THU',
                 style: TextStyle(
                   color: Colors.white70,
-                  fontSize: 12,
+                  fontSize: 11,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 1.2,
                 ),
               ),
-              const SizedBox(height: 6),
+              const SizedBox(height: 4),
               Text(
                 (_bloc.totalPriceAll).toInt().toVND(),
                 style: const TextStyle(
                   color: Colors.white,
-                  fontSize: 22,
+                  fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
               ),
             ],
           ),
           Container(
-            padding: const EdgeInsets.all(10),
+            padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.2),
               shape: BoxShape.circle,
@@ -371,7 +371,7 @@ class _OrderManagerScreenState extends State<OrderManagerScreen> {
             child: const Icon(
               Icons.account_balance_wallet_outlined,
               color: Colors.white,
-              size: 28,
+              size: 20,
             ),
           ),
         ],
@@ -384,7 +384,7 @@ class _OrderManagerScreenState extends State<OrderManagerScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _datetimeRange(),
-        const SizedBox(height: 16),
+        const SizedBox(height: 10),
         _buildStatsGrid(),
         _buildRevenueCard(),
         const Padding(
