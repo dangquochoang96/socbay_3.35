@@ -110,7 +110,17 @@ class _TaskTimelineScreenState extends State<TaskTimelineScreen> {
               ? techniciansWithTasks
               : allTechnicians.where((tech) {
                   final name = tech.username?.toLowerCase() ?? '';
-                  return name.contains(_searchQuery.toLowerCase());
+                  final matchesTechName = name.contains(
+                    _searchQuery.toLowerCase(),
+                  );
+                  final matchesTaskAddress = tech.tasks.any(
+                    (task) =>
+                        task.address?.toLowerCase().contains(
+                          _searchQuery.toLowerCase(),
+                        ) ??
+                        false,
+                  );
+                  return matchesTechName || matchesTaskAddress;
                 }).toList();
 
           // Tính toán tổng quan số liệu dựa trên các KTV có công việc
@@ -203,7 +213,7 @@ class _TaskTimelineScreenState extends State<TaskTimelineScreen> {
               });
             },
             decoration: InputDecoration(
-              hintText: "Tìm kiếm kỹ thuật viên...",
+              hintText: "Tìm kiếm kỹ thuật viên, địa chỉ...",
               prefixIcon: const Icon(
                 Icons.search,
                 color: ColorUtil.graniteGray,
@@ -353,13 +363,26 @@ class _TaskTimelineScreenState extends State<TaskTimelineScreen> {
       );
 
       for (var task in tech.tasks) {
-        calendarTasks.add(
-          CalendarTaskWrapper(
-            task: task,
-            technicianId: tech.id,
-            technician: tech,
-          ),
-        );
+        final query = _searchQuery.toLowerCase();
+        final techName = tech.username?.toLowerCase() ?? '';
+        final taskAddress = task.address?.toLowerCase() ?? '';
+
+        bool shouldShowTask = true;
+        if (query.isNotEmpty) {
+          final matchesTechName = techName.contains(query);
+          final matchesTaskAddress = taskAddress.contains(query);
+          shouldShowTask = matchesTechName || matchesTaskAddress;
+        }
+
+        if (shouldShowTask) {
+          calendarTasks.add(
+            CalendarTaskWrapper(
+              task: task,
+              technicianId: tech.id,
+              technician: tech,
+            ),
+          );
+        }
       }
     }
 
@@ -376,8 +399,8 @@ class _TaskTimelineScreenState extends State<TaskTimelineScreen> {
       dataSource: TaskCalendarDataSource(calendarTasks, calendarResources),
       resourceViewSettings: ResourceViewSettings(
         showAvatar: true,
-        size: 80,
-        visibleResourceCount: 5,
+        size: 70,
+        visibleResourceCount: 4,
         displayNameTextStyle: GoogleFonts.roboto(
           fontSize: 12,
           fontWeight: FontWeight.w600,
@@ -386,7 +409,7 @@ class _TaskTimelineScreenState extends State<TaskTimelineScreen> {
       ),
       timeSlotViewSettings: const TimeSlotViewSettings(
         startHour: 6, // Chỉ show từ 6h sáng
-        endHour: 22, // Đến 22h tối
+        endHour: 21, // Đến 21h tối
         timeIntervalWidth: 100,
         timeFormat: 'HH:mm',
         timelineAppointmentHeight:
@@ -394,6 +417,17 @@ class _TaskTimelineScreenState extends State<TaskTimelineScreen> {
       ),
       appointmentBuilder: _buildAppointment,
       onTap: (CalendarTapDetails details) {
+        if (details.targetElement == CalendarElement.resourceHeader) {
+          final resource = details.resource;
+          if (resource != null) {
+            try {
+              final tech = technicians.firstWhere((t) => t.id == resource.id);
+              _showTechnicianStats(context, tech);
+            } catch (_) {}
+          }
+          return;
+        }
+
         if (details.appointments != null && details.appointments!.isNotEmpty) {
           final wrapper = details.appointments!.first as CalendarTaskWrapper;
           _showTaskDetails(context, wrapper);
@@ -416,9 +450,15 @@ class _TaskTimelineScreenState extends State<TaskTimelineScreen> {
         // Nếu chiều cao ô công việc quá nhỏ (do bị chia nhỏ khi trùng giờ), chỉ hiện tên công việc để tránh overflow
         final bool showSubInfo = maxHeight > 40;
 
+        final double verticalMargin = maxHeight < 30 ? 1 : 2;
+        final double verticalPadding = maxHeight < 30 ? 1 : 2;
+
         return Container(
-          margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+          margin: EdgeInsets.symmetric(horizontal: 4, vertical: verticalMargin),
+          padding: EdgeInsets.symmetric(
+            horizontal: 6,
+            vertical: verticalPadding,
+          ),
           decoration: BoxDecoration(
             color: color.withValues(alpha: 0.12),
             border: Border(left: BorderSide(color: color, width: 3)),
@@ -427,48 +467,321 @@ class _TaskTimelineScreenState extends State<TaskTimelineScreen> {
               bottomRight: Radius.circular(4),
             ),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                task.name ?? 'Công việc dịch vụ',
-                style: GoogleFonts.roboto(
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
-                  color: ColorUtil.primary,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: SingleChildScrollView(
+              physics: const NeverScrollableScrollPhysics(),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    task.name ?? 'Công việc dịch vụ',
+                    style: GoogleFonts.roboto(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      color: ColorUtil.primary,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  if (showSubInfo) ...[
+                    const SizedBox(height: 2),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.person_outline,
+                          size: 9,
+                          color: ColorUtil.primary.withValues(alpha: 0.6),
+                        ),
+                        const SizedBox(width: 2),
+                        Expanded(
+                          child: Text(
+                            task.customerName ?? 'Khách hàng',
+                            style: GoogleFonts.roboto(
+                              fontSize: 9,
+                              color: ColorUtil.primary.withValues(alpha: 0.7),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ],
               ),
-              if (showSubInfo) ...[
-                const SizedBox(height: 2),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showTechnicianStats(
+    BuildContext context,
+    TechnicianTimelineModel tech,
+  ) {
+    final int totalTasks = tech.tasks.length;
+    final int completedTasks = tech.tasks.where((t) => t.status == "3").length;
+    final int inProgressTasks = tech.tasks
+        .where((t) => t.status == "2" || t.status == "5")
+        .length;
+    final int cancelledTasks = tech.tasks.where((t) => t.status == "4").length;
+    final int unassignedTasks = tech.tasks.where((t) => t.status == "1").length;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+            boxShadow: [
+              BoxShadow(color: Colors.black12, blurRadius: 10, spreadRadius: 2),
+            ],
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Dấu gạch nhỏ phía trên bottom sheet
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(2.5),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                // KTV Profile Header
                 Row(
                   children: [
-                    Icon(
-                      Icons.person_outline,
-                      size: 9,
-                      color: ColorUtil.primary.withValues(alpha: 0.6),
-                    ),
-                    const SizedBox(width: 2),
-                    Expanded(
-                      child: Text(
-                        task.customerName ?? 'Khách hàng',
-                        style: GoogleFonts.roboto(
-                          fontSize: 9,
-                          color: ColorUtil.primary.withValues(alpha: 0.7),
+                    Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: ColorUtil.bangladeshGreen,
+                          width: 2.5,
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Colors.black12,
+                            blurRadius: 6,
+                            offset: Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      child: CircleAvatar(
+                        radius: 30,
+                        backgroundColor: Colors.grey[100],
+                        backgroundImage:
+                            (tech.avatar != null && tech.avatar!.isNotEmpty)
+                            ? CachedNetworkImageProvider(
+                                ImageUtil.getUrlFromPath(tech.avatar!),
+                              )
+                            : null,
+                        child: (tech.avatar == null || tech.avatar!.isEmpty)
+                            ? Icon(
+                                Icons.engineering,
+                                size: 30,
+                                color: ColorUtil.bangladeshGreen,
+                              )
+                            : null,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            (tech.username != null &&
+                                    tech.username!.contains('-'))
+                                ? tech.username!.split('-').last
+                                : (tech.username ?? 'Kỹ thuật viên'),
+                            style: GoogleFonts.roboto(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: ColorUtil.primary,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            "Kỹ thuật viên chuyên nghiệp",
+                            style: GoogleFonts.roboto(
+                              fontSize: 12,
+                              color: ColorUtil.graniteGray,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
+                const SizedBox(height: 20),
+                const Divider(height: 1),
+                const SizedBox(height: 20),
+
+                // Contact info
+                Text(
+                  "Thông tin liên hệ",
+                  style: GoogleFonts.roboto(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: ColorUtil.bangladeshGreen,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                if (tech.phone != null && tech.phone!.isNotEmpty)
+                  _buildInteractiveRow(
+                    icon: Icons.phone,
+                    title: "Số điện thoại:",
+                    value: tech.phone!,
+                    isPhone: true,
+                    onTap: () => _callPhone(tech.phone),
+                  )
+                else
+                  _buildDetailRow(
+                    Icons.phone,
+                    "Số điện thoại:",
+                    "Không có SĐT",
+                  ),
+                _buildDetailRow(
+                  Icons.location_on,
+                  "Địa chỉ làm việc:",
+                  tech.address ?? "Chưa cập nhật địa chỉ",
+                ),
+
+                const SizedBox(height: 20),
+                const Divider(height: 1),
+                const SizedBox(height: 20),
+
+                // Statistics Title
+                Text(
+                  "Thống kê công việc trong ngày",
+                  style: GoogleFonts.roboto(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: ColorUtil.bangladeshGreen,
+                  ),
+                ),
+                const SizedBox(height: 12),
+
+                // Grid stats
+                GridView.count(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  crossAxisCount: 2,
+                  childAspectRatio: 1.6,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
+                  children: [
+                    _buildStatCard(
+                      title: "Được giao",
+                      count: totalTasks,
+                      icon: Icons.assignment_outlined,
+                      color: Colors.blue[700]!,
+                      bgColor: Colors.blue[50]!,
+                    ),
+                    _buildStatCard(
+                      title: "Đang làm",
+                      count: inProgressTasks,
+                      icon: Icons.play_circle_outline,
+                      color: Colors.orange[800]!,
+                      bgColor: Colors.orange[50]!,
+                    ),
+                    _buildStatCard(
+                      title: "Hoàn thành",
+                      count: completedTasks,
+                      icon: Icons.check_circle_outline,
+                      color: Colors.green[700]!,
+                      bgColor: Colors.green[50]!,
+                    ),
+                    _buildStatCard(
+                      title: "Đã hủy/Khác",
+                      count: cancelledTasks + unassignedTasks,
+                      icon: Icons.cancel_outlined,
+                      color: Colors.red[700]!,
+                      bgColor: Colors.red[50]!,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
               ],
-            ],
+            ),
           ),
         );
       },
+    );
+  }
+
+  Widget _buildStatCard({
+    required String title,
+    required int count,
+    required IconData icon,
+    required Color color,
+    required Color bgColor,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: color.withValues(alpha: 0.3), width: 1),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: color.withValues(alpha: 0.15),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Icon(icon, size: 16, color: color),
+              ),
+              Text(
+                count.toString(),
+                style: GoogleFonts.roboto(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w900,
+                  color: color,
+                ),
+              ),
+            ],
+          ),
+          Text(
+            title,
+            style: GoogleFonts.roboto(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: color.withValues(alpha: 0.8),
+            ),
+          ),
+        ],
+      ),
     );
   }
 

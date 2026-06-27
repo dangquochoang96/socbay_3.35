@@ -180,7 +180,6 @@ class StaffNewOrderBloc extends Bloc<StaffNewOrderEvent, StaffNewOrderState> {
             var l = Map<String, dynamic>.from(json.decode(res.body));
             LoggerUtil.log(jsonEncode(l));
             var m = Map<String, dynamic>.from(l["data"]);
-            //var orderModel = OrderModel.fromJson(m["order"]);
             var orderDetailModel = List<OrderDetailModel>.from(
               m["orderDetails"].map(
                 (model) => OrderDetailModel.fromJson(model),
@@ -271,9 +270,9 @@ class StaffNewOrderBloc extends Bloc<StaffNewOrderEvent, StaffNewOrderState> {
               ? ""
               : listFilterId.substring(0, listFilterId.length - 1),
           "images": images,
-          //new
           'sale_id': taskModel?.saleId?.toString() ?? event.saleId.toString(),
           'address': event.newAddressSP.toString(),
+          'sub_type': event.subType.toString(),
         };
         var body = json.encode(args);
         if (kDebugMode) {

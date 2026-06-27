@@ -93,13 +93,14 @@ class _OrderManagerScreenState extends State<OrderManagerScreenBySale> {
 
   Widget _builder(BuildContext context, OrderManagerState state) {
     return PopScope(
-      canPop: false,
+      canPop: true,
       child: Scaffold(
         appBar: MyAppBar(
           title: "Quản lý đơn hàng",
           isBackNavigation: true,
           onBack: () async {
-            Navigator.pushReplacementNamed(context, Routes.root);
+            // Navigator.pushReplacementNamed(context, Routes.root);
+            Navigator.pop(context);
           },
         ),
         body: RefreshIndicator(
@@ -267,115 +268,26 @@ class _OrderManagerScreenState extends State<OrderManagerScreenBySale> {
   }
 
   Widget _buildStatsGrid() {
-    return Column(
+    return Row(
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: _buildStatCard(
-                title: 'Tổng đơn',
-                value: _bloc.totalOrderAll.toString(),
-                icon: Icons.assignment_outlined,
-                color: ColorUtil.primary,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: _buildStatCard(
-                title: 'Đơn phát sinh',
-                value: _bloc.totalDonThayLoi.toString(),
-                icon: Icons.error_outline_rounded,
-                color: ColorUtil.red,
-              ),
-            ),
-          ],
+        Expanded(
+          child: _buildStatCard(
+            title: 'Tổng đơn',
+            value: _bloc.totalOrderAll.toString(),
+            icon: Icons.assignment_outlined,
+            color: ColorUtil.primary,
+          ),
         ),
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            Expanded(
-              child: _buildStatCard(
-                title: 'Đơn vệ sinh',
-                value: _bloc.totalDonVeSinh.toString(),
-                icon: Icons.cleaning_services_outlined,
-                color: Colors.blue,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: _buildStatCard(
-                title: 'Đơn lắp máy',
-                value: _bloc.totalDonLapMay.toString(),
-                icon: Icons.build_circle_outlined,
-                color: ColorUtil.brightYellow,
-              ),
-            ),
-          ],
+        const SizedBox(width: 8),
+        Expanded(
+          child: _buildStatCard(
+            title: 'Tổng doanh thu',
+            value: (_bloc.totalPriceAll).toInt().toVND(),
+            icon: Icons.account_balance_wallet_outlined,
+            color: ColorUtil.green,
+          ),
         ),
       ],
-    );
-  }
-
-  Widget _buildRevenueCard() {
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [ColorUtil.green, ColorUtil.green.withValues(alpha: 0.85)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: ColorUtil.green.withValues(alpha: 0.3),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'TỔNG DOANH THU',
-                style: TextStyle(
-                  color: Colors.white70,
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.2,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                (_bloc.totalPriceAll).toInt().toVND(),
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-          Container(
-            padding: const EdgeInsets.all(6),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.2),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.account_balance_wallet_outlined,
-              color: Colors.white,
-              size: 20,
-            ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -386,7 +298,6 @@ class _OrderManagerScreenState extends State<OrderManagerScreenBySale> {
         _datetimeRange(),
         const SizedBox(height: 10),
         _buildStatsGrid(),
-        _buildRevenueCard(),
         const Padding(
           padding: EdgeInsets.only(bottom: 12.0, top: 4.0),
           child: Text(

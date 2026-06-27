@@ -159,6 +159,8 @@ abstract final class ApiEndpoints {
       '/socbay/order/order-list-bySale/$saleId';
   static String orderSalesIncome(Object? userId) =>
       '/socbay/order/sales-income/$userId';
+  static String orderSalesIncomeBySale(Object? userId) =>
+      '/socbay/order/sales-income-bySale/$userId';
   static String orderLastReplaceFilterCore(Object? userId) =>
       '/socbay/order/last-replace-filter-core/$userId';
 

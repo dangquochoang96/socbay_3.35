@@ -930,6 +930,26 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                       return;
                     }
 
+                    final bool hasNewProduct = getProductNew.isNotEmpty;
+                    final int taskType =
+                        int.tryParse(_bloc.taskModel?.type ?? '') ?? 0;
+                    final int subType;
+                    if (taskType == 7) {
+                      subType = 4;
+                    } else if (taskType == 8) {
+                      subType = 5;
+                    } else if (taskType == 9) {
+                      subType = 6;
+                    } else if (taskType == 10) {
+                      subType = 7;
+                    } else if (hasNewProduct) {
+                      subType = 1;
+                    } else if (_bloc.totalPay != 0) {
+                      subType = 2;
+                    } else {
+                      subType = 3;
+                    }
+
                     _bloc.add(
                       StaffCreateOrderEvent(
                         _currentSelectedProductValue,
@@ -972,6 +992,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                             : '0',
                         widget.isRent ? _selectedEndDate : DateTime.now(),
                         _noteController.text,
+                        subType,
                       ),
                     );
                   },

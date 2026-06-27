@@ -168,6 +168,30 @@ class HomeServiceModel {
       des: 'Khác',
       name: 'Khác',
     ),
+    HomeServiceModel(
+      id: 7,
+      image: Images.iconAdvise,
+      des: 'Hỗ trợ Online',
+      name: 'Hỗ trợ Online',
+    ),
+    HomeServiceModel(
+      id: 8,
+      image: Images.iconAdvise,
+      des: 'Giao máy',
+      name: 'Giao máy',
+    ),
+    HomeServiceModel(
+      id: 9,
+      image: Images.iconAdvise,
+      des: 'Lắp lọc tổng (thợ chính)',
+      name: 'Lắp lọc tổng (thợ chính)',
+    ),
+    HomeServiceModel(
+      id: 10,
+      image: Images.iconAdvise,
+      des: 'Lắp lọc tổng (thợ phụ)',
+      name: 'Lắp lọc tổng (thợ phụ)',
+    ),
   ];
   static List<HomeServiceModel> getServiceList() {
     return [
@@ -206,6 +230,30 @@ class HomeServiceModel {
         image: Images.iconAdvise,
         des: 'Khác',
         name: 'Khác',
+      ),
+      HomeServiceModel(
+        id: 7,
+        image: Images.iconAdvise,
+        des: 'Hỗ trợ Online',
+        name: 'Hỗ trợ Online',
+      ),
+      HomeServiceModel(
+        id: 8,
+        image: Images.iconAdvise,
+        des: 'Giao máy',
+        name: 'Giao máy',
+      ),
+      HomeServiceModel(
+        id: 9,
+        image: Images.iconAdvise,
+        des: 'Lắp lọc tổng (thợ chính)',
+        name: 'Lắp lọc tổng (thợ chính)',
+      ),
+      HomeServiceModel(
+        id: 10,
+        image: Images.iconAdvise,
+        des: 'Lắp lọc tổng (thợ phụ)',
+        name: 'Lắp lọc tổng (thợ phụ)',
       ),
     ];
   }

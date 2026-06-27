@@ -9,6 +9,7 @@ class UserModel {
   final int? id;
   final String? username;
   final String? avatar;
+  final String? companyAvatar;
   final String? email;
   final String? phone;
   final String? address;
@@ -38,6 +39,7 @@ class UserModel {
   UserModel({
     this.username,
     this.avatar,
+    this.companyAvatar,
     this.email,
     this.phone,
     this.address,
@@ -70,6 +72,7 @@ class UserModel {
     id: Parse.toIntValue(json['id']),
     username: json['username'],
     avatar: json['avartar'],
+    companyAvatar: json['company_avatar'],
     email: json['email'],
     phone: json['phone'] as String?,
     address: json['address'],
@@ -109,6 +112,7 @@ class UserModel {
     'id': id,
     'username': username,
     'avatar': avatar,
+    'company_avatar': companyAvatar,
     'birthday': birthday,
     'phone': phone,
     'address': address,

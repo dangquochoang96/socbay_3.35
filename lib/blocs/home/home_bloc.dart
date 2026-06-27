@@ -92,14 +92,21 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
   Future<void> _mapGetSalesIncome() async {
     try {
+      final isSale = App.instance.userApp?.isUserSale() == true;
       var url = AppConfig.instance.apiUri(
-        ApiEndpoints.orderSalesIncome(App.instance.userApp?.id),
+        isSale
+            ? ApiEndpoints.orderSalesIncomeBySale(App.instance.userApp?.id)
+            : ApiEndpoints.orderSalesIncome(App.instance.userApp?.id),
       );
       var res = await http.get(url);
       if (res.statusCode == HttpStatus.ok) {
         var l = Map<String, dynamic>.from(json.decode(res.body));
+        var dataJson = l["data"];
+        Iterable rawList = (dataJson is Map)
+            ? dataJson.values
+            : (dataJson is List ? dataJson : []);
         staffSalesIncomes = List<StaffSalesIncomeModel>.from(
-          l["data"].map((model) => StaffSalesIncomeModel.fromJson(model)),
+          rawList.map((model) => StaffSalesIncomeModel.fromJson(model)),
         );
         totalOrderAll = 0;
         totalPriceAll = 0;
@@ -117,7 +124,6 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         }
         totalPriceAll =
             totalPriceAll - totalTruTichDiem * 1000 - totalChietKhauAll;
-        //print(blogs);
       }
     } catch (ex) {
       LoggerUtil.error(ex.toString());
@@ -167,22 +173,6 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       banners = res.data!;
     }
   }
-
-  // Future<void> _mapGetProductsEventToState(
-  //     HomeScreenGetProductsEvent? event, Emitter<HomeState> emit) async {
-  //   try {
-  //     var url = Uri.http(
-  //         AppConfig.instance.values.apiUrl, "/api/product/list", {'page': "0"});
-  //     var res = await http.get(url);
-  //     if (res.statusCode == HttpStatus.ok) {
-  //       var l = Map<String, dynamic>.from(json.decode(res.body));
-  //       products = List<ProductModel>.from(
-  //           l["data"].map((model) => ProductModel.fromJson(model)));
-  //     }
-  //   } catch (ex) {
-  //     LoggerUtil.error(ex.toString());
-  //   }
-  // }
 
   Future<void> _mapGetLastReplaceFilterCore() async {
     try {

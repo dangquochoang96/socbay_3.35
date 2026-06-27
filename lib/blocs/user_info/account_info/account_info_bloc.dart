@@ -63,9 +63,7 @@ class AccountInfoBloc extends Bloc<AccountInfoEvent, AccountInfoState> {
     try {
       UserInfoRequest userInfoRequest = event.userInfoRequest;
       userInfoRequest.avatar = event.userInfoRequest.avatar;
-      database = await $FloorAppDatabase
-          .databaseBuilder('socbay.db')
-          .build();
+      database = await $FloorAppDatabase.databaseBuilder('socbay.db').build();
       final resUpdateUserInfo = await apiRepository.updateUserInfo(
         userInfoRequest,
       );
@@ -83,7 +81,7 @@ class AccountInfoBloc extends Bloc<AccountInfoEvent, AccountInfoState> {
         emit(
           AccountInfoUpdateDoneState(
             isSuccess: false,
-            error: resUpdateUserInfo.message ?? 'Xáº£y ra lá»—i',
+            error: resUpdateUserInfo.message ?? 'Xảy ra lỗi',
           ),
         );
       }

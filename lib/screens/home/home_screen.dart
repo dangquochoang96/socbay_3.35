@@ -506,6 +506,20 @@ class _HomeScreenState extends State<HomeScreen> {
                             width: 1,
                             color: Colors.grey.withValues(alpha: 0.7),
                           ),
+                        ] else if (App.instance.userApp?.isUserSale() ??
+                            false) ...[
+                          _buildBoxSummary(
+                            context,
+                            "Tổng đơn",
+                            "${_bloc.totalOrderAll}",
+                            Images.iconFeedback,
+                          ),
+                          _buildBoxSummary(
+                            context,
+                            "Doanh số",
+                            _bloc.totalPriceAll.toInt().toVND(),
+                            Images.iconStats,
+                          ),
                         ] else if (App.instance.userApp?.isUserRole() ??
                             false) ...[
                           _buildBoxSummary(
@@ -519,19 +533,6 @@ class _HomeScreenState extends State<HomeScreen> {
                             "Doanh số",
                             _bloc.totalPriceAll.toInt().toVND(),
                             Images.iconPoint,
-                          ),
-                        ] else ...[
-                          _buildBoxSummary(
-                            context,
-                            "Tổng đơn",
-                            "${_bloc.totalOrderAll}",
-                            Images.iconFeedback,
-                          ),
-                          _buildBoxSummary(
-                            context,
-                            "Doanh số",
-                            _bloc.totalPriceAll.toInt().toVND(),
-                            Images.iconStats,
                           ),
                         ],
                       ],
@@ -735,7 +736,7 @@ class _HomeScreenState extends State<HomeScreen> {
             );
           } else if (index == 3) {
             Navigator.pushNamed(context, Routes.retailOrderScreen);
-          }else if (index == 4) {
+          } else if (index == 4) {
             Navigator.pushNamed(context, Routes.warehouseScreen);
           }
         } else {
