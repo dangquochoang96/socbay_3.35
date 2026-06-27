@@ -10,6 +10,7 @@ import 'package:socbay/blocs/staff/order/order_manager_state.dart';
 import 'package:socbay/constants/constants.dart';
 import 'package:socbay/data/model/order_detail_model.dart';
 import 'package:socbay/data/model/staff_order_detail_model.dart';
+import 'package:socbay/data/model/staff_sales_income_model.dart';
 import 'package:socbay/routes.dart';
 import 'package:socbay/utils/color_util.dart';
 import 'package:socbay/widgets/button_widget.dart';
@@ -28,6 +29,7 @@ class _OrderManagerScreenState extends State<OrderManagerScreen> {
   late OrderManagerBloc _bloc;
   DateTimeRange? myDateRange;
   final ScrollController _scrollController = ScrollController();
+  bool _isStatsExpanded = false;
 
   @override
   void initState() {
@@ -291,6 +293,163 @@ class _OrderManagerScreenState extends State<OrderManagerScreen> {
     );
   }
 
+  int _getSumInt(String? Function(StaffSalesIncomeModel) getter) {
+    int sum = 0;
+    for (var item in _bloc.staffSalesIncomes) {
+      final val = getter(item);
+      if (val != null) {
+        sum += int.tryParse(val) ?? 0;
+      }
+    }
+    return sum;
+  }
+
+  double _getSumDouble(String? Function(StaffSalesIncomeModel) getter) {
+    double sum = 0;
+    for (var item in _bloc.staffSalesIncomes) {
+      final val = getter(item);
+      if (val != null) {
+        sum += double.tryParse(val) ?? 0.0;
+      }
+    }
+    return sum;
+  }
+
+  Widget _buildDetailedStats() {
+    if (_bloc.staffSalesIncomes.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final lapMayCount = _getSumInt((item) => item.totalOrderLapMay);
+    final lapMayRev = _getSumDouble((item) => item.totalPriceLapMay);
+
+    final thayTheCount = _getSumInt((item) => item.totalOrderThayThe);
+    final thayTheRev = _getSumDouble((item) => item.totalPriceThayThe);
+
+    final vsbdCount = _getSumInt((item) => item.totalOrderVsbd);
+    final vsbdRev = _getSumDouble((item) => item.totalPriceVsbd);
+
+    final onlineCount = _getSumInt((item) => item.totalOrderOnline);
+    final onlineRev = _getSumDouble((item) => item.totalPriceOnline);
+
+    final shipCount = _getSumInt((item) => item.totalOrderShip);
+    final shipRev = _getSumDouble((item) => item.totalPriceShip);
+
+    final locTongChinhCount = _getSumInt((item) => item.totalOrderLocTongChinh);
+    final locTongChinhRev = _getSumDouble(
+      (item) => item.totalPriceLocTongChinh,
+    );
+
+    final locTongPhuCount = _getSumInt((item) => item.totalOrderLocTongPhu);
+    final locTongPhuRev = _getSumDouble((item) => item.totalPriceLocTongPhu);
+
+    return Container(
+      margin: const EdgeInsets.only(top: 8),
+      decoration: BoxDecoration(
+        color: ColorUtil.primary.withValues(alpha: 0.03),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: ColorUtil.primary.withValues(alpha: 0.1),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        children: [
+          InkWell(
+            onTap: () {
+              setState(() {
+                _isStatsExpanded = !_isStatsExpanded;
+              });
+            },
+            borderRadius: BorderRadius.circular(12),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.analytics_outlined,
+                    color: ColorUtil.primary,
+                    size: 18,
+                  ),
+                  const SizedBox(width: 8),
+                  const Expanded(
+                    child: Text(
+                      'Thống kê chi tiết loại đơn',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: ColorUtil.primary,
+                      ),
+                    ),
+                  ),
+                  Icon(
+                    _isStatsExpanded
+                        ? Icons.keyboard_arrow_up
+                        : Icons.keyboard_arrow_down,
+                    color: ColorUtil.graniteGray,
+                    size: 18,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          if (_isStatsExpanded) ...[
+            const Divider(height: 1, thickness: 0.5),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              child: Column(
+                children: [
+                  _buildDetailRow('Đơn lắp máy', lapMayCount, lapMayRev),
+                  _buildDetailRow('Đơn thay thế', thayTheCount, thayTheRev),
+                  _buildDetailRow('Đơn vsbd', vsbdCount, vsbdRev),
+                  _buildDetailRow('Đơn online', onlineCount, onlineRev),
+                  _buildDetailRow('Đơn ship', shipCount, shipRev),
+                  _buildDetailRow(
+                    'Đơn lọc tổng chính',
+                    locTongChinhCount,
+                    locTongChinhRev,
+                  ),
+                  _buildDetailRow(
+                    'Đơn lọc tổng phụ',
+                    locTongPhuCount,
+                    locTongPhuRev,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(String label, int count, double revenue) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: ColorUtil.raisinBlack,
+            ),
+          ),
+          Text(
+            '$count đơn • ${revenue.toInt().toVND()}',
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: ColorUtil.green,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildHeader() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -298,6 +457,7 @@ class _OrderManagerScreenState extends State<OrderManagerScreen> {
         _datetimeRange(),
         const SizedBox(height: 10),
         _buildStatsGrid(),
+        _buildDetailedStats(),
         const Padding(
           padding: EdgeInsets.only(bottom: 12.0, top: 4.0),
           child: Text(
