@@ -1338,18 +1338,14 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                           )
                         : TextFormField(
                             controller: lstKeyValueCores[i].key,
-                            readOnly: !lstKeyValueCores[i].isManualInput,
-                            onTap: lstKeyValueCores[i].isManualInput
-                                ? null
-                                : () {
-                                    _showCoreSearchSelector(context, i);
-                                  },
+                            readOnly: true,
+                            onTap: () {
+                              _showCoreSearchSelector(context, i);
+                            },
                             decoration: InputDecoration(
-                              hintText: lstKeyValueCores[i].isManualInput
-                                  ? 'Nhập trường hợp khác'
-                                  : (_ktvWarehouseCores.isEmpty
-                                        ? 'Kho trống!'
-                                        : 'Chọn lõi/máy...'),
+                              hintText: _ktvWarehouseCores.isEmpty
+                                  ? 'Kho trống!'
+                                  : 'Chọn lõi/máy...',
                               isDense: true,
                               contentPadding: const EdgeInsets.symmetric(
                                 horizontal: 12,
@@ -1377,8 +1373,6 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                                         setState(() {
                                           lstKeyValueCores[i].key.clear();
                                           lstKeyValueCores[i].value.clear();
-                                          lstKeyValueCores[i].isManualInput =
-                                              false;
                                           _recalculateTotal();
                                         });
                                       },
@@ -1724,7 +1718,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setModalState) {
             final List<String> filteredList = [];
-            const String manualOption = "Lắp đặt, VSBD, Khác";
+            const String manualOption = "Lắp đặt mới, VSBD, Dv khác...";
             if (searchQuery.isEmpty ||
                 manualOption.toLowerCase().contains(
                   searchQuery.toLowerCase(),
@@ -1822,15 +1816,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                                   ),
                                   onTap: () {
                                     setState(() {
-                                      if (item == manualOption) {
-                                        lstKeyValueCores[index].isManualInput =
-                                            true;
-                                        lstKeyValueCores[index].key.text = "";
-                                      } else {
-                                        lstKeyValueCores[index].isManualInput =
-                                            false;
-                                        lstKeyValueCores[index].key.text = item;
-                                      }
+                                      lstKeyValueCores[index].key.text = item;
                                     });
                                     Navigator.pop(context);
                                   },
@@ -2218,8 +2204,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
 class KeyValue {
   late TextEditingController key;
   late TextEditingController value;
-  bool isManualInput;
 
   //late TextEditingController selectedDate;
-  KeyValue(this.key, this.value, {this.isManualInput = false});
+  KeyValue(this.key, this.value);
 }
