@@ -881,7 +881,6 @@ class _ProductSearchBottomSheetState extends State<ProductSearchBottomSheet> {
     });
     try {
       var url = AppConfig.instance.apiUri(ApiEndpoints.productSearch, {
-        'page': '0',
         'q': query,
       });
       var res = await http.get(url);

@@ -506,11 +506,7 @@ class _OrderManagerScreenState extends State<OrderManagerScreen> {
   }
 
   Widget _buildOrderCard(BuildContext context, StaffOrderDetailModel order) {
-    Decimal heso = Decimal.parse("1000");
-    var finalPrice =
-        (Decimal.parse(order.price ?? "0") -
-        Decimal.parse(order.truTichDiem ?? "0") * heso -
-        Decimal.parse(order.chietKhau ?? "0"));
+    var finalPrice = Decimal.parse(order.price ?? "0");
     String formattedPrice = finalPrice.toBigInt().toVND();
 
     double rating = order.rate != null

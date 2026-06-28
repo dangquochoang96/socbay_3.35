@@ -146,7 +146,10 @@ class _TaskTimelineScreenState extends State<TaskTimelineScreen> {
                       ? _buildErrorWidget(state.message)
                       : allTechnicians.isEmpty && !isLoading
                       ? _buildEmptyWidget()
-                      : _buildTimelineCalendar(filteredTechnicians),
+                      : Padding(
+                          padding: const EdgeInsets.only(bottom: 50.0),
+                          child: _buildTimelineCalendar(filteredTechnicians),
+                        ),
                 ),
               ],
             ),

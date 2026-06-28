@@ -30,6 +30,7 @@ class CoreReplacementServiceBloc
   String createDate = "";
   var des = "";
   double totalPriceForOrder = 0;
+  String finalPrice = "0";
   FutureOr<void> _getStartEventToState(
     CoreReplatementServiceStartEvent event,
     Emitter<CoreReplatementServiceState> emit,
@@ -45,6 +46,7 @@ class CoreReplacementServiceBloc
       var m = Map<String, dynamic>.from(l["data"]);
       try {
         orderDetailModel = OrderDetailModel.fromJson(m["order"]);
+        finalPrice = orderDetailModel!.price ?? "0";
         rating = orderDetailModel!.rate != null
             ? double.parse(orderDetailModel!.rate!)
             : 0.0;
