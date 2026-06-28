@@ -477,11 +477,44 @@ class _DetailBookingScreenState extends State<DetailBookingScreen> {
             String url = _bloc.taskModel!.images![index].isEmpty
                 ? ""
                 : "$protocol${AppConfig.instance.values.apiUrl}${_bloc.taskModel!.images![index]}";
+            
+            bool isVideo = url.toLowerCase().endsWith('.mp4') || 
+                           url.toLowerCase().endsWith('.mov') ||
+                           url.toLowerCase().endsWith('.avi');
+
             return Padding(
               padding: const EdgeInsets.only(right: 8.0),
-              child: _fullScreenHeroWidget(url),
+              child: isVideo 
+                  ? _videoWidget(url) 
+                  : _fullScreenHeroWidget(url),
             );
           },
+        ),
+      ),
+    );
+  }
+
+  Widget _videoWidget(String url) {
+    return GestureDetector(
+      onTap: () async {
+        final uri = Uri.parse(url);
+        if (await canLaunchUrl(uri)) {
+          await launchUrl(uri, mode: LaunchMode.externalApplication);
+        }
+      },
+      child: Container(
+        width: 100,
+        height: 100,
+        decoration: BoxDecoration(
+          color: Colors.black12,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: const Center(
+          child: Icon(
+            Icons.play_circle_fill,
+            size: 40,
+            color: Colors.black54,
+          ),
         ),
       ),
     );

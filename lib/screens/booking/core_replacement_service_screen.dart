@@ -571,16 +571,11 @@ class _CoreReplacementServiceScreenState
 
   Widget _buildPriceCard() {
     var sumPrice = _bloc.totalPriceForOrder;
-    var totalPrice = _bloc.orderDetailModel?.price;
     var discount = _bloc.orderDetailModel?.chietKhau;
     var subPoint = _bloc.orderDetailModel?.truTichDiem;
     var savePoint = _bloc.orderDetailModel?.tichDiem;
     Decimal heso = Decimal.parse("1000");
-    var cal =
-        (Decimal.parse(totalPrice ?? "0") -
-        Decimal.parse(subPoint ?? "0") * heso -
-        Decimal.parse(discount ?? "0"));
-    _totalPriced = cal > Decimal.parse("0") ? cal : 0;
+    _totalPriced = _bloc.finalPrice;
     if (_totalPriced == 0) {
       _bloc.orderDetailModel?.paymentStatus == '1';
     }
