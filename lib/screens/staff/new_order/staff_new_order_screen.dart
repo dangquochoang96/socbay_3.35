@@ -282,7 +282,11 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
       setState(() {
         _isLoading = _bloc.isLoading;
       });
-      Navigator.pushReplacementNamed(context, Routes.orderManagerScreen);
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        Routes.orderManagerScreen,
+        (route) => route.isFirst,
+      );
     }
     if (state is ServiceScreenUploadImageFailedState) {
       context.showSnackBar("Upload ảnh lỗi!");

@@ -123,7 +123,17 @@ class TaskModel {
       return imgs;
     }
     try {
-      imgs = List<String>.from(images.map((e) => e["image_link"]));
+      for (var e in images) {
+        if (e is String) {
+          imgs.add(e);
+        } else if (e is Map) {
+          if (e["image_link"] != null) {
+            imgs.add(e["image_link"].toString());
+          } else if (e["image"] != null) {
+            imgs.add(e["image"].toString());
+          }
+        }
+      }
     } catch (exception) {
       LoggerUtil.log(exception.toString());
     }
