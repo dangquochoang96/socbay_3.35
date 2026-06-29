@@ -280,7 +280,10 @@ class _CreateRetailOrderScreenState extends State<CreateRetailOrderScreen> {
       builder: (context, state) {
         final isSubmitting = state is CreateRetailOrderLoading;
         return Scaffold(
-          appBar: MyAppBar(title: "Tạo đơn bán buôn", isBackNavigation: true),
+          appBar: MyAppBar(
+            title: "Tạo đơn nhập vật tư",
+            isBackNavigation: true,
+          ),
           backgroundColor: const Color(0xfff7f8fa),
           body: Stack(
             children: [
@@ -882,6 +885,7 @@ class _ProductSearchBottomSheetState extends State<ProductSearchBottomSheet> {
     try {
       var url = AppConfig.instance.apiUri(ApiEndpoints.productSearch, {
         'q': query,
+        'cate': '13,14,33,34,42',
       });
       var res = await http.get(url);
       if (res.statusCode == HttpStatus.ok) {
@@ -1007,7 +1011,12 @@ class _ProductSearchBottomSheetState extends State<ProductSearchBottomSheet> {
                 )
               : ListView.separated(
                   controller: widget.scrollController,
-                  padding: const EdgeInsets.all(16),
+                  padding: EdgeInsets.only(
+                    left: 16,
+                    right: 16,
+                    top: 16,
+                    bottom: 40 + MediaQuery.of(context).padding.bottom,
+                  ),
                   itemCount: _searchResults.length,
                   separatorBuilder: (context, index) =>
                       const Divider(height: 16),

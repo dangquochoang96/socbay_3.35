@@ -36,13 +36,21 @@ import 'package:location/location.dart' as location_dart;
 import 'package:socbay/widgets/text_field_default.dart';
 import 'package:image/image.dart' as img;
 
+import 'package:socbay/data/data_provider/api_endpoints.dart';
+import 'package:socbay/data/model/product_model.dart';
+import 'staff_service_screen_sale.dart';
 import '../../../application.dart';
 import '../../../data/model/user_model.dart';
 import '../../my_task/my_task/my_task_tab.dart';
 import '../technique/technique_screen.dart';
 
 class StaffServiceScreen extends StatefulWidget {
-  const StaffServiceScreen({super.key});
+  final TaskOrderType initialOrderType;
+
+  const StaffServiceScreen({
+    super.key,
+    this.initialOrderType = TaskOrderType.service,
+  });
 
   @override
   State<StaffServiceScreen> createState() => _ServiceScreenState();
@@ -77,10 +85,12 @@ class _ServiceScreenState extends State<StaffServiceScreen> {
   final customerController = TextEditingController();
   late TabBarBloc _tabBarBloc;
   UserModel? _favouriteStaff;
+  late TaskOrderType _selectedOrderType;
 
   @override
   void initState() {
     _bloc = BlocProvider.of(context);
+    _selectedOrderType = widget.initialOrderType;
     _tabBarBloc = BlocProvider.of<TabBarBloc>(context);
     staffFavoriteTxtController = TextEditingController();
     describeRequestTxtController = TextEditingController();
@@ -145,14 +155,19 @@ class _ServiceScreenState extends State<StaffServiceScreen> {
     if (state is StaffServiceScreenCheckCustomerSuccessState) {
       _listProducts.clear();
       _listProducts.add(
-        OrderModel(id: 0, product: MachineModel(id: 0, name: "--Chọn máy--")),
+        OrderModel(
+          id: 0,
+          product: MachineModel(id: 0, name: "--Chọn máy--"),
+          proad: ProductModel(address: "chọn máy"),
+        ),
       );
       for (var element in _bloc.listProducts) {
-        if (element.product != null) {
+        if (_productName(element).isNotEmpty) {
           _listProducts.add(element);
         }
       }
       setState(() {
+        _resetSelectedProductIfHidden();
         _addNewCustomer = false;
         customerController.text = _bloc.customerInfor?.username ?? '';
       });
@@ -303,6 +318,8 @@ class _ServiceScreenState extends State<StaffServiceScreen> {
             '1. Thông tin dịch vụ & Khách hàng',
             Icons.home_repair_service_rounded,
           ),
+          _buildOrderTypeDropdown(),
+          const SizedBox(height: 16),
           _buildDropdownField(),
           const SizedBox(height: 16),
           _buildSearchCustomer(),
@@ -374,6 +391,99 @@ class _ServiceScreenState extends State<StaffServiceScreen> {
         );
       }).toList(),
     );
+  }
+
+  Widget _buildOrderTypeDropdown() {
+    return DropdownButtonFormField<TaskOrderType>(
+      initialValue: _selectedOrderType,
+      decoration: InputDecoration(
+        labelText: 'Loại đơn',
+        labelStyle: TextStyle(
+          color: ColorUtil.bangladeshGreen.withValues(alpha: 0.8),
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+        ),
+        filled: true,
+        fillColor: Colors.grey.shade50,
+        prefixIcon: const Icon(
+          Icons.receipt_long_rounded,
+          color: ColorUtil.bangladeshGreen,
+        ),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 12,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey.shade200, width: 1.5),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(
+            color: ColorUtil.bangladeshGreen,
+            width: 1.5,
+          ),
+        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+      isExpanded: true,
+      icon: const Icon(
+        Icons.arrow_drop_down_rounded,
+        color: ColorUtil.spanishGray,
+        size: 28,
+      ),
+      onChanged: (TaskOrderType? newValue) {
+        if (newValue != null) {
+          setState(() {
+            _selectedOrderType = newValue;
+            _resetSelectedProductIfHidden();
+          });
+        }
+      },
+      items: const [
+        DropdownMenuItem<TaskOrderType>(
+          value: TaskOrderType.service,
+          child: Text(
+            'Đơn Dịch Vụ',
+            style: TextStyle(fontSize: 14, color: ColorUtil.raisinBlack),
+          ),
+        ),
+        DropdownMenuItem<TaskOrderType>(
+          value: TaskOrderType.rent,
+          child: Text(
+            'Đơn Thuê',
+            style: TextStyle(fontSize: 14, color: ColorUtil.raisinBlack),
+          ),
+        ),
+      ],
+    );
+  }
+
+  List<OrderModel> get _displayedProducts {
+    if (_selectedOrderType != TaskOrderType.rent) {
+      return _listProducts;
+    }
+    return _listProducts
+        .where((item) => item.id == 0 || _isRentOrderProduct(item))
+        .toList();
+  }
+
+  bool _isRentOrderProduct(OrderModel item) {
+    return item.orderTypeLabel?.trim().toLowerCase().contains('thu') == true;
+  }
+
+  String _productName(OrderModel item) {
+    return item.product?.name ?? item.proad?.name ?? '';
+  }
+
+  void _resetSelectedProductIfHidden() {
+    final hasSelectedProduct = _displayedProducts.any(
+      (item) => item.id == _currentSelectedProductValue,
+    );
+    if (!hasSelectedProduct) {
+      _currentSelectedProductValue = 0;
+      addressSPRequestTxtController.clear();
+    }
   }
 
   Widget _buildSearchCustomer() {
@@ -502,7 +612,8 @@ class _ServiceScreenState extends State<StaffServiceScreen> {
   }
 
   Widget _buildDropdownFieldPruducts() {
-    final hasProduct = _listProducts.any(
+    final displayedProducts = _displayedProducts;
+    final hasProduct = displayedProducts.any(
       (e) => e.id == _currentSelectedProductValue,
     );
     return Column(
@@ -551,7 +662,7 @@ class _ServiceScreenState extends State<StaffServiceScreen> {
           onChanged: (String? newValue) {
             setState(() {
               _currentSelectedProductValue = int.parse(newValue ?? '0');
-              final matched = _listProducts.where(
+              final matched = displayedProducts.where(
                 (item) =>
                     item.id.toString() ==
                     _currentSelectedProductValue.toString(),
@@ -562,11 +673,11 @@ class _ServiceScreenState extends State<StaffServiceScreen> {
               }
             });
           },
-          items: _listProducts.map((OrderModel sv) {
+          items: displayedProducts.map((OrderModel sv) {
             return DropdownMenuItem<String>(
               value: sv.id.toString(),
               child: Text(
-                sv.product?.name ?? '',
+                _productName(sv),
                 style: const TextStyle(
                   fontSize: 14,
                   color: ColorUtil.raisinBlack,
@@ -1146,6 +1257,9 @@ class _ServiceScreenState extends State<StaffServiceScreen> {
           images: _listPath,
         ),
         false,
+        createTaskEndpoint: _selectedOrderType == TaskOrderType.rent
+            ? ApiEndpoints.rentTaskCreate
+            : ApiEndpoints.taskCreate,
       ),
     );
     if (_bloc.listTaskModel.isEmpty) {

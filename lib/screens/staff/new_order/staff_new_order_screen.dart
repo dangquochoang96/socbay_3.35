@@ -380,19 +380,6 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                         ),
                       ),
                     ),
-                    _buildInputRow(
-                      'Ghi chú',
-                      _buildTextFieldWrapper(
-                        TextField(
-                          controller: _noteController,
-                          maxLines: 3,
-                          decoration: const InputDecoration(
-                            border: InputBorder.none,
-                            hintText: 'Nhập ghi chú...',
-                          ),
-                        ),
-                      ),
-                    ),
                   ],
                 ),
 
@@ -507,6 +494,23 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                     ],
                   ),
                 _itemFilterCoreTable(),
+                _buildCard(
+                  children: [
+                    _buildInputRow(
+                      'Ghi chú',
+                      _buildTextFieldWrapper(
+                        TextField(
+                          controller: _noteController,
+                          maxLines: 3,
+                          decoration: const InputDecoration(
+                            border: InputBorder.none,
+                            hintText: 'Nhập ghi chú...',
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
                 _itemFilterCoreMaintainTable(),
                 _buildCard(
                   children: [
@@ -1161,6 +1165,15 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
   }
 
   Widget _buildDropdownFieldPruducts() {
+    final List<OrderModel> filteredProducts = _listProducts.where((sv) {
+      if (sv.id == 0) return true;
+      if (widget.isRent) {
+        return sv.orderTypeLabel == 'Thuê';
+      } else {
+        return sv.orderTypeLabel == 'Bán';
+      }
+    }).toList();
+
     return FormField<String>(
       builder: (FormFieldState<String> state) {
         return InputDecorator(
@@ -1189,7 +1202,12 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
           isEmpty: false,
           child: DropdownButtonHideUnderline(
             child: DropdownButton<String>(
-              value: _currentSelectedProductValue.toString(),
+              value:
+                  filteredProducts.any(
+                    (item) => item.id == _currentSelectedProductValue,
+                  )
+                  ? _currentSelectedProductValue.toString()
+                  : "0",
               isDense: true,
               isExpanded: true,
               onChanged: (String? newValue) {
@@ -1213,7 +1231,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                   }
                 });
               },
-              items: _listProducts.map((OrderModel sv) {
+              items: filteredProducts.map((OrderModel sv) {
                 return DropdownMenuItem<String>(
                   value: sv.id.toString(),
                   child: Text(sv.product?.name ?? ""),
@@ -1291,7 +1309,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
               Expanded(
                 flex: 1,
                 child: Text(
-                  "Tên lõi",
+                  "Tên lõi/ Dịch vụ",
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     color: ColorUtil.raisinBlack,
@@ -1722,12 +1740,21 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setModalState) {
             final List<String> filteredList = [];
-            const String manualOption = "Lắp đặt mới, VSBD, Dv khác...";
+            const String manualOption = "Lắp đặt mới; VSBD; Dv khác...";
             if (searchQuery.isEmpty ||
                 manualOption.toLowerCase().contains(
                   searchQuery.toLowerCase(),
                 )) {
               filteredList.add(manualOption);
+            }
+            if (widget.isRent) {
+              const String rentOption = "Thu tiền đơn thuê/đại lý";
+              if (searchQuery.isEmpty ||
+                  rentOption.toLowerCase().contains(
+                    searchQuery.toLowerCase(),
+                  )) {
+                filteredList.add(rentOption);
+              }
             }
             filteredList.addAll(
               _ktvWarehouseCores.where(

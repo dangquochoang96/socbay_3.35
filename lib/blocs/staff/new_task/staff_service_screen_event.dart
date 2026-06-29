@@ -16,8 +16,13 @@ class StaffServiceScreenChangeTypeServiceEvent extends StaffServiceScreenEvent {
 class StaffServiceScreenCreateTaskEvent extends StaffServiceScreenEvent {
   final CreateTaskRequest createTaskRequest;
   final bool isSearch;
+  final String? createTaskEndpoint;
 
-  StaffServiceScreenCreateTaskEvent(this.createTaskRequest, this.isSearch);
+  StaffServiceScreenCreateTaskEvent(
+    this.createTaskRequest,
+    this.isSearch, {
+    this.createTaskEndpoint,
+  });
 }
 
 class StaffServiceScreenUserAddressEvent extends StaffServiceScreenEvent {}

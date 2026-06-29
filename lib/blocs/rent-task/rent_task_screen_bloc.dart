@@ -29,6 +29,7 @@ class RentTaskScreenSaleBloc
     on<StaffTaskScreenGetTaskDoneEvent>(_mapGetTaskDoneEventToState);
     on<BookingDeleteTaskEvent>(_mapBookingDeleteTaskEventToState);
     on<BookingDeleteTaskToDayEvent>(_mapBookingDeleteTaskToDayEventToState);
+    on<StaffTaskScreenAssignTechnicianEvent>(_mapAssignTechnicianEventToState);
   }
 
   final ApiRepository apiRepository;
@@ -286,5 +287,64 @@ class RentTaskScreenSaleBloc
     }
     emit(MyTaskScreenInitialState());
     isLoading = false;
+  }
+
+  Future<void> _mapAssignTechnicianEventToState(
+    StaffTaskScreenAssignTechnicianEvent event,
+    Emitter<RentTaskScreenState> emit,
+  ) async {
+    isLoading = true;
+    emit(MyTaskScreenInitialState());
+    
+    String timeStartFormatted = "";
+    if (event.taskModel.timeStart != null) {
+      try {
+        timeStartFormatted = DateFormat('dd/MM/yyyy HH:mm')
+            .format(DateTime.parse(event.taskModel.timeStart!));
+      } catch (_) {
+        timeStartFormatted = event.taskModel.timeStart!;
+      }
+    }
+
+    Map<String, dynamic> params = {
+      "time_start": timeStartFormatted,
+      "time_end": event.taskModel.timeEnd ?? "",
+      "type_task": event.taskModel.type ?? "1",
+      "name": event.taskModel.name ?? "",
+      "staff": event.staffId.toString(),
+      "priority": event.taskModel.priority ?? "1",
+      "status": "5",
+      "des": event.taskModel.des ?? "",
+      "user_create": event.taskModel.userCreate ?? App.instance.userApp!.id.toString(),
+      "customer": event.taskModel.customer?.id ?? event.taskModel.userId,
+      "images": event.taskModel.images ?? [],
+    };
+
+    var url = AppConfig.instance.apiUri(
+      ApiEndpoints.rentTaskEdit(event.taskId.toString()),
+    );
+    var body = json.encode(params);
+    try {
+      var res = await http.post(
+        url,
+        body: body,
+        headers: {'Content-type': 'application/json'},
+      );
+      if (res.statusCode == HttpStatus.ok) {
+        var l = Map<String, dynamic>.from(json.decode(res.body));
+        if (l["code"] == 1) {
+          emit(BookingUpdateSuccessState());
+        } else {
+          emit(BookingUpdateErrorState());
+        }
+      } else {
+        emit(BookingUpdateErrorState());
+      }
+    } catch (ex) {
+      LoggerUtil.error(ex.toString());
+      emit(BookingUpdateErrorState());
+    }
+    isLoading = false;
+    emit(MyTaskScreenInitialState());
   }
 }

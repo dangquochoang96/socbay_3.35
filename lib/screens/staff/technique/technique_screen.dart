@@ -77,7 +77,7 @@ class _TechniqueScreenState extends State<TechniqueScreen>
       backgroundColor: Colors.grey.shade50,
       appBar: MyAppBar(
         title: "Lựa chọn kỹ thuật viên",
-        isBackNavigation: false,
+        isBackNavigation: true,
         centerTitle: true,
       ),
       body: Column(

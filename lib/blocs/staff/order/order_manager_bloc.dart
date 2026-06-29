@@ -47,11 +47,7 @@ class OrderManagerBloc extends Bloc<OrderManagerEvent, OrderManagerState> {
 
       var url = AppConfig.instance.apiUri(
         ApiEndpoints.orderListStaff(App.instance.userApp?.id),
-        {
-          'start': event.start,
-          'end': event.end,
-          'page': event.page.toString(),
-        },
+        {'start': event.start, 'end': event.end, 'page': event.page.toString()},
       );
       var res = await http.get(url);
       if (res.statusCode == HttpStatus.ok) {
@@ -71,29 +67,15 @@ class OrderManagerBloc extends Bloc<OrderManagerEvent, OrderManagerState> {
             l["data"].map((model) => StaffSalesIncomeModel.fromJson(model)),
           );
           for (var e in staffSalesIncomes) {
-            if (e.status == "2") {
-              totalPriceAll = totalPriceAll + double.parse(e.totalPrice ?? "0");
-              totalChietKhauAll =
-                  totalChietKhauAll + double.parse(e.totalChietKhau ?? "0");
-              totalTruTichDiem =
-                  totalTruTichDiem + int.parse(e.totalTruTichDiem ?? "0");
-            }
+            totalPriceAll = totalPriceAll + double.parse(e.totalPrice ?? "0");
+            totalChietKhauAll =
+                totalChietKhauAll + double.parse(e.totalChietKhau ?? "0");
+            totalTruTichDiem =
+                totalTruTichDiem + int.parse(e.totalTruTichDiem ?? "0");
             totalOrderAll = totalOrderAll + int.parse(e.totalOrder ?? "0");
           }
           totalPriceAll =
               totalPriceAll - totalTruTichDiem * 1000 - totalChietKhauAll;
-
-          for (var element in staffSalesIncomes) {
-            if (element.status == "0") {
-              totalDonLapMay = int.parse(element.totalOrder ?? "0");
-            }
-            if (element.status == "1") {
-              totalDonVeSinh = int.parse(element.totalOrder ?? "0");
-            }
-            if (element.status == "2") {
-              totalDonThayLoi = int.parse(element.totalOrder ?? "0");
-            }
-          }
         }
 
         var lstOrdersData = l["lstOrders"];
@@ -101,9 +83,11 @@ class OrderManagerBloc extends Bloc<OrderManagerEvent, OrderManagerState> {
         lastPage = lstOrdersData["last_page"] ?? 1;
 
         var newOrders = List<StaffOrderDetailModel>.from(
-          lstOrdersData["data"].map((model) => StaffOrderDetailModel.fromJson(model)),
+          lstOrdersData["data"].map(
+            (model) => StaffOrderDetailModel.fromJson(model),
+          ),
         );
-        
+
         if (event.page == 1) {
           staffLstOrders = newOrders;
         } else {

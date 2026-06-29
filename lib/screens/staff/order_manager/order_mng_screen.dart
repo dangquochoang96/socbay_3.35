@@ -343,6 +343,9 @@ class _OrderManagerScreenState extends State<OrderManagerScreen> {
     final locTongPhuCount = _getSumInt((item) => item.totalOrderLocTongPhu);
     final locTongPhuRev = _getSumDouble((item) => item.totalPriceLocTongPhu);
 
+    final rentCount = _getSumInt((item) => item.totalRentOrder);
+    final rentRev = _getSumDouble((item) => item.totalPriceRent);
+
     return Container(
       margin: const EdgeInsets.only(top: 8),
       decoration: BoxDecoration(
@@ -414,6 +417,7 @@ class _OrderManagerScreenState extends State<OrderManagerScreen> {
                     locTongPhuCount,
                     locTongPhuRev,
                   ),
+                  _buildDetailRow('Đơn thuê máy', rentCount, rentRev),
                 ],
               ),
             ),

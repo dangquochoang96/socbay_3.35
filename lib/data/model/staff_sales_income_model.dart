@@ -17,8 +17,8 @@ class StaffSalesIncomeModel {
   String? totalPriceLocTongChinh;
   String? totalOrderLocTongPhu;
   String? totalPriceLocTongPhu;
-  String? type;
-  String? status;
+  String? totalRentOrder;
+  String? totalPriceRent;
 
   StaffSalesIncomeModel({
     this.totalOrder,
@@ -39,8 +39,8 @@ class StaffSalesIncomeModel {
     this.totalPriceLocTongChinh,
     this.totalOrderLocTongPhu,
     this.totalPriceLocTongPhu,
-    this.type,
-    this.status,
+    this.totalRentOrder,
+    this.totalPriceRent,
   });
   factory StaffSalesIncomeModel.fromJson(Map<String, dynamic> json) =>
       StaffSalesIncomeModel(
@@ -62,7 +62,7 @@ class StaffSalesIncomeModel {
         totalPriceLocTongChinh: json["totalPriceLocTongChinh"] as String?,
         totalOrderLocTongPhu: json["totalOrderLocTongPhu"] as String?,
         totalPriceLocTongPhu: json["totalPriceLocTongPhu"] as String?,
-        type: json["type"] as String?,
-        status: json["status"] as String?,
+        totalRentOrder: json["totalRentOrder"] as String?,
+        totalPriceRent: json["totalPriceRent"] as String?,
       );
 }

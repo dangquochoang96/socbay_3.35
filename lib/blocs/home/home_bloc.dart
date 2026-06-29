@@ -113,13 +113,11 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         totalChietKhauAll = 0;
         totalTruTichDiem = 0;
         for (var e in staffSalesIncomes) {
-          if (e.status == '2') {
-            totalPriceAll = totalPriceAll + double.parse(e.totalPrice ?? "0");
-            totalChietKhauAll =
-                totalChietKhauAll + double.parse(e.totalChietKhau ?? "0");
-            totalTruTichDiem =
-                totalTruTichDiem + int.parse(e.totalTruTichDiem ?? "0");
-          }
+          totalPriceAll = totalPriceAll + double.parse(e.totalPrice ?? "0");
+          totalChietKhauAll =
+              totalChietKhauAll + double.parse(e.totalChietKhau ?? "0");
+          totalTruTichDiem =
+              totalTruTichDiem + int.parse(e.totalTruTichDiem ?? "0");
           totalOrderAll = totalOrderAll + int.parse(e.totalOrder ?? "0");
         }
         totalPriceAll =

@@ -87,7 +87,9 @@ class StaffServiceScreenBloc
         "address": event.createTaskRequest.address.toString(),
         "request_user_id": App.instance.userApp!.id.toString(),
       };
-      var url = AppConfig.instance.apiUri(ApiEndpoints.taskCreate);
+      var url = AppConfig.instance.apiUri(
+        event.createTaskEndpoint ?? ApiEndpoints.taskCreate,
+      );
       var body = json.encode(args);
 
       try {

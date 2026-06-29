@@ -6,13 +6,16 @@ import 'package:socbay/blocs/rent-task/rent_task_screen_event.dart';
 import 'package:socbay/blocs/rent-task/rent_task_screen_state.dart';
 import 'package:socbay/constants/constants.dart';
 import 'package:socbay/data/model/task_model.dart';
+import 'package:socbay/data/model/user_model.dart';
 import 'package:socbay/routes.dart';
+import 'package:socbay/screens/staff/technique/technique_screen.dart';
 import 'package:socbay/utils/color_util.dart';
 import 'package:socbay/utils/context_extension.dart';
 import 'package:socbay/utils/scroll_util.dart';
 import 'package:socbay/widgets/indicator_loadmore.dart';
 import 'package:socbay/widgets/loading_indicator.dart';
 import 'package:socbay/widgets/text_field_default.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class RentTaskTabSale extends StatefulWidget {
   const RentTaskTabSale({super.key});
@@ -93,6 +96,16 @@ class _RentTaskTabSale extends State<RentTaskTabSale> {
     }
     if (state is BookingDeleteErrorState) {
       context.showSnackBar("Hủy thất bại!");
+    }
+    if (state is BookingUpdateSuccessState) {
+      context.showSnackBar("Gán KTV thành công!");
+      _bloc.add(const StaffTaskScreenGetTaskByDayEvent(isRefresh: true));
+      _bloc.add(
+        const StaffTaskScreenGetTaskAssigedEvent(isRefresh: true, page: 0),
+      );
+    }
+    if (state is BookingUpdateErrorState) {
+      context.showSnackBar("Gán KTV thất bại!");
     }
   }
 
@@ -219,6 +232,16 @@ class _RentTaskTabSale extends State<RentTaskTabSale> {
                   Icons.phone_outlined,
                   'SĐT:',
                   taskModel.customer?.phone ?? '',
+                  onTap: (taskModel.customer?.phone != null &&
+                          taskModel.customer!.phone!.isNotEmpty)
+                      ? () async {
+                          final Uri telUri =
+                              Uri.parse('tel:${taskModel.customer!.phone}');
+                          if (await canLaunchUrl(telUri)) {
+                            await launchUrl(telUri);
+                          }
+                        }
+                      : null,
                 ),
                 const SizedBox(height: 8),
                 _buildInfoRow(
@@ -257,10 +280,18 @@ class _RentTaskTabSale extends State<RentTaskTabSale> {
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       _buildActionButton(
+                        icon: Icons.person_add_alt_1_outlined,
+                        text: 'Gán KTV',
+                        color: ColorUtil.bangladeshGreen,
+                        onTap: () => _onAssignTechnician(taskModel),
+                      ),
+                      const SizedBox(width: 12),
+                      _buildActionButton(
                         icon: Icons.edit_outlined,
                         text: 'Sửa',
                         color: ColorUtil.bangladeshGreen,
                         onTap: () => _editBooking(taskModel),
+                        isOutlined: true,
                       ),
                       const SizedBox(width: 12),
                       _buildActionButton(
@@ -279,6 +310,30 @@ class _RentTaskTabSale extends State<RentTaskTabSale> {
         ),
       ),
     );
+  }
+
+  void _onAssignTechnician(TaskModel taskModel) {
+    Navigator.of(context)
+        .push(
+          MaterialPageRoute(
+            builder: (context) => const TechniqueScreen(
+              initialTabIndex: 1,
+            ),
+          ),
+        )
+        .then((value) {
+          if (value != null) {
+            Map<String, dynamic> result = value as Map<String, dynamic>;
+            UserModel? selectedStaff = result['favouriteStaff'] as UserModel?;
+            if (selectedStaff != null) {
+              _bloc.add(StaffTaskScreenAssignTechnicianEvent(
+                taskId: taskModel.id!,
+                staffId: selectedStaff.id!,
+                taskModel: taskModel,
+              ));
+            }
+          }
+        });
   }
 
   Widget _buildStatusBadge(String status) {
@@ -305,6 +360,7 @@ class _RentTaskTabSale extends State<RentTaskTabSale> {
     String value, {
     Color? valueColor,
     bool isBoldValue = false,
+    VoidCallback? onTap,
   }) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -319,12 +375,18 @@ class _RentTaskTabSale extends State<RentTaskTabSale> {
           ),
         ),
         Expanded(
-          child: Text(
-            value,
-            style: TextStyle(
-              color: valueColor ?? Colors.black87,
-              fontSize: 14,
-              fontWeight: isBoldValue ? FontWeight.bold : FontWeight.normal,
+          child: GestureDetector(
+            onTap: onTap,
+            child: Text(
+              value,
+              style: TextStyle(
+                color: onTap != null
+                    ? (valueColor ?? Colors.blue)
+                    : (valueColor ?? Colors.black87),
+                fontSize: 14,
+                fontWeight: isBoldValue ? FontWeight.bold : FontWeight.normal,
+                decoration: onTap != null ? TextDecoration.underline : null,
+              ),
             ),
           ),
         ),

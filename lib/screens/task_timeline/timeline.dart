@@ -412,7 +412,7 @@ class _TaskTimelineScreenState extends State<TaskTimelineScreen> {
       ),
       timeSlotViewSettings: const TimeSlotViewSettings(
         startHour: 6, // Chỉ show từ 6h sáng
-        endHour: 21, // Đến 21h tối
+        endHour: 22, // Đến 22h tối
         timeIntervalWidth: 100,
         timeFormat: 'HH:mm',
         timelineAppointmentHeight:

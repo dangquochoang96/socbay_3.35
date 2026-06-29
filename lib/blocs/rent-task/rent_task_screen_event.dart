@@ -1,3 +1,5 @@
+import 'package:socbay/data/model/task_model.dart';
+
 abstract class RentTaskScreenEvent {
   const RentTaskScreenEvent();
 }
@@ -83,5 +85,16 @@ class StaffTaskScreenUpdateTaskDayDoneEvent extends RentTaskScreenEvent {
     this.priority,
     this.timeStart, {
     this.address,
+  });
+}
+
+class StaffTaskScreenAssignTechnicianEvent extends RentTaskScreenEvent {
+  final int taskId;
+  final int staffId;
+  final TaskModel taskModel;
+  const StaffTaskScreenAssignTechnicianEvent({
+    required this.taskId,
+    required this.staffId,
+    required this.taskModel,
   });
 }
