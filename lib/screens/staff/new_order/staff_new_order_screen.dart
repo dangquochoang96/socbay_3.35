@@ -33,6 +33,7 @@ import 'package:socbay/data/data_provider/api_endpoints.dart';
 import 'package:socbay/data/model/warehouse_model.dart';
 import 'package:socbay/utils/auth_http.dart' as http;
 import 'dart:convert';
+import 'package:socbay/components/qr_reader_view.dart';
 
 class StaffNewOrderScreen extends StatefulWidget {
   final bool isRent;
@@ -1278,25 +1279,49 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                   fontSize: 16,
                 ),
               ),
-              GestureDetector(
-                onTap: () {
-                  setState(() {
-                    lstKeyValueCores.add(
-                      KeyValue(
-                        TextEditingController(),
-                        TextEditingController(),
+              Row(
+                children: [
+                  GestureDetector(
+                    onTap: _scanQrCodeReplacement,
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                    );
-                  });
-                },
-                child: Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(8),
+                      child: const Icon(
+                        Icons.qr_code_scanner,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                    ),
                   ),
-                  child: const Icon(Icons.add, color: Colors.white, size: 20),
-                ),
+                  const SizedBox(width: 8),
+                  GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        lstKeyValueCores.add(
+                          KeyValue(
+                            TextEditingController(),
+                            TextEditingController(),
+                          ),
+                        );
+                      });
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(
+                        Icons.add,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -1725,6 +1750,101 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
 
     _bloc.totalPay = baseAmount + _bloc.vatAmount;
     _bloc.savePoint = (_bloc.totalPay * 3 / 100000).ceil();
+  }
+
+  Future<void> _scanQrCodeReplacement() async {
+    if (await Permission.camera.request().isGranted) {
+      final barcode = await Navigator.push<String>(
+        context,
+        MaterialPageRoute(
+          builder: (context) => QrcodeReaderView(
+            onScan: (result) async {
+              Navigator.pop(context, result);
+            },
+          ),
+        ),
+      );
+      if (barcode != null && barcode.isNotEmpty) {
+        setState(() {
+          _isLoading = true;
+        });
+        try {
+          final url = AppConfig.instance.apiUri(
+            ApiEndpoints.getProductByBarcode(barcode),
+          );
+          final response = await http.get(url);
+          if (response.statusCode == HttpStatus.ok) {
+            final jsonRes = json.decode(response.body);
+            if (jsonRes['code'] == 1 && jsonRes['data'] != null) {
+              final product = ProductModel.fromJson(jsonRes['data']);
+              final productName = product.name;
+
+              if (productName != null && productName.isNotEmpty) {
+                String? matchedCore;
+                try {
+                  matchedCore = _ktvWarehouseCores.firstWhere(
+                    (core) => core.toLowerCase() == productName.toLowerCase(),
+                  );
+                } catch (_) {
+                  matchedCore = null;
+                }
+
+                if (matchedCore != null) {
+                  setState(() {
+                    int emptyIndex = lstKeyValueCores.indexWhere(
+                      (item) => item.key.text.isEmpty,
+                    );
+                    if (emptyIndex != -1) {
+                      lstKeyValueCores[emptyIndex].key.text = matchedCore!;
+                    } else {
+                      lstKeyValueCores.add(
+                        KeyValue(
+                          TextEditingController(text: matchedCore),
+                          TextEditingController(),
+                        ),
+                      );
+                    }
+                  });
+                  context.showSnackBar("Đã thêm lõi: $matchedCore");
+                } else {
+                  context.showSnackBar(
+                    "Lõi '$productName' không có trong kho cá nhân!",
+                  );
+                }
+              } else {
+                context.showSnackBar("Không tìm thấy tên sản phẩm!");
+              }
+            } else {
+              context.showSnackBar("Không tìm thấy sản phẩm với mã này!");
+            }
+          } else {
+            context.showSnackBar("Lỗi tải thông tin sản phẩm!");
+          }
+        } catch (e) {
+          context.showSnackBar("Đã xảy ra lỗi: $e");
+        } finally {
+          setState(() {
+            _isLoading = false;
+          });
+        }
+      }
+    } else {
+      CustomAlertDialog.show(
+        context,
+        leftText: "Cài đặt",
+        rightText: "Hủy",
+        title: "Thông báo",
+        isLeftPositive: true,
+        leftAction: () {
+          Navigator.pop(context);
+          openAppSettings();
+        },
+        rightAction: () {
+          Navigator.pop(context);
+        },
+        content: "Ứng dụng cần quyền camera để quét mã QR",
+      );
+    }
   }
 
   void _showCoreSearchSelector(BuildContext context, int index) {

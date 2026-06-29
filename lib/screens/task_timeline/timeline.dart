@@ -876,9 +876,7 @@ class _TaskTimelineScreenState extends State<TaskTimelineScreen> {
                 _buildDetailRow(
                   Icons.merge_type,
                   "Loại công việc:",
-                  task.taskType == "service"
-                      ? "Dịch vụ khách hàng"
-                      : "Thuê bao",
+                  task.taskType == "service" ? "Dịch vụ" : "Thuê",
                 ),
                 _buildDetailRow(
                   Icons.description,
