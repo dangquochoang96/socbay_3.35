@@ -305,7 +305,9 @@ class StaffNewOrderBloc extends Bloc<StaffNewOrderEvent, StaffNewOrderState> {
                 'time_start': DateFormat(
                   'dd/MM/yyyy HH:ss',
                 ).format(DateTime.parse(taskModel!.timeStart.toString())),
-                'time_end': "",
+                'time_end': DateFormat(
+                  'dd/MM/yyyy HH:ss',
+                ).format(DateTime.now()),
                 'staff': App.instance.userApp?.id.toString(),
                 'user_create': App.instance.userApp?.id.toString(),
                 'product_id': event.productId.toString(),
