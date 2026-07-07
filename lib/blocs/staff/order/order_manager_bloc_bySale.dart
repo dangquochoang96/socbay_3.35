@@ -8,7 +8,6 @@ import 'package:socbay/blocs/staff/order/order_manager_state.dart';
 import 'package:socbay/config/app_config.dart';
 import 'package:socbay/data/data_provider/api_endpoints.dart';
 import 'package:socbay/data/model/order_detail_model.dart';
-import 'package:socbay/data/model/staff_order_detail_model.dart';
 import 'package:socbay/data/model/staff_sales_income_model.dart';
 import 'package:socbay/data/repository/auth/api_repository.dart';
 import 'package:socbay/utils/auth_http.dart' as http;
@@ -33,7 +32,7 @@ class OrderManagerBlocBySale
   int totalDonVeSinh = 0;
   int totalDonLapMay = 0;
   List<StaffSalesIncomeModel> staffSalesIncomes = [];
-  List<StaffOrderDetailModel> staffLstOrders = [];
+  List<OrderDetailModel> staffLstOrders = [];
   FutureOr<void> _mapGetListOrderManagerEventToState(
     OrderManagerListEvent event,
     Emitter<OrderManagerState> emit,
@@ -84,9 +83,9 @@ class OrderManagerBlocBySale
         currentPage = lstOrdersData["current_page"] ?? 1;
         lastPage = lstOrdersData["last_page"] ?? 1;
 
-        var newOrders = List<StaffOrderDetailModel>.from(
+        var newOrders = List<OrderDetailModel>.from(
           lstOrdersData["data"].map(
-            (model) => StaffOrderDetailModel.fromJson(model),
+            (model) => OrderDetailModel.fromJson(model),
           ),
         );
 

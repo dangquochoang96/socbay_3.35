@@ -1,5 +1,6 @@
 import 'package:intl/intl.dart';
 import 'package:socbay/data/model/order_filter_core_model.dart';
+import 'package:socbay/data/model/order_payment_model.dart';
 import 'package:socbay/data/model/user_model.dart';
 import 'package:socbay/utils/logger_util.dart';
 
@@ -31,6 +32,9 @@ class OrderDetailModel {
   final List<String>? images;
   final String? productId;
   final String? address;
+  final OrderPaymentModel? orderPayment;
+  final String? code;
+  final String? orderCode;
   OrderDetailModel({
     this.id,
     this.status,
@@ -59,37 +63,42 @@ class OrderDetailModel {
     this.images,
     this.productId,
     this.address,
+    this.orderPayment,
+    this.code,
+    this.orderCode,
   });
 
   factory OrderDetailModel.fromJson(
     Map<String, dynamic> json,
   ) => OrderDetailModel(
-    id: json['id'] as int?,
-    status: json['status'] as String?,
-    userId: json['user_id'] as String?,
-    type: json['type'] as String?,
-    price: json['price'] as String?,
-    chietKhau: json['chiet_khau'] as String?,
-    tichDiem: json['tich_diem'] as String?,
-    truTichDiem: json['tru_tich_diem'] as String?,
-    vatAmount: json['vat'] as String?,
-    ghichu: json['ghichu'] as String?,
-    rate: json['rate'] as String?,
-    comment: json['comment'] as String?,
-    createdAt: json['created_at'] as String?,
-    updatedAt: json['updated_at'] as String?,
-    origin: json['origin'] as String?,
-    typePayment: json['type_payment'] as String?,
-    paymentStatus: json['payment_status'] as String?,
-    saleId: json['sale_id'] as String?,
-    address: json['address'] as String?,
+    id: _asInt(json['id']),
+    status: _asString(json['status']),
+    userId: _asString(json['user_id']),
+    type: _asString(json['type']),
+    price: _asString(json['price']),
+    chietKhau: _asString(json['chiet_khau']),
+    tichDiem: _asString(json['tich_diem']),
+    truTichDiem: _asString(json['tru_tich_diem']),
+    vatAmount: _asString(json['vat']),
+    ghichu: _asString(json['ghichu']),
+    rate: _asString(json['rate']),
+    comment: _asString(json['comment']),
+    createdAt: _asString(json['created_at']),
+    updatedAt: _asString(json['updated_at']),
+    origin: _asString(json['origin']),
+    typePayment: _asString(json['type_payment']),
+    paymentStatus: _asString(json['payment_status']),
+    saleId: _asString(json['sale_id']),
+    address: _asString(json['address']),
     orderFilterCoresModel: (json['order_filter_core'] as List<dynamic>?)
         ?.map((e) => OrderFilterCoreModel.fromJson(e as Map<String, dynamic>))
         .toList(),
-    tvNextInsteadDate: getNextInsteadDate(
-      json['order_filter_core'] as List<dynamic>?,
-    ),
-    tvInsteadDate: getInsteadDate(json['order_filter_core'] as List<dynamic>?),
+    tvNextInsteadDate:
+        _asString(json['replace_date_promise']) ??
+        getNextInsteadDate(json['order_filter_core'] as List<dynamic>?),
+    tvInsteadDate:
+        _asString(json['replace_date']) ??
+        getInsteadDate(json['order_filter_core'] as List<dynamic>?),
     dateOrder: getDateOrder(json['order_filter_core'] as List<dynamic>?),
     // staff: json["staff"] != null && json["staff"][0]["staff_info"] != null
     //     ? UserModel.fromJson(
@@ -109,6 +118,11 @@ class OrderDetailModel {
         : null,
     images: getImages(json["images"] as List<dynamic>?),
     productId: getProductId(json['order_filter_core'] as List<dynamic>?),
+    orderPayment: _getOrderPayment(
+      json['order_payment'] ?? json['orderPayment'] ?? json['order_payments'],
+    ),
+    code: _asString(json['code']),
+    orderCode: _asString(json['order_code'] ?? json['order_id']),
   );
 
   Map<String, dynamic> toJson() => <String, dynamic>{
@@ -132,7 +146,32 @@ class OrderDetailModel {
     'sale_id': saleId,
     'order_filter_core': orderFilterCoresModel,
     'address': address,
+    'order_payment': orderPayment?.toJson(),
+    'code': code,
+    'order_code': orderCode,
   };
+
+  static OrderPaymentModel? _getOrderPayment(dynamic orderPayment) {
+    if (orderPayment is Map<String, dynamic>) {
+      return OrderPaymentModel.fromJson(orderPayment);
+    }
+    if (orderPayment is Map) {
+      return OrderPaymentModel.fromJson(
+        Map<String, dynamic>.from(orderPayment),
+      );
+    }
+    if (orderPayment is List && orderPayment.isNotEmpty) {
+      return _getOrderPayment(orderPayment.first);
+    }
+    return null;
+  }
+
+  static int? _asInt(dynamic value) {
+    if (value is int) return value;
+    return int.tryParse(value?.toString() ?? '');
+  }
+
+  static String? _asString(dynamic value) => value?.toString();
   static String getNextInsteadDate(List<dynamic>? tvNextInsteadDate) {
     try {
       var lstOrderFilterCoresModel = tvNextInsteadDate

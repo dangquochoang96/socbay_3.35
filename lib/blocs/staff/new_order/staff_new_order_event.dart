@@ -61,3 +61,15 @@ class StaffNewOrderUploadImageEvent extends StaffNewOrderEvent {
 
   StaffNewOrderUploadImageEvent(this.files);
 }
+
+class StaffNewOrderUploadPaymentProofEvent extends StaffNewOrderEvent {
+  final int orderId;
+  final String notes;
+  final List<File> files;
+
+  StaffNewOrderUploadPaymentProofEvent({
+    required this.orderId,
+    required this.notes,
+    required this.files,
+  });
+}

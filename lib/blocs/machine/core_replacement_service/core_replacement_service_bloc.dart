@@ -45,7 +45,13 @@ class CoreReplacementServiceBloc
       var l = Map<String, dynamic>.from(json.decode(res.body));
       var m = Map<String, dynamic>.from(l["data"]);
       try {
-        orderDetailModel = OrderDetailModel.fromJson(m["order"]);
+        final orderJson = Map<String, dynamic>.from(m["order"]);
+        if (m["order_payment"] != null) {
+          orderJson["order_payment"] = m["order_payment"];
+        } else if (m["order_payments"] != null) {
+          orderJson["order_payment"] = m["order_payments"];
+        }
+        orderDetailModel = OrderDetailModel.fromJson(orderJson);
         finalPrice = orderDetailModel!.price ?? "0";
         rating = orderDetailModel!.rate != null
             ? double.parse(orderDetailModel!.rate!)

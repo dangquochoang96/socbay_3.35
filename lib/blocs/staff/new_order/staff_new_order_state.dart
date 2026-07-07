@@ -1,3 +1,6 @@
+import 'package:socbay/data/model/order_detail_model.dart';
+import 'package:socbay/data/model/order_payment_model.dart';
+
 abstract class StaffNewOrderState {
   const StaffNewOrderState();
 }
@@ -10,7 +13,12 @@ class StaffNewOrderGetListProductsAllSuccessState extends StaffNewOrderState {}
 
 class StaffNewOrderGetListProductsFailState extends StaffNewOrderState {}
 
-class StaffCreateOrderCoresSuccessState extends StaffNewOrderState {}
+class StaffCreateOrderCoresSuccessState extends StaffNewOrderState {
+  final OrderDetailModel? order;
+  final OrderPaymentModel? orderPayment;
+
+  const StaffCreateOrderCoresSuccessState({this.order, this.orderPayment});
+}
 
 class StaffCreateOrderCoresFailState extends StaffNewOrderState {
   final String message;
@@ -27,6 +35,15 @@ class ServiceScreenUploadImageFailedState extends StaffNewOrderState {
   final String message;
 
   const ServiceScreenUploadImageFailedState(this.message);
+}
+
+class StaffNewOrderUploadPaymentProofSuccessState
+    extends StaffNewOrderState {}
+
+class StaffNewOrderUploadPaymentProofFailState extends StaffNewOrderState {
+  final String message;
+
+  const StaffNewOrderUploadPaymentProofFailState(this.message);
 }
 
 class OrderHadCreated extends StaffNewOrderState {}

@@ -13,6 +13,7 @@ import 'package:socbay/data/data_provider/api_endpoints.dart';
 import 'package:socbay/data/model/order_detail_model.dart';
 import 'package:socbay/data/model/order_filter_core_model.dart';
 import 'package:socbay/data/model/order_model.dart';
+import 'package:socbay/data/model/order_payment_model.dart';
 import 'package:socbay/data/model/product_model.dart';
 import 'package:socbay/data/model/request/user_info_request.dart';
 import 'package:socbay/data/model/task_model.dart';
@@ -49,6 +50,9 @@ class StaffNewOrderBloc extends Bloc<StaffNewOrderEvent, StaffNewOrderState> {
     on<StaffNewOrderGetListProductsAllEvent>(_getProductAll);
     on<StaffCreateOrderEvent>(_createNewOrder);
     on<StaffNewOrderUploadImageEvent>(_mapUploadImageEventToState);
+    on<StaffNewOrderUploadPaymentProofEvent>(
+      _mapUploadPaymentProofEventToState,
+    );
   }
 
   Future<void> _mapChangeTypeServiceEventToState(
@@ -291,7 +295,16 @@ class StaffNewOrderBloc extends Bloc<StaffNewOrderEvent, StaffNewOrderState> {
           if (l["code"] == 200) {
             var m = Map<String, dynamic>.from(l["data"]);
             var n = Map<String, dynamic>.from(m["order"]);
-            orderDetail = OrderDetailModel(id: n["id"]);
+            OrderPaymentModel? orderPayment;
+            if (m["order_payment"] != null) {
+              orderPayment = OrderPaymentModel.fromJson(
+                Map<String, dynamic>.from(m["order_payment"]),
+              );
+            }
+            orderDetail = OrderDetailModel.fromJson({
+              ...n,
+              'order_payment': orderPayment?.toJson(),
+            });
             var urleditTask = AppConfig.instance.apiUri(
               isRent
                   ? ApiEndpoints.rentTaskEdit(taskModel?.id)
@@ -317,7 +330,12 @@ class StaffNewOrderBloc extends Bloc<StaffNewOrderEvent, StaffNewOrderState> {
             var resEditTask = await http.post(urleditTask);
             if (resEditTask.statusCode == HttpStatus.ok &&
                 (event.lstNew.isNotEmpty || event.lstMaintain.isNotEmpty)) {
-              emit(StaffCreateOrderCoresSuccessState());
+              emit(
+                StaffCreateOrderCoresSuccessState(
+                  order: orderDetail,
+                  orderPayment: orderPayment,
+                ),
+              );
             } else {
               emit(StaffCreateOrderCoresFailState(l["message"]));
             }
@@ -373,6 +391,61 @@ class StaffNewOrderBloc extends Bloc<StaffNewOrderEvent, StaffNewOrderState> {
       }
     } catch (ex) {
       LoggerUtil.error(ex.toString());
+    }
+  }
+
+  Future<void> _mapUploadPaymentProofEventToState(
+    StaffNewOrderUploadPaymentProofEvent event,
+    Emitter<StaffNewOrderState> emit,
+  ) async {
+    isLoading = true;
+    emit(StaffNewOrderInitialState());
+    try {
+      var uri = Uri.parse(
+        AppConfig.instance.apiUrl(ApiEndpoints.uploadPaymentProof),
+      );
+      var request = http.MultipartRequest('POST', uri);
+      request.fields['order_id'] = event.orderId.toString();
+      request.fields['notes'] = event.notes;
+      for (var file in event.files) {
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            'payment_image_bill[]',
+            file.readAsBytesSync(),
+            filename: basename(file.path),
+          ),
+        );
+      }
+
+      var resStream = await request.send();
+      var response = await http.Response.fromStream(resStream);
+      if (response.statusCode == HttpStatus.ok) {
+        var l = Map<String, dynamic>.from(json.decode(response.body));
+        if (l["code"] == 200 || l["code"] == 1) {
+          isLoading = false;
+          emit(StaffNewOrderUploadPaymentProofSuccessState());
+        } else {
+          isLoading = false;
+          emit(
+            StaffNewOrderUploadPaymentProofFailState(
+              l["message"]?.toString() ?? "Upload ảnh bill lỗi!",
+            ),
+          );
+        }
+      } else {
+        isLoading = false;
+        emit(
+          const StaffNewOrderUploadPaymentProofFailState(
+            "Upload ảnh bill lỗi!",
+          ),
+        );
+      }
+    } catch (ex) {
+      isLoading = false;
+      LoggerUtil.error(ex.toString());
+      emit(
+        const StaffNewOrderUploadPaymentProofFailState("Upload ảnh bill lỗi!"),
+      );
     }
   }
 

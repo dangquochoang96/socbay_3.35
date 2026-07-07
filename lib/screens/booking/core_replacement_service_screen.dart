@@ -12,7 +12,7 @@ import 'package:socbay/blocs/machine/core_replacement_service/core_replacement_s
 import 'package:socbay/blocs/machine/core_replacement_service/core_replacement_service_state.dart';
 import 'package:socbay/config/app_config.dart';
 import 'package:socbay/data/model/user_model.dart';
-import 'package:socbay/onepay_paygate/onepay_paygate_flutter.dart';
+// import 'package:socbay/onepay_paygate/onepay_paygate_flutter.dart';
 import 'package:socbay/paths/images.dart';
 import 'package:socbay/routes.dart';
 import 'package:socbay/utils/color_util.dart';
@@ -60,68 +60,68 @@ class _CoreReplacementServiceScreenState
     super.dispose();
   }
 
-  void _createPayment() {
-    final amount = _totalPriced?.toString();
-    if (amount == null) {
-      return;
-    }
-    //Môi trường Test
-    // var ACCESS_CODE_PAYGATE = "6BEB2546"; // Onepay send for merchant
-    // var MERCHANT_PAYGATE = "TESTONEPAY"; //  Merchant register with onepay
-    // var HASH_KEY = "6D0870CDE5F24F34F3915FB0045120DB"; // Onepay send for merchant
-    // var URL_SCHEMES = "merchantappscheme"; // get CFBundleURLSchemes in Info.plist
-    const ACCESS_CODE_PAYGATE = "A2905C04";
-    const MERCHANT_PAYGATE = "OP_SHOMEAPP";
-    const HASH_KEY = "6C6F8CF98A8C9C37214E613411F3E3A1";
-    const URL_SCHEMES = "merchantappscheme";
+  // void _createPayment() {
+  //   final amount = _totalPriced?.toString();
+  //   if (amount == null) {
+  //     return;
+  //   }
+  //   //Môi trường Test
+  //   // var ACCESS_CODE_PAYGATE = "6BEB2546"; // Onepay send for merchant
+  //   // var MERCHANT_PAYGATE = "TESTONEPAY"; //  Merchant register with onepay
+  //   // var HASH_KEY = "6D0870CDE5F24F34F3915FB0045120DB"; // Onepay send for merchant
+  //   // var URL_SCHEMES = "merchantappscheme"; // get CFBundleURLSchemes in Info.plist
+  //   const ACCESS_CODE_PAYGATE = "A2905C04";
+  //   const MERCHANT_PAYGATE = "OP_SHOMEAPP";
+  //   const HASH_KEY = "6C6F8CF98A8C9C37214E613411F3E3A1";
+  //   const URL_SCHEMES = "merchantappscheme";
 
-    var entity = OPPaymentEntity(
-      amount: double.parse(amount),
-      orderInformation: "${App.instance.userApp?.phone}",
-      currency: OnepayCurrency.vnd,
-      accessCode: ACCESS_CODE_PAYGATE,
-      merchant: MERCHANT_PAYGATE,
-      hashKey: HASH_KEY,
-      urlSchemes: URL_SCHEMES,
-    );
-    OnePayPaygate.open(
-      context: context,
-      entity: entity,
-      onPayResult: (OPPaymentResult result) {
-        if (result.isSuccess) {
-          setState(() {
-            _bloc.add(
-              OrderPaymentStatusUpdatedEvent(_bloc.orderDetailModel!.id!),
-            );
-          });
-          showDialog(
-            context: context,
-            builder: (context) => const AlertDialog(
-              title: Text("Thông báo"),
-              content: Text("Thanh toán thành công"),
-            ),
-          );
-        } else {
-          showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
-              title: const Text("Thông báo"),
-              content: Text(result.message ?? "Thanh toán không thành công"),
-            ),
-          );
-        }
-      },
-      onPayFail: (error) {
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Text("Lỗi"),
-            content: Text(error.errorCase.name),
-          ),
-        );
-      },
-    );
-  }
+  //   var entity = OPPaymentEntity(
+  //     amount: double.parse(amount),
+  //     orderInformation: "${App.instance.userApp?.phone}",
+  //     currency: OnepayCurrency.vnd,
+  //     accessCode: ACCESS_CODE_PAYGATE,
+  //     merchant: MERCHANT_PAYGATE,
+  //     hashKey: HASH_KEY,
+  //     urlSchemes: URL_SCHEMES,
+  //   );
+  //   OnePayPaygate.open(
+  //     context: context,
+  //     entity: entity,
+  //     onPayResult: (OPPaymentResult result) {
+  //       if (result.isSuccess) {
+  //         setState(() {
+  //           _bloc.add(
+  //             OrderPaymentStatusUpdatedEvent(_bloc.orderDetailModel!.id!),
+  //           );
+  //         });
+  //         showDialog(
+  //           context: context,
+  //           builder: (context) => const AlertDialog(
+  //             title: Text("Thông báo"),
+  //             content: Text("Thanh toán thành công"),
+  //           ),
+  //         );
+  //       } else {
+  //         showDialog(
+  //           context: context,
+  //           builder: (context) => AlertDialog(
+  //             title: const Text("Thông báo"),
+  //             content: Text(result.message ?? "Thanh toán không thành công"),
+  //           ),
+  //         );
+  //       }
+  //     },
+  //     onPayFail: (error) {
+  //       showDialog(
+  //         context: context,
+  //         builder: (context) => AlertDialog(
+  //           title: const Text("Lỗi"),
+  //           content: Text(error.errorCase.name),
+  //         ),
+  //       );
+  //     },
+  //   );
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -185,7 +185,7 @@ class _CoreReplacementServiceScreenState
               if (_bloc.orderDetailModel?.images != null &&
                   _bloc.orderDetailModel!.images!.isNotEmpty)
                 _buildMediaCard(),
-              if (_bloc.orderDetailModel?.paymentStatus == '1') ...[
+              if (_isOrderPaymentPaid) ...[
                 const SizedBox(height: 16),
                 Center(
                   child: ImageUtil.loadAssetsImage(
@@ -208,6 +208,315 @@ class _CoreReplacementServiceScreenState
     return _bloc.orderDetailModel != null &&
         coreModels != null &&
         coreModels.isNotEmpty;
+  }
+
+  bool get _isOrderPaymentPaid =>
+      _bloc.orderDetailModel?.orderPayment?.paymentStatus == '1';
+
+  bool get _isOrderPaymentUnpaid =>
+      _bloc.orderDetailModel?.orderPayment?.paymentStatus == '0';
+
+  Widget _buildPaymentStatusChip() {
+    final status = _bloc.orderDetailModel?.orderPayment?.paymentStatus;
+
+    String text;
+    Color textColor;
+    Color bgColor;
+
+    if (status == '1') {
+      text = 'Đã thanh toán';
+      textColor = ColorUtil.green;
+      bgColor = ColorUtil.green.withValues(alpha: 0.1);
+    } else if (status == '2') {
+      text = 'Chờ xác nhận';
+      textColor = ColorUtil.brightYellow;
+      bgColor = ColorUtil.brightYellow.withValues(alpha: 0.1);
+    } else {
+      text = 'Chưa thanh toán';
+      textColor = ColorUtil.red;
+      bgColor = ColorUtil.red.withValues(alpha: 0.1);
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: textColor.withValues(alpha: 0.3), width: 1),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: textColor,
+          fontWeight: FontWeight.bold,
+          fontSize: 12,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOrderTypeChip() {
+    final type = _bloc.orderDetailModel?.type;
+    String text;
+    Color textColor = ColorUtil.raisinBlack;
+    Color bgColor = const Color(0xFFF1F5F9);
+
+    if (type == '1' || type == '2') {
+      text = 'Đơn dịch vụ';
+      textColor = const Color(0xFF0F766E);
+      bgColor = const Color(0xFFF0FDFA);
+    } else if (type == '3' || type == '4') {
+      text = 'Đơn thuê';
+      textColor = const Color(0xFF1D4ED8);
+      bgColor = const Color(0xFFEFF6FF);
+    } else {
+      text = 'Không xác định';
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: textColor.withValues(alpha: 0.3), width: 1),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: textColor,
+          fontWeight: FontWeight.bold,
+          fontSize: 12,
+        ),
+      ),
+    );
+  }
+
+  String get _paymentAmount {
+    final orderTotal = _normalizePaymentAmount(_bloc.finalPrice);
+    if (orderTotal.isNotEmpty && orderTotal != '0') {
+      return orderTotal;
+    }
+    final orderPaymentAmount = _bloc.orderDetailModel?.orderPayment?.amount;
+    final amount = orderPaymentAmount == null || orderPaymentAmount.isEmpty
+        ? '0'
+        : orderPaymentAmount;
+    return _normalizePaymentAmount(amount);
+  }
+
+  String _normalizePaymentAmount(String amount) {
+    final cleanAmount = amount
+        .replaceAll('.', '')
+        .replaceAll('đ', '')
+        .replaceAll(',', '')
+        .trim();
+    final rawAmount = amount.replaceAll('đ', '').replaceAll(',', '').trim();
+    final dotIndex = rawAmount.lastIndexOf('.');
+    if (dotIndex >= 0 && rawAmount.length - dotIndex <= 3) {
+      final parsedAmount = double.tryParse(rawAmount);
+      if (parsedAmount != null) {
+        return parsedAmount.round().toString();
+      }
+    }
+    return cleanAmount;
+  }
+
+  String get _orderCodeForTransfer {
+    final order = _bloc.orderDetailModel;
+    if (order?.code?.isNotEmpty == true) {
+      return order!.code!;
+    }
+    if (order?.orderCode?.isNotEmpty == true) {
+      return order!.orderCode!;
+    }
+    return order?.id?.toString() ?? '';
+  }
+
+  String get _customerPhoneForTransfer {
+    return _bloc.orderDetailModel?.user?.phone?.isNotEmpty == true
+        ? _bloc.orderDetailModel!.user!.phone!
+        : App.instance.userApp?.phone ?? '';
+  }
+
+  String get _transferContent {
+    final orderCode = _orderCodeForTransfer;
+    final phone = _customerPhoneForTransfer;
+    if (orderCode.isNotEmpty && phone.isNotEmpty) {
+      return '$orderCode-$phone';
+    }
+    if (orderCode.isNotEmpty) {
+      return orderCode;
+    }
+    return _bloc.orderDetailModel?.orderPayment?.transferContent ?? '';
+  }
+
+  String get _paymentQrUrl {
+    final amount = _paymentAmount;
+    final addInfo = Uri.encodeQueryComponent(_transferContent);
+    final accountName = Uri.encodeQueryComponent('CTCP CN VA DV SHOME');
+    return 'https://img.vietqr.io/image/vpbank-551999-compact2.png?amount=$amount&addInfo=$addInfo&accountName=$accountName';
+  }
+
+  void _showPaymentQrSheet() {
+    final qrUrl = _paymentQrUrl;
+    final amount = int.tryParse(_paymentAmount);
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) {
+        return Container(
+          margin: const EdgeInsets.all(12),
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(24),
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 44,
+                  height: 5,
+                  margin: const EdgeInsets.only(bottom: 18),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(100),
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFEFF6FF),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: const Icon(
+                    Icons.qr_code_2_rounded,
+                    color: Color(0xFF2563EB),
+                    size: 34,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  'Thanh toán chuyển khoản',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: ColorUtil.raisinBlack,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Vui lòng quét mã QR bên dưới để thanh toán đơn hàng.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: ColorUtil.spanishGray, fontSize: 13),
+                ),
+                const SizedBox(height: 18),
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: const Color(0xFFE5E7EB)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.06),
+                        blurRadius: 18,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
+                  ),
+                  child: Image.network(
+                    qrUrl,
+                    height: 260,
+                    width: 260,
+                    fit: BoxFit.contain,
+                    errorBuilder: (_, __, ___) => const SizedBox(
+                      height: 220,
+                      child: Center(
+                        child: Text(
+                          'Không tải được mã QR.\nVui lòng kiểm tra kết nối mạng.',
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 18),
+                _buildPaymentQrInfoRow(
+                  'Số tiền',
+                  amount != null ? amount.toString().toVND() : _paymentAmount,
+                  isHighlight: true,
+                ),
+                _buildPaymentQrInfoRow('Nội dung CK', _transferContent),
+                const SizedBox(height: 18),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.of(sheetContext).pop(),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: ColorUtil.green,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                    child: const Text(
+                      'Đã hiểu',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildPaymentQrInfoRow(
+    String label,
+    String value, {
+    bool isHighlight = false,
+  }) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(color: ColorUtil.spanishGray, fontSize: 13),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              value,
+              textAlign: TextAlign.right,
+              style: TextStyle(
+                color: isHighlight ? ColorUtil.red : ColorUtil.raisinBlack,
+                fontWeight: isHighlight ? FontWeight.bold : FontWeight.w600,
+                fontSize: isHighlight ? 16 : 14,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildEmptyState() {
@@ -280,7 +589,7 @@ class _CoreReplacementServiceScreenState
 
   Widget _showBottomSheetFeedback() {
     if (App.instance.userApp?.isUserCustomer() == true) {
-      final hasPayment = _bloc.orderDetailModel?.paymentStatus == '0';
+      final hasPayment = _isOrderPaymentUnpaid;
 
       return SafeArea(
         bottom: true,
@@ -340,7 +649,7 @@ class _CoreReplacementServiceScreenState
                 const SizedBox(width: 10),
                 Expanded(
                   child: ElevatedButton.icon(
-                    onPressed: _createPayment,
+                    onPressed: _showPaymentQrSheet,
                     icon: const Icon(
                       Icons.payment_outlined,
                       color: Colors.white,
@@ -465,6 +774,28 @@ class _CoreReplacementServiceScreenState
     );
   }
 
+  Widget _buildInfoRowWithWidget(String label, Widget valueWidget) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Expanded(
+            flex: 2,
+            child: Text(
+              label,
+              style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+            ),
+          ),
+          Expanded(
+            flex: 3,
+            child: Align(alignment: Alignment.centerRight, child: valueWidget),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildStaffInfoCard() {
     var staffName = _bloc.orderDetailModel?.staff != null
         ? _bloc.orderDetailModel?.staff?.username
@@ -576,15 +907,17 @@ class _CoreReplacementServiceScreenState
     var savePoint = _bloc.orderDetailModel?.tichDiem;
     Decimal heso = Decimal.parse("1000");
     _totalPriced = _bloc.finalPrice;
-    if (_totalPriced == 0) {
-      _bloc.orderDetailModel?.paymentStatus == '1';
-    }
 
     return _buildCard(
       title: "Chi tiết thanh toán",
       icon: Icons.receipt_long_outlined,
       child: Column(
         children: [
+          _buildInfoRowWithWidget("Loại đơn:", _buildOrderTypeChip()),
+          _buildInfoRowWithWidget(
+            "Trạng thái thanh toán:",
+            _buildPaymentStatusChip(),
+          ),
           _buildInfoRow("Ngày thực hiện:", _bloc.createDate),
           _buildInfoRow("Tổng tiền:", (sumPrice.toInt()).toString().toVND()),
           _buildInfoRow(

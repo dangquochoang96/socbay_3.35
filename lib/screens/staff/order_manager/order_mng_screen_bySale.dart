@@ -8,7 +8,6 @@ import 'package:socbay/blocs/staff/order/order_manager_event.dart';
 import 'package:socbay/blocs/staff/order/order_manager_state.dart';
 import 'package:socbay/constants/constants.dart';
 import 'package:socbay/data/model/order_detail_model.dart';
-import 'package:socbay/data/model/staff_order_detail_model.dart';
 import 'package:socbay/routes.dart';
 import 'package:socbay/utils/color_util.dart';
 import 'package:socbay/widgets/button_widget.dart';
@@ -313,19 +312,15 @@ class _OrderManagerScreenState extends State<OrderManagerScreenBySale> {
     );
   }
 
-  Widget _buildStatusBadge(String? status) {
-    String text = 'Thay lõi';
-    Color bgColor = ColorUtil.green.withValues(alpha: 0.1);
-    Color textColor = ColorUtil.green;
+  Widget _buildStatusBadge(String? type) {
+    String text = 'Đơn dịch vụ';
+    Color bgColor = const Color(0xFFF0FDFA);
+    Color textColor = const Color(0xFF0F766E);
 
-    if (status == '0') {
-      text = 'Lắp máy';
-      bgColor = ColorUtil.brightYellow.withValues(alpha: 0.1);
-      textColor = ColorUtil.brightYellow;
-    } else if (status == '1') {
-      text = 'Vệ sinh';
-      bgColor = Colors.blue.withValues(alpha: 0.1);
-      textColor = Colors.blue;
+    if (type == '3' || type == '4') {
+      text = 'Đơn thuê';
+      bgColor = const Color(0xFFEFF6FF);
+      textColor = const Color(0xFF1D4ED8);
     }
 
     return Container(
@@ -333,6 +328,7 @@ class _OrderManagerScreenState extends State<OrderManagerScreenBySale> {
       decoration: BoxDecoration(
         color: bgColor,
         borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: textColor.withValues(alpha: 0.15), width: 1),
       ),
       child: Text(
         text,
@@ -345,7 +341,40 @@ class _OrderManagerScreenState extends State<OrderManagerScreenBySale> {
     );
   }
 
-  Widget _buildOrderCard(BuildContext context, StaffOrderDetailModel order) {
+  Widget _buildPaymentStatusBadge(String? status) {
+    String text = 'Chưa thanh toán';
+    Color bgColor = const Color(0xFFFEF2F2);
+    Color textColor = const Color(0xFFDC2626);
+
+    if (status == '1') {
+      text = 'Đã thanh toán';
+      bgColor = const Color(0xFFF0FDF4);
+      textColor = const Color(0xFF16A34A);
+    } else if (status == '2') {
+      text = 'Chờ xác nhận';
+      bgColor = const Color(0xFFFEF3C7);
+      textColor = const Color(0xFFD97706);
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: textColor.withValues(alpha: 0.15), width: 1),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: textColor,
+          fontSize: 11,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOrderCard(BuildContext context, OrderDetailModel order) {
     var finalPrice = Decimal.parse(order.price ?? "0");
     String formattedPrice = finalPrice.toBigInt().toVND();
 
@@ -377,7 +406,7 @@ class _OrderManagerScreenState extends State<OrderManagerScreenBySale> {
                     color: ColorUtil.raisinBlack,
                   ),
                 ),
-                _buildStatusBadge(order.status),
+                _buildStatusBadge(order.type),
               ],
             ),
             const SizedBox(height: 12),
@@ -439,6 +468,22 @@ class _OrderManagerScreenState extends State<OrderManagerScreenBySale> {
               ),
               const SizedBox(height: 6),
             ],
+            Row(
+              children: [
+                const Icon(
+                  Icons.payment_outlined,
+                  size: 14,
+                  color: ColorUtil.spanishGray,
+                ),
+                const SizedBox(width: 8),
+                const Text(
+                  "Thanh toán: ",
+                  style: TextStyle(fontSize: 13, color: ColorUtil.graniteGray),
+                ),
+                _buildPaymentStatusBadge(order.paymentStatus),
+              ],
+            ),
+            const SizedBox(height: 6),
             if (rating > 0) ...[
               Row(
                 children: [

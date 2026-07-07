@@ -73,6 +73,7 @@ abstract final class ApiEndpoints {
   // =========================
   static const uploadImage = '/uploadImage';
   static const orderUploadImage = '/socbay/order/upload-image';
+  static const uploadPaymentProof = '/socbay/order/payment/upload-proof';
 
   // =========================
   // PRODUCT
