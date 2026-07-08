@@ -185,4 +185,12 @@ abstract final class ApiEndpoints {
   // =========================
   static const kpi = '/kpis';
   static String kpiByUser(Object? userId) => '/kpis/$userId';
+
+  // =========================
+  // WALLET
+  // =========================
+  static const wallet = '/socbay/wallet';
+  static const walletTransactions = '/socbay/wallet/transactions';
+  static const walletAdvance = '/socbay/wallet/advance';
+  static const walletDeposit = '/socbay/wallet/deposit';
 }

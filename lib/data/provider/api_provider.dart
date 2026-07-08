@@ -32,6 +32,7 @@ import 'package:socbay/data/model/user_model.dart';
 import 'package:socbay/data/model/kpi_model.dart';
 import 'package:socbay/data/model/user_profile.dart';
 import 'package:socbay/data/model/user_attendance_model.dart';
+import 'package:socbay/data/model/wallet_model.dart';
 import 'package:socbay/data/response/api_response.dart';
 import 'package:socbay/utils/logger_util.dart';
 
@@ -1037,7 +1038,9 @@ class ApiProvider {
         final baseProfile = App.instance.userApp?.userProfile;
 
         final kpiData = resJson['data'] != null
-            ? KPIDataResponse.fromJson(Map<String, dynamic>.from(resJson['data']))
+            ? KPIDataResponse.fromJson(
+                Map<String, dynamic>.from(resJson['data']),
+              )
             : null;
 
         final attendances = resJson['data_attendances'] != null
@@ -1063,10 +1066,142 @@ class ApiProvider {
           kpi: kpiData,
           userAttendances: attendances,
         );
-        return DefaultResponse(data: parsed, status: res.status, message: res.message);
+        return DefaultResponse(
+          data: parsed,
+          status: res.status,
+          message: res.message,
+        );
       } else {
         return DefaultResponse(status: res.status, message: res.message);
       }
+    } catch (e) {
+      return DefaultResponse.withError(Error(message: e.toString()));
+    }
+  }
+
+  Future<DefaultResponse<WalletModel>> getWalletBalance() async {
+    try {
+      final Map resJson = await _baseAPI.request(
+        manager: ApiManager(ApiType.getWallet),
+      );
+      final res = DefaultResponse.fromJson(Map<String, dynamic>.from(resJson));
+      if ((res.status == 200 || res.status == 1) && resJson['data'] != null) {
+        final walletData = resJson['data']['wallet'];
+        return DefaultResponse(
+          status: res.status,
+          message: res.message,
+          data: walletData != null
+              ? WalletModel.fromJson(Map<String, dynamic>.from(walletData))
+              : WalletModel(),
+        );
+      } else {
+        return DefaultResponse(status: res.status, message: res.message);
+      }
+    } catch (e) {
+      return DefaultResponse.withError(Error(message: e.toString()));
+    }
+  }
+
+  Future<DefaultResponse<List<WalletTransactionModel>>> getWalletTransactions({
+    int? limit,
+  }) async {
+    try {
+      final Map resJson = await _baseAPI.request(
+        manager: ApiManager(ApiType.getWalletTransactions),
+        queryParams: limit != null ? {'limit': limit.toString()} : null,
+      );
+      final res = DefaultResponse.fromJson(Map<String, dynamic>.from(resJson));
+      if ((res.status == 200 || res.status == 1) && resJson['data'] != null) {
+        final listData = resJson['data']['data'];
+        final list = listData is List
+            ? listData
+                  .map(
+                    (item) => WalletTransactionModel.fromJson(
+                      Map<String, dynamic>.from(item),
+                    ),
+                  )
+                  .toList()
+            : <WalletTransactionModel>[];
+        return DefaultResponse(
+          status: res.status,
+          message: res.message,
+          data: list,
+        );
+      } else {
+        return DefaultResponse(status: res.status, message: res.message);
+      }
+    } catch (e) {
+      return DefaultResponse.withError(Error(message: e.toString()));
+    }
+  }
+
+  Future<DefaultResponse> requestWalletAdvance({
+    required double amount,
+    int? orderId,
+    String? note,
+    List<File>? proofImages,
+  }) async {
+    try {
+      final Map<String, dynamic> dataMap = {'amount': amount.toString()};
+      if (orderId != null) {
+        dataMap['order_id'] = orderId.toString();
+      }
+      if (note != null) {
+        dataMap['note'] = note;
+      }
+      if (proofImages != null && proofImages.isNotEmpty) {
+        final List<MultipartFile> files = [];
+        for (var image in proofImages) {
+          files.add(
+            await MultipartFile.fromFile(
+              image.path,
+              filename: path_manager.basename(image.path),
+            ),
+          );
+        }
+        dataMap['proof_images[]'] = files;
+      }
+
+      final FormData formData = FormData.fromMap(dataMap);
+      final Map resJson = await _baseAPI.request(
+        manager: ApiManager(ApiType.walletAdvance),
+        bodyParams: formData,
+      );
+      return DefaultResponse.fromJson(Map<String, dynamic>.from(resJson));
+    } catch (e) {
+      return DefaultResponse.withError(Error(message: e.toString()));
+    }
+  }
+
+  Future<DefaultResponse> requestWalletDeposit({
+    required double amount,
+    String? note,
+    List<File>? proofImages,
+  }) async {
+    try {
+      final Map<String, dynamic> dataMap = {'amount': amount.toString()};
+      if (note != null) {
+        dataMap['note'] = note;
+      }
+      if (proofImages != null && proofImages.isNotEmpty) {
+        final List<MultipartFile> files = [];
+        for (var image in proofImages) {
+          files.add(
+            await MultipartFile.fromFile(
+              image.path,
+              filename: path_manager.basename(image.path),
+            ),
+          );
+        }
+        dataMap['proof_images[]'] = files;
+      }
+
+      final FormData formData = FormData.fromMap(dataMap);
+      final Map resJson = await _baseAPI.request(
+        manager: ApiManager(ApiType.walletDeposit),
+        bodyParams: formData,
+      );
+      return DefaultResponse.fromJson(Map<String, dynamic>.from(resJson));
     } catch (e) {
       return DefaultResponse.withError(Error(message: e.toString()));
     }

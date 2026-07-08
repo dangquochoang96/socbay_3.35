@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:socbay/blocs/staff/wallet/ktv_wallet_bloc.dart';
+import 'package:socbay/screens/wallet/ktv_wallet.dart';
 import 'package:socbay/blocs/auth/forgot_password/forgot_password_screen_bloc.dart';
 import 'package:socbay/blocs/auth/new_password/new_password_screen_bloc.dart';
 import 'package:socbay/blocs/auth/verify_otp/verify_otp_screen_bloc.dart';
@@ -178,6 +180,7 @@ class Routes {
   static const String warehouseScreen = '/warehouseScreen';
   static const String hrManagementSummary = '/hrManagementSummary';
   static const String taskTimelineScreen = '/taskTimelineScreen';
+  static const String ktvWalletScreen = '/ktvWalletScreen';
   CupertinoPageRoute routePage(RouteSettings settings) {
     return CupertinoPageRoute(
       settings: settings,
@@ -595,6 +598,11 @@ class Routes {
             return BlocProvider<TaskTimelineBloc>(
               create: (context) => TaskTimelineBloc(),
               child: const TaskTimelineScreen(),
+            );
+          case ktvWalletScreen:
+            return BlocProvider<KtvWalletBloc>(
+              create: (context) => KtvWalletBloc(apiRepository: apiRepository),
+              child: const KtvWalletScreen(),
             );
         }
         return const Scaffold();

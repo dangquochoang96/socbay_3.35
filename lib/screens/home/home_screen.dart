@@ -738,6 +738,8 @@ class _HomeScreenState extends State<HomeScreen> {
             Navigator.pushNamed(context, Routes.retailOrderScreen);
           } else if (index == 4) {
             Navigator.pushNamed(context, Routes.warehouseScreen);
+          } else if (index == 5) {
+            Navigator.pushNamed(context, Routes.ktvWalletScreen);
           }
         } else {
           if (index == 0) {

@@ -33,4 +33,5 @@ class Images {
   static const String successPayment = "da-thanh-toan.jpg";
   static const String warehouseImport = "nhapvattu.jpg";
   static const String ktvWarehouse = "khocanhan.jpg";
+  static const String wallet = "wallet.png";
 }

@@ -103,6 +103,11 @@ class HomeServiceModel {
       des: 'Kho Cá Nhân của KTV',
       name: 'KHO CÁ NHÂN',
     ),
+    HomeServiceModel(
+      image: Images.wallet,
+      des: 'Quản lý ví KTV',
+      name: 'QUẢN LÝ VÍ',
+    ),
   ];
   static List<HomeServiceModel> staffServiceListSale = [
     HomeServiceModel(

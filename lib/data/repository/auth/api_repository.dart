@@ -22,6 +22,7 @@ import 'package:socbay/data/model/task_model.dart';
 import 'package:socbay/data/model/user_address.dart';
 import 'package:socbay/data/model/user_model.dart';
 import 'package:socbay/data/model/user_profile.dart';
+import 'package:socbay/data/model/wallet_model.dart';
 import 'package:socbay/data/provider/api_provider.dart';
 import 'package:socbay/data/repository/auth/base_api_repository.dart';
 import 'package:socbay/data/response/api_response.dart';
@@ -262,5 +263,45 @@ class ApiRepository extends BaseApiRepository {
   @override
   Future<DefaultResponse<UserProfile>> getKPIs(String userId) {
     return _apiProvider.getKPIs(userId);
+  }
+
+  @override
+  Future<DefaultResponse<WalletModel>> getWalletBalance() {
+    return _apiProvider.getWalletBalance();
+  }
+
+  @override
+  Future<DefaultResponse<List<WalletTransactionModel>>> getWalletTransactions({
+    int? limit,
+  }) {
+    return _apiProvider.getWalletTransactions(limit: limit);
+  }
+
+  @override
+  Future<DefaultResponse> requestWalletAdvance({
+    required double amount,
+    int? orderId,
+    String? note,
+    List<File>? proofImages,
+  }) {
+    return _apiProvider.requestWalletAdvance(
+      amount: amount,
+      orderId: orderId,
+      note: note,
+      proofImages: proofImages,
+    );
+  }
+
+  @override
+  Future<DefaultResponse> requestWalletDeposit({
+    required double amount,
+    String? note,
+    List<File>? proofImages,
+  }) {
+    return _apiProvider.requestWalletDeposit(
+      amount: amount,
+      note: note,
+      proofImages: proofImages,
+    );
   }
 }

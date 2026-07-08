@@ -52,6 +52,10 @@ enum ApiType {
   getTask,
   deleteTask,
   getKPIByUser,
+  getWallet,
+  getWalletTransactions,
+  walletAdvance,
+  walletDeposit,
 }
 
 class ApiConfig {
@@ -284,6 +288,30 @@ class ApiManager {
         return ApiConfig(
           path: ApiEndpoints.kpiByUser(additionalPath),
           method: HttpMethod.get,
+          headers: _defaultHeaders,
+        );
+      case ApiType.getWallet:
+        return ApiConfig(
+          path: ApiEndpoints.wallet,
+          method: HttpMethod.get,
+          headers: _defaultHeaders,
+        );
+      case ApiType.getWalletTransactions:
+        return ApiConfig(
+          path: ApiEndpoints.walletTransactions,
+          method: HttpMethod.get,
+          headers: _defaultHeaders,
+        );
+      case ApiType.walletAdvance:
+        return ApiConfig(
+          path: ApiEndpoints.walletAdvance,
+          method: HttpMethod.post,
+          headers: _defaultHeaders,
+        );
+      case ApiType.walletDeposit:
+        return ApiConfig(
+          path: ApiEndpoints.walletDeposit,
+          method: HttpMethod.post,
           headers: _defaultHeaders,
         );
     }

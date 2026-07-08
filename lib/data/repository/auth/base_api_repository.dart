@@ -21,6 +21,7 @@ import 'package:socbay/data/model/task_model.dart';
 import 'package:socbay/data/model/user_address.dart';
 import 'package:socbay/data/model/user_model.dart';
 import 'package:socbay/data/model/user_profile.dart';
+import 'package:socbay/data/model/wallet_model.dart';
 import 'package:socbay/data/response/api_response.dart';
 
 abstract class BaseApiRepository {
@@ -105,4 +106,19 @@ abstract class BaseApiRepository {
     required File image,
   });
   Future<DefaultResponse<UserProfile>> getKPIs(String userId);
+
+  /// WALLET
+  Future<DefaultResponse<WalletModel>> getWalletBalance();
+  Future<DefaultResponse<List<WalletTransactionModel>>> getWalletTransactions({int? limit});
+  Future<DefaultResponse> requestWalletAdvance({
+    required double amount,
+    int? orderId,
+    String? note,
+    List<File>? proofImages,
+  });
+  Future<DefaultResponse> requestWalletDeposit({
+    required double amount,
+    String? note,
+    List<File>? proofImages,
+  });
 }
