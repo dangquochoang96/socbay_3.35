@@ -67,6 +67,8 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
       TextEditingController();
   final TextEditingController _vatController = TextEditingController();
   final TextEditingController _noteController = TextEditingController();
+  final TextEditingController _cashAmountController = TextEditingController();
+  final TextEditingController _transferAmountController = TextEditingController();
 
   TextEditingController chietKhauController = TextEditingController();
   TextEditingController subSavePointController = TextEditingController();
@@ -206,6 +208,8 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
     lstKeyValueCores.clear();
     lstKeyValueMaintainCores.clear();
     _noteController.dispose();
+    _cashAmountController.dispose();
+    _transferAmountController.dispose();
     super.dispose();
   }
 
@@ -283,7 +287,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
       setState(() {
         _isLoading = false;
       });
-      if (_bloc.paymentType == 2 &&
+      if ((_bloc.paymentType == 2 || _bloc.paymentType == 3) &&
           state.orderPayment?.qrUrl != null &&
           state.orderPayment!.qrUrl!.isNotEmpty) {
         _showTransferQrSheet(state);
@@ -743,10 +747,85 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                         children: [
                           _paymentItem('Tiền mặt', 1),
                           _paymentItem('Chuyển khoản', 2),
+                          _paymentItem('Cả 2', 3),
                         ],
                       ),
                     ),
                     if (_bloc.paymentType == 2) ...[
+                      const SizedBox(height: 16),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFEFF6FF),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: const Color(0xFFBFDBFE)),
+                        ),
+                        child: const Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Icon(
+                              Icons.qr_code_2_outlined,
+                              color: Color(0xFF2563EB),
+                              size: 22,
+                            ),
+                            SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                'Sau khi tạo đơn thành công, hệ thống sẽ hiển thị mã QR chuyển khoản. Kỹ thuật viên cho khách quét QR, sau đó chụp bill để kế toán kiểm tra.',
+                                style: TextStyle(
+                                  color: Color(0xFF1E3A8A),
+                                  fontSize: 13,
+                                  height: 1.35,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                    if (_bloc.paymentType == 3) ...[
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextFormField(
+                              controller: _cashAmountController,
+                              keyboardType: TextInputType.number,
+                              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                              decoration: const InputDecoration(
+                                labelText: 'Tiền mặt',
+                                hintText: 'Nhập số tiền mặt',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.all(Radius.circular(12)),
+                                ),
+                                suffixText: 'đ',
+                              ),
+                              onChanged: (val) {
+                                setState(() {});
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: TextFormField(
+                              controller: _transferAmountController,
+                              keyboardType: TextInputType.number,
+                              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                              decoration: const InputDecoration(
+                                labelText: 'Chuyển khoản',
+                                hintText: 'Nhập số tiền CK',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.all(Radius.circular(12)),
+                                ),
+                                suffixText: 'đ',
+                              ),
+                              onChanged: (val) {
+                                setState(() {});
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
                       const SizedBox(height: 16),
                       Container(
                         padding: const EdgeInsets.all(12),
@@ -826,6 +905,15 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                     if (lst1.isEmpty) {
                       context.showSnackBar('Chưa nhập chi tiết lần thay lõi');
                       return;
+                    }
+
+                    if (_bloc.paymentType == 3) {
+                      final cash = double.tryParse(_cashAmountController.text.trim()) ?? 0.0;
+                      final transfer = double.tryParse(_transferAmountController.text.trim()) ?? 0.0;
+                      if ((cash + transfer - _bloc.totalPay).abs() > 0.01) {
+                        context.showSnackBar('Tổng số tiền mặt và chuyển khoản phải bằng tổng tiền thanh toán (${_bloc.totalPay.toString().toVND()})');
+                        return;
+                      }
                     }
 
                     billData = BillData(
@@ -990,6 +1078,15 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                       return;
                     }
 
+                    if (_bloc.paymentType == 3) {
+                      final cash = double.tryParse(_cashAmountController.text.trim()) ?? 0.0;
+                      final transfer = double.tryParse(_transferAmountController.text.trim()) ?? 0.0;
+                      if ((cash + transfer - _bloc.totalPay).abs() > 0.01) {
+                        context.showSnackBar('Tổng số tiền mặt và chuyển khoản phải bằng tổng tiền thanh toán (${_bloc.totalPay.toString().toVND()})');
+                        return;
+                      }
+                    }
+
                     final bool hasNewProduct = getProductNew.isNotEmpty;
                     final int taskType =
                         int.tryParse(_bloc.taskModel?.type ?? '') ?? 0;
@@ -1053,6 +1150,12 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                         widget.isRent ? _selectedEndDate : DateTime.now(),
                         _noteController.text,
                         subType,
+                        cashAmount: _bloc.paymentType == 3
+                            ? (double.tryParse(_cashAmountController.text.trim()) ?? 0.0)
+                            : null,
+                        transferAmount: _bloc.paymentType == 3
+                            ? (double.tryParse(_transferAmountController.text.trim()) ?? 0.0)
+                            : null,
                       ),
                     );
                   },
@@ -1066,7 +1169,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                   ),
                   color: ColorUtil.bangladeshGreen,
                   child: Text(
-                    _bloc.paymentType == 2
+                    _bloc.paymentType == 2 || _bloc.paymentType == 3
                         ? "TẠO ĐƠN & HIỂN THỊ QR"
                         : "HOÀN THÀNH",
                     textAlign: TextAlign.center,

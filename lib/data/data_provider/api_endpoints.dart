@@ -193,4 +193,6 @@ abstract final class ApiEndpoints {
   static const walletTransactions = '/socbay/wallet/transactions';
   static const walletAdvance = '/socbay/wallet/advance';
   static const walletDeposit = '/socbay/wallet/deposit';
+  static String deleteTransactions(Object? transactionId) =>
+      '/socbay/wallet/transaction/$transactionId';
 }

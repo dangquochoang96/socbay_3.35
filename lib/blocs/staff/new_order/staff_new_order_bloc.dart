@@ -277,6 +277,10 @@ class StaffNewOrderBloc extends Bloc<StaffNewOrderEvent, StaffNewOrderState> {
           'sale_id': taskModel?.saleId?.toString() ?? event.saleId.toString(),
           'address': event.newAddressSP.toString(),
           'sub_type': event.subType.toString(),
+          if (event.paymentType == 3) ...{
+            'cash_amount': event.cashAmount?.toString(),
+            'transfer_amount': event.transferAmount?.toString(),
+          },
         };
         var body = json.encode(args);
         if (kDebugMode) {

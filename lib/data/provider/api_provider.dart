@@ -1206,4 +1206,18 @@ class ApiProvider {
       return DefaultResponse.withError(Error(message: e.toString()));
     }
   }
+
+  Future<DefaultResponse> deleteTransaction(int transactionId) async {
+    try {
+      final Map resJson = await _baseAPI.request(
+        manager: ApiManager(
+          ApiType.deleteTransaction,
+          additionalPath: transactionId.toString(),
+        ),
+      );
+      return DefaultResponse.fromJson(Map<String, dynamic>.from(resJson));
+    } catch (e) {
+      return DefaultResponse.withError(Error(message: e.toString()));
+    }
+  }
 }

@@ -121,4 +121,5 @@ abstract class BaseApiRepository {
     String? note,
     List<File>? proofImages,
   });
+  Future<DefaultResponse> deleteTransaction(int transactionId);
 }

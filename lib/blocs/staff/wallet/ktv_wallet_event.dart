@@ -33,3 +33,9 @@ class KtvWalletDepositSubmitEvent extends KtvWalletEvent {
     this.proofImages,
   });
 }
+
+class KtvWalletDeleteTransactionEvent extends KtvWalletEvent {
+  final int transactionId;
+
+  const KtvWalletDeleteTransactionEvent({required this.transactionId});
+}

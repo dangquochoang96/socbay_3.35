@@ -17,6 +17,7 @@ class KtvWalletBloc extends Bloc<KtvWalletEvent, KtvWalletState> {
     on<KtvWalletRefreshEvent>(_onRefresh);
     on<KtvWalletAdvanceSubmitEvent>(_onAdvanceSubmit);
     on<KtvWalletDepositSubmitEvent>(_onDepositSubmit);
+    on<KtvWalletDeleteTransactionEvent>(_onDeleteTransaction);
   }
 
   Future<void> _fetchWalletData(Emitter<KtvWalletState> emit) async {
@@ -103,6 +104,25 @@ class KtvWalletBloc extends Bloc<KtvWalletEvent, KtvWalletState> {
         await _fetchWalletData(emit);
       } else {
         emit(KtvWalletSubmitFailureState(res.message ?? 'Yêu cầu nộp tiền thất bại!'));
+      }
+    } catch (e) {
+      emit(KtvWalletSubmitFailureState(e.toString()));
+    }
+  }
+
+  FutureOr<void> _onDeleteTransaction(
+    KtvWalletDeleteTransactionEvent event,
+    Emitter<KtvWalletState> emit,
+  ) async {
+    emit(KtvWalletSubmitLoadingState());
+    try {
+      final res = await apiRepository.deleteTransaction(event.transactionId);
+      if (res.status == 200 || res.status == 1) {
+        emit(KtvWalletSubmitSuccessState(res.message ?? 'Xóa giao dịch thành công!'));
+        // Refresh data to reflect the changes
+        await _fetchWalletData(emit);
+      } else {
+        emit(KtvWalletSubmitFailureState(res.message ?? 'Xóa giao dịch thất bại!'));
       }
     } catch (e) {
       emit(KtvWalletSubmitFailureState(e.toString()));

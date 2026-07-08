@@ -56,6 +56,7 @@ enum ApiType {
   getWalletTransactions,
   walletAdvance,
   walletDeposit,
+  deleteTransaction,
 }
 
 class ApiConfig {
@@ -312,6 +313,12 @@ class ApiManager {
         return ApiConfig(
           path: ApiEndpoints.walletDeposit,
           method: HttpMethod.post,
+          headers: _defaultHeaders,
+        );
+      case ApiType.deleteTransaction:
+        return ApiConfig(
+          path: ApiEndpoints.deleteTransactions(additionalPath),
+          method: HttpMethod.del,
           headers: _defaultHeaders,
         );
     }

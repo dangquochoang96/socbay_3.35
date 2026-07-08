@@ -304,4 +304,9 @@ class ApiRepository extends BaseApiRepository {
       proofImages: proofImages,
     );
   }
+
+  @override
+  Future<DefaultResponse> deleteTransaction(int transactionId) {
+    return _apiProvider.deleteTransaction(transactionId);
+  }
 }

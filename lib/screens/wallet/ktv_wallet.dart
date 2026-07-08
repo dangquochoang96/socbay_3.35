@@ -555,23 +555,59 @@ class _KtvWalletScreenState extends State<KtvWalletScreen> {
                   ],
                 ),
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: statusBgColor,
-                  borderRadius: BorderRadius.circular(100),
-                ),
-                child: Text(
-                  statusName,
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                    color: statusTextColor,
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: statusBgColor,
+                      borderRadius: BorderRadius.circular(100),
+                    ),
+                    child: Text(
+                      statusName,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: statusTextColor,
+                      ),
+                    ),
                   ),
-                ),
+                  if (tx.status == 0 && (tx.type == 1 || tx.type == 2)) ...[
+                    const SizedBox(width: 8),
+                    InkWell(
+                      onTap: () => _confirmDeleteTransaction(context, tx.id),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.red.shade50,
+                          borderRadius: BorderRadius.circular(100),
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.delete_outline, size: 12, color: ColorUtil.red),
+                            SizedBox(width: 2),
+                            Text(
+                              'Xóa',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: ColorUtil.red,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ],
           ),
@@ -623,6 +659,43 @@ class _KtvWalletScreenState extends State<KtvWalletScreen> {
           ],
         ],
       ),
+    );
+  }
+
+  void _confirmDeleteTransaction(BuildContext context, int? transactionId) {
+    if (transactionId == null) return;
+    showDialog(
+      context: context,
+      builder: (BuildContext ctx) {
+        return AlertDialog(
+          title: const Text('Xác nhận xóa'),
+          content: const Text('Bạn có chắc chắn muốn xóa giao dịch này không?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text(
+                'Hủy',
+                style: TextStyle(color: ColorUtil.graniteGray),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(ctx).pop();
+                _bloc.add(
+                  KtvWalletDeleteTransactionEvent(transactionId: transactionId),
+                );
+              },
+              child: const Text(
+                'Xóa',
+                style: TextStyle(
+                  color: ColorUtil.red,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
