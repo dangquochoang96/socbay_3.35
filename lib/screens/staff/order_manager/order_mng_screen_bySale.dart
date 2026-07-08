@@ -468,22 +468,27 @@ class _OrderManagerScreenState extends State<OrderManagerScreenBySale> {
               ),
               const SizedBox(height: 6),
             ],
-            Row(
-              children: [
-                const Icon(
-                  Icons.payment_outlined,
-                  size: 14,
-                  color: ColorUtil.spanishGray,
-                ),
-                const SizedBox(width: 8),
-                const Text(
-                  "Thanh toán: ",
-                  style: TextStyle(fontSize: 13, color: ColorUtil.graniteGray),
-                ),
-                _buildPaymentStatusBadge(order.paymentStatus),
-              ],
-            ),
-            const SizedBox(height: 6),
+            if (order.paymentStatus != null) ...[
+              Row(
+                children: [
+                  const Icon(
+                    Icons.payment_outlined,
+                    size: 14,
+                    color: ColorUtil.spanishGray,
+                  ),
+                  const SizedBox(width: 8),
+                  const Text(
+                    "Thanh toán: ",
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: ColorUtil.graniteGray,
+                    ),
+                  ),
+                  _buildPaymentStatusBadge(order.paymentStatus),
+                ],
+              ),
+              const SizedBox(height: 6),
+            ],
             if (rating > 0) ...[
               Row(
                 children: [

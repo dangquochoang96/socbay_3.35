@@ -338,19 +338,6 @@ class _BillScreenState extends State<BillScreen> {
                           ],
                         ),
                       ),
-                      Expanded(
-                        flex: 1,
-                        child: Column(
-                          children: [
-                            const Text('Ví', style: TextStyle(fontSize: 18)),
-                            SizedBox(
-                              height: 24,
-                              width: 24,
-                              child: Radio<int>(value: 3),
-                            ),
-                          ],
-                        ),
-                      ),
                     ],
                   ),
                 ),

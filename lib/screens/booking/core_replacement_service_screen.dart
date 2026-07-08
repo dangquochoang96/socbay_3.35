@@ -914,11 +914,15 @@ class _CoreReplacementServiceScreenState
       child: Column(
         children: [
           _buildInfoRowWithWidget("Loại đơn:", _buildOrderTypeChip()),
-          _buildInfoRowWithWidget(
-            "Trạng thái thanh toán:",
-            _buildPaymentStatusChip(),
-          ),
+          if (_bloc.orderDetailModel?.orderPayment?.paymentStatus != null)
+            _buildInfoRowWithWidget(
+              "Trạng thái thanh toán:",
+              _buildPaymentStatusChip(),
+            ),
           _buildInfoRow("Ngày thực hiện:", _bloc.createDate),
+          if (_bloc.orderDetailModel?.ghichu != null &&
+              _bloc.orderDetailModel!.ghichu!.trim().isNotEmpty)
+            _buildInfoRow("Ghi chú:", _bloc.orderDetailModel!.ghichu!.trim()),
           _buildInfoRow("Tổng tiền:", (sumPrice.toInt()).toString().toVND()),
           _buildInfoRow(
             "Thuế VAT:",

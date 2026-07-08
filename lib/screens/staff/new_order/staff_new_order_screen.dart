@@ -743,7 +743,6 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                         children: [
                           _paymentItem('Tiền mặt', 1),
                           _paymentItem('Chuyển khoản', 2),
-                          _paymentItem('Ví', 3),
                         ],
                       ),
                     ),
