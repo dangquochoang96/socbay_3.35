@@ -70,10 +70,12 @@ class StaffNewOrderUploadPaymentProofEvent extends StaffNewOrderEvent {
   final int orderId;
   final String notes;
   final List<File> files;
+  final int? paymentStatus;
 
   StaffNewOrderUploadPaymentProofEvent({
     required this.orderId,
     required this.notes,
     required this.files,
+    this.paymentStatus,
   });
 }

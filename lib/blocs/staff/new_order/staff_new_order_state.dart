@@ -38,7 +38,10 @@ class ServiceScreenUploadImageFailedState extends StaffNewOrderState {
 }
 
 class StaffNewOrderUploadPaymentProofSuccessState
-    extends StaffNewOrderState {}
+    extends StaffNewOrderState {
+  final int? paymentStatus;
+  const StaffNewOrderUploadPaymentProofSuccessState({this.paymentStatus});
+}
 
 class StaffNewOrderUploadPaymentProofFailState extends StaffNewOrderState {
   final String message;

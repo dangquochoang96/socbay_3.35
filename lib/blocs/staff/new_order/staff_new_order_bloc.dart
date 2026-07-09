@@ -411,6 +411,9 @@ class StaffNewOrderBloc extends Bloc<StaffNewOrderEvent, StaffNewOrderState> {
       var request = http.MultipartRequest('POST', uri);
       request.fields['order_id'] = event.orderId.toString();
       request.fields['notes'] = event.notes;
+      if (event.paymentStatus != null) {
+        request.fields['payment_status'] = event.paymentStatus.toString();
+      }
       for (var file in event.files) {
         request.files.add(
           http.MultipartFile.fromBytes(
@@ -427,7 +430,9 @@ class StaffNewOrderBloc extends Bloc<StaffNewOrderEvent, StaffNewOrderState> {
         var l = Map<String, dynamic>.from(json.decode(response.body));
         if (l["code"] == 200 || l["code"] == 1) {
           isLoading = false;
-          emit(StaffNewOrderUploadPaymentProofSuccessState());
+          emit(StaffNewOrderUploadPaymentProofSuccessState(
+            paymentStatus: event.paymentStatus,
+          ));
         } else {
           isLoading = false;
           emit(

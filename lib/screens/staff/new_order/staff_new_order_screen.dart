@@ -317,7 +317,11 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
       ).showSnackBar(SnackBar(content: Text(state.message)));
     }
     if (state is StaffNewOrderUploadPaymentProofSuccessState) {
-      context.showSnackBarSuccess("Đã lưu ảnh bill thanh toán");
+      if (state.paymentStatus == 0) {
+        context.showSnackBarSuccess("Đã ghi nhận khách chưa thanh toán");
+      } else {
+        context.showSnackBarSuccess("Đã lưu ảnh bill thanh toán");
+      }
       _goToOrderManager();
     }
     if (state is StaffNewOrderUploadPaymentProofFailState) {
@@ -1299,8 +1303,21 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                     Expanded(
                       child: OutlinedButton(
                         onPressed: () {
+                          if (orderId == null) {
+                            context.showSnackBar(
+                              'Không tìm thấy mã đơn hàng để cập nhật trạng thái.',
+                            );
+                            return;
+                          }
                           Navigator.of(sheetContext).pop();
-                          _goToOrderManager();
+                          _bloc.add(
+                            StaffNewOrderUploadPaymentProofEvent(
+                              orderId: orderId,
+                              notes: '',
+                              files: [],
+                              paymentStatus: 0,
+                            ),
+                          );
                         },
                         style: OutlinedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 14),
