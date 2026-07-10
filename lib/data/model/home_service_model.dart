@@ -51,9 +51,9 @@ class HomeServiceModel {
 
   static List<HomeServiceModel> serviceList = [
     HomeServiceModel(
-      image: Images.iconMaintenance,
-      des: 'Dịch vụ khách hàng',
-      name: 'ĐẶT LỊCH DỊCH VỤ',
+      image: Images.wallet,
+      des: 'Quản lý công nợ',
+      name: 'CÔNG NỢ ĐƠN HÀNG',
     ),
     HomeServiceModel(
       image: Images.iconAdvise,

@@ -690,11 +690,7 @@ class _HomeScreenState extends State<HomeScreen> {
           if (index == 0) {
             Navigator.pushNamed(
               context,
-              Routes.serviceScreen,
-              arguments: {
-                "index": index.toString(),
-                "listService": _bloc.services,
-              },
+              Routes.customerOrderListScreen,
             );
           } else if (index == 1) {
             const url = "tel:0963456911";

@@ -1399,7 +1399,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                           Navigator.of(sheetContext).pop();
                           _bloc.add(
                             StaffNewOrderUploadPaymentProofEvent(
-                              orderId: orderId,
+                              orderPaymentId: orderPayment!.id!,
                               notes: '',
                               files: [],
                               paymentStatus: 0,

@@ -73,7 +73,7 @@ abstract final class ApiEndpoints {
   // =========================
   static const uploadImage = '/uploadImage';
   static const orderUploadImage = '/socbay/order/upload-image';
-  static const uploadPaymentProof = '/socbay/order/payment/upload-proof';
+  static const uploadPaymentProof = '/socbay/order-payments/upload-proof';
 
   // =========================
   // PRODUCT
@@ -164,6 +164,7 @@ abstract final class ApiEndpoints {
       '/socbay/order/sales-income-bySale/$userId';
   static String orderLastReplaceFilterCore(Object? userId) =>
       '/socbay/order/last-replace-filter-core/$userId';
+  static const listOrderPayments = '/socbay/order-payments';
 
   // =========================
   // Retail Order Warehouse

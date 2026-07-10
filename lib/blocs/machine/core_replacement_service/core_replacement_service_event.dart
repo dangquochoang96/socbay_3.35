@@ -1,3 +1,5 @@
+import 'dart:io';
+
 abstract class CoreReplatementServiceEvent {
   const CoreReplatementServiceEvent();
 }
@@ -14,4 +16,18 @@ class OrderFeedbackTaskProcessedEvent extends CoreReplatementServiceEvent {
 class OrderPaymentStatusUpdatedEvent extends CoreReplatementServiceEvent {
   final int taskId;
   OrderPaymentStatusUpdatedEvent(this.taskId);
+}
+
+class CoreReplacementServiceUploadPaymentProofEvent extends CoreReplatementServiceEvent {
+  final int orderPaymentId;
+  final String notes;
+  final List<File> files;
+  final int? paymentStatus;
+
+  CoreReplacementServiceUploadPaymentProofEvent({
+    required this.orderPaymentId,
+    required this.notes,
+    required this.files,
+    this.paymentStatus,
+  });
 }

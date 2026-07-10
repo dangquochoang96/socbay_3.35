@@ -48,6 +48,8 @@ import 'package:socbay/screens/auth/new_password_screen.dart';
 import 'package:socbay/screens/auth/register_screen.dart';
 import 'package:socbay/screens/auth/verify_otp_screen.dart';
 import 'package:socbay/screens/booking/core_replacement_service_screen.dart';
+import 'package:socbay/blocs/customer_order/customer_order_payment_bloc.dart';
+import 'package:socbay/screens/customer_order/customer_order_list.dart';
 import 'package:socbay/screens/booking/detail_booking_screen.dart';
 import 'package:socbay/screens/commenttechnique/commenttechnique_screen.dart';
 import 'package:socbay/screens/evaluate/evaluate_screen.dart';
@@ -181,6 +183,7 @@ class Routes {
   static const String hrManagementSummary = '/hrManagementSummary';
   static const String taskTimelineScreen = '/taskTimelineScreen';
   static const String ktvWalletScreen = '/ktvWalletScreen';
+  static const String customerOrderListScreen = '/customerOrderListScreen';
   CupertinoPageRoute routePage(RouteSettings settings) {
     return CupertinoPageRoute(
       settings: settings,
@@ -455,6 +458,13 @@ class Routes {
                 args: settings.arguments as Map<String, dynamic>,
               ),
               child: const CoreReplacementServiceScreen(),
+            );
+          case customerOrderListScreen:
+            return BlocProvider<CustomerOrderPaymentBloc>(
+              create: (builderContext) => CustomerOrderPaymentBloc(
+                apiRepository: apiRepository,
+              ),
+              child: const CustomerOrderListScreen(),
             );
           case staffCommentAndRatingList:
             return BlocProvider<CommentAndRatingBloc>(

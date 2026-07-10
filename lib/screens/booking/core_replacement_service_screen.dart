@@ -6,12 +6,15 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_format_money_vietnam/flutter_format_money_vietnam.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:full_screen_image_null_safe/full_screen_image_null_safe.dart';
+import 'package:intl/intl.dart';
 import 'package:socbay/application.dart';
 import 'package:socbay/blocs/machine/core_replacement_service/core_replacement_service_bloc.dart';
 import 'package:socbay/blocs/machine/core_replacement_service/core_replacement_service_event.dart';
 import 'package:socbay/blocs/machine/core_replacement_service/core_replacement_service_state.dart';
 import 'package:socbay/config/app_config.dart';
 import 'package:socbay/data/model/user_model.dart';
+import 'package:socbay/data/model/order_detail_model.dart';
+import 'package:socbay/data/model/order_payment_model.dart';
 // import 'package:socbay/onepay_paygate/onepay_paygate_flutter.dart';
 import 'package:socbay/paths/images.dart';
 import 'package:socbay/routes.dart';
@@ -22,6 +25,9 @@ import 'package:socbay/widgets/button_widget.dart';
 import 'package:socbay/widgets/loading_indicator.dart';
 import 'package:socbay/widgets/my_app_bar.dart';
 import 'package:socbay/widgets/text_field_default.dart';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
+import 'package:socbay/data/event_bus/event_bus_event.dart';
 
 class CoreReplacementServiceScreen extends StatefulWidget {
   const CoreReplacementServiceScreen({super.key});
@@ -131,7 +137,15 @@ class _CoreReplacementServiceScreenState
     >(builder: _builder, listener: _listener);
   }
 
-  void _listener(BuildContext context, CoreReplatementServiceState state) {}
+  void _listener(BuildContext context, CoreReplatementServiceState state) {
+    if (state is CoreReplacementServiceUploadPaymentProofSuccessState) {
+      context.showSnackBar('Tải ảnh minh chứng thanh toán thành công!');
+      _bloc.add(CoreReplatementServiceStartEvent());
+      App.instance.eventBus.fire(EventBusReloadOrderPaymentsEvent());
+    } else if (state is CoreReplacementServiceUploadPaymentProofFailState) {
+      context.showSnackBar(state.message);
+    }
+  }
 
   Widget _builder(BuildContext context, CoreReplatementServiceState state) {
     final hasData = _hasData;
@@ -176,6 +190,7 @@ class _CoreReplacementServiceScreenState
               _buildStaffInfoCard(),
               _buildActionCard(),
               _buildPriceCard(),
+              _buildPaymentInfoCard(),
               if (_bloc.orderDetailModel?.orderFilterCoresModel != null &&
                   _bloc.orderDetailModel!.orderFilterCoresModel!.any(
                     (item) => item.replaceDatePromise != "",
@@ -211,19 +226,32 @@ class _CoreReplacementServiceScreenState
   }
 
   bool get _isOrderPaymentPaid =>
-      _bloc.orderDetailModel?.orderPayment?.paymentStatus == '1';
+      _bloc.orderDetailModel?.orderPayment == null ||
+      _bloc.orderDetailModel!.orderPayment!.isEmpty ||
+      _bloc.orderDetailModel?.orderPayment?.any(
+            (p) => p.paymentStatus == '1',
+          ) ==
+          true;
 
   bool get _isOrderPaymentUnpaid =>
-      _bloc.orderDetailModel?.orderPayment?.paymentStatus == '0';
+      _bloc.orderDetailModel?.orderPayment != null &&
+      _bloc.orderDetailModel!.orderPayment!.isNotEmpty &&
+      _bloc.orderDetailModel?.orderPayment?.any(
+            (p) => p.paymentStatus == '0',
+          ) ==
+          true;
 
   Widget _buildPaymentStatusChip() {
-    final status = _bloc.orderDetailModel?.orderPayment?.paymentStatus;
+    final payments = _bloc.orderDetailModel?.orderPayment;
+    final status = (payments != null && payments.isNotEmpty)
+        ? payments.first.paymentStatus
+        : '1';
 
     String text;
     Color textColor;
     Color bgColor;
 
-    if (status == '1') {
+    if (status == '1' || payments == null || payments.isEmpty) {
       text = 'Đã thanh toán';
       textColor = ColorUtil.green;
       bgColor = ColorUtil.green.withValues(alpha: 0.1);
@@ -296,7 +324,10 @@ class _CoreReplacementServiceScreenState
     if (orderTotal.isNotEmpty && orderTotal != '0') {
       return orderTotal;
     }
-    final orderPaymentAmount = _bloc.orderDetailModel?.orderPayment?.amount;
+    final payments = _bloc.orderDetailModel?.orderPayment;
+    final orderPaymentAmount = (payments != null && payments.isNotEmpty)
+        ? payments.first.amount
+        : null;
     final amount = orderPaymentAmount == null || orderPaymentAmount.isEmpty
         ? '0'
         : orderPaymentAmount;
@@ -346,7 +377,10 @@ class _CoreReplacementServiceScreenState
     if (orderCode.isNotEmpty) {
       return orderCode;
     }
-    return _bloc.orderDetailModel?.orderPayment?.transferContent ?? '';
+    final payments = _bloc.orderDetailModel?.orderPayment;
+    return (payments != null && payments.isNotEmpty)
+        ? payments.first.transferContent ?? ''
+        : '';
   }
 
   String get _paymentQrUrl {
@@ -359,6 +393,15 @@ class _CoreReplacementServiceScreenState
   void _showPaymentQrSheet() {
     final qrUrl = _paymentQrUrl;
     final amount = int.tryParse(_paymentAmount);
+    final payments = _bloc.orderDetailModel?.orderPayment;
+    final orderPaymentId = (payments != null && payments.isNotEmpty)
+        ? payments.first.id
+        : null;
+
+    final notesController = TextEditingController();
+    final List<File> billFiles = [];
+    final picker = ImagePicker();
+    bool isSubmitting = false;
 
     showModalBottomSheet(
       context: context,
@@ -366,117 +409,326 @@ class _CoreReplacementServiceScreenState
       useSafeArea: true,
       backgroundColor: Colors.transparent,
       builder: (sheetContext) {
-        return Container(
-          margin: const EdgeInsets.all(12),
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(24),
-          ),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 44,
-                  height: 5,
-                  margin: const EdgeInsets.only(bottom: 18),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
-                    borderRadius: BorderRadius.circular(100),
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFEFF6FF),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: const Icon(
-                    Icons.qr_code_2_rounded,
-                    color: Color(0xFF2563EB),
-                    size: 34,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                const Text(
-                  'Thanh toán chuyển khoản',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: ColorUtil.raisinBlack,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                const Text(
-                  'Vui lòng quét mã QR bên dưới để thanh toán đơn hàng.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: ColorUtil.spanishGray, fontSize: 13),
-                ),
-                const SizedBox(height: 18),
-                Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: const Color(0xFFE5E7EB)),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.06),
-                        blurRadius: 18,
-                        offset: const Offset(0, 8),
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            return Container(
+              margin: const EdgeInsets.all(12),
+              padding: EdgeInsets.only(
+                left: 20,
+                right: 20,
+                top: 12,
+                bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(24),
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 44,
+                      height: 5,
+                      margin: const EdgeInsets.only(bottom: 18),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade300,
+                        borderRadius: BorderRadius.circular(100),
                       ),
-                    ],
-                  ),
-                  child: Image.network(
-                    qrUrl,
-                    height: 260,
-                    width: 260,
-                    fit: BoxFit.contain,
-                    errorBuilder: (_, __, ___) => const SizedBox(
-                      height: 220,
-                      child: Center(
-                        child: Text(
-                          'Không tải được mã QR.\nVui lòng kiểm tra kết nối mạng.',
-                          textAlign: TextAlign.center,
+                    ),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFEFF6FF),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: const Icon(
+                        Icons.qr_code_2_rounded,
+                        color: Color(0xFF2563EB),
+                        size: 34,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    const Text(
+                      'Thanh toán chuyển khoản',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: ColorUtil.raisinBlack,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Vui lòng quét mã QR chuyển khoản, sau đó tải ảnh bill minh chứng bên dưới.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: ColorUtil.spanishGray,
+                        fontSize: 13,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: const Color(0xFFE5E7EB)),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.04),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Image.network(
+                        qrUrl,
+                        height: 220,
+                        width: 220,
+                        fit: BoxFit.contain,
+                        errorBuilder: (_, __, ___) => const SizedBox(
+                          height: 180,
+                          child: Center(
+                            child: Text(
+                              'Không tải được mã QR.\nVui lòng kiểm tra kết nối mạng.',
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ),
-                const SizedBox(height: 18),
-                _buildPaymentQrInfoRow(
-                  'Số tiền',
-                  amount != null ? amount.toString().toVND() : _paymentAmount,
-                  isHighlight: true,
-                ),
-                _buildPaymentQrInfoRow('Nội dung CK', _transferContent),
-                const SizedBox(height: 18),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () => Navigator.of(sheetContext).pop(),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: ColorUtil.green,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
+                    const SizedBox(height: 14),
+                    _buildPaymentQrInfoRow(
+                      'Số tiền',
+                      amount != null
+                          ? amount.toString().toVND()
+                          : _paymentAmount,
+                      isHighlight: true,
+                    ),
+                    _buildPaymentQrInfoRow('Nội dung CK', _transferContent),
+                    const SizedBox(height: 16),
+
+                    const Divider(color: Color(0xFFE2E8F0)),
+                    const SizedBox(height: 12),
+
+                    const Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'Tải lên ảnh minh chứng (ảnh bill)',
+                        style: TextStyle(
+                          color: ColorUtil.raisinBlack,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
                       ),
                     ),
-                    child: const Text(
-                      'Đã hiểu',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
+                    const SizedBox(height: 10),
+
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: isSubmitting
+                                ? null
+                                : () async {
+                                    final pickedFile = await picker.pickImage(
+                                      source: ImageSource.camera,
+                                      imageQuality: 50,
+                                    );
+                                    if (pickedFile != null) {
+                                      setSheetState(() {
+                                        billFiles.add(File(pickedFile.path));
+                                      });
+                                    }
+                                  },
+                            icon: const Icon(Icons.photo_camera_outlined),
+                            label: const Text('Chụp bill'),
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: isSubmitting
+                                ? null
+                                : () async {
+                                    final pickedFiles = await picker
+                                        .pickMultiImage(imageQuality: 50);
+                                    if (pickedFiles.isNotEmpty) {
+                                      setSheetState(() {
+                                        billFiles.addAll(
+                                          pickedFiles.map((x) => File(x.path)),
+                                        );
+                                      });
+                                    }
+                                  },
+                            icon: const Icon(Icons.photo_library_outlined),
+                            label: const Text('Chọn ảnh'),
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+
+                    if (billFiles.isNotEmpty)
+                      SizedBox(
+                        height: 90,
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: billFiles.length,
+                          separatorBuilder: (_, __) => const SizedBox(width: 8),
+                          itemBuilder: (_, index) {
+                            return Stack(
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Image.file(
+                                    billFiles[index],
+                                    width: 80,
+                                    height: 90,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                                Positioned(
+                                  top: 2,
+                                  right: 2,
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      setSheetState(() {
+                                        billFiles.removeAt(index);
+                                      });
+                                    },
+                                    child: Container(
+                                      padding: const EdgeInsets.all(4),
+                                      decoration: const BoxDecoration(
+                                        color: Colors.black54,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: const Icon(
+                                        Icons.close,
+                                        color: Colors.white,
+                                        size: 12,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                      ),
+
+                    const SizedBox(height: 12),
+
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF8FAFC),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: const Color(0xFFE2E8F0)),
+                      ),
+                      child: TextField(
+                        controller: notesController,
+                        maxLines: 2,
+                        decoration: const InputDecoration(
+                          hintText: 'Nhập ghi chú thanh toán (nếu có)...',
+                          hintStyle: TextStyle(
+                            color: ColorUtil.spanishGray,
+                            fontSize: 13,
+                          ),
+                          border: InputBorder.none,
+                        ),
+                        style: const TextStyle(fontSize: 13),
                       ),
                     ),
-                  ),
+                    const SizedBox(height: 20),
+
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: isSubmitting
+                                ? null
+                                : () => Navigator.of(sheetContext).pop(),
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                            ),
+                            child: const Text('Bỏ qua'),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed:
+                                (isSubmitting ||
+                                    billFiles.isEmpty ||
+                                    orderPaymentId == null)
+                                ? null
+                                : () {
+                                    setSheetState(() {
+                                      isSubmitting = true;
+                                    });
+                                    _bloc.add(
+                                      CoreReplacementServiceUploadPaymentProofEvent(
+                                        orderPaymentId: orderPaymentId,
+                                        notes: notesController.text.trim(),
+                                        files: billFiles,
+                                      ),
+                                    );
+                                    Navigator.of(sheetContext).pop();
+                                  },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: ColorUtil.green,
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                            ),
+                            child: isSubmitting
+                                ? const SizedBox(
+                                    height: 18,
+                                    width: 18,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation(
+                                        Colors.white,
+                                      ),
+                                    ),
+                                  )
+                                : const Text(
+                                    'Gửi minh chứng',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         );
       },
     );
@@ -914,7 +1166,8 @@ class _CoreReplacementServiceScreenState
       child: Column(
         children: [
           _buildInfoRowWithWidget("Loại đơn:", _buildOrderTypeChip()),
-          if (_bloc.orderDetailModel?.orderPayment?.paymentStatus != null)
+          if (_bloc.orderDetailModel?.orderPayment != null &&
+              _bloc.orderDetailModel!.orderPayment!.isNotEmpty)
             _buildInfoRowWithWidget(
               "Trạng thái thanh toán:",
               _buildPaymentStatusChip(),
@@ -951,6 +1204,150 @@ class _CoreReplacementServiceScreenState
             ),
         ],
       ),
+    );
+  }
+
+  Widget _buildPaymentInfoCard() {
+    final payments = _bloc.orderDetailModel?.orderPayment;
+    if (payments == null || payments.isEmpty) return const SizedBox.shrink();
+
+    return _buildCard(
+      title: 'Chi tiết giao dịch thanh toán',
+      icon: Icons.payments_outlined,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          for (int i = 0; i < payments.length; i++) ...[
+            if (i > 0) ...[
+              const SizedBox(height: 12),
+              const Divider(color: Color(0xFFE2E8F0), height: 1),
+              const SizedBox(height: 12),
+            ],
+            _buildSinglePaymentDetail(payments[i], i + 1),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSinglePaymentDetail(OrderPaymentModel payment, int indexNo) {
+    // Map method: 1 -> Chuyển khoản, 0 -> Tiền mặt
+    String methodText = 'Không xác định';
+    if (payment.method == '1') {
+      methodText = 'Chuyển khoản';
+    } else if (payment.method == '0') {
+      methodText = 'Tiền mặt';
+    } else {
+      methodText = payment.method ?? 'Chuyển khoản';
+    }
+
+    final double amountValue = double.tryParse(payment.amount ?? '0') ?? 0;
+
+    String formattedDate = '';
+    if (payment.createdAt != null) {
+      try {
+        final parsedDate = DateTime.parse(payment.createdAt!);
+        formattedDate = DateFormat('dd/MM/yyyy HH:mm').format(parsedDate);
+      } catch (_) {
+        formattedDate = payment.createdAt!;
+      }
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Giao dịch #${payment.id}',
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+                color: ColorUtil.bangladeshGreen,
+              ),
+            ),
+            if (formattedDate.isNotEmpty)
+              Text(
+                formattedDate,
+                style: const TextStyle(
+                  fontSize: 11,
+                  color: ColorUtil.spanishGray,
+                ),
+              ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        _buildInfoRow('Phương thức:', methodText),
+        _buildInfoRow(
+          'Số tiền:',
+          amountValue.toInt().toString().toVND(),
+          valueColor: ColorUtil.red,
+          isBold: true,
+        ),
+        _buildInfoRow(
+          "Trạng thái thanh toán:",
+          payment.paymentStatus == "1"
+              ? "Đã thanh toán"
+              : payment.paymentStatus == "2"
+              ? "Chờ xác nhận"
+              : "Chưa thanh toán",
+          valueColor: payment.paymentStatus == "1"
+              ? ColorUtil.green
+              : payment.paymentStatus == "2"
+              ? ColorUtil.brightYellow
+              : ColorUtil.red,
+          isBold: true,
+        ),
+        if (payment.notes?.isNotEmpty == true)
+          _buildInfoRow('Ghi chú:', payment.notes!),
+        if (payment.proofImages != null && payment.proofImages!.isNotEmpty) ...[
+          const SizedBox(height: 10),
+          const Text(
+            'Hình ảnh minh chứng:',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: ColorUtil.spanishGray,
+            ),
+          ),
+          const SizedBox(height: 8),
+          SizedBox(
+            height: 80,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: payment.proofImages!.length,
+              itemBuilder: (context, imgIndex) {
+                final String rawPath = payment.proofImages![imgIndex];
+                final String imgUrl = ImageUtil.getUrlFromStoragePath(rawPath);
+                return Container(
+                  margin: const EdgeInsets.only(right: 10.0),
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: Colors.grey.shade200),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: FullScreenWidget(
+                      disposeLevel: DisposeLevel.Medium,
+                      child: Hero(
+                        tag: 'payment_proof_img_${payment.id}_$imgIndex',
+                        child: ImageUtil.loadNetWorkImage(
+                          url: imgUrl,
+                          height: 80,
+                          width: 80,
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ],
     );
   }
 

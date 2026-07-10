@@ -32,7 +32,7 @@ class OrderDetailModel {
   final List<String>? images;
   final String? productId;
   final String? address;
-  final OrderPaymentModel? orderPayment;
+  final List<OrderPaymentModel>? orderPayment;
   final String? code;
   final String? orderCode;
   OrderDetailModel({
@@ -118,7 +118,7 @@ class OrderDetailModel {
         : null,
     images: getImages(json["images"] as List<dynamic>?),
     productId: getProductId(json['order_filter_core'] as List<dynamic>?),
-    orderPayment: _getOrderPayment(
+    orderPayment: _getOrderPayments(
       json['order_payment'] ?? json['orderPayment'] ?? json['order_payments'],
     ),
     code: _asString(json['code']),
@@ -146,22 +146,21 @@ class OrderDetailModel {
     'sale_id': saleId,
     'order_filter_core': orderFilterCoresModel,
     'address': address,
-    'order_payment': orderPayment?.toJson(),
+    'order_payment': orderPayment?.map((x) => x.toJson()).toList(),
     'code': code,
     'order_code': orderCode,
   };
 
-  static OrderPaymentModel? _getOrderPayment(dynamic orderPayment) {
-    if (orderPayment is Map<String, dynamic>) {
-      return OrderPaymentModel.fromJson(orderPayment);
+  static List<OrderPaymentModel>? _getOrderPayments(dynamic orderPayment) {
+    if (orderPayment is List) {
+      return orderPayment
+          .map((e) => OrderPaymentModel.fromJson(Map<String, dynamic>.from(e)))
+          .toList();
     }
     if (orderPayment is Map) {
-      return OrderPaymentModel.fromJson(
-        Map<String, dynamic>.from(orderPayment),
-      );
-    }
-    if (orderPayment is List && orderPayment.isNotEmpty) {
-      return _getOrderPayment(orderPayment.first);
+      return [
+        OrderPaymentModel.fromJson(Map<String, dynamic>.from(orderPayment))
+      ];
     }
     return null;
   }

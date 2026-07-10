@@ -8,6 +8,8 @@ class OrderPaymentModel {
   final String? paymentStatus;
   final String? createdAt;
   final String? updatedAt;
+  final List<String>? proofImages;
+  final String? notes;
 
   OrderPaymentModel({
     this.id,
@@ -19,6 +21,8 @@ class OrderPaymentModel {
     this.paymentStatus,
     this.createdAt,
     this.updatedAt,
+    this.proofImages,
+    this.notes,
   });
 
   factory OrderPaymentModel.fromJson(Map<String, dynamic> json) =>
@@ -32,6 +36,10 @@ class OrderPaymentModel {
         paymentStatus: _asString(json['payment_status']),
         createdAt: _asString(json['created_at']),
         updatedAt: _asString(json['updated_at']),
+        notes: _asString(json['notes']),
+        proofImages: json['proof_images'] != null
+            ? List<String>.from(json['proof_images'].map((x) => x.toString()))
+            : null,
       );
 
   Map<String, dynamic> toJson() => <String, dynamic>{
@@ -44,6 +52,8 @@ class OrderPaymentModel {
     'payment_status': paymentStatus,
     'created_at': createdAt,
     'updated_at': updatedAt,
+    'notes': notes,
+    'proof_images': proofImages,
   };
 }
 

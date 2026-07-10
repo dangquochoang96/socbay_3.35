@@ -13,6 +13,7 @@ import 'package:socbay/data/repository/auth/api_repository.dart';
 import 'package:socbay/utils/auth_http.dart' as http;
 import 'package:socbay/utils/logger_util.dart';
 import 'package:collection/collection.dart';
+import 'package:path/path.dart' as path_manager;
 
 class CoreReplacementServiceBloc
     extends Bloc<CoreReplatementServiceEvent, CoreReplatementServiceState> {
@@ -21,6 +22,7 @@ class CoreReplacementServiceBloc
     on<CoreReplatementServiceStartEvent>(_getStartEventToState);
     on<OrderFeedbackTaskProcessedEvent>(_createOrUpdateFeedbackTaskProcessed);
     on<OrderPaymentStatusUpdatedEvent>(_updatePaymentStatus);
+    on<CoreReplacementServiceUploadPaymentProofEvent>(_uploadPaymentProof);
   }
   final ApiRepository apiRepository;
   OrderDetailModel? orderDetailModel;
@@ -127,5 +129,65 @@ class CoreReplacementServiceBloc
       LoggerUtil.log(ex.toString());
     }
     emitter(CoreReplatementServiceInitialState());
+  }
+
+  FutureOr<void> _uploadPaymentProof(
+    CoreReplacementServiceUploadPaymentProofEvent event,
+    Emitter<CoreReplatementServiceState> emit,
+  ) async {
+    isLoading = true;
+    emit(CoreReplatementServiceInitialState());
+    try {
+      var uri = Uri.parse(
+        AppConfig.instance.apiUrl(ApiEndpoints.uploadPaymentProof),
+      );
+      var request = http.MultipartRequest('POST', uri);
+      request.fields['order_payment_id'] = event.orderPaymentId.toString();
+      request.fields['notes'] = event.notes;
+      if (event.paymentStatus != null) {
+        request.fields['payment_status'] = event.paymentStatus.toString();
+      }
+      for (var file in event.files) {
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            'payment_image_bill[]',
+            file.readAsBytesSync(),
+            filename: path_manager.basename(file.path),
+          ),
+        );
+      }
+
+      var resStream = await request.send();
+      var response = await http.Response.fromStream(resStream);
+      if (response.statusCode == HttpStatus.ok) {
+        var l = Map<String, dynamic>.from(json.decode(response.body));
+        if (l["code"] == 200 || l["code"] == 1) {
+          isLoading = false;
+          emit(CoreReplacementServiceUploadPaymentProofSuccessState());
+        } else {
+          isLoading = false;
+          emit(
+            CoreReplacementServiceUploadPaymentProofFailState(
+              l["message"]?.toString() ?? "Upload ảnh bill lỗi!",
+            ),
+          );
+        }
+      } else {
+        isLoading = false;
+        emit(
+          CoreReplacementServiceUploadPaymentProofFailState(
+            "Upload ảnh bill lỗi! Code: ${response.statusCode}",
+          ),
+        );
+      }
+    } catch (ex) {
+      isLoading = false;
+      LoggerUtil.error(ex.toString());
+      emit(
+        CoreReplacementServiceUploadPaymentProofFailState(
+          "Upload ảnh bill lỗi: $ex",
+        ),
+      );
+    }
   }
 }
