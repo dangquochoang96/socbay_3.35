@@ -337,15 +337,15 @@ class _MachineDetailScreenState extends State<MachineDetailScreen> {
   }
 
   Widget _itemBuilder(BuildContext context, int index) {
-    Decimal heso = Decimal.parse("1000");
+    // Decimal heso = Decimal.parse("1000");
     final order = _bloc.ordersModel[index];
     final title =
         "Lần ${_bloc.ordersModel.length - index} - Mã đơn ${order.id}";
 
     Decimal price = Decimal.parse(order.price ?? "0");
-    Decimal truTichDiem = Decimal.parse(order.truTichDiem ?? "0") * heso;
-    Decimal chietKhau = Decimal.parse(order.chietKhau ?? "0");
-    Decimal total = price - truTichDiem - chietKhau;
+    // Decimal truTichDiem = Decimal.parse(order.truTichDiem ?? "0") * heso;
+    // Decimal chietKhau = Decimal.parse(order.chietKhau ?? "0");
+    Decimal total = price;
     if (total < Decimal.parse("0")) {
       total = Decimal.parse("0");
     }

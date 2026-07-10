@@ -409,7 +409,7 @@ class StaffNewOrderBloc extends Bloc<StaffNewOrderEvent, StaffNewOrderState> {
         AppConfig.instance.apiUrl(ApiEndpoints.uploadPaymentProof),
       );
       var request = http.MultipartRequest('POST', uri);
-      request.fields['order_id'] = event.orderId.toString();
+      request.fields['order_payment_id'] = event.orderPaymentId.toString();
       request.fields['notes'] = event.notes;
       if (event.paymentStatus != null) {
         request.fields['payment_status'] = event.paymentStatus.toString();

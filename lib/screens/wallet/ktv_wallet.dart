@@ -592,7 +592,11 @@ class _KtvWalletScreenState extends State<KtvWalletScreen> {
                         child: const Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.delete_outline, size: 12, color: ColorUtil.red),
+                            Icon(
+                              Icons.delete_outline,
+                              size: 12,
+                              color: ColorUtil.red,
+                            ),
                             SizedBox(width: 2),
                             Text(
                               'Xóa',
@@ -629,7 +633,9 @@ class _KtvWalletScreenState extends State<KtvWalletScreen> {
                 itemCount: tx.proofImages!.length,
                 itemBuilder: (context, imgIndex) {
                   final String rawPath = tx.proofImages![imgIndex];
-                  final String imgUrl = ImageUtil.getUrlFromPath(rawPath);
+                  final String imgUrl = ImageUtil.getUrlFromStoragePath(
+                    rawPath,
+                  );
                   return Container(
                     margin: const EdgeInsets.only(right: 8.0),
                     width: 60,

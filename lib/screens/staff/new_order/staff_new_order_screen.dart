@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -68,14 +69,16 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
   final TextEditingController _vatController = TextEditingController();
   final TextEditingController _noteController = TextEditingController();
   final TextEditingController _cashAmountController = TextEditingController();
-  final TextEditingController _transferAmountController = TextEditingController();
+  final TextEditingController _transferAmountController =
+      TextEditingController();
 
   TextEditingController chietKhauController = TextEditingController();
   TextEditingController subSavePointController = TextEditingController();
   TextEditingController dateController = TextEditingController();
   bool isListProductsSelected = true;
   TextEditingController addressCustomerController = TextEditingController();
-  TextEditingController addressCustomerControllerSP = TextEditingController();
+  late TextEditingController addressCustomerControllerSP =
+      TextEditingController(text: _bloc.taskModel?.productInfo?.address ?? '');
   final List<String> _listPath = [];
   late final ImagePicker _picker;
   bool _isLoading = false;
@@ -423,7 +426,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                       _buildDropdownFieldPruducts(),
                     ),
                     _buildInputRow(
-                      'LẮP ĐẶT MÁY MỚI THÌ CHỌN SẢN PHẨM MÁY LỌC NƯỚC',
+                      'LẮP ĐẶT MÁY MỚI THÌ CHỌN SẢN PHẨM',
                       _selectNewProduct(),
                     ),
                   ],
@@ -795,16 +798,40 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                             child: TextFormField(
                               controller: _cashAmountController,
                               keyboardType: TextInputType.number,
-                              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                              inputFormatters: [CurrencyInputFormatter()],
                               decoration: const InputDecoration(
                                 labelText: 'Tiền mặt',
                                 hintText: 'Nhập số tiền mặt',
                                 border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.all(Radius.circular(12)),
+                                  borderRadius: BorderRadius.all(
+                                    Radius.circular(12),
+                                  ),
                                 ),
                                 suffixText: 'đ',
                               ),
                               onChanged: (val) {
+                                final cleanVal = val.replaceAll('.', '').trim();
+                                final parsed = double.tryParse(cleanVal) ?? 0.0;
+                                final transferStr = _transferAmountController
+                                    .text
+                                    .replaceAll('.', '')
+                                    .trim();
+                                final transfer =
+                                    double.tryParse(transferStr) ?? 0.0;
+                                final maxCash = (_bloc.totalPay - transfer)
+                                    .clamp(0.0, _bloc.totalPay);
+                                if (parsed > maxCash) {
+                                  final formatted = NumberFormat.decimalPattern(
+                                    'vi_VN',
+                                  ).format(maxCash);
+                                  _cashAmountController.value =
+                                      TextEditingValue(
+                                        text: formatted,
+                                        selection: TextSelection.collapsed(
+                                          offset: formatted.length,
+                                        ),
+                                      );
+                                }
                                 setState(() {});
                               },
                             ),
@@ -814,16 +841,38 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                             child: TextFormField(
                               controller: _transferAmountController,
                               keyboardType: TextInputType.number,
-                              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                              inputFormatters: [CurrencyInputFormatter()],
                               decoration: const InputDecoration(
                                 labelText: 'Chuyển khoản',
                                 hintText: 'Nhập số tiền CK',
                                 border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.all(Radius.circular(12)),
+                                  borderRadius: BorderRadius.all(
+                                    Radius.circular(12),
+                                  ),
                                 ),
                                 suffixText: 'đ',
                               ),
                               onChanged: (val) {
+                                final cleanVal = val.replaceAll('.', '').trim();
+                                final parsed = double.tryParse(cleanVal) ?? 0.0;
+                                final cashStr = _cashAmountController.text
+                                    .replaceAll('.', '')
+                                    .trim();
+                                final cash = double.tryParse(cashStr) ?? 0.0;
+                                final maxTransfer = (_bloc.totalPay - cash)
+                                    .clamp(0.0, _bloc.totalPay);
+                                if (parsed > maxTransfer) {
+                                  final formatted = NumberFormat.decimalPattern(
+                                    'vi_VN',
+                                  ).format(maxTransfer);
+                                  _transferAmountController.value =
+                                      TextEditingValue(
+                                        text: formatted,
+                                        selection: TextSelection.collapsed(
+                                          offset: formatted.length,
+                                        ),
+                                      );
+                                }
                                 setState(() {});
                               },
                             ),
@@ -912,10 +961,24 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                     }
 
                     if (_bloc.paymentType == 3) {
-                      final cash = double.tryParse(_cashAmountController.text.trim()) ?? 0.0;
-                      final transfer = double.tryParse(_transferAmountController.text.trim()) ?? 0.0;
+                      final cash =
+                          double.tryParse(
+                            _cashAmountController.text
+                                .replaceAll('.', '')
+                                .trim(),
+                          ) ??
+                          0.0;
+                      final transfer =
+                          double.tryParse(
+                            _transferAmountController.text
+                                .replaceAll('.', '')
+                                .trim(),
+                          ) ??
+                          0.0;
                       if ((cash + transfer - _bloc.totalPay).abs() > 0.01) {
-                        context.showSnackBar('Tổng số tiền mặt và chuyển khoản phải bằng tổng tiền thanh toán (${_bloc.totalPay.toString().toVND()})');
+                        context.showSnackBar(
+                          'Tổng số tiền mặt và chuyển khoản phải bằng tổng tiền thanh toán (${_bloc.totalPay.toString().toVND()})',
+                        );
                         return;
                       }
                     }
@@ -1083,10 +1146,24 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                     }
 
                     if (_bloc.paymentType == 3) {
-                      final cash = double.tryParse(_cashAmountController.text.trim()) ?? 0.0;
-                      final transfer = double.tryParse(_transferAmountController.text.trim()) ?? 0.0;
+                      final cash =
+                          double.tryParse(
+                            _cashAmountController.text
+                                .replaceAll('.', '')
+                                .trim(),
+                          ) ??
+                          0.0;
+                      final transfer =
+                          double.tryParse(
+                            _transferAmountController.text
+                                .replaceAll('.', '')
+                                .trim(),
+                          ) ??
+                          0.0;
                       if ((cash + transfer - _bloc.totalPay).abs() > 0.01) {
-                        context.showSnackBar('Tổng số tiền mặt và chuyển khoản phải bằng tổng tiền thanh toán (${_bloc.totalPay.toString().toVND()})');
+                        context.showSnackBar(
+                          'Tổng số tiền mặt và chuyển khoản phải bằng tổng tiền thanh toán (${_bloc.totalPay.toString().toVND()})',
+                        );
                         return;
                       }
                     }
@@ -1155,10 +1232,20 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                         _noteController.text,
                         subType,
                         cashAmount: _bloc.paymentType == 3
-                            ? (double.tryParse(_cashAmountController.text.trim()) ?? 0.0)
+                            ? (double.tryParse(
+                                    _cashAmountController.text
+                                        .replaceAll('.', '')
+                                        .trim(),
+                                  ) ??
+                                  0.0)
                             : null,
                         transferAmount: _bloc.paymentType == 3
-                            ? (double.tryParse(_transferAmountController.text.trim()) ?? 0.0)
+                            ? (double.tryParse(
+                                    _transferAmountController.text
+                                        .replaceAll('.', '')
+                                        .trim(),
+                                  ) ??
+                                  0.0)
                             : null,
                       ),
                     );
@@ -1337,14 +1424,17 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                     Expanded(
                       child: ElevatedButton(
                         onPressed: () {
-                          if (orderId == null) {
+                          final orderPaymentId = orderPayment?.id;
+                          if (orderPaymentId == null) {
                             context.showSnackBar(
-                              'Không tìm thấy mã đơn hàng để lưu bill.',
+                              'Không tìm thấy thông tin thanh toán để lưu bill.',
                             );
                             return;
                           }
                           Navigator.of(sheetContext).pop();
-                          _showPaymentProofSheet(orderId: orderId);
+                          _showPaymentProofSheet(
+                            orderPaymentId: orderPaymentId,
+                          );
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: ColorUtil.green,
@@ -1407,7 +1497,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
     );
   }
 
-  void _showPaymentProofSheet({required int orderId}) {
+  void _showPaymentProofSheet({required int orderPaymentId}) {
     final notesController = TextEditingController();
     final List<File> billFiles = [];
 
@@ -1613,7 +1703,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                           Navigator.of(sheetContext).pop();
                           _bloc.add(
                             StaffNewOrderUploadPaymentProofEvent(
-                              orderId: orderId,
+                              orderPaymentId: orderPaymentId,
                               notes: notes,
                               files: billFiles,
                             ),
@@ -3027,4 +3117,33 @@ class KeyValue {
 
   //late TextEditingController selectedDate;
   KeyValue(this.key, this.value);
+}
+
+class CurrencyInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    if (newValue.selection.baseOffset == 0) {
+      return newValue;
+    }
+
+    String cleanText = newValue.text.replaceAll(RegExp(r'[^0-9]'), '');
+    if (cleanText.isEmpty) {
+      return newValue.copyWith(
+        text: '',
+        selection: const TextSelection.collapsed(offset: 0),
+      );
+    }
+
+    double value = double.tryParse(cleanText) ?? 0;
+    final formatter = NumberFormat.decimalPattern('vi_VN');
+    String formatted = formatter.format(value);
+
+    return newValue.copyWith(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
+    );
+  }
 }
