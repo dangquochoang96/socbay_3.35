@@ -13,7 +13,6 @@ import 'package:socbay/blocs/machine/core_replacement_service/core_replacement_s
 import 'package:socbay/blocs/machine/core_replacement_service/core_replacement_service_state.dart';
 import 'package:socbay/config/app_config.dart';
 import 'package:socbay/data/model/user_model.dart';
-import 'package:socbay/data/model/order_detail_model.dart';
 import 'package:socbay/data/model/order_payment_model.dart';
 // import 'package:socbay/onepay_paygate/onepay_paygate_flutter.dart';
 import 'package:socbay/paths/images.dart';
@@ -28,6 +27,9 @@ import 'package:socbay/widgets/text_field_default.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:socbay/data/event_bus/event_bus_event.dart';
+import 'package:http/http.dart' as http;
+import 'package:permission_handler/permission_handler.dart';
+import 'package:image_gallery_saver_plus/image_gallery_saver_plus.dart';
 
 class CoreReplacementServiceScreen extends StatefulWidget {
   const CoreReplacementServiceScreen({super.key});
@@ -243,9 +245,16 @@ class _CoreReplacementServiceScreenState
 
   Widget _buildPaymentStatusChip() {
     final payments = _bloc.orderDetailModel?.orderPayment;
-    final status = (payments != null && payments.isNotEmpty)
-        ? payments.first.paymentStatus
-        : '1';
+    String status = '1';
+    if (payments != null && payments.isNotEmpty) {
+      if (payments.any((p) => p.paymentStatus == '0')) {
+        status = '0';
+      } else if (payments.any((p) => p.paymentStatus == '2')) {
+        status = '2';
+      } else {
+        status = payments.first.paymentStatus ?? '1';
+      }
+    }
 
     String text;
     Color textColor;
@@ -319,19 +328,29 @@ class _CoreReplacementServiceScreenState
     );
   }
 
+  OrderPaymentModel? get _currentUnpaidPayment {
+    final payments = _bloc.orderDetailModel?.orderPayment;
+    if (payments == null || payments.isEmpty) return null;
+    try {
+      return payments.firstWhere((p) => p.paymentStatus == '0');
+    } catch (_) {
+      return payments.first;
+    }
+  }
+
   String get _paymentAmount {
+    final unpaidPayment = _currentUnpaidPayment;
+    if (unpaidPayment != null) {
+      final amount = unpaidPayment.amount;
+      if (amount != null && amount.isNotEmpty) {
+        return _normalizePaymentAmount(amount);
+      }
+    }
     final orderTotal = _normalizePaymentAmount(_bloc.finalPrice);
     if (orderTotal.isNotEmpty && orderTotal != '0') {
       return orderTotal;
     }
-    final payments = _bloc.orderDetailModel?.orderPayment;
-    final orderPaymentAmount = (payments != null && payments.isNotEmpty)
-        ? payments.first.amount
-        : null;
-    final amount = orderPaymentAmount == null || orderPaymentAmount.isEmpty
-        ? '0'
-        : orderPaymentAmount;
-    return _normalizePaymentAmount(amount);
+    return '0';
   }
 
   String _normalizePaymentAmount(String amount) {
@@ -372,15 +391,13 @@ class _CoreReplacementServiceScreenState
     final orderCode = _orderCodeForTransfer;
     final phone = _customerPhoneForTransfer;
     if (orderCode.isNotEmpty && phone.isNotEmpty) {
-      return '$orderCode-$phone';
+      return '$orderCode $phone';
     }
     if (orderCode.isNotEmpty) {
       return orderCode;
     }
-    final payments = _bloc.orderDetailModel?.orderPayment;
-    return (payments != null && payments.isNotEmpty)
-        ? payments.first.transferContent ?? ''
-        : '';
+    final unpaidPayment = _currentUnpaidPayment;
+    return unpaidPayment?.transferContent ?? '';
   }
 
   String get _paymentQrUrl {
@@ -390,13 +407,147 @@ class _CoreReplacementServiceScreenState
     return 'https://img.vietqr.io/image/vpbank-551999-compact2.png?amount=$amount&addInfo=$addInfo&accountName=$accountName';
   }
 
+  void _showPermissionSettingsDialog(String permissionName) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: const Text('Yêu cầu quyền truy cập'),
+          content: Text(
+            'Ứng dụng cần quyền truy cập $permissionName để lưu mã QR. Vui lòng cấp quyền trong Cài đặt thiết bị của bạn.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text(
+                'Bỏ qua',
+                style: TextStyle(color: ColorUtil.spanishGray),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                openAppSettings();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: ColorUtil.green,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: const Text(
+                'Đi tới Cài đặt',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _downloadQrCode(String url) async {
+    try {
+      PermissionStatus status = PermissionStatus.denied;
+      if (Platform.isIOS) {
+        status = await Permission.photos.status;
+        if (status.isDenied) {
+          status = await Permission.photos.request();
+        }
+        if (status.isPermanentlyDenied) {
+          _showPermissionSettingsDialog('Thư viện ảnh');
+          return;
+        }
+        if (!status.isGranted && !status.isLimited) {
+          return;
+        }
+      } else if (Platform.isAndroid) {
+        status = await Permission.storage.status;
+        if (status.isDenied) {
+          status = await Permission.storage.request();
+        }
+        if (status.isPermanentlyDenied) {
+          // Check/Request Permission.photos on Android 13+ (READ_MEDIA_IMAGES)
+          final photosStatus = await Permission.photos.status;
+          if (photosStatus.isDenied) {
+            status = await Permission.photos.request();
+          } else {
+            status = photosStatus;
+          }
+          if (status.isPermanentlyDenied) {
+            _showPermissionSettingsDialog('Bộ nhớ / Thư viện ảnh');
+            return;
+          }
+        }
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Đang tải mã QR...'),
+            duration: Duration(seconds: 1),
+          ),
+        );
+      }
+
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        final bytes = response.bodyBytes;
+        final result = await ImageGallerySaverPlus.saveImage(
+          bytes,
+          quality: 100,
+          name: "QR_Code_Payment_${DateTime.now().millisecondsSinceEpoch}",
+        );
+
+        if (result != null && result['isSuccess'] == true) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Lưu mã QR thành công vào thư viện ảnh.'),
+                backgroundColor: ColorUtil.green,
+              ),
+            );
+          }
+        } else {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Không thể lưu mã QR: ${result?['errorMessage'] ?? 'Lỗi không xác định'}'),
+                backgroundColor: ColorUtil.red,
+              ),
+            );
+          }
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Tải ảnh QR thất bại. Vui lòng thử lại.'),
+              backgroundColor: ColorUtil.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Đã xảy ra lỗi: $e'),
+            backgroundColor: ColorUtil.red,
+          ),
+        );
+      }
+    }
+  }
+
   void _showPaymentQrSheet() {
     final qrUrl = _paymentQrUrl;
     final amount = int.tryParse(_paymentAmount);
-    final payments = _bloc.orderDetailModel?.orderPayment;
-    final orderPaymentId = (payments != null && payments.isNotEmpty)
-        ? payments.first.id
-        : null;
+    final unpaidPayment = _currentUnpaidPayment;
+    final orderPaymentId = unpaidPayment?.id;
 
     final notesController = TextEditingController();
     final List<File> billFiles = [];
@@ -482,20 +633,42 @@ class _CoreReplacementServiceScreenState
                           ),
                         ],
                       ),
-                      child: Image.network(
-                        qrUrl,
-                        height: 220,
-                        width: 220,
-                        fit: BoxFit.contain,
-                        errorBuilder: (_, __, ___) => const SizedBox(
-                          height: 180,
-                          child: Center(
-                            child: Text(
-                              'Không tải được mã QR.\nVui lòng kiểm tra kết nối mạng.',
-                              textAlign: TextAlign.center,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Image.network(
+                            qrUrl,
+                            height: 220,
+                            width: 220,
+                            fit: BoxFit.contain,
+                            errorBuilder: (_, __, ___) => const SizedBox(
+                              height: 180,
+                              child: Center(
+                                child: Text(
+                                  'Không tải được mã QR.\nVui lòng kiểm tra kết nối mạng.',
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
                             ),
                           ),
-                        ),
+                          const SizedBox(height: 8),
+                          TextButton.icon(
+                            onPressed: () => _downloadQrCode(qrUrl),
+                            icon: const Icon(
+                              Icons.download_rounded,
+                              color: Color(0xFF2563EB),
+                              size: 18,
+                            ),
+                            label: const Text(
+                              'Lưu mã QR về máy',
+                              style: TextStyle(
+                                color: Color(0xFF2563EB),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     const SizedBox(height: 14),

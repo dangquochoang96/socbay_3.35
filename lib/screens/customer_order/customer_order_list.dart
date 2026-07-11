@@ -205,23 +205,44 @@ class _CustomerOrderListScreenState extends State<CustomerOrderListScreen> {
     );
   }
 
+  int _getOrderPaymentStatus(dynamic item) {
+    final rawStatus = item['overall_payment_status'];
+    if (rawStatus != null) {
+      final parsed = int.tryParse(rawStatus.toString());
+      if (parsed != null) {
+        return parsed;
+      }
+    }
+
+    final orderPayment = item['order_payment'] as List?;
+    if (orderPayment == null || orderPayment.isEmpty) {
+      return 1; // Empty order_payment list means paid (status 1)
+    }
+
+    bool hasUnpaid = false;
+    bool hasPending = false;
+    for (final p in orderPayment) {
+      if (p is Map) {
+        final pStatus = p['payment_status']?.toString();
+        if (pStatus == '0') {
+          hasUnpaid = true;
+        } else if (pStatus == '2') {
+          hasPending = true;
+        }
+      }
+    }
+    if (hasUnpaid) return 0;
+    if (hasPending) return 2;
+    return 1;
+  }
+
   // Filter local logic matching user rules
   List<dynamic> _filterOrders(List<dynamic> orders, int filterStatus) {
     if (filterStatus == -1) return orders;
 
     return orders.where((item) {
-      final orderPayment = item['order_payment'] as List?;
-      final overallStatus = item['overall_payment_status'];
-
-      // Rule: Empty order_payment list means paid
-      final isPaid =
-          overallStatus == 1 || (orderPayment == null || orderPayment.isEmpty);
-
-      if (filterStatus == 1) {
-        return isPaid;
-      } else {
-        return !isPaid;
-      }
+      final status = _getOrderPaymentStatus(item);
+      return status == filterStatus;
     }).toList();
   }
 
@@ -351,26 +372,36 @@ class _CustomerOrderListScreenState extends State<CustomerOrderListScreen> {
   }
 
   Widget _buildFilterTabs(int currentFilter) {
-    return Row(
-      children: [
-        _buildFilterChip(
-          label: "Tất cả",
-          value: -1,
-          active: currentFilter == -1,
-        ),
-        const SizedBox(width: 8),
-        _buildFilterChip(
-          label: "Chưa thanh toán",
-          value: 0,
-          active: currentFilter == 0,
-        ),
-        const SizedBox(width: 8),
-        _buildFilterChip(
-          label: "Đã thanh toán",
-          value: 1,
-          active: currentFilter == 1,
-        ),
-      ],
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      physics: const BouncingScrollPhysics(),
+      child: Row(
+        children: [
+          _buildFilterChip(
+            label: "Tất cả",
+            value: -1,
+            active: currentFilter == -1,
+          ),
+          const SizedBox(width: 8),
+          _buildFilterChip(
+            label: "Chưa thanh toán",
+            value: 0,
+            active: currentFilter == 0,
+          ),
+          const SizedBox(width: 8),
+          _buildFilterChip(
+            label: "Chờ xác nhận",
+            value: 2,
+            active: currentFilter == 2,
+          ),
+          const SizedBox(width: 8),
+          _buildFilterChip(
+            label: "Đã thanh toán",
+            value: 1,
+            active: currentFilter == 1,
+          ),
+        ],
+      ),
     );
   }
 
@@ -413,12 +444,7 @@ class _CustomerOrderListScreenState extends State<CustomerOrderListScreen> {
     final note = order['ghichu'];
     final createdAt = order['created_at'];
 
-    final orderPayment = order['order_payment'] as List?;
-    final overallStatus = order['overall_payment_status'];
-
-    // Rule: Empty order_payment means paid
-    final isPaid =
-        overallStatus == 1 || (orderPayment == null || orderPayment.isEmpty);
+    final paymentStatus = _getOrderPaymentStatus(order);
 
     String formattedDate = '';
     if (createdAt != null) {
@@ -473,7 +499,7 @@ class _CustomerOrderListScreenState extends State<CustomerOrderListScreen> {
                       fontSize: 15,
                     ),
                   ),
-                  _buildPaymentChip(isPaid),
+                  _buildPaymentChip(paymentStatus),
                 ],
               ),
               if (formattedDate.isNotEmpty) ...[
@@ -553,17 +579,35 @@ class _CustomerOrderListScreenState extends State<CustomerOrderListScreen> {
     );
   }
 
-  Widget _buildPaymentChip(bool isPaid) {
+  Widget _buildPaymentChip(int status) {
+    String text;
+    Color textColor;
+    Color bgColor;
+
+    if (status == 1) {
+      text = "Đã thanh toán";
+      textColor = const Color(0xFF15803D);
+      bgColor = const Color(0xFFDCFCE7);
+    } else if (status == 2) {
+      text = "Chờ xác nhận";
+      textColor = const Color(0xFFB45309);
+      bgColor = const Color(0xFFFEF3C7);
+    } else {
+      text = "Chưa thanh toán";
+      textColor = const Color(0xFFB91C1C);
+      bgColor = const Color(0xFFFEE2E2);
+    }
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: isPaid ? const Color(0xFFDCFCE7) : const Color(0xFFFEE2E2),
+        color: bgColor,
         borderRadius: BorderRadius.circular(100),
       ),
       child: Text(
-        isPaid ? "Đã thanh toán" : "Chưa thanh toán",
+        text,
         style: TextStyle(
-          color: isPaid ? const Color(0xFF15803D) : const Color(0xFFB91C1C),
+          color: textColor,
           fontWeight: FontWeight.bold,
           fontSize: 11,
         ),

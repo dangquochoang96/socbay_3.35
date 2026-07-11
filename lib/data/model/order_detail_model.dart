@@ -87,7 +87,7 @@ class OrderDetailModel {
     updatedAt: _asString(json['updated_at']),
     origin: _asString(json['origin']),
     typePayment: _asString(json['type_payment']),
-    paymentStatus: _asString(json['payment_status']),
+    paymentStatus: _asString(json['overall_payment_status']),
     saleId: _asString(json['sale_id']),
     address: _asString(json['address']),
     orderFilterCoresModel: (json['order_filter_core'] as List<dynamic>?)
@@ -159,7 +159,7 @@ class OrderDetailModel {
     }
     if (orderPayment is Map) {
       return [
-        OrderPaymentModel.fromJson(Map<String, dynamic>.from(orderPayment))
+        OrderPaymentModel.fromJson(Map<String, dynamic>.from(orderPayment)),
       ];
     }
     return null;
