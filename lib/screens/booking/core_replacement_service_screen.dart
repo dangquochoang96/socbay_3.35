@@ -515,7 +515,9 @@ class _CoreReplacementServiceScreenState
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('Không thể lưu mã QR: ${result?['errorMessage'] ?? 'Lỗi không xác định'}'),
+                content: Text(
+                  'Không thể lưu mã QR: ${result?['errorMessage'] ?? 'Lỗi không xác định'}',
+                ),
                 backgroundColor: ColorUtil.red,
               ),
             );
@@ -864,6 +866,7 @@ class _CoreReplacementServiceScreenState
                                         orderPaymentId: orderPaymentId,
                                         notes: notesController.text.trim(),
                                         files: billFiles,
+                                        paymentStatus: 2,
                                       ),
                                     );
                                     Navigator.of(sheetContext).pop();
