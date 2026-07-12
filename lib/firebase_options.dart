@@ -53,7 +53,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '74379867334',
     projectId: 'socbay-9e758',
     storageBucket: 'socbay-9e758.firebasestorage.app',
-    iosBundleId: 'com.example.socbay',
+    iosBundleId: 'com.thongdd.thayloilocsocbay',
   );
   static const FirebaseOptions web = FirebaseOptions(
     apiKey: 'AIzaSyAi2l2Ckp0GNwU6Zp357sxi9JfYRAuxDf8',
@@ -71,7 +71,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '74379867334',
     projectId: 'socbay-9e758',
     storageBucket: 'socbay-9e758.firebasestorage.app',
-    iosBundleId: 'com.example.socbay',
+    iosBundleId: 'com.thongdd.thayloilocsocbay',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(

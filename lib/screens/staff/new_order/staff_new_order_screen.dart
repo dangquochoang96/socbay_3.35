@@ -47,6 +47,8 @@ class StaffNewOrderScreen extends StatefulWidget {
 class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
   late dynamic _bloc;
   late BillData billData;
+  StaffCreateOrderCoresSuccessState? _successState;
+  int _lastClickTime = 0;
   late Map<String, dynamic> billDataMap;
   int _currentSelectedProductValue = 0;
   final TextEditingController currentSelectedProductAllValue =
@@ -289,6 +291,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
     if (state is StaffCreateOrderCoresSuccessState) {
       setState(() {
         _isLoading = false;
+        _successState = state;
       });
       if ((_bloc.paymentType == 2 || _bloc.paymentType == 3) &&
           state.orderPayment?.qrUrl != null &&
@@ -1052,6 +1055,19 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                 ),
                 ButtonWidget(
                   onTap: () {
+                    if (_successState != null) {
+                      if ((_bloc.paymentType == 2 || _bloc.paymentType == 3) &&
+                          _successState!.orderPayment?.qrUrl != null &&
+                          _successState!.orderPayment!.qrUrl!.isNotEmpty) {
+                        _showTransferQrSheet(_successState!);
+                      } else {
+                        _goToOrderManager();
+                      }
+                      return;
+                    }
+                    final now = DateTime.now().millisecondsSinceEpoch;
+                    if (now - _lastClickTime < 2000) return;
+                    _lastClickTime = now;
                     var getProductNew = _listProductsAll.where(
                       (element) =>
                           element.name == currentSelectedProductAllValue.text,
@@ -1260,9 +1276,13 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                   ),
                   color: ColorUtil.bangladeshGreen,
                   child: Text(
-                    _bloc.paymentType == 2 || _bloc.paymentType == 3
-                        ? "TẠO ĐƠN & HIỂN THỊ QR"
-                        : "HOÀN THÀNH",
+                    _successState != null
+                        ? ((_bloc.paymentType == 2 || _bloc.paymentType == 3)
+                            ? "XEM MÃ QR THANH TOÁN"
+                            : "HOÀN THÀNH")
+                        : (_bloc.paymentType == 2 || _bloc.paymentType == 3
+                            ? "TẠO ĐƠN & HIỂN THỊ QR"
+                            : "HOÀN THÀNH"),
                     textAlign: TextAlign.center,
                     style: const TextStyle(fontSize: 16, color: Colors.white),
                   ),
