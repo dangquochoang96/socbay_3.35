@@ -451,7 +451,7 @@ class _ServiceScreenState extends State<StaffServiceScreen> {
         DropdownMenuItem<TaskOrderType>(
           value: TaskOrderType.rent,
           child: Text(
-            'Đơn Thuê',
+            'Đơn Thuê/ Đại lý',
             style: TextStyle(fontSize: 14, color: ColorUtil.raisinBlack),
           ),
         ),

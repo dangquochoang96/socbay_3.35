@@ -42,7 +42,6 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     on<HomeScreenGetBlogsEvent>(_mapGetBlogsToState);
     on<HomeScreenGetListServiceEvent>(_mapGetListServiceEventToState);
     on<HomeScreenGetListBannerEvent>(_mapGetBannerEventToState);
-    // on<HomeScreenGetProductsEvent>(_mapGetProductsEventToState);
   }
 
   FutureOr<void> _mapHomeStartedEventToState(
@@ -57,16 +56,31 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       await _mapGetSalesIncome();
     }
     await Future.wait([
+      _mapGetUserInfo(),
       _mapGetProductsUsertoState(null, emit),
       _mapGetBlogsToState(null, emit),
       _mapGetListServiceEventToState(null, emit),
       _mapGetBannerEventToState(null, emit),
-      // _mapGetProductsEventToState(null, emit),
       _mapGetLastReplaceFilterCore(),
     ]).then((value) {
       isLoading = false;
       emit(HomeInitialState());
     });
+  }
+
+  Future<void> _mapGetUserInfo() async {
+    try {
+      final res = await apiRepository.getUserInfo();
+      if (res.status == HttpStatus.ok && res.data != null) {
+        App.instance.userApp = res.data;
+        user = res.data;
+      } else {
+        user = App.instance.userApp;
+      }
+    } catch (ex) {
+      LoggerUtil.error(ex.toString());
+      user = App.instance.userApp;
+    }
   }
 
   Future<void> _mapGetProductsUsertoState(

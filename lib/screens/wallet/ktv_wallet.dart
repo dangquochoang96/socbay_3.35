@@ -277,26 +277,26 @@ class _KtvWalletScreenState extends State<KtvWalletScreen> {
     );
   }
 
-  Widget _buildWalletSubStat(String label, double amount, Color color) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(color: Colors.white70, fontSize: 11),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          NumberFormatUtil.parseToVND(amount),
-          style: TextStyle(
-            color: color,
-            fontSize: 13,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ],
-    );
-  }
+  // Widget _buildWalletSubStat(String label, double amount, Color color) {
+  //   return Column(
+  //     crossAxisAlignment: CrossAxisAlignment.start,
+  //     children: [
+  //       Text(
+  //         label,
+  //         style: const TextStyle(color: Colors.white70, fontSize: 11),
+  //       ),
+  //       const SizedBox(height: 4),
+  //       Text(
+  //         NumberFormatUtil.parseToVND(amount),
+  //         style: TextStyle(
+  //           color: color,
+  //           fontSize: 13,
+  //           fontWeight: FontWeight.bold,
+  //         ),
+  //       ),
+  //     ],
+  //   );
+  // }
 
   Widget _buildQuickActions() {
     return Padding(

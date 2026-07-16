@@ -1,9 +1,15 @@
+import 'dart:io';
+import 'dart:ui' as ui;
 import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_format_money_vietnam/flutter_format_money_vietnam.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:socbay/application.dart';
 import 'package:socbay/blocs/staff/order/order_manager_bloc.dart';
 import 'package:socbay/blocs/staff/order/order_manager_event.dart';
 import 'package:socbay/blocs/staff/order/order_manager_state.dart';
@@ -28,19 +34,19 @@ class _OrderManagerScreenState extends State<OrderManagerScreen> {
   late OrderManagerBloc _bloc;
   DateTimeRange? myDateRange;
   final ScrollController _scrollController = ScrollController();
+  final GlobalKey _reportKey = GlobalKey();
   bool _isStatsExpanded = false;
 
   @override
   void initState() {
     _bloc = BlocProvider.of(context);
-    var startInitTime = DateTime(
-      DateTime.now().year,
-      DateTime.now().month,
-      1,
-    ).toString();
-    var endInitTime = DateTime.now().add(
-      const Duration(seconds: (23 * 60 + 59) * 60),
-    );
+    final now = DateTime.now();
+    final start = DateTime(now.year, now.month, 1);
+    final end = DateTime.now();
+    myDateRange = DateTimeRange(start: start, end: end);
+
+    var startInitTime = start.toString();
+    var endInitTime = end.add(const Duration(seconds: (23 * 60 + 59) * 60));
     _bloc.add(
       OrderManagerListEvent(
         isRefresh: true,
@@ -100,65 +106,86 @@ class _OrderManagerScreenState extends State<OrderManagerScreen> {
           title: "Quản lý đơn hàng",
           isBackNavigation: true,
           onBack: () async {
-            // Navigator.pushReplacementNamed(context, Routes.root);
             Navigator.pop(context);
           },
         ),
-        body: RefreshIndicator(
-          onRefresh: () async {
-            final now = DateTime.now();
-            var start = DateTime(now.year, now.month, 1);
-            var end = DateTime.now();
-            setState(() {
-              myDateRange = DateTimeRange(start: start, end: end);
-            });
-            _bloc.add(
-              OrderManagerListEvent(
-                isRefresh: true,
-                start: start.toString(),
-                end: end
-                    .add(const Duration(seconds: (23 * 60 + 59) * 60))
-                    .toString(),
-                page: 1,
-              ),
-            );
-          },
-          child: LoadingIndicator(
-            isLoading: _bloc.isLoading,
-            child: ListView.builder(
-              controller: _scrollController,
-              padding: const EdgeInsets.symmetric(
-                horizontal: paddingHorizontal,
-                vertical: paddingVertical,
-              ),
-              itemCount:
-                  1 +
-                  _bloc.staffLstOrders.length +
-                  (_bloc.isLoadMoreLoading ? 1 : 0),
-              itemBuilder: (context, index) {
-                if (index == 0) {
-                  return _buildHeader();
-                }
-
-                if (index == _bloc.staffLstOrders.length + 1) {
-                  return const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 16.0),
-                    child: Center(
-                      child: CircularProgressIndicator(
-                        color: ColorUtil.bangladeshGreen,
-                      ),
-                    ),
-                  );
-                }
-
-                final orderIndex = index - 1;
-                return _buildOrderCard(
-                  context,
-                  _bloc.staffLstOrders[orderIndex],
+        body: Stack(
+          children: [
+            RefreshIndicator(
+              onRefresh: () async {
+                final now = DateTime.now();
+                var start = DateTime(now.year, now.month, 1);
+                var end = DateTime.now();
+                setState(() {
+                  myDateRange = DateTimeRange(start: start, end: end);
+                });
+                _bloc.add(
+                  OrderManagerListEvent(
+                    isRefresh: true,
+                    start: start.toString(),
+                    end: end
+                        .add(const Duration(seconds: (23 * 60 + 59) * 60))
+                        .toString(),
+                    page: 1,
+                  ),
                 );
               },
+              child: LoadingIndicator(
+                isLoading: _bloc.isLoading,
+                child: ListView.builder(
+                  controller: _scrollController,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: paddingHorizontal,
+                    vertical: paddingVertical,
+                  ),
+                  itemCount:
+                      1 +
+                      _bloc.staffLstOrders.length +
+                      (_bloc.isLoadMoreLoading ? 1 : 0),
+                  itemBuilder: (context, index) {
+                    if (index == 0) {
+                      return _buildHeader();
+                    }
+
+                    if (index == _bloc.staffLstOrders.length + 1) {
+                      return const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 16.0),
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            color: ColorUtil.bangladeshGreen,
+                          ),
+                        ),
+                      );
+                    }
+
+                    final orderIndex = index - 1;
+                    return _buildOrderCard(
+                      context,
+                      _bloc.staffLstOrders[orderIndex],
+                    );
+                  },
+                ),
+              ),
             ),
-          ),
+            Positioned(
+              left: -9999,
+              top: -9999,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: RepaintBoundary(
+                  key: _reportKey,
+                  child: SizedBox(
+                    width: 850,
+                    child: Container(
+                      color: Colors.white,
+                      padding: const EdgeInsets.all(24),
+                      child: _buildReportContent(),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -461,19 +488,504 @@ class _OrderManagerScreenState extends State<OrderManagerScreen> {
         const SizedBox(height: 10),
         _buildStatsGrid(),
         _buildDetailedStats(),
-        const Padding(
-          padding: EdgeInsets.only(bottom: 12.0, top: 4.0),
-          child: Text(
-            'Danh sách đơn hàng',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: ColorUtil.raisinBlack,
-            ),
+        Padding(
+          padding: const EdgeInsets.only(bottom: 12.0, top: 8.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Danh sách đơn hàng',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: ColorUtil.raisinBlack,
+                ),
+              ),
+              ElevatedButton.icon(
+                onPressed: _exportReportImage,
+                icon: const Icon(
+                  Icons.share_outlined,
+                  size: 16,
+                  color: Colors.white,
+                ),
+                label: const Text(
+                  'Xuất báo cáo',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: ColorUtil.bangladeshGreen,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ],
     );
+  }
+
+  Future<void> _exportReportImage() async {
+    if (_bloc.staffLstOrders.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Không có đơn hàng nào để xuất báo cáo!')),
+      );
+      return;
+    }
+
+    try {
+      // Show loading indicator
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(color: ColorUtil.bangladeshGreen),
+        ),
+      );
+
+      // Force state update to ensure 850px report layout is fresh
+      setState(() {});
+      await Future.delayed(const Duration(milliseconds: 150));
+
+      final boundary =
+          _reportKey.currentContext?.findRenderObject()
+              as RenderRepaintBoundary?;
+
+      if (boundary == null) {
+        if (mounted && Navigator.canPop(context)) {
+          Navigator.pop(context);
+        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Không thể tạo khung hình báo cáo, vui lòng thử lại!',
+            ),
+          ),
+        );
+        return;
+      }
+
+      final image = await boundary.toImage(pixelRatio: 2.0);
+      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+
+      if (mounted && Navigator.canPop(context)) {
+        Navigator.pop(context);
+      }
+
+      if (byteData == null) return;
+      final pngBytes = byteData.buffer.asUint8List();
+
+      final tempDir = await getTemporaryDirectory();
+      final ktvName = (App.instance.userApp?.username ?? 'ktv').replaceAll(
+        ' ',
+        '_',
+      );
+      final fileName =
+          'phieu_cong_viec_${ktvName}_${DateTime.now().millisecondsSinceEpoch}.png';
+      final file = File('${tempDir.path}/$fileName');
+      await file.writeAsBytes(pngBytes);
+
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [XFile(file.path)],
+          text:
+              'Báo cáo công việc - KTV ${App.instance.userApp?.username ?? ''}',
+        ),
+      );
+    } catch (e) {
+      print("Error exporting report image: $e");
+      if (mounted) {
+        if (Navigator.canPop(context)) {
+          Navigator.pop(context);
+        }
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Có lỗi khi xuất báo cáo: $e')));
+      }
+    }
+  }
+
+  Widget _buildReportContent() {
+    final ktvName = App.instance.userApp?.username ?? '';
+
+    final startDate =
+        myDateRange?.start ??
+        DateTime(DateTime.now().year, DateTime.now().month, 1);
+    final endDate = myDateRange?.end ?? DateTime.now();
+
+    final startStr = DateFormat('dd/MM/yyyy').format(startDate);
+    final endStr = DateFormat('dd/MM/yyyy').format(endDate);
+    final dateRangeText = (startStr == endStr)
+        ? startStr
+        : '$startStr - $endStr';
+
+    final shortStart = DateFormat('dd/MM').format(startDate);
+    final shortEnd = DateFormat('dd/MM').format(endDate);
+    final shortDateText = (shortStart == shortEnd)
+        ? shortStart
+        : '$shortStart-$shortEnd';
+
+    double grandCash = 0;
+    double grandTransfer = 0;
+    double totalThayLoiRev = 0;
+
+    List<Map<String, dynamic>> orderRows = [];
+    for (var order in _bloc.staffLstOrders) {
+      double price = double.tryParse(order.price ?? '0') ?? 0;
+      double cash = 0;
+      double transfer = 0;
+
+      if (order.orderPayment != null && order.orderPayment!.isNotEmpty) {
+        for (var p in order.orderPayment!) {
+          double amt = double.tryParse(p.amount ?? '0') ?? 0;
+          if (p.method == '0') {
+            cash += amt;
+          } else if (p.method == '1') {
+            transfer += amt;
+          }
+        }
+      }
+
+      grandCash += cash;
+      grandTransfer += transfer;
+
+      String subType = _getSubTypeText(order);
+      if (subType == 'Thay lõi') {
+        totalThayLoiRev += price;
+      }
+
+      final saleName =
+          order.sale?.username ??
+          order.sale?.phone ??
+          order.user?.username ??
+          '';
+
+      orderRows.add({
+        'orderId': order.id?.toString() ?? '',
+        'saleName': saleName,
+        'subType': subType,
+        'price': price,
+        'cash': cash,
+        'transfer': transfer,
+        'products': _getProductsText(order),
+        'note': order.ghichu ?? '',
+      });
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Center(
+          child: Text(
+            'PHIẾU CÔNG VIỆC HÀNG NGÀY',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+          ),
+        ),
+        const SizedBox(height: 14),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            RichText(
+              text: TextSpan(
+                style: const TextStyle(fontSize: 13, color: Colors.black),
+                children: [
+                  const TextSpan(
+                    text: 'Họ tên kỹ thuật: ',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  TextSpan(
+                    text: ktvName,
+                    style: const TextStyle(
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            RichText(
+              text: TextSpan(
+                style: const TextStyle(fontSize: 13, color: Colors.black),
+                children: [
+                  const TextSpan(
+                    text: 'Ngày: ',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  TextSpan(
+                    text: dateRangeText,
+                    style: const TextStyle(
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 14),
+        const Text(
+          'BÁO CÁO KỸ THUẬT VIÊN',
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Table(
+          border: TableBorder.all(color: Colors.black, width: 1.0),
+          columnWidths: const {
+            0: FlexColumnWidth(1.2),
+            1: FlexColumnWidth(1.8),
+            2: FlexColumnWidth(1.4),
+            3: FlexColumnWidth(1.8),
+            4: FlexColumnWidth(1.8),
+            5: FlexColumnWidth(1.8),
+            6: FlexColumnWidth(3.8),
+            7: FlexColumnWidth(2.4),
+          },
+          children: [
+            TableRow(
+              decoration: const BoxDecoration(color: Color(0xFFF0F0F0)),
+              children: [
+                _buildTableCell('Đơn Số', isHeader: true),
+                _buildTableCell('Tên Sale', isHeader: true),
+                _buildTableCell('Loại đơn', isHeader: true),
+                _buildTableCell('Tổng số tiền', isHeader: true),
+                _buildTableCell('TT Tiền mặt', isHeader: true),
+                _buildTableCell('TT Chuyển khoản', isHeader: true),
+                _buildTableCell('Sản phẩm', isHeader: true),
+                _buildTableCell('Ghi chú', isHeader: true),
+              ],
+            ),
+            ...orderRows.map((row) {
+              return TableRow(
+                children: [
+                  _buildTableCell(
+                    row['orderId'],
+                    isBold: true,
+                    align: TextAlign.center,
+                  ),
+                  _buildTableCell(row['saleName']),
+                  _buildTableCell(row['subType']),
+                  _buildTableCell(
+                    _formatK(row['price']),
+                    align: TextAlign.right,
+                  ),
+                  _buildTableCell(
+                    _formatK(row['cash'], isZeroBlank: true),
+                    align: TextAlign.right,
+                  ),
+                  _buildTableCell(
+                    _formatK(row['transfer'], isZeroBlank: true),
+                    align: TextAlign.right,
+                  ),
+                  _buildTableCell(row['products']),
+                  _buildTableCell(row['note']),
+                ],
+              );
+            }),
+            TableRow(
+              children: [
+                TableCell(
+                  child: Container(
+                    alignment: Alignment.centerRight,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 4,
+                      vertical: 6,
+                    ),
+                    child: const Text(
+                      'TỔNG',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 11.5,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ),
+                ),
+                const TableCell(child: SizedBox.shrink()),
+                const TableCell(child: SizedBox.shrink()),
+                _buildTableCell(
+                  _formatK(_bloc.totalPriceAll),
+                  isBold: true,
+                  align: TextAlign.right,
+                ),
+                _buildTableCell(
+                  _formatK(grandCash),
+                  isBold: true,
+                  align: TextAlign.right,
+                ),
+                _buildTableCell(
+                  _formatK(grandTransfer),
+                  isBold: true,
+                  align: TextAlign.right,
+                ),
+                const TableCell(child: SizedBox.shrink()),
+                const TableCell(child: SizedBox.shrink()),
+              ],
+            ),
+            TableRow(
+              children: [
+                TableCell(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 4,
+                      vertical: 6,
+                    ),
+                    child: const Text(
+                      'TIỀN MẶT PHẢI NỘP',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 11.5,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ),
+                ),
+                const TableCell(child: SizedBox.shrink()),
+                const TableCell(child: SizedBox.shrink()),
+                _buildTableCell(
+                  _formatK(grandCash),
+                  isBold: true,
+                  align: TextAlign.left,
+                ),
+                const TableCell(child: SizedBox.shrink()),
+                const TableCell(child: SizedBox.shrink()),
+                const TableCell(child: SizedBox.shrink()),
+                const TableCell(child: SizedBox.shrink()),
+              ],
+            ),
+            TableRow(
+              children: [
+                TableCell(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 4,
+                      vertical: 6,
+                    ),
+                    child: const Text(
+                      'Doanh Thu Thay Lõi',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 11.5,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ),
+                ),
+                const TableCell(child: SizedBox.shrink()),
+                const TableCell(child: SizedBox.shrink()),
+                _buildTableCell(
+                  _formatK(totalThayLoiRev),
+                  isBold: true,
+                  align: TextAlign.left,
+                ),
+                const TableCell(child: SizedBox.shrink()),
+                const TableCell(child: SizedBox.shrink()),
+                _buildTableCell(
+                  'Thưởng nóng:',
+                  isBold: true,
+                  align: TextAlign.left,
+                ),
+                const TableCell(child: SizedBox.shrink()),
+              ],
+            ),
+          ],
+        ),
+        const SizedBox(height: 14),
+        const Text(
+          '0002 4820 001 - TRAN THI NGOC HAN - Tiền Phong Bank',
+          style: TextStyle(
+            fontSize: 12.0,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          'Nội dung CK: $ktvName ($shortDateText)',
+          style: const TextStyle(fontSize: 11.0, color: Colors.black),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTableCell(
+    String text, {
+    bool isHeader = false,
+    bool isBold = false,
+    TextAlign align = TextAlign.left,
+  }) {
+    return TableCell(
+      verticalAlignment: TableCellVerticalAlignment.middle,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+        child: Text(
+          text,
+          textAlign: align,
+          style: TextStyle(
+            fontSize: isHeader ? 11.5 : 11.0,
+            fontWeight: (isHeader || isBold)
+                ? FontWeight.bold
+                : FontWeight.normal,
+            color: Colors.black,
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _formatK(double val, {bool isZeroBlank = false}) {
+    if (val == 0) {
+      return isZeroBlank ? '' : '0';
+    }
+    double inK = val / 1000;
+    final numFormat = NumberFormat('#,###', 'vi_VN');
+    return '${numFormat.format(inK.round())}k';
+  }
+
+  String _getSubTypeText(OrderDetailModel order) {
+    final type = order.type;
+    if (type == '1') return 'Đơn lắp máy';
+    if (type == '2') return 'Thay lõi';
+    if (type == '3') return 'VSBD';
+    if (type == '4') return 'Đơn online';
+    if (type == '5') return 'Đơn ship';
+    if (type == '6') return 'Lọc tổng (chính)';
+    if (type == '7') return 'Lọc tổng (phụ)';
+    return 'Thay thế';
+  }
+
+  String _getProductsText(OrderDetailModel order) {
+    if (order.orderFilterCoresModel != null &&
+        order.orderFilterCoresModel!.isNotEmpty) {
+      final cores = order.orderFilterCoresModel!
+          .where(
+            (c) =>
+                c.replaceDatePromise == null ||
+                c.replaceDatePromise!.isEmpty ||
+                c.replaceDatePromise!.contains('0000'),
+          )
+          .map((c) => c.name)
+          .where((n) => n != null && n.isNotEmpty)
+          .join(', ');
+      if (cores.isNotEmpty) return cores;
+    }
+    return 'Lắp đặt mới; VSBD; Dv khác...';
   }
 
   Widget _buildStatusBadge(String? type) {

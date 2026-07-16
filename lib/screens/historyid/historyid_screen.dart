@@ -527,6 +527,42 @@ class _HistoryidScreenState extends State<HistoryidScreen>
                               )),
                             ),
                           ),
+                          if (machine.address != null &&
+                              machine.address!.trim().isNotEmpty)
+                            Align(
+                              alignment: Alignment.topLeft,
+                              child: Container(
+                                padding: EdgeInsets.only(
+                                  top: MediaQuery.of(context).size.width * 0.01,
+                                ),
+                                child: RichText(
+                                  softWrap: true,
+                                  maxLines: 3,
+                                  text: TextSpan(
+                                    children: [
+                                      const TextSpan(
+                                        text: 'Vị trí lắp đặt: ',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: ColorUtil.bangladeshGreen,
+                                          decorationThickness: 1,
+                                          fontSize: 13,
+                                        ),
+                                      ),
+                                      TextSpan(
+                                        text: machine.address ?? '',
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.normal,
+                                          color: ColorUtil.raisinBlack,
+                                          decorationThickness: 1,
+                                          fontSize: 13,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
                         ],
                       ),
                     ],

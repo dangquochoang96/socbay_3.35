@@ -143,7 +143,7 @@ class StaffNewOrderBloc extends Bloc<StaffNewOrderEvent, StaffNewOrderState> {
     isLoading = true;
     var isNew = false;
     emit(StaffNewOrderInitialState());
-    await _updateAddressCustomer(event.newAddress);
+    // await _updateAddressCustomer(event.newAddress);
     try {
       if (event.productId == 0) {
         if (event.newProductId != null && event.newProductId != 0) {
@@ -329,6 +329,7 @@ class StaffNewOrderBloc extends Bloc<StaffNewOrderEvent, StaffNewOrderState> {
                 'user_create': App.instance.userApp?.id.toString(),
                 'product_id': event.productId.toString(),
                 'order_id': orderDetail?.id.toString(),
+                'address': event.newAddress,
               },
             );
             var resEditTask = await http.post(urleditTask);
@@ -430,9 +431,11 @@ class StaffNewOrderBloc extends Bloc<StaffNewOrderEvent, StaffNewOrderState> {
         var l = Map<String, dynamic>.from(json.decode(response.body));
         if (l["code"] == 200 || l["code"] == 1) {
           isLoading = false;
-          emit(StaffNewOrderUploadPaymentProofSuccessState(
-            paymentStatus: event.paymentStatus,
-          ));
+          emit(
+            StaffNewOrderUploadPaymentProofSuccessState(
+              paymentStatus: event.paymentStatus,
+            ),
+          );
         } else {
           isLoading = false;
           emit(
@@ -458,22 +461,22 @@ class StaffNewOrderBloc extends Bloc<StaffNewOrderEvent, StaffNewOrderState> {
     }
   }
 
-  FutureOr<void> _updateAddressCustomer(String? newAddress) async {
-    try {
-      UserInfoRequest userInfo = UserInfoRequest(
-        phone: taskModel?.customer?.phone,
-        birthday: taskModel?.customer?.birthday
-            ?.substring(0, 10)
-            .split("-")
-            .reversed
-            .join("/"),
-        address: newAddress,
-        email: taskModel?.customer?.email,
-        avatar: taskModel?.customer?.avatar,
-      );
-      await apiRepository.updateUserInfo(userInfo);
-    } catch (ex) {
-      LoggerUtil.log(ex.toString());
-    }
-  }
+  // FutureOr<void> _updateAddressCustomer(String? newAddress) async {
+  //   try {
+  //     UserInfoRequest userInfo = UserInfoRequest(
+  //       phone: taskModel?.customer?.phone,
+  //       birthday: taskModel?.customer?.birthday
+  //           ?.substring(0, 10)
+  //           .split("-")
+  //           .reversed
+  //           .join("/"),
+  //       address: newAddress,
+  //       email: taskModel?.customer?.email,
+  //       avatar: taskModel?.customer?.avatar,
+  //     );
+  //     await apiRepository.updateUserInfo(userInfo);
+  //   } catch (ex) {
+  //     LoggerUtil.log(ex.toString());
+  //   }
+  // }
 }

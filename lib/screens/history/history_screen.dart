@@ -494,6 +494,15 @@ class _HistoryScreenState extends State<HistoryScreen>
                   valueColor: ColorUtil.bangladeshGreen,
                   isBoldValue: true,
                 ),
+                if (machine.address != null &&
+                    machine.address!.trim().isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  _buildHistoryInfoRow(
+                    Icons.location_on_outlined,
+                    'Vị trí lắp đặt',
+                    machine.address!,
+                  ),
+                ],
               ],
             ),
           ),

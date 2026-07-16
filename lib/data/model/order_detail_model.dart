@@ -29,6 +29,7 @@ class OrderDetailModel {
   final DateTime? dateOrder;
   final UserModel? staff;
   final UserModel? user;
+  final UserModel? sale;
   final List<String>? images;
   final String? productId;
   final String? address;
@@ -60,6 +61,7 @@ class OrderDetailModel {
     this.dateOrder,
     this.staff,
     this.user,
+    this.sale,
     this.images,
     this.productId,
     this.address,
@@ -115,6 +117,9 @@ class OrderDetailModel {
         : null,
     user: json["user"] != null
         ? UserModel.fromJson(json["user"] as Map<String, dynamic>)
+        : null,
+    sale: json["sale"] != null
+        ? UserModel.fromJson(json["sale"] as Map<String, dynamic>)
         : null,
     images: getImages(json["images"] as List<dynamic>?),
     productId: getProductId(json['order_filter_core'] as List<dynamic>?),

@@ -7,6 +7,7 @@ import 'package:socbay/screens/auth/login_screen.dart';
 import 'package:socbay/screens/splash_screen.dart';
 import 'package:socbay/screens/home_tab_bar/tab_bar_screen.dart';
 import 'package:socbay/utils/logger_util.dart';
+import 'package:socbay/services/in_app_update_service.dart';
 import 'package:socbay/widgets/dialog/custom_alert_dialog.dart';
 
 import 'blocs/root/root_event.dart';
@@ -30,10 +31,14 @@ class _RootState extends State<Root> {
     _rootBloc = RootBloc();
     _tabBarBloc = TabBarBloc();
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      InAppUpdateService.instance.checkForUpdate();
+    });
   }
 
   @override
   void dispose() {
+    InAppUpdateService.instance.dispose();
     _rootBloc.close();
     _tabBarBloc.close();
     super.dispose();
