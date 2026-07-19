@@ -97,50 +97,60 @@ class _WarehouseScreenState extends State<WarehouseScreen>
     }
   }
 
+  void _updateFilteredWarehouseList([String? query]) {
+    final searchQuery = query ?? _searchController.text;
+    final stockFilterText = _stockFilterController.text.trim();
+    final filterStock = int.tryParse(stockFilterText);
+
+    _filteredWarehouseList = _allWarehouses.where((warehouse) {
+      final product = warehouse.product;
+      final stock = _safeParseInt(warehouse.quantityExist);
+
+      bool nameMatch = true;
+      if (searchQuery.trim().isNotEmpty) {
+        nameMatch = (product?.name ?? '').toLowerCase().contains(
+          searchQuery.toLowerCase(),
+        );
+      }
+
+      bool stockMatch = true;
+      if (stockFilterText.isNotEmpty && filterStock != null) {
+        stockMatch = stock == filterStock;
+      }
+
+      return nameMatch && stockMatch;
+    }).toList();
+
+    _filteredWarehouseList.sort((a, b) {
+      final qa = _safeParseInt(a.quantityExist);
+      final qb = _safeParseInt(b.quantityExist);
+      return _sortDesc ? qb.compareTo(qa) : qa.compareTo(qb);
+    });
+  }
+
   void _filterWarehouseList(String query) {
     setState(() {
-      final stockFilterText = _stockFilterController.text.trim();
-      final filterStock = int.tryParse(stockFilterText);
-
-      _filteredWarehouseList = _allWarehouses.where((warehouse) {
-        final product = warehouse.product;
-        final stock = _safeParseInt(warehouse.quantityExist);
-
-        bool nameMatch = true;
-        if (query.trim().isNotEmpty) {
-          nameMatch =
-              product?.name!.toLowerCase().contains(query.toLowerCase()) ??
-              false;
-        }
-
-        bool stockMatch = true;
-        if (stockFilterText.isNotEmpty && filterStock != null) {
-          stockMatch = stock == filterStock;
-        }
-
-        return nameMatch && stockMatch;
-      }).toList();
-
-      _filteredWarehouseList.sort((a, b) {
-        final qa = _safeParseInt(a.quantityExist);
-        final qb = _safeParseInt(b.quantityExist);
-        return _sortDesc ? qb.compareTo(qa) : qa.compareTo(qb);
-      });
+      _updateFilteredWarehouseList(query);
     });
+  }
+
+  void _updateFilteredExportHistoryList([String? query]) {
+    final searchQuery = query ?? _exportSearchController.text;
+    if (searchQuery.trim().isEmpty) {
+      _filteredExportHistoryList = List.from(_allHistory);
+      return;
+    }
+    _filteredExportHistoryList = _allHistory.where((history) {
+      final name = history.userName?.toLowerCase() ?? '';
+      final phone = history.userPhone?.toLowerCase() ?? '';
+      final search = searchQuery.toLowerCase();
+      return name.contains(search) || phone.contains(search);
+    }).toList();
   }
 
   void _filterExportHistoryList(String query) {
     setState(() {
-      if (query.trim().isEmpty) {
-        _filteredExportHistoryList = List.from(_allHistory);
-        return;
-      }
-      _filteredExportHistoryList = _allHistory.where((history) {
-        final name = history.userName?.toLowerCase() ?? '';
-        final phone = history.userPhone?.toLowerCase() ?? '';
-        final searchQuery = query.toLowerCase();
-        return name.contains(searchQuery) || phone.contains(searchQuery);
-      }).toList();
+      _updateFilteredExportHistoryList(query);
     });
   }
 
@@ -1567,6 +1577,864 @@ class _WarehouseScreenState extends State<WarehouseScreen>
     removeOverlay();
   }
 
+  Future<void> _showReturnDialog() async {
+    DestinationWarehouse? selectedDestinationWarehouse;
+    List<DestinationWarehouse> destinationWarehouses = [];
+    bool isLoadingWarehouses = true;
+
+    final TextEditingController notesController = TextEditingController();
+    final TextEditingController searchController = TextEditingController();
+
+    Map<int, int> selectedQuantities = {};
+    Map<int, TextEditingController> quantityControllers = {};
+    Map<int, TextEditingController> priceControllers = {};
+    List<Warehouse> filteredWarehouseList = [];
+
+    for (var warehouse in _allWarehouses) {
+      selectedQuantities[warehouse.id] = 0;
+      quantityControllers[warehouse.id] = TextEditingController(text: '0');
+      final defaultPrice = warehouse.product?.price?.toString() ?? '0';
+      priceControllers[warehouse.id] = TextEditingController(
+        text: _formatCurrency(defaultPrice),
+      );
+    }
+
+    void setQuantity(
+      int warehouseId,
+      int qty,
+      int maxQuantity,
+      StateSetter dialogSetState,
+    ) {
+      if (qty < 0) qty = 0;
+      if (qty > maxQuantity) qty = maxQuantity;
+      dialogSetState(() {
+        selectedQuantities[warehouseId] = qty;
+        quantityControllers[warehouseId]?.text = qty.toString();
+      });
+    }
+
+    final warehouseBloc = context.read<WarehouseBloc>();
+    warehouseBloc.add(const FetchDestinationWarehousesEvent());
+
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogCtx) => BlocProvider.value(
+        value: warehouseBloc,
+        child: StatefulBuilder(
+          builder: (dialogStateContext, dialogSetState) {
+            return BlocListener<WarehouseBloc, WarehouseState>(
+              listener: (blocCtx, state) {
+                if (state is DestinationWarehouseLoading) {
+                  dialogSetState(() => isLoadingWarehouses = true);
+                } else if (state is DestinationWarehouseSuccess) {
+                  dialogSetState(() {
+                    isLoadingWarehouses = false;
+                    destinationWarehouses = state.warehouses;
+                    if (destinationWarehouses.isNotEmpty &&
+                        selectedDestinationWarehouse == null) {
+                      selectedDestinationWarehouse =
+                          destinationWarehouses.first;
+                    }
+                  });
+                } else if (state is DestinationWarehouseFailure) {
+                  dialogSetState(() => isLoadingWarehouses = false);
+                  Fluttertoast.showToast(msg: state.error);
+                }
+              },
+              child: Dialog.fullscreen(
+                child: Scaffold(
+                  appBar: AppBar(
+                    backgroundColor: Colors.orange,
+                    leading: IconButton(
+                      icon: const Icon(Icons.close, color: Colors.white),
+                      onPressed: () => Navigator.pop(dialogCtx),
+                    ),
+                    title: const Text(
+                      'Tạo phiếu hoàn kho',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () async {
+                          if (selectedDestinationWarehouse == null) {
+                            Fluttertoast.showToast(
+                              msg: 'Vui lòng chọn kho nhận',
+                            );
+                            return;
+                          }
+
+                          final warehouseId = selectedDestinationWarehouse!.id;
+
+                          final selectedProductsData = selectedQuantities
+                              .entries
+                              .where((entry) => entry.value > 0)
+                              .map((entry) {
+                                final warehouse = _allWarehouses.firstWhere(
+                                  (w) => w.id == entry.key,
+                                );
+                                final cleanPrice = _parseCurrency(
+                                  priceControllers[entry.key]?.text ?? '0',
+                                );
+                                final priceNum =
+                                    double.tryParse(cleanPrice) ??
+                                    double.tryParse(
+                                      warehouse.product?.price?.toString() ??
+                                          '0',
+                                    ) ??
+                                    0;
+                                final productId =
+                                    warehouse.product?.id ??
+                                    int.tryParse(warehouse.productId ?? '0') ??
+                                    0;
+
+                                return {
+                                  'product_id': productId,
+                                  'quantity': entry.value,
+                                  'price': priceNum,
+                                  'name': warehouse.product?.name ?? '',
+                                };
+                              })
+                              .toList();
+
+                          if (selectedProductsData.isEmpty) {
+                            Fluttertoast.showToast(
+                              msg:
+                                  'Vui lòng chọn ít nhất một sản phẩm để hoàn kho',
+                            );
+                            return;
+                          }
+
+                          final params = {
+                            'warehouse_id': warehouseId,
+                            'products': selectedProductsData
+                                .map((p) => p['product_id'])
+                                .toList(),
+                            'quantities': selectedProductsData
+                                .map((p) => p['quantity'])
+                                .toList(),
+                            'prices': selectedProductsData
+                                .map((p) => p['price'])
+                                .toList(),
+                            'notes': notesController.text.trim(),
+                          };
+
+                          final user = App.instance.userApp;
+                          if (user != null) {
+                            Navigator.pop(dialogCtx);
+                            context.read<WarehouseBloc>().add(
+                              ReturnWarehouseEvent(
+                                userId: user.id.toString(),
+                                params: params,
+                              ),
+                            );
+                          }
+                        },
+                        child: const Text(
+                          'Xác nhận',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  body: SingleChildScrollView(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Thông tin hoàn kho',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        isLoadingWarehouses
+                            ? const SizedBox(
+                                height: 48,
+                                child: Center(
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.orange,
+                                  ),
+                                ),
+                              )
+                            : DropdownButtonFormField<DestinationWarehouse>(
+                                value: selectedDestinationWarehouse,
+                                isExpanded: true,
+                                itemHeight: null,
+                                decoration: const InputDecoration(
+                                  labelText: 'Kho nhận *',
+                                  border: OutlineInputBorder(),
+                                  contentPadding: EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 12,
+                                  ),
+                                ),
+                                selectedItemBuilder: (context) {
+                                  return destinationWarehouses.map((wh) {
+                                    final name = wh.name ?? 'Kho #${wh.id}';
+                                    final displayText = name;
+                                    return Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: Text(
+                                        displayText,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 13,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    );
+                                  }).toList();
+                                },
+                                items: destinationWarehouses.map((wh) {
+                                  return DropdownMenuItem<DestinationWarehouse>(
+                                    value: wh,
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 4,
+                                      ),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(
+                                            wh.name ?? 'Kho #${wh.id}',
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 13,
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          if (wh.address != null &&
+                                              wh.address!.isNotEmpty)
+                                            Text(
+                                              wh.address!,
+                                              style: const TextStyle(
+                                                fontSize: 11,
+                                                color: Colors.grey,
+                                              ),
+                                              overflow: TextOverflow.ellipsis,
+                                              maxLines: 1,
+                                            ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                }).toList(),
+                                onChanged: (val) {
+                                  dialogSetState(() {
+                                    selectedDestinationWarehouse = val;
+                                  });
+                                },
+                              ),
+
+                        const Divider(height: 32),
+
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              'Sản phẩm hoàn trả',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            TextButton.icon(
+                              onPressed: () async {
+                                if (await Permission.camera
+                                    .request()
+                                    .isGranted) {
+                                  final barcode = await Navigator.push<String>(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => QrcodeReaderView(
+                                        onScan: (result) async {
+                                          Navigator.pop(context, result);
+                                        },
+                                      ),
+                                    ),
+                                  );
+                                  if (barcode != null && barcode.isNotEmpty) {
+                                    try {
+                                      final url = AppConfig.instance.apiUri(
+                                        ApiEndpoints.getProductByBarcode(
+                                          barcode,
+                                        ),
+                                      );
+                                      final response = await http.get(url);
+                                      if (response.statusCode ==
+                                          HttpStatus.ok) {
+                                        final jsonRes = json.decode(
+                                          response.body,
+                                        );
+                                        if (jsonRes['code'] == 1 &&
+                                            jsonRes['data'] != null) {
+                                          final product = ProductModel.fromJson(
+                                            jsonRes['data'],
+                                          );
+                                          final targetId = product.id;
+
+                                          final idx = _allWarehouses.indexWhere(
+                                            (w) => w.product?.id == targetId,
+                                          );
+                                          if (idx != -1) {
+                                            final warehouse =
+                                                _allWarehouses[idx];
+                                            final maxQty = _safeParseInt(
+                                              warehouse.quantityExist,
+                                            );
+                                            if (maxQty > 0) {
+                                              dialogSetState(() {
+                                                int currentQty =
+                                                    selectedQuantities[warehouse
+                                                        .id] ??
+                                                    0;
+                                                if (currentQty < maxQty) {
+                                                  currentQty++;
+                                                  selectedQuantities[warehouse
+                                                          .id] =
+                                                      currentQty;
+                                                  quantityControllers[warehouse
+                                                          .id]
+                                                      ?.text = currentQty
+                                                      .toString();
+                                                } else {
+                                                  Fluttertoast.showToast(
+                                                    msg:
+                                                        'Số lượng hoàn đã đạt tối đa tồn kho',
+                                                  );
+                                                }
+                                              });
+                                              Fluttertoast.showToast(
+                                                msg: 'Đã thêm: ${product.name}',
+                                              );
+                                            } else {
+                                              Fluttertoast.showToast(
+                                                msg:
+                                                    'Sản phẩm này hiện có 0 số lượng tồn kho',
+                                              );
+                                            }
+                                          } else {
+                                            Fluttertoast.showToast(
+                                              msg:
+                                                  'Sản phẩm không có trong kho của bạn',
+                                            );
+                                          }
+                                        } else {
+                                          Fluttertoast.showToast(
+                                            msg:
+                                                'Không tìm thấy sản phẩm với mã này',
+                                          );
+                                        }
+                                      } else {
+                                        Fluttertoast.showToast(
+                                          msg: 'Lỗi tải thông tin sản phẩm',
+                                        );
+                                      }
+                                    } catch (e) {
+                                      Fluttertoast.showToast(
+                                        msg: 'Đã xảy ra lỗi: $e',
+                                      );
+                                    }
+                                  }
+                                } else {
+                                  CustomAlertDialog.show(
+                                    context,
+                                    leftText: "Cài đặt",
+                                    rightText: "Hủy",
+                                    isLeftPositive: true,
+                                    leftAction: () {
+                                      Navigator.pop(context);
+                                      openAppSettings();
+                                    },
+                                    content:
+                                        'Vui lòng cấp quyền truy cập camera.',
+                                  );
+                                }
+                              },
+                              icon: const Icon(
+                                Icons.qr_code_scanner,
+                                color: Colors.orange,
+                              ),
+                              label: const Text(
+                                'Quét Mã',
+                                style: TextStyle(
+                                  color: Colors.orange,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        TextField(
+                          controller: searchController,
+                          decoration: InputDecoration(
+                            hintText: 'Tìm kiếm sản phẩm theo tên hoặc mã...',
+                            prefixIcon: const Icon(Icons.search),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            suffixIcon: searchController.text.isNotEmpty
+                                ? IconButton(
+                                    icon: const Icon(Icons.clear),
+                                    onPressed: () {
+                                      searchController.clear();
+                                      dialogSetState(() {
+                                        filteredWarehouseList.clear();
+                                      });
+                                    },
+                                  )
+                                : null,
+                          ),
+                          onChanged: (value) {
+                            dialogSetState(() {
+                              final query = value.trim().toLowerCase();
+                              if (query.isEmpty) {
+                                filteredWarehouseList.clear();
+                              } else {
+                                filteredWarehouseList = _allWarehouses.where((
+                                  warehouse,
+                                ) {
+                                  final name = warehouse.product?.name ?? '';
+                                  final code =
+                                      warehouse.product?.productCode ?? '';
+                                  return name.toLowerCase().contains(query) ||
+                                      code.toLowerCase().contains(query);
+                                }).toList();
+                              }
+                            });
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                        Builder(
+                          builder: (context) {
+                            final isSearching = searchController.text
+                                .trim()
+                                .isNotEmpty;
+                            final displayedList = isSearching
+                                ? filteredWarehouseList
+                                : _allWarehouses
+                                      .where(
+                                        (w) =>
+                                            (selectedQuantities[w.id] ?? 0) > 0,
+                                      )
+                                      .toList();
+
+                            if (displayedList.isEmpty) {
+                              return Center(
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 32,
+                                  ),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        isSearching
+                                            ? Icons.search_off
+                                            : Icons.inventory_2_outlined,
+                                        size: 48,
+                                        color: Colors.grey.shade400,
+                                      ),
+                                      const SizedBox(height: 12),
+                                      Text(
+                                        isSearching
+                                            ? 'Không tìm thấy sản phẩm phù hợp'
+                                            : 'Chưa có sản phẩm nào được chọn',
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.grey,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        isSearching
+                                            ? 'Thử tìm kiếm với từ khóa khác'
+                                            : 'Quét mã QR hoặc tìm kiếm ở trên để thêm sản phẩm hoàn kho',
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          color: Colors.grey.shade500,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            }
+
+                            return ListView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: displayedList.length,
+                              itemBuilder: (ctx, index) {
+                                final warehouse = displayedList[index];
+                                final product = warehouse.product;
+                                final maxQuantity = _safeParseInt(
+                                  warehouse.quantityExist,
+                                );
+                                final currentQty =
+                                    selectedQuantities[warehouse.id] ?? 0;
+
+                                if (isSearching && currentQty == 0) {
+                                  return Card(
+                                    margin: const EdgeInsets.only(bottom: 8),
+                                    elevation: 0,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                      side: BorderSide(
+                                        color: Colors.grey.shade200,
+                                      ),
+                                    ),
+                                    child: ListTile(
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                            horizontal: 12,
+                                            vertical: 4,
+                                          ),
+                                      title: Text(
+                                        product?.name ?? '',
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 13,
+                                        ),
+                                      ),
+                                      subtitle: Text(
+                                        'Tồn: $maxQuantity | Giá: ${_formatCurrency(product?.price)} đ',
+                                        style: TextStyle(
+                                          color: Colors.grey[600],
+                                          fontSize: 11,
+                                        ),
+                                      ),
+                                      trailing: ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.orange
+                                              .withValues(alpha: 0.1),
+                                          foregroundColor: Colors.orange,
+                                          elevation: 0,
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 12,
+                                            vertical: 4,
+                                          ),
+                                          minimumSize: const Size(60, 32),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              6,
+                                            ),
+                                          ),
+                                        ),
+                                        onPressed: () {
+                                          setQuantity(
+                                            warehouse.id,
+                                            1,
+                                            maxQuantity,
+                                            dialogSetState,
+                                          );
+                                        },
+                                        child: const Text(
+                                          'Thêm',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                }
+
+                                return Card(
+                                  margin: const EdgeInsets.only(bottom: 12),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    side: BorderSide(
+                                      color: Colors.grey.shade200,
+                                    ),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(12),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Expanded(
+                                              child: Text(
+                                                product?.name ?? '',
+                                                style: const TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 14,
+                                                ),
+                                              ),
+                                            ),
+                                            IconButton(
+                                              icon: const Icon(
+                                                Icons.delete_outline,
+                                                color: Colors.red,
+                                                size: 20,
+                                              ),
+                                              padding: EdgeInsets.zero,
+                                              constraints:
+                                                  const BoxConstraints(),
+                                              onPressed: () {
+                                                setQuantity(
+                                                  warehouse.id,
+                                                  0,
+                                                  maxQuantity,
+                                                  dialogSetState,
+                                                );
+                                              },
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    'Tồn kho hiện tại: $maxQuantity',
+                                                    style: TextStyle(
+                                                      color: Colors.grey[600],
+                                                      fontSize: 12,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(height: 4),
+                                                  Text(
+                                                    'Giá mặc định: ${_formatCurrency(product?.price)} đ',
+                                                    style: TextStyle(
+                                                      color: Colors.grey[600],
+                                                      fontSize: 12,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                            Container(
+                                              decoration: BoxDecoration(
+                                                border: Border.all(
+                                                  color: Colors.grey.shade300,
+                                                ),
+                                                borderRadius:
+                                                    BorderRadius.circular(6),
+                                              ),
+                                              child: Row(
+                                                children: [
+                                                  IconButton(
+                                                    icon: const Icon(
+                                                      Icons.remove,
+                                                      size: 16,
+                                                    ),
+                                                    padding: EdgeInsets.zero,
+                                                    constraints:
+                                                        const BoxConstraints(
+                                                          minWidth: 32,
+                                                          minHeight: 32,
+                                                        ),
+                                                    onPressed: () {
+                                                      setQuantity(
+                                                        warehouse.id,
+                                                        currentQty - 1,
+                                                        maxQuantity,
+                                                        dialogSetState,
+                                                      );
+                                                    },
+                                                  ),
+                                                  SizedBox(
+                                                    width: 40,
+                                                    height: 32,
+                                                    child: TextField(
+                                                      controller:
+                                                          quantityControllers[warehouse
+                                                              .id],
+                                                      keyboardType:
+                                                          TextInputType.number,
+                                                      textAlign:
+                                                          TextAlign.center,
+                                                      style: const TextStyle(
+                                                        fontSize: 13,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                      ),
+                                                      decoration:
+                                                          const InputDecoration(
+                                                            border: InputBorder
+                                                                .none,
+                                                            contentPadding:
+                                                                EdgeInsets.only(
+                                                                  bottom: 12,
+                                                                ),
+                                                          ),
+                                                      onChanged: (val) {
+                                                        int qty =
+                                                            int.tryParse(val) ??
+                                                            0;
+                                                        setQuantity(
+                                                          warehouse.id,
+                                                          qty,
+                                                          maxQuantity,
+                                                          dialogSetState,
+                                                        );
+                                                      },
+                                                    ),
+                                                  ),
+                                                  IconButton(
+                                                    icon: const Icon(
+                                                      Icons.add,
+                                                      size: 16,
+                                                    ),
+                                                    padding: EdgeInsets.zero,
+                                                    constraints:
+                                                        const BoxConstraints(
+                                                          minWidth: 32,
+                                                          minHeight: 32,
+                                                        ),
+                                                    onPressed: () {
+                                                      setQuantity(
+                                                        warehouse.id,
+                                                        currentQty + 1,
+                                                        maxQuantity,
+                                                        dialogSetState,
+                                                      );
+                                                    },
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 12),
+                                        Row(
+                                          children: [
+                                            const Text(
+                                              'Giá hoàn (đ):',
+                                              style: TextStyle(
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Expanded(
+                                              child: SizedBox(
+                                                height: 36,
+                                                child: TextField(
+                                                  controller:
+                                                      priceControllers[warehouse
+                                                          .id],
+                                                  keyboardType:
+                                                      TextInputType.number,
+                                                  style: const TextStyle(
+                                                    fontSize: 13,
+                                                  ),
+                                                  decoration: InputDecoration(
+                                                    isDense: true,
+                                                    contentPadding:
+                                                        const EdgeInsets.symmetric(
+                                                          horizontal: 10,
+                                                          vertical: 8,
+                                                        ),
+                                                    border: OutlineInputBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            6,
+                                                          ),
+                                                      borderSide: BorderSide(
+                                                        color: Colors
+                                                            .grey
+                                                            .shade300,
+                                                      ),
+                                                    ),
+                                                    enabledBorder:
+                                                        OutlineInputBorder(
+                                                          borderRadius:
+                                                              BorderRadius.circular(
+                                                                6,
+                                                              ),
+                                                          borderSide:
+                                                              BorderSide(
+                                                                color: Colors
+                                                                    .grey
+                                                                    .shade300,
+                                                              ),
+                                                        ),
+                                                  ),
+                                                  onChanged: (val) {
+                                                    final clean =
+                                                        _parseCurrency(val);
+                                                    if (clean.isNotEmpty) {
+                                                      priceControllers[warehouse
+                                                              .id]!
+                                                          .value = TextEditingValue(
+                                                        text: _formatCurrency(
+                                                          clean,
+                                                        ),
+                                                        selection:
+                                                            TextSelection.collapsed(
+                                                              offset:
+                                                                  _formatCurrency(
+                                                                    clean,
+                                                                  ).length,
+                                                            ),
+                                                      );
+                                                    }
+                                                  },
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                            );
+                          },
+                        ),
+                        const Divider(height: 32),
+                        TextField(
+                          controller: notesController,
+                          maxLines: 3,
+                          decoration: const InputDecoration(
+                            labelText: 'Ghi chú',
+                            hintText: 'Nhập ghi chú hoàn kho...',
+                            border: OutlineInputBorder(),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -1592,6 +2460,11 @@ class _WarehouseScreenState extends State<WarehouseScreen>
             Fluttertoast.showToast(msg: 'Hoàn tác xuất kho thành công');
             _fetchData(isRefresh: true);
           } else if (state is RefundWarehouseFailure) {
+            Fluttertoast.showToast(msg: state.error);
+          } else if (state is ReturnWarehouseSuccess) {
+            Fluttertoast.showToast(msg: state.message);
+            _fetchData(isRefresh: true);
+          } else if (state is ReturnWarehouseFailure) {
             Fluttertoast.showToast(msg: state.error);
           }
         },
@@ -1620,14 +2493,41 @@ class _WarehouseScreenState extends State<WarehouseScreen>
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _showExportDialog,
-        backgroundColor: ColorUtil.bangladeshGreen,
-        icon: const Icon(Icons.add_box_outlined, color: Colors.white),
-        label: const Text(
-          'Xuất kho',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
+      floatingActionButton: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          FloatingActionButton.extended(
+            heroTag: 'btnReturnWarehouse',
+            onPressed: _showReturnDialog,
+            backgroundColor: Colors.green,
+            icon: const Icon(
+              Icons.assignment_return_outlined,
+              color: Colors.white,
+            ),
+            label: const Text(
+              'Hoàn kho',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          FloatingActionButton.extended(
+            heroTag: 'btnExportWarehouse',
+            onPressed: _showExportDialog,
+            backgroundColor: ColorUtil.brightYellow,
+            icon: const Icon(Icons.add_box_outlined, color: Colors.white),
+            label: const Text(
+              'Xuất kho',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -1669,11 +2569,7 @@ class _WarehouseScreenState extends State<WarehouseScreen>
 
         if (state is WarehouseLoadSuccess) {
           _allWarehouses = state.warehouseData.dataWasehouse ?? [];
-          if (_filteredWarehouseList.isEmpty &&
-              _searchController.text.isEmpty &&
-              _stockFilterController.text.isEmpty) {
-            _filteredWarehouseList = List.from(_allWarehouses);
-          }
+          _updateFilteredWarehouseList();
 
           return Column(
             children: [
@@ -2004,10 +2900,7 @@ class _WarehouseScreenState extends State<WarehouseScreen>
 
         if (state is WarehouseLoadSuccess) {
           _allHistory = state.warehouseData.dataHistory ?? [];
-          if (_filteredExportHistoryList.isEmpty &&
-              _exportSearchController.text.isEmpty) {
-            _filteredExportHistoryList = List.from(_allHistory);
-          }
+          _updateFilteredExportHistoryList();
 
           final stats = state.statistic;
 

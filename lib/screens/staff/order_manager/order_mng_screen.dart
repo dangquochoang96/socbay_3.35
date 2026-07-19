@@ -594,11 +594,21 @@ class _OrderManagerScreenState extends State<OrderManagerScreen> {
       final file = File('${tempDir.path}/$fileName');
       await file.writeAsBytes(pngBytes);
 
+      final startDate =
+          myDateRange?.start ??
+          DateTime(DateTime.now().year, DateTime.now().month, 1);
+      final endDate = myDateRange?.end ?? DateTime.now();
+      final startStr = DateFormat('dd/MM/yyyy').format(startDate);
+      final endStr = DateFormat('dd/MM/yyyy').format(endDate);
+      final dateRangeText = (startStr == endStr)
+          ? startStr
+          : '$startStr - $endStr';
+
       await SharePlus.instance.share(
         ShareParams(
           files: [XFile(file.path)],
           text:
-              'Báo cáo công việc - KTV ${App.instance.userApp?.username ?? ''}',
+              'Báo cáo công việc - KTV ${App.instance.userApp?.username ?? ''} ($dateRangeText)',
         ),
       );
     } catch (e) {
@@ -636,7 +646,7 @@ class _OrderManagerScreenState extends State<OrderManagerScreen> {
 
     double grandCash = 0;
     double grandTransfer = 0;
-    double totalThayLoiRev = 0;
+    double totalThayLoiRev = _getSumDouble((item) => item.totalPriceThayThe);
 
     List<Map<String, dynamic>> orderRows = [];
     for (var order in _bloc.staffLstOrders) {
@@ -659,9 +669,6 @@ class _OrderManagerScreenState extends State<OrderManagerScreen> {
       grandTransfer += transfer;
 
       String subType = _getSubTypeText(order);
-      if (subType == 'Thay lõi') {
-        totalThayLoiRev += price;
-      }
 
       final saleName =
           order.sale?.username ??
@@ -840,6 +847,7 @@ class _OrderManagerScreenState extends State<OrderManagerScreen> {
             ),
             TableRow(
               children: [
+                const TableCell(child: SizedBox.shrink()),
                 TableCell(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
@@ -856,7 +864,7 @@ class _OrderManagerScreenState extends State<OrderManagerScreen> {
                     ),
                   ),
                 ),
-                const TableCell(child: SizedBox.shrink()),
+                // const TableCell(child: SizedBox.shrink()),
                 const TableCell(child: SizedBox.shrink()),
                 _buildTableCell(
                   _formatK(grandCash),
@@ -871,6 +879,7 @@ class _OrderManagerScreenState extends State<OrderManagerScreen> {
             ),
             TableRow(
               children: [
+                const TableCell(child: SizedBox.shrink()),
                 TableCell(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
@@ -887,7 +896,7 @@ class _OrderManagerScreenState extends State<OrderManagerScreen> {
                     ),
                   ),
                 ),
-                const TableCell(child: SizedBox.shrink()),
+                // const TableCell(child: SizedBox.shrink()),
                 const TableCell(child: SizedBox.shrink()),
                 _buildTableCell(
                   _formatK(totalThayLoiRev),

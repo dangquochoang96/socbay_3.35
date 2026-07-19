@@ -19,6 +19,8 @@ class WarehouseBloc extends Bloc<WarehouseEvent, WarehouseState> {
     on<SearchCustomerEvent>(_onSearchCustomer);
     on<ExportWarehouseEvent>(_onExportWarehouse);
     on<RefundWarehouseEvent>(_onRefundWarehouse);
+    on<ReturnWarehouseEvent>(_onReturnWarehouse);
+    on<FetchDestinationWarehousesEvent>(_onFetchDestinationWarehouses);
   }
 
   Future<void> _onFetchWarehouseData(
@@ -189,6 +191,82 @@ class WarehouseBloc extends Bloc<WarehouseEvent, WarehouseState> {
       }
     } catch (e) {
       emit(RefundWarehouseFailure(error: e.toString()));
+    }
+  }
+
+  Future<void> _onReturnWarehouse(
+    ReturnWarehouseEvent event,
+    Emitter<WarehouseState> emit,
+  ) async {
+    emit(ReturnWarehouseLoading());
+    try {
+      final url = AppConfig.instance.apiUri(
+        ApiEndpoints.returnWarehouse(event.userId),
+      );
+      final response = await http.post(
+        url,
+        body: jsonEncode(event.params),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (response.statusCode == HttpStatus.ok ||
+          response.statusCode == HttpStatus.created) {
+        final jsonRes = json.decode(response.body);
+        if (jsonRes['code'] == 1) {
+          emit(
+            ReturnWarehouseSuccess(
+              message: jsonRes['message'] ?? 'Hoàn kho thành công !!!',
+            ),
+          );
+        } else {
+          emit(
+            ReturnWarehouseFailure(
+              error: jsonRes['message'] ?? 'Lỗi khi hoàn kho',
+            ),
+          );
+        }
+      } else {
+        emit(
+          ReturnWarehouseFailure(error: 'Lỗi máy chủ: ${response.statusCode}'),
+        );
+      }
+    } catch (e) {
+      emit(ReturnWarehouseFailure(error: e.toString()));
+    }
+  }
+
+  Future<void> _onFetchDestinationWarehouses(
+    FetchDestinationWarehousesEvent event,
+    Emitter<WarehouseState> emit,
+  ) async {
+    emit(DestinationWarehouseLoading());
+    try {
+      final url = AppConfig.instance.apiUri(ApiEndpoints.listWarehouse);
+      final response = await http.get(url);
+
+      if (response.statusCode == HttpStatus.ok) {
+        final jsonRes = json.decode(response.body);
+        if (jsonRes['code'] == 1 && jsonRes['data'] != null) {
+          final List<dynamic> listData = jsonRes['data'];
+          final warehouses =
+              listData.map((e) => DestinationWarehouse.fromJson(e)).toList();
+          emit(DestinationWarehouseSuccess(warehouses: warehouses));
+        } else {
+          emit(
+            DestinationWarehouseFailure(
+              error: jsonRes['message'] ?? 'Lỗi khi lấy danh sách kho',
+            ),
+          );
+        }
+      } else {
+        emit(
+          DestinationWarehouseFailure(
+            error: 'Lỗi máy chủ: ${response.statusCode}',
+          ),
+        );
+      }
+    } catch (e) {
+      emit(DestinationWarehouseFailure(error: e.toString()));
     }
   }
 }

@@ -34,3 +34,16 @@ class RefundWarehouseEvent extends WarehouseEvent {
 
   const RefundWarehouseEvent({required this.historyId});
 }
+
+class ReturnWarehouseEvent extends WarehouseEvent {
+  final String userId;
+  final Map<String, dynamic> params;
+
+  const ReturnWarehouseEvent({required this.userId, required this.params});
+}
+
+class FetchDestinationWarehousesEvent extends WarehouseEvent {
+  const FetchDestinationWarehousesEvent();
+}
+
+

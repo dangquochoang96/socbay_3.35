@@ -276,3 +276,29 @@ class Statistic {
         "total_price": totalPrice,
       };
 }
+
+class DestinationWarehouse {
+  int id;
+  String? name;
+  String? address;
+
+  DestinationWarehouse({
+    required this.id,
+    this.name,
+    this.address,
+  });
+
+  factory DestinationWarehouse.fromJson(Map<String, dynamic> json) =>
+      DestinationWarehouse(
+        id: json["id"],
+        name: json["name"],
+        address: json["address"],
+      );
+
+  Map<String, dynamic> toJson() => {
+        "id": id,
+        "name": name,
+        "address": address,
+      };
+}
+

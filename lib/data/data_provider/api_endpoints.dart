@@ -176,10 +176,12 @@ abstract final class ApiEndpoints {
   static String exportWarehouse(Object? userId) =>
       '/riha/exportWasehouse/$userId';
   static String refundWarehouse(Object? id) => '/riha/warehouse_refund/$id';
+  static String returnWarehouse(Object? id) => '/riha/returnWarehouse/$id';
   static const retailOrder = '/retailOrder';
   static const createRetailOrder = '/retailOrder/createRetailOrder';
   static String retailOrderShipConfirm(Object? id) =>
       '/retailOrderShip/$id/storeAssignmentImage';
+  static const listWarehouse = '/warehouses/list_warehouse';
 
   // =========================
   // KPI

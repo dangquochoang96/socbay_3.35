@@ -61,3 +61,35 @@ class RefundWarehouseFailure extends WarehouseState {
 
   const RefundWarehouseFailure({required this.error});
 }
+
+// Return states
+class ReturnWarehouseLoading extends WarehouseState {}
+
+class ReturnWarehouseSuccess extends WarehouseState {
+  final String message;
+
+  const ReturnWarehouseSuccess({this.message = 'Hoàn kho thành công !!!'});
+}
+
+class ReturnWarehouseFailure extends WarehouseState {
+  final String error;
+
+  const ReturnWarehouseFailure({required this.error});
+}
+
+// Fetch Destination Warehouse states
+class DestinationWarehouseLoading extends WarehouseState {}
+
+class DestinationWarehouseSuccess extends WarehouseState {
+  final List<DestinationWarehouse> warehouses;
+
+  const DestinationWarehouseSuccess({required this.warehouses});
+}
+
+class DestinationWarehouseFailure extends WarehouseState {
+  final String error;
+
+  const DestinationWarehouseFailure({required this.error});
+}
+
+

@@ -185,10 +185,10 @@ class _FeedbackScreenState extends State<FeedbackScreen>
   }
 
   Future _onCreateFeedBack() async {
-    if (_selectedValue == null || _selectedValue!.trim() == "0") {
-      context.showSnackBar("Đơn hàng không hợp lệ!");
-      return;
-    }
+    // if (_selectedValue == null || _selectedValue!.trim() == "0") {
+    //   context.showSnackBar("Đơn hàng không hợp lệ!");
+    //   return;
+    // }
     _bloc.add(
       FeedbackCreateEvent(
         orderId: _selectedValue ?? "",
