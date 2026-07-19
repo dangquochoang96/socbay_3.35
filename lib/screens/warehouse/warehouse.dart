@@ -1768,7 +1768,7 @@ class _WarehouseScreenState extends State<WarehouseScreen>
                                 ),
                               )
                             : DropdownButtonFormField<DestinationWarehouse>(
-                                value: selectedDestinationWarehouse,
+                                initialValue: selectedDestinationWarehouse,
                                 isExpanded: true,
                                 itemHeight: null,
                                 decoration: const InputDecoration(

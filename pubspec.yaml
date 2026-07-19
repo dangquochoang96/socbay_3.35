@@ -1,7 +1,7 @@
 name: socbay
 description: "A new Flutter project."
 publish_to: "none"
-version: 3.0.4+1121
+version: 3.0.5+1122
 
 environment:
   sdk: ^3.9.2

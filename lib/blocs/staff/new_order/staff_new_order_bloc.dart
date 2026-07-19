@@ -15,7 +15,6 @@ import 'package:socbay/data/model/order_filter_core_model.dart';
 import 'package:socbay/data/model/order_model.dart';
 import 'package:socbay/data/model/order_payment_model.dart';
 import 'package:socbay/data/model/product_model.dart';
-import 'package:socbay/data/model/request/user_info_request.dart';
 import 'package:socbay/data/model/task_model.dart';
 import 'package:socbay/data/repository/auth/api_repository.dart';
 

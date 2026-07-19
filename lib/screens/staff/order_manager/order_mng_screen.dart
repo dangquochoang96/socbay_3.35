@@ -982,19 +982,31 @@ class _OrderManagerScreenState extends State<OrderManagerScreen> {
   String _getProductsText(OrderDetailModel order) {
     if (order.orderFilterCoresModel != null &&
         order.orderFilterCoresModel!.isNotEmpty) {
-      final cores = order.orderFilterCoresModel!
-          .where(
-            (c) =>
-                c.replaceDatePromise == null ||
-                c.replaceDatePromise!.isEmpty ||
-                c.replaceDatePromise!.contains('0000'),
-          )
-          .map((c) => c.name)
-          .where((n) => n != null && n.isNotEmpty)
-          .join(', ');
-      if (cores.isNotEmpty) return cores;
+      final validProductNames = <String>[];
+      for (var c in order.orderFilterCoresModel!) {
+        if (c.replaceDatePromise != null && c.replaceDatePromise!.isNotEmpty) {
+          continue;
+        }
+
+        final name = c.name?.trim() ?? '';
+        if (name.isEmpty) continue;
+
+        if (name.contains('Lắp đặt mới; VSBD; Dv khác') ||
+            name.contains('Lắp đặt mới; VSBD') ||
+            name == 'Lắp đặt mới') {
+          continue;
+        }
+
+        if (!validProductNames.contains(name)) {
+          validProductNames.add(name);
+        }
+      }
+
+      if (validProductNames.isNotEmpty) {
+        return validProductNames.join(', ');
+      }
     }
-    return 'Lắp đặt mới; VSBD; Dv khác...';
+    return '';
   }
 
   Widget _buildStatusBadge(String? type) {

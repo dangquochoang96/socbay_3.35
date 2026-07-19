@@ -643,7 +643,7 @@ class _CoreReplacementServiceScreenState
                             height: 220,
                             width: 220,
                             fit: BoxFit.contain,
-                            errorBuilder: (_, __, ___) => const SizedBox(
+                            errorBuilder: (_, _, _) => const SizedBox(
                               height: 180,
                               child: Center(
                                 child: Text(
@@ -763,7 +763,7 @@ class _CoreReplacementServiceScreenState
                         child: ListView.separated(
                           scrollDirection: Axis.horizontal,
                           itemCount: billFiles.length,
-                          separatorBuilder: (_, __) => const SizedBox(width: 8),
+                          separatorBuilder: (_, _) => const SizedBox(width: 8),
                           itemBuilder: (_, index) {
                             return Stack(
                               children: [
