@@ -969,14 +969,9 @@ class _OrderManagerScreenState extends State<OrderManagerScreen> {
 
   String _getSubTypeText(OrderDetailModel order) {
     final type = order.type;
-    if (type == '1') return 'Đơn lắp máy';
-    if (type == '2') return 'Thay lõi';
-    if (type == '3') return 'VSBD';
-    if (type == '4') return 'Đơn online';
-    if (type == '5') return 'Đơn ship';
-    if (type == '6') return 'Lọc tổng (chính)';
-    if (type == '7') return 'Lọc tổng (phụ)';
-    return 'Thay thế';
+    if (type == '2') return 'Đơn dịch vụ';
+    if (type == '4') return 'Đơn thuê';
+    return 'Đơn bán máy';
   }
 
   String _getProductsText(OrderDetailModel order) {

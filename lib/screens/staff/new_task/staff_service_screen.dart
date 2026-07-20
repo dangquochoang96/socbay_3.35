@@ -192,11 +192,10 @@ class _ServiceScreenState extends State<StaffServiceScreen> {
         isShowTitle: false,
         leftAction: () async {
           _tabBarBloc.add(const TabBarPressed(index: 1));
-          Navigator.pushReplacementNamed(context, Routes.root).then(
-            (value) => context.read<TaskScreenBloc>().add(
-              const StaffTaskScreenGetTaskByDayEvent(isRefresh: true),
-            ),
+          context.read<TaskScreenBloc>().add(
+            const StaffTaskScreenGetTaskByDayEvent(isRefresh: true),
           );
+          Navigator.popUntil(context, (route) => route.isFirst);
         },
       );
     }

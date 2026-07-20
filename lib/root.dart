@@ -23,13 +23,11 @@ class _RootState extends State<Root> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   late RootBloc _rootBloc;
-  late TabBarBloc _tabBarBloc;
 
   @override
   void initState() {
     //_rootBloc = BlocProvider.of<RootBloc>(context);
     _rootBloc = RootBloc();
-    _tabBarBloc = TabBarBloc();
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       InAppUpdateService.instance.checkForUpdate();
@@ -40,7 +38,6 @@ class _RootState extends State<Root> {
   void dispose() {
     InAppUpdateService.instance.dispose();
     _rootBloc.close();
-    _tabBarBloc.close();
     super.dispose();
   }
 

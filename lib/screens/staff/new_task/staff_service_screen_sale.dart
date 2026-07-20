@@ -14,6 +14,7 @@ import 'package:socbay/blocs/tab_bar/tab_bar_bloc.dart';
 import 'package:socbay/blocs/tab_bar/tab_bar_event.dart';
 import 'package:socbay/blocs/task/task_screen_bloc.dart';
 import 'package:socbay/blocs/task/task_screen_event.dart';
+import 'package:socbay/blocs/task/task_screen_sale_bloc.dart';
 import 'package:socbay/config/app_config.dart';
 import 'package:socbay/data/data_provider/api_endpoints.dart';
 import 'package:socbay/data/model/home_service_model.dart';
@@ -201,11 +202,10 @@ class _StaffServiceSaleScreenState extends State<StaffServiceSaleScreen> {
         isShowTitle: false,
         leftAction: () async {
           _tabBarBloc.add(const TabBarPressed(index: 1));
-          Navigator.pushReplacementNamed(context, Routes.root).then(
-            (value) => context.read<TaskScreenBloc>().add(
-              const StaffTaskScreenGetTaskByDayEvent(isRefresh: true),
-            ),
+          context.read<TaskScreenSaleBloc>().add(
+            const StaffTaskScreenGetTaskByDayEvent(isRefresh: true),
           );
+          Navigator.popUntil(context, (route) => route.isFirst);
         },
       );
     }

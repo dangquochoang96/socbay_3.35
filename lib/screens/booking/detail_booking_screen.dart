@@ -14,6 +14,7 @@ import 'package:socbay/blocs/rent-task/rent_task_screen_event.dart'
 import 'package:socbay/blocs/rent-task/rent_task_screen_bloc.dart';
 import 'package:socbay/config/app_config.dart';
 import 'package:socbay/constants/maps.dart';
+import 'package:socbay/data/model/home_service_model.dart';
 import 'package:socbay/data/model/order_detail_model.dart';
 import 'package:socbay/data/model/task_model.dart';
 import 'package:socbay/routes.dart';
@@ -37,6 +38,7 @@ class DetailBookingScreen extends StatefulWidget {
 class _DetailBookingScreenState extends State<DetailBookingScreen> {
   late dynamic _bloc;
   late dynamic _taskScreenSaleBloc;
+  String? _selectedTaskType;
 
   @override
   void initState() {
@@ -192,6 +194,12 @@ class _DetailBookingScreenState extends State<DetailBookingScreen> {
   }
 
   Widget _buildGeneralInfoCard(TaskModel? taskModel) {
+    final String? effectiveType = _selectedTaskType ?? taskModel?.type;
+    final bool typeExists = HomeServiceModel.taskServiceList.any(
+      (element) => element.id.toString() == effectiveType,
+    );
+    final String? dropdownValue = typeExists ? effectiveType : null;
+
     return _buildCard(
       title: "Thông tin chung",
       icon: Icons.info_outline,
@@ -204,6 +212,66 @@ class _DetailBookingScreenState extends State<DetailBookingScreen> {
             isBold: true,
           ),
           _buildInfoRow("Công việc:", taskModel?.name ?? ""),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Expanded(
+                  flex: 2,
+                  child: Text(
+                    "Loại công việc:",
+                    style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                  ),
+                ),
+                Expanded(
+                  flex: 3,
+                  child: Container(
+                    height: 40,
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: ColorUtil.bangladeshGreen,
+                        width: 1,
+                      ),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        value: dropdownValue,
+                        isExpanded: true,
+                        hint: const Text(
+                          "Chọn loại CV",
+                          style: TextStyle(fontSize: 13),
+                        ),
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: ColorUtil.raisinBlack,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            _selectedTaskType = newValue;
+                          });
+                        },
+                        items: HomeServiceModel.taskServiceList.map((
+                          HomeServiceModel sv,
+                        ) {
+                          return DropdownMenuItem<String>(
+                            value: sv.id.toString(),
+                            child: Text(
+                              sv.name ?? "",
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
           _buildInfoRow(
             "Trạng thái:",
             taskModel?.getStatus() ?? "",
@@ -629,6 +697,7 @@ class _DetailBookingScreenState extends State<DetailBookingScreen> {
         Map<String, dynamic>? result = value as Map<String, dynamic>?;
         if (result != null) {
           setState(() {
+            _selectedTaskType = null;
             _bloc.add(DetailBookingStartedEvent());
             if (widget.isRent) {
               _taskScreenSaleBloc.add(
@@ -774,10 +843,11 @@ class _DetailBookingScreenState extends State<DetailBookingScreen> {
   }
 
   void _createOrder(int id) {
+    final String? effectiveType = _selectedTaskType ?? _bloc.taskModel?.type;
     Navigator.pushNamed(
       context,
       widget.isRent ? Routes.createRentOrderScreen : Routes.createOrderScreen,
-      arguments: {'id': id},
+      arguments: {'id': id, 'taskType': effectiveType},
     );
   }
 }

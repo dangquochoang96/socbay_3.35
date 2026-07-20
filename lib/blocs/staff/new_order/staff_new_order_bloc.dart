@@ -72,6 +72,32 @@ class StaffNewOrderBloc extends Bloc<StaffNewOrderEvent, StaffNewOrderState> {
       if (res.statusCode == HttpStatus.ok) {
         var l = Map<String, dynamic>.from(json.decode(res.body));
         taskModel = TaskModel.fromJson(l["data"]);
+        if (args['taskType'] != null && args['taskType'].toString().isNotEmpty) {
+          taskModel = TaskModel(
+            id: taskModel?.id,
+            type: args['taskType'].toString(),
+            name: taskModel?.name,
+            createdAt: taskModel?.createdAt,
+            updatedAt: taskModel?.updatedAt,
+            status: taskModel?.status,
+            des: taskModel?.des,
+            noti: taskModel?.noti,
+            priority: taskModel?.priority,
+            timeStart: taskModel?.timeStart,
+            timeEnd: taskModel?.timeEnd,
+            userId: taskModel?.userId,
+            saleId: taskModel?.saleId,
+            userCreate: taskModel?.userCreate,
+            userCustomer: taskModel?.userCustomer,
+            origin: taskModel?.origin,
+            productId: taskModel?.productId,
+            orderId: taskModel?.orderId,
+            productInfo: taskModel?.productInfo,
+            staff: taskModel?.staff,
+            customer: taskModel?.customer,
+            images: taskModel?.images,
+          );
+        }
         subSavePoint = taskModel?.customer?.point ?? 0;
         add(StaffNewOrderGetListProductsEvent());
         add(StaffNewOrderGetListProductsAllEvent());

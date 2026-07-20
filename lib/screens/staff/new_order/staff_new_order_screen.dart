@@ -1196,7 +1196,8 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                       subType = 6;
                     } else if (taskType == 10) {
                       subType = 7;
-                    } else if (hasNewProduct) {
+                    } else if (hasNewProduct &&
+                        (taskType == 4 || taskType == 5)) {
                       subType = 1;
                     } else if (_bloc.totalPay != 0) {
                       subType = 2;

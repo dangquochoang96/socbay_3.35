@@ -160,10 +160,7 @@ class _ServiceScreenState extends State<ServiceScreen> {
         leftAction: () async {
           _tabBarBloc.add(const TabBarPressed(index: 1));
           _historyScreenBloc.add(HistoryScreenTabPressEvent(0));
-          await Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const TabBarScreen()),
-          );
+          Navigator.popUntil(context, (route) => route.isFirst);
         },
       );
     }

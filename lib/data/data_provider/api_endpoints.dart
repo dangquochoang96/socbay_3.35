@@ -181,7 +181,13 @@ abstract final class ApiEndpoints {
   static const createRetailOrder = '/retailOrder/createRetailOrder';
   static String retailOrderShipConfirm(Object? id) =>
       '/retailOrderShip/$id/storeAssignmentImage';
+
+  // =========================
+  //    WHAREHOUSE
+  // =========================
   static const listWarehouse = '/warehouses/list_warehouse';
+  static String warehouseInvoice(Object? warehouseId) =>
+      '/warehouses/$warehouseId';
 
   // =========================
   // KPI
