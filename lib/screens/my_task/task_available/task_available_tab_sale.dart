@@ -357,13 +357,18 @@ class _TaskAvailableTabState extends State<TaskAvailableTabSale> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      _buildActionButton(
-                        icon: Icons.person_add_alt_1_outlined,
-                        text: 'Gán KTV',
-                        color: ColorUtil.bangladeshGreen,
-                        onTap: () => _onAssignTechnician(taskModel),
-                      ),
-                      const SizedBox(width: 12),
+                      if ((taskModel.userId == null ||
+                              taskModel.userId!.isEmpty ||
+                              taskModel.userId == "0") &&
+                          taskModel.staff?.id == null) ...[
+                        _buildActionButton(
+                          icon: Icons.person_add_alt_1_outlined,
+                          text: 'Gán KTV',
+                          color: ColorUtil.bangladeshGreen,
+                          onTap: () => _onAssignTechnician(taskModel),
+                        ),
+                        const SizedBox(width: 12),
+                      ],
                       _buildActionButton(
                         icon: Icons.edit_outlined,
                         text: 'Sửa',

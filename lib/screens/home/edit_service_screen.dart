@@ -41,6 +41,7 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
   late TextEditingController addressRequestTxtController;
   late List<String> _listPath = [];
   String? desDraft;
+  String? _initialTimeStart;
   String? _currentSelectedValue;
   String? _dateStart;
   String? _timeStart;
@@ -83,10 +84,10 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
       _currentSelectedValue = _bloc.taskModel?.type;
       if (_bloc.taskModel?.timeStart != null) {
         _parsedDate = DateTime.parse(_bloc.taskModel!.timeStart!);
-        _dateStart =
-            "${_parsedDate.day}/${_parsedDate.month}/${_parsedDate.year}";
+        _dateStart = _parsedDate.toDateString(format: "dd/MM/yyyy");
         _timeStart =
             "${_parsedDate.hour.toString().padLeft(2, "0")}:${_parsedDate.minute.toString().padLeft(2, "0")}";
+        _initialTimeStart ??= '$_dateStart $_timeStart';
       }
       _favouriteStaff = _bloc.taskModel?.staff;
       _listPath = _bloc.taskModel?.images ?? [];
@@ -238,16 +239,23 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
         serviceName = i.name;
       }
     }
+
+    final currentTimeStart = '$_dateStart $_timeStart';
+    final bool isTimeChanged =
+        _initialTimeStart != null && currentTimeStart != _initialTimeStart;
+    final int statusToUpdate =
+        isTimeChanged ? 5 : (_favouriteStaff?.id == null ? 1 : 5);
+
     _bloc.add(
       EditServiceUpdateTaskEvent(
         UpdateTaskRequest(
           type: int.parse(_currentSelectedValue ?? "1"),
           name: serviceName,
           des: describeRequestTxtController.text,
-          status: _favouriteStaff?.id == null ? 1 : 5,
+          status: statusToUpdate,
           priority: int.parse(_bloc.taskModel?.priority ?? "1"),
           serviceId: int.parse(_currentSelectedValue ?? "1"),
-          timeStart: '$_dateStart $_timeStart',
+          timeStart: currentTimeStart,
           timeEnd: "",
           staffId: _favouriteStaff?.id,
           saleId: 1,

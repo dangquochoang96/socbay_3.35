@@ -29,6 +29,8 @@ class _RentTaskTabSale extends State<RentTaskTabSale> {
   late ScrollController _scrollController;
 
   late TextEditingController _feedbackController;
+  late TextEditingController _searchController;
+  String _searchQuery = '';
   var _isRefresh = true;
 
   DateTime? selectedDate;
@@ -41,6 +43,7 @@ class _RentTaskTabSale extends State<RentTaskTabSale> {
     _isRefresh = false;
     _scrollController = ScrollController();
     _feedbackController = TextEditingController();
+    _searchController = TextEditingController();
     _scrollController.addListener(() {
       scrollPaginationListener(
         scrollController: _scrollController,
@@ -72,6 +75,7 @@ class _RentTaskTabSale extends State<RentTaskTabSale> {
   void dispose() {
     _scrollController.dispose();
     _feedbackController.dispose();
+    _searchController.dispose();
     _bloc.listTaskModel.clear();
     _bloc.close();
     _isRefresh = true;
@@ -107,49 +111,116 @@ class _RentTaskTabSale extends State<RentTaskTabSale> {
     if (state is BookingUpdateErrorState) {
       context.showSnackBar("Gán KTV thất bại!");
     }
+    if (state is MyTaskScreenInitialState) {
+      setState(() {});
+    }
+  }
+
+  List<TaskModel> get _filteredTasks {
+    if (_searchQuery.isEmpty) {
+      return _bloc.staffListTaskBydayModel;
+    } else {
+      final query = _searchQuery.toLowerCase();
+      return _bloc.staffListTaskBydayModel.where((task) {
+        return (task.customer?.phone != null &&
+                task.customer!.phone!.toLowerCase().contains(query)) ||
+            (task.customer?.username != null &&
+                task.customer!.username!.toLowerCase().contains(query)) ||
+            (task.customer?.address != null &&
+                task.customer!.address!.toLowerCase().contains(query)) ||
+            (task.name != null &&
+                task.name!.toLowerCase().contains(query)) ||
+            (task.id != null && task.id.toString().contains(query));
+      }).toList();
+    }
   }
 
   Widget _builder(BuildContext context, state) {
-    return LoadingIndicator(
-      isLoading: _bloc.isLoading,
-      child: RefreshIndicator(
-        onRefresh: () async {
-          _isRefresh = true;
-          _bloc.add(StaffTaskScreenGetTaskByDayEvent(isRefresh: _isRefresh));
-        },
-        child: _bloc.staffListTaskBydayModel.isEmpty && !_bloc.isLoading
-            ? const CustomScrollView(
-                physics: AlwaysScrollableScrollPhysics(),
-                slivers: [
-                  SliverFillRemaining(
-                    child: Center(child: Text("Chưa có công việc")),
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _searchController,
+                  decoration: const InputDecoration(
+                    labelText: "Tìm Kiếm",
+                    hintText: "Tìm Kiếm",
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(25.0)),
+                    ),
                   ),
-                ],
-              )
-            : ListView.separated(
-                //controller: _scrollController,
-                itemBuilder: _itemBuilder,
-                itemCount: _bloc.staffListTaskBydayModel.length,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: paddingHorizontal,
-                  vertical: paddingVertical,
                 ),
-                separatorBuilder: (BuildContext context, int index) {
-                  return const Divider(
-                    thickness: 1,
-                    color: ColorUtil.bangladeshGreen,
-                  );
-                },
               ),
-      ),
+              const SizedBox(width: 5),
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    _searchQuery = _searchController.text;
+                  });
+                },
+                child: const Text('Search'),
+              ),
+              const SizedBox(width: 5),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                onPressed: () {
+                  setState(() {
+                    _searchQuery = '';
+                    _searchController.clear();
+                  });
+                },
+                child: const Text('All', style: TextStyle(color: Colors.white)),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: LoadingIndicator(
+            isLoading: _bloc.isLoading,
+            child: RefreshIndicator(
+              onRefresh: () async {
+                _isRefresh = true;
+                _bloc.add(StaffTaskScreenGetTaskByDayEvent(isRefresh: _isRefresh));
+              },
+              child: _bloc.staffListTaskBydayModel.isEmpty && !_bloc.isLoading
+                  ? const CustomScrollView(
+                      physics: AlwaysScrollableScrollPhysics(),
+                      slivers: [
+                        SliverFillRemaining(
+                          child: Center(child: Text("Chưa có công việc")),
+                        ),
+                      ],
+                    )
+                  : ListView.separated(
+                      //controller: _scrollController,
+                      itemBuilder: _itemBuilder,
+                      itemCount: _filteredTasks.length,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: paddingHorizontal,
+                        vertical: paddingVertical,
+                      ),
+                      separatorBuilder: (BuildContext context, int index) {
+                        return const Divider(
+                          thickness: 1,
+                          color: ColorUtil.bangladeshGreen,
+                        );
+                      },
+                    ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
   Widget _itemBuilder(BuildContext context, int index) {
-    if (index >= _bloc.staffListTaskBydayModel.length) {
+    if (index >= _filteredTasks.length) {
       return const IndicatorLoadMore();
     }
-    TaskModel taskModel = _bloc.staffListTaskBydayModel[index];
+    TaskModel taskModel = _filteredTasks[index];
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -279,13 +350,18 @@ class _RentTaskTabSale extends State<RentTaskTabSale> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      _buildActionButton(
-                        icon: Icons.person_add_alt_1_outlined,
-                        text: 'Gán KTV',
-                        color: ColorUtil.bangladeshGreen,
-                        onTap: () => _onAssignTechnician(taskModel),
-                      ),
-                      const SizedBox(width: 12),
+                      if ((taskModel.userId == null ||
+                              taskModel.userId!.isEmpty ||
+                              taskModel.userId == "0") &&
+                          taskModel.staff?.id == null) ...[
+                        _buildActionButton(
+                          icon: Icons.person_add_alt_1_outlined,
+                          text: 'Gán KTV',
+                          color: ColorUtil.bangladeshGreen,
+                          onTap: () => _onAssignTechnician(taskModel),
+                        ),
+                        const SizedBox(width: 12),
+                      ],
                       _buildActionButton(
                         icon: Icons.edit_outlined,
                         text: 'Sửa',

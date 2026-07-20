@@ -874,6 +874,11 @@ class _TaskTimelineScreenState extends State<TaskTimelineScreen> {
                   task.timeStart ?? "N/A",
                 ),
                 _buildDetailRow(
+                  Icons.access_time,
+                  "Thời gian kết thúc:",
+                  task.timeEnd ?? "N/A",
+                ),
+                _buildDetailRow(
                   Icons.merge_type,
                   "Loại công việc:",
                   task.taskType == "service" ? "Dịch vụ" : "Thuê",
