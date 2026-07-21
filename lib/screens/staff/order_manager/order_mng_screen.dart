@@ -757,7 +757,7 @@ class _OrderManagerScreenState extends State<OrderManagerScreen> {
           columnWidths: const {
             0: FlexColumnWidth(1.2),
             1: FlexColumnWidth(1.8),
-            2: FlexColumnWidth(1.4),
+            2: FlexColumnWidth(1.8),
             3: FlexColumnWidth(1.8),
             4: FlexColumnWidth(1.8),
             5: FlexColumnWidth(1.8),
@@ -917,7 +917,7 @@ class _OrderManagerScreenState extends State<OrderManagerScreen> {
         ),
         const SizedBox(height: 14),
         const Text(
-          '0002 4820 001 - TRAN THI NGOC HAN - Tiền Phong Bank',
+          '551999 - CTCP CN VA DV SHOME - VPBank',
           style: TextStyle(
             fontSize: 12.0,
             fontWeight: FontWeight.bold,
@@ -969,9 +969,47 @@ class _OrderManagerScreenState extends State<OrderManagerScreen> {
 
   String _getSubTypeText(OrderDetailModel order) {
     final type = order.type;
-    if (type == '2') return 'Đơn dịch vụ';
-    if (type == '4') return 'Đơn thuê';
-    return 'Đơn bán máy';
+    String baseType = 'Đơn bán máy';
+    if (type == '2') {
+      baseType = 'Dịch vụ';
+    } else if (type == '4') {
+      baseType = 'Thuê';
+    }
+
+    final subTypeRaw = order.subType?.trim();
+    if (subTypeRaw == null || subTypeRaw.isEmpty) {
+      return baseType;
+    }
+
+    String subTypeLabel;
+    switch (subTypeRaw) {
+      case '1':
+        subTypeLabel = 'Lắp máy';
+        break;
+      case '2':
+        subTypeLabel = 'Thay thế';
+        break;
+      case '3':
+        subTypeLabel = 'VSBD';
+        break;
+      case '4':
+        subTypeLabel = 'Online';
+        break;
+      case '5':
+        subTypeLabel = 'Ship';
+        break;
+      case '6':
+        subTypeLabel = 'Lọc tổng chính';
+        break;
+      case '7':
+        subTypeLabel = 'Lọc tổng phụ';
+        break;
+      default:
+        subTypeLabel = subTypeRaw;
+        break;
+    }
+
+    return '$baseType ($subTypeLabel)';
   }
 
   String _getProductsText(OrderDetailModel order) {
@@ -988,7 +1026,7 @@ class _OrderManagerScreenState extends State<OrderManagerScreen> {
 
         if (name.contains('Lắp đặt mới; VSBD; Dv khác') ||
             name.contains('Lắp đặt mới; VSBD') ||
-            name == 'Lắp đặt mới') {
+            name.contains('Thu tiền đơn thuê')) {
           continue;
         }
 

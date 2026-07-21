@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:socbay/blocs/root/root_bloc.dart';
 import 'package:socbay/blocs/root/root_state.dart';
-import 'package:socbay/blocs/tab_bar/tab_bar_bloc.dart';
 import 'package:socbay/screens/auth/login_screen.dart';
 import 'package:socbay/screens/splash_screen.dart';
 import 'package:socbay/screens/home_tab_bar/tab_bar_screen.dart';

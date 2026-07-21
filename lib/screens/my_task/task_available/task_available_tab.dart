@@ -131,6 +131,7 @@ class _TaskAvailableTabState extends State<TaskAvailableTab> {
                 ],
               )
             : ListView.separated(
+                physics: const AlwaysScrollableScrollPhysics(),
                 controller: _scrollController,
                 itemBuilder: _itemBuilder,
                 itemCount: _bloc.staffListTaskAssigedModel.length,

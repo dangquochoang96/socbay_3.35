@@ -128,6 +128,7 @@ class _RentTaskTabState extends State<RentTaskTab> {
                 ],
               )
             : ListView.separated(
+                physics: const AlwaysScrollableScrollPhysics(),
                 //controller: _scrollController,
                 itemBuilder: _itemBuilder,
                 itemCount: _bloc.staffListTaskBydayModel.length,

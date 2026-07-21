@@ -128,6 +128,7 @@ class _MyTaskTabState extends State<MyTaskTab> {
                 ],
               )
             : ListView.separated(
+                physics: const AlwaysScrollableScrollPhysics(),
                 //controller: _scrollController,
                 itemBuilder: _itemBuilder,
                 itemCount: _bloc.staffListTaskBydayModel.length,

@@ -202,6 +202,7 @@ class _RentTaskAvailableTabState extends State<RentTaskAvailableTabSale> {
                       ],
                     )
                   : ListView.separated(
+                      physics: const AlwaysScrollableScrollPhysics(),
                       controller: _scrollController,
                       itemBuilder: _itemBuilder,
                       itemCount: _filteredTasks.length,

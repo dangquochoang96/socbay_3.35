@@ -9,6 +9,7 @@ class OrderDetailModel {
   final String? status;
   final String? userId;
   final String? type;
+  final String? subType;
   final String? price;
   final String? chietKhau;
   final String? tichDiem;
@@ -41,6 +42,7 @@ class OrderDetailModel {
     this.status,
     this.userId,
     this.type,
+    this.subType,
     this.price,
     this.chietKhau,
     this.tichDiem,
@@ -77,6 +79,7 @@ class OrderDetailModel {
     status: _asString(json['status']),
     userId: _asString(json['user_id']),
     type: _asString(json['type']),
+    subType: _asString(json['sub_type']),
     price: _asString(json['price']),
     chietKhau: _asString(json['chiet_khau']),
     tichDiem: _asString(json['tich_diem']),
@@ -102,10 +105,6 @@ class OrderDetailModel {
         _asString(json['replace_date']) ??
         getInsteadDate(json['order_filter_core'] as List<dynamic>?),
     dateOrder: getDateOrder(json['order_filter_core'] as List<dynamic>?),
-    // staff: json["staff"] != null && json["staff"][0]["staff_info"] != null
-    //     ? UserModel.fromJson(
-    //         json["staff"][0]["staff_info"] as Map<String, dynamic>)
-    //     : null,
     staff:
         json["staff"] != null &&
             json["staff"] is List &&
@@ -135,6 +134,7 @@ class OrderDetailModel {
     'status': status,
     'user_id': userId,
     'type': type,
+    'sub_type': subType,
     'price': price,
     'chiet_khau': chietKhau,
     'tich_diem': tichDiem,
@@ -253,7 +253,6 @@ class OrderDetailModel {
       if (lstOrderFilterCoresModel == null) {
         return null;
       }
-      //DateFormat inputFormat = DateFormat("dd/MM/yyyy");
       if (lstOrderFilterCoresModel.isEmpty) {
         return null;
       } else {

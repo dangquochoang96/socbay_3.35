@@ -79,11 +79,11 @@ class UserNewOrderBloc extends Bloc<UserNewOrderEvent, UserNewOrderState> {
         }
       }
       if (event.productId != null && event.productId != 0) {
-        String listFilterId = "";
-        String listCoresName = "";
-        String listReplaceDate = "";
-        String listNextDate = "";
-        String listPrice = "";
+        List<String> listFilterId = [];
+        List<String> listCoresName = [];
+        List<String> listReplaceDate = [];
+        List<String> listNextDate = [];
+        List<String> listPrice = [];
         var lst1 = event.lstNew;
         var lst2 = event.lstMaintain;
         for (OrderFilterCoreModel filterCore in lst1) {
@@ -97,32 +97,36 @@ class UserNewOrderBloc extends Bloc<UserNewOrderEvent, UserNewOrderState> {
         }
         for (OrderFilterCoreModel filterCore in lst1) {
           if (filterCore.name != null && filterCore.name != '') {
-            listFilterId += "0,";
-            listCoresName += "${filterCore.name},";
-            listReplaceDate += filterCore.replaceDate != null
-                ? "${filterCore.replaceDate!.split("/").reversed.join("-")},"
-                : ",";
-            listNextDate += filterCore.replaceDatePromise != null
-                ? "${filterCore.replaceDatePromise!.split("/").reversed.join("-")},"
-                : ",";
-            listPrice += filterCore.price != null
-                ? "${filterCore.price},"
-                : "0,";
+            listFilterId.add("0");
+            listCoresName.add(filterCore.name!);
+            listReplaceDate.add(
+              filterCore.replaceDate != null
+                  ? filterCore.replaceDate!.split("/").reversed.join("-")
+                  : "",
+            );
+            listNextDate.add(
+              filterCore.replaceDatePromise != null
+                  ? filterCore.replaceDatePromise!.split("/").reversed.join("-")
+                  : "",
+            );
+            listPrice.add(filterCore.price ?? "0");
           }
         }
         for (OrderFilterCoreModel filterCore in lst2) {
           if (filterCore.name != null && filterCore.name != '') {
-            listFilterId += "0,";
-            listCoresName += "${filterCore.name},";
-            listReplaceDate += filterCore.replaceDate != null
-                ? "${filterCore.replaceDate!.split("/").reversed.join("-")},"
-                : ",";
-            listNextDate += filterCore.replaceDatePromise != null
-                ? "${filterCore.replaceDatePromise!.split("/").reversed.join("-")},"
-                : ",";
-            listPrice += filterCore.price != null
-                ? "${filterCore.price},"
-                : "0,";
+            listFilterId.add("0");
+            listCoresName.add(filterCore.name!);
+            listReplaceDate.add(
+              filterCore.replaceDate != null
+                  ? filterCore.replaceDate!.split("/").reversed.join("-")
+                  : "",
+            );
+            listNextDate.add(
+              filterCore.replaceDatePromise != null
+                  ? filterCore.replaceDatePromise!.split("/").reversed.join("-")
+                  : "",
+            );
+            listPrice.add(filterCore.price ?? "0");
           }
         }
         //Add cores
@@ -137,21 +141,11 @@ class UserNewOrderBloc extends Bloc<UserNewOrderEvent, UserNewOrderState> {
           'staff': '161',
           'sale_id': '161',
           'product_id': event.productId.toString(),
-          'replaceDate': listReplaceDate.isEmpty
-              ? ""
-              : listReplaceDate.substring(0, listReplaceDate.length - 1),
-          'replaceDatePromise': listNextDate.isEmpty
-              ? ""
-              : listNextDate.substring(0, listNextDate.length - 1),
-          'name': listCoresName.isEmpty
-              ? ""
-              : listCoresName.substring(0, listCoresName.length - 1),
-          'corePrice': listPrice.isEmpty
-              ? ""
-              : listPrice.substring(0, listPrice.length - 1),
-          'listCores': listFilterId.isEmpty
-              ? ""
-              : listFilterId.substring(0, listFilterId.length - 1),
+          'replaceDate': listReplaceDate,
+          'replaceDatePromise': listNextDate,
+          'name': listCoresName,
+          'corePrice': listPrice,
+          'listCores': listFilterId,
           "images": images,
           'address': App.instance.userApp?.address.toString(),
         };

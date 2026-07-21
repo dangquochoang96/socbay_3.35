@@ -106,6 +106,7 @@ class _TaskWaitState extends State<TaskWaitTab> {
           );
         },
         child: ListView.separated(
+          physics: const AlwaysScrollableScrollPhysics(),
           controller: _scrollController,
           itemBuilder: _itemBuilder,
           itemCount: taskList.length,

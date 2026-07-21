@@ -195,6 +195,7 @@ class _MyTaskTabState extends State<MyTaskTabSale> {
                       ],
                     )
                   : ListView.separated(
+                      physics: const AlwaysScrollableScrollPhysics(),
                       //controller: _scrollController,
                       itemBuilder: _itemBuilder,
                       itemCount: _filteredTasks.length,
