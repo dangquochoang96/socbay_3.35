@@ -25,6 +25,7 @@ class TaskModel {
   final ProductModel? productInfo;
   final UserModel? staff;
   final UserModel? customer;
+  final UserModel? sale;
   final List<String>? images;
 
   TaskModel({
@@ -49,6 +50,7 @@ class TaskModel {
     this.productInfo,
     this.staff,
     this.customer,
+    this.sale,
     this.images,
   });
 
@@ -79,6 +81,9 @@ class TaskModel {
         : null,
     customer: json["customer"] != null
         ? UserModel.fromJson(json["customer"] as Map<String, dynamic>)
+        : null,
+    sale: json["sale"] != null
+        ? UserModel.fromJson(json["sale"] as Map<String, dynamic>)
         : null,
     images: getImages(json["images"] as List<dynamic>?),
   );

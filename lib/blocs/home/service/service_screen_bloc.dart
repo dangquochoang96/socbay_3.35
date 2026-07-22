@@ -66,7 +66,8 @@ class ServiceScreenBloc extends Bloc<ServiceScreenEvent, ServiceScreenState> {
         "status": event.createTaskRequest.status.toString(),
         "priority": (event.createTaskRequest.priority).toString(),
         "staff": event.createTaskRequest.staffId.toString(),
-        "user_create": "161",
+        "user_create": "1",
+        "sale_id": "12985",
         "product_id": event.createTaskRequest.productId == 0
             ? null
             : event.createTaskRequest.productId,

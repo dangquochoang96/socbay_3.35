@@ -197,6 +197,12 @@ class HomeServiceModel {
       des: 'Lắp lọc tổng (thợ phụ)',
       name: 'Lắp lọc tổng (thợ phụ)',
     ),
+    HomeServiceModel(
+      id: 11,
+      image: Images.iconAdvise,
+      des: 'Lắp máy đơn sàn',
+      name: 'Lắp máy đơn sàn',
+    ),
   ];
   static List<HomeServiceModel> getServiceList() {
     return [
@@ -259,6 +265,12 @@ class HomeServiceModel {
         image: Images.iconAdvise,
         des: 'Lắp lọc tổng (thợ phụ)',
         name: 'Lắp lọc tổng (thợ phụ)',
+      ),
+      HomeServiceModel(
+        id: 11,
+        image: Images.iconAdvise,
+        des: 'Lắp máy đơn sàn',
+        name: 'Lắp máy đơn sàn',
       ),
     ];
   }

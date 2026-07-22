@@ -211,7 +211,7 @@ class _DetailBookingScreenState extends State<DetailBookingScreen> {
             valueColor: ColorUtil.red,
             isBold: true,
           ),
-          _buildInfoRow("Công việc:", taskModel?.name ?? ""),
+          // _buildInfoRow("Công việc:", taskModel?.name ?? ""),
           Padding(
             padding: const EdgeInsets.only(bottom: 8.0),
             child: Row(
@@ -220,7 +220,7 @@ class _DetailBookingScreenState extends State<DetailBookingScreen> {
                 Expanded(
                   flex: 2,
                   child: Text(
-                    "Loại công việc:",
+                    "Công việc:",
                     style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                   ),
                 ),

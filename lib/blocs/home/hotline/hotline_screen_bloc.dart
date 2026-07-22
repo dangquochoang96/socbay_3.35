@@ -34,10 +34,6 @@ class HotlineScreenBloc extends Bloc<HotlineScreenEvent, HotlineScreenState> {
         l["data"].map((model) => UserModel.fromJson(model)),
       );
     }
-    // final res = await apiRepository.getListSupporters();
-    // if(res.data!=null){
-    //   users = res.data!;
-    // }
     isLoading = false;
     emit(HotlineScreenInitialState());
   }

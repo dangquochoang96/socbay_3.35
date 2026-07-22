@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:socbay/application.dart';
@@ -49,6 +50,7 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
   DateTime? selectedDate;
   TimeOfDay? selectedTime;
   UserModel? _favouriteStaff;
+  UserModel? _selectedSale;
   late final ImagePicker _picker;
   // ignore: prefer_typing_uninitialized_variables
   var _parsedDate;
@@ -79,19 +81,60 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
     );
   }
 
+  DateTime? _parseDateTime(String? dateStr) {
+    if (dateStr == null || dateStr.trim().isEmpty) return null;
+    final str = dateStr.trim();
+    final parsedIso = DateTime.tryParse(str);
+    if (parsedIso != null) return parsedIso;
+
+    final formats = [
+      'dd/MM/yyyy HH:mm:ss',
+      'dd/MM/yyyy HH:mm',
+      'dd/MM/yyyy',
+      'HH:mm dd/MM/yyyy',
+      'HH:mm:ss dd/MM/yyyy',
+      'yyyy-MM-dd HH:mm:ss',
+      'yyyy-MM-dd HH:mm',
+    ];
+
+    for (final format in formats) {
+      try {
+        return DateFormat(format).parse(str);
+      } catch (_) {}
+    }
+    return null;
+  }
+
   void _listener(BuildContext context, EditServiceState state) {
     if (state is EditServiceInitialState) {
       _currentSelectedValue = _bloc.taskModel?.type;
-      if (_bloc.taskModel?.timeStart != null) {
-        _parsedDate = DateTime.parse(_bloc.taskModel!.timeStart!);
-        _dateStart = _parsedDate.toDateString(format: "dd/MM/yyyy");
-        _timeStart =
-            "${_parsedDate.hour.toString().padLeft(2, "0")}:${_parsedDate.minute.toString().padLeft(2, "0")}";
-        _initialTimeStart ??= '$_dateStart $_timeStart';
+      if (_bloc.taskModel?.timeStart != null &&
+          _bloc.taskModel!.timeStart!.isNotEmpty) {
+        final parsed = _parseDateTime(_bloc.taskModel!.timeStart!);
+        if (parsed != null) {
+          _parsedDate = parsed;
+          _dateStart = parsed.toDateString(format: "dd/MM/yyyy");
+          _timeStart =
+              "${parsed.hour.toString().padLeft(2, "0")}:${parsed.minute.toString().padLeft(2, "0")}";
+          _initialTimeStart ??= '$_dateStart $_timeStart';
+        }
       }
       _favouriteStaff = _bloc.taskModel?.staff;
       _listPath = _bloc.taskModel?.images ?? [];
       desDraft = _bloc.taskModel?.des ?? "";
+
+      if (_selectedSale == null) {
+        if (_bloc.taskModel?.sale != null) {
+          _selectedSale = _bloc.taskModel!.sale;
+        } else if (_bloc.taskModel?.saleId != null && _bloc.sales.isNotEmpty) {
+          _selectedSale = _bloc.sales.firstWhere(
+            (s) => s.id?.toString() == _bloc.taskModel!.saleId.toString(),
+            orElse: () => _bloc.sales.first,
+          );
+        } else if (_bloc.sales.isNotEmpty) {
+          _selectedSale = _bloc.sales.first;
+        }
+      }
     }
 
     if (state is EditServiceUploadImageSuccessState) {
@@ -185,6 +228,8 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
                   onTapSecond: _onTapTimeStart,
                 ),
                 const SizedBox(height: 8),
+                _buildSaleDropdownField(),
+                const SizedBox(height: 8),
                 _buildField(
                   '',
                   'Thợ ưa thích',
@@ -243,8 +288,9 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
     final currentTimeStart = '$_dateStart $_timeStart';
     final bool isTimeChanged =
         _initialTimeStart != null && currentTimeStart != _initialTimeStart;
-    final int statusToUpdate =
-        isTimeChanged ? 5 : (_favouriteStaff?.id == null ? 1 : 5);
+    final int statusToUpdate = isTimeChanged
+        ? 5
+        : (_favouriteStaff?.id == null ? 1 : 5);
 
     _bloc.add(
       EditServiceUpdateTaskEvent(
@@ -258,12 +304,92 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
           timeStart: currentTimeStart,
           timeEnd: "",
           staffId: _favouriteStaff?.id,
-          saleId: 1,
+          saleId:
+              _selectedSale?.id ??
+              int.tryParse(_bloc.taskModel?.saleId ?? "") ??
+              1,
           customerId: App.instance.userApp?.id,
           orderId: 1,
           images: _listPath,
         ),
       ),
+    );
+  }
+
+  Widget _buildSaleDropdownField() {
+    List<UserModel> dropdownSales = List.from(_bloc.sales);
+    if (_selectedSale != null &&
+        !dropdownSales.any(
+          (s) => s.id?.toString() == _selectedSale!.id?.toString(),
+        )) {
+      dropdownSales.insert(0, _selectedSale!);
+    }
+
+    final String? currentSaleId =
+        _selectedSale?.id?.toString() ?? _bloc.taskModel?.saleId?.toString();
+    final bool exists = dropdownSales.any(
+      (s) => s.id?.toString() == currentSaleId,
+    );
+    final String? validValue = exists ? currentSaleId : null;
+
+    return FormField<String>(
+      builder: (FormFieldState<String> state) {
+        return InputDecorator(
+          decoration: InputDecoration(
+            labelText: 'Sale phụ trách',
+            errorStyle: const TextStyle(
+              color: Colors.redAccent,
+              fontSize: 16.0,
+            ),
+            hintText: 'Chọn Sale',
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8.0),
+              borderSide: const BorderSide(
+                color: ColorUtil.bangladeshGreen,
+                width: 0.5,
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8.0),
+              borderSide: const BorderSide(
+                color: ColorUtil.bangladeshGreen,
+                width: 0.5,
+              ),
+            ),
+            prefixIcon: const Icon(Icons.person_pin_outlined),
+          ),
+          isEmpty: validValue == null,
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              value: validValue,
+              isDense: true,
+              hint: const Text('Chọn Sale'),
+              onChanged: (String? newValue) {
+                if (newValue != null) {
+                  setState(() {
+                    _selectedSale = dropdownSales.firstWhere(
+                      (element) => element.id?.toString() == newValue,
+                    );
+                    desDraft = describeRequestTxtController.text;
+                  });
+                }
+              },
+              items: dropdownSales.map((UserModel user) {
+                final displayName =
+                    (user.username != null && user.username!.isNotEmpty)
+                    ? user.username!
+                    : (user.phone != null && user.phone!.isNotEmpty
+                          ? user.phone!
+                          : "Sale #${user.id}");
+                return DropdownMenuItem<String>(
+                  value: user.id?.toString(),
+                  child: Text(displayName),
+                );
+              }).toList(),
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -452,12 +578,18 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
   }
 
   Future<void> _selectDate() async {
+    final now = DateTime.now();
+    final initialDate =
+        (_parsedDate != null &&
+            !_parsedDate.isBefore(now.subtract(const Duration(days: 365))))
+        ? _parsedDate
+        : now;
     final DateTime? picked = await showDatePicker(
       context: context,
       locale: const Locale("vi", "VN"),
-      initialDate: _parsedDate ?? DateTime.now(),
-      firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(const Duration(days: 365)),
+      initialDate: initialDate,
+      firstDate: now.subtract(const Duration(days: 365)),
+      lastDate: now.add(const Duration(days: 365)),
     );
     if (picked != null && picked != selectedDate) {
       selectedDate = picked;
@@ -471,7 +603,9 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
   Future<void> _selectTime() async {
     final TimeOfDay? picked = await showTimePicker(
       context: context,
-      initialTime: TimeOfDay.fromDateTime(_parsedDate),
+      initialTime: _parsedDate != null
+          ? TimeOfDay.fromDateTime(_parsedDate)
+          : TimeOfDay.now(),
     );
     if (picked != null && picked != selectedTime) {
       selectedTime = picked;

@@ -315,7 +315,7 @@ class _EvaluateScreenListState extends State<EvaluateScreen> {
   }
 
   Widget _buildAvatar(UserModel item) {
-    final avatarUrl = item.avatar ?? '';
+    final avatarUrl = item.companyAvatar ?? '';
     if (avatarUrl.isEmpty) {
       final initial = (item.username != null && item.username!.isNotEmpty)
           ? item.username!.substring(0, 1).toUpperCase()
@@ -358,7 +358,7 @@ class _EvaluateScreenListState extends State<EvaluateScreen> {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(26),
         child: ImageUtil.loadNetWorkImage(
-          url: avatarUrl,
+          url: ImageUtil.getUrlFromPath(avatarUrl),
           height: 52,
           width: 52,
         ),

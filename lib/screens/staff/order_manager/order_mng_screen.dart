@@ -651,6 +651,12 @@ class _OrderManagerScreenState extends State<OrderManagerScreen> {
     List<Map<String, dynamic>> orderRows = [];
     for (var order in _bloc.staffLstOrders) {
       double price = double.tryParse(order.price ?? '0') ?? 0;
+      if (order.type == '4') {
+        price = 80000;
+      } else if (order.subType == '8') {
+        price = 200000;
+      }
+
       double cash = 0;
       double transfer = 0;
 
@@ -1003,6 +1009,9 @@ class _OrderManagerScreenState extends State<OrderManagerScreen> {
         break;
       case '7':
         subTypeLabel = 'Lọc tổng phụ';
+        break;
+      case '8':
+        subTypeLabel = 'Lắp máy sàn';
         break;
       default:
         subTypeLabel = subTypeRaw;

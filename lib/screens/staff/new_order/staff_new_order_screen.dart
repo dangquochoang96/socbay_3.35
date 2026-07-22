@@ -1196,6 +1196,8 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                       subType = 6;
                     } else if (taskType == 10) {
                       subType = 7;
+                    } else if (taskType == 11) {
+                      subType = 8;
                     } else if (hasNewProduct &&
                         (taskType == 4 || taskType == 5)) {
                       subType = 1;
@@ -1279,11 +1281,11 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                   child: Text(
                     _successState != null
                         ? ((_bloc.paymentType == 2 || _bloc.paymentType == 3)
-                            ? "XEM MÃ QR THANH TOÁN"
-                            : "HOÀN THÀNH")
+                              ? "XEM MÃ QR THANH TOÁN"
+                              : "HOÀN THÀNH")
                         : (_bloc.paymentType == 2 || _bloc.paymentType == 3
-                            ? "TẠO ĐƠN & HIỂN THỊ QR"
-                            : "HOÀN THÀNH"),
+                              ? "TẠO ĐƠN & HIỂN THỊ QR"
+                              : "HOÀN THÀNH"),
                     textAlign: TextAlign.center,
                     style: const TextStyle(fontSize: 16, color: Colors.white),
                   ),

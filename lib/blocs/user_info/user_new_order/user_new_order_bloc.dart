@@ -59,8 +59,8 @@ class UserNewOrderBloc extends Bloc<UserNewOrderEvent, UserNewOrderState> {
             'tru_diem': '0',
             'address': App.instance.userApp?.address.toString(),
             'type_payment': event.paymentType.toString(),
-            'staff': '161',
-            'sale_id': '161',
+            'staff': '1',
+            'sale_id': '12985',
           });
 
           var res = await http.post(url);
@@ -138,8 +138,8 @@ class UserNewOrderBloc extends Bloc<UserNewOrderEvent, UserNewOrderState> {
           'tich_diem': event.savePoint.toString(),
           'tru_diem': event.subSavePoint.toString(),
           'type_payment': event.paymentType.toString(),
-          'staff': '161',
-          'sale_id': '161',
+          'staff': '1',
+          'sale_id': '12985',
           'product_id': event.productId.toString(),
           'replaceDate': listReplaceDate,
           'replaceDatePromise': listNextDate,

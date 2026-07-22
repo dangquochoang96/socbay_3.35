@@ -10,6 +10,7 @@ import 'package:socbay/data/data_provider/api_endpoints.dart';
 import 'package:socbay/utils/logger_util.dart';
 import '../../../data/model/home_service_model.dart';
 import '../../../data/model/task_model.dart';
+import '../../../data/model/user_model.dart';
 import '../../../data/repository/auth/api_repository.dart';
 import 'package:socbay/utils/auth_http.dart' as http;
 import 'package:path/path.dart';
@@ -19,6 +20,7 @@ class EditServiceBloc extends Bloc<EditServiceEvent, EditServiceState> {
   bool isLoading = false;
   Map<String, dynamic> args;
   List<HomeServiceModel> services = [];
+  List<UserModel> sales = [];
   TaskModel? taskModel;
   List<String> paths = [];
 
@@ -43,6 +45,22 @@ class EditServiceBloc extends Bloc<EditServiceEvent, EditServiceState> {
         var l = Map<String, dynamic>.from(json.decode(res.body));
         taskModel = TaskModel.fromJson(l["data"]);
         add(EditServiceGetServicesEvent());
+      }
+
+      var urlSale = AppConfig.instance.apiUri(
+        ApiEndpoints.userSupport,
+        {'type': 'sale'},
+      );
+      var resSale = await http.get(urlSale);
+      if (resSale.statusCode == HttpStatus.ok) {
+        var lSale = Map<String, dynamic>.from(json.decode(resSale.body));
+        if (lSale["data"] != null && lSale["data"] is List) {
+          sales = List<UserModel>.from(
+            (lSale["data"] as List).map(
+              (model) => UserModel.fromJson(model as Map<String, dynamic>),
+            ),
+          );
+        }
       }
     } catch (ex) {
       LoggerUtil.error(ex.toString());
@@ -130,6 +148,7 @@ class EditServiceBloc extends Bloc<EditServiceEvent, EditServiceState> {
       "user_create": App.instance.userApp!.id.toString(),
       "customer": event.updateTaskRequest.customerId,
       "images": images,
+      "sale_id": event.updateTaskRequest.saleId,
     };
     var url = AppConfig.instance.apiUri(ApiEndpoints.taskEdit(args['id']));
     var body = json.encode(params);
