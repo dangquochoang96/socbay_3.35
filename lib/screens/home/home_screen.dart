@@ -135,9 +135,11 @@ class _HomeScreenState extends State<HomeScreen> {
         IconButton(
           onPressed: _onPressNotification,
           icon: ImageUtil.loadAssetsImage(
-            fileName: Images.iconNoti,
-            width: 25,
-            height: 25,
+            fileName: _bloc.hasUnreadNotification
+                ? Images.iconNotiUnread
+                : Images.iconNoti,
+            width: 30,
+            height: 30,
           ),
         ),
       ],
@@ -724,10 +726,7 @@ class _HomeScreenState extends State<HomeScreen> {
       onTap: () {
         if (App.instance.userApp?.isUserCustomer() == true) {
           if (index == 0) {
-            Navigator.pushNamed(
-              context,
-              Routes.customerOrderListScreen,
-            );
+            Navigator.pushNamed(context, Routes.customerOrderListScreen);
           } else if (index == 1) {
             const url = "tel:0963456911";
             launchUrl(Uri.parse(url));
@@ -925,7 +924,15 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _onPressNotification() {
-    Navigator.pushNamed(context, Routes.notificationScreen);
+    if (_bloc.hasUnreadNotification) {
+      setState(() {
+        _bloc.hasUnreadNotification = false;
+      });
+      _bloc.markNotificationAsRead();
+    }
+    Navigator.pushNamed(context, Routes.notificationScreen).then((_) {
+      _bloc.add(HomeStartedEvent());
+    });
   }
 
   void _onPressMenu() {

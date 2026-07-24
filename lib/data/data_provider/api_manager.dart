@@ -23,6 +23,8 @@ enum ApiType {
 
   ///User
   getNotifications,
+  notificationBadge,
+  notificationMarkAsRead,
   getGiftList,
   getStaffs,
   updateUserInfo,
@@ -137,8 +139,20 @@ class ApiManager {
         );
       case ApiType.getNotifications:
         return ApiConfig(
-          path: ApiEndpoints.notifications,
+          path: ApiEndpoints.notificationList,
           method: HttpMethod.get,
+          headers: _defaultHeaders,
+        );
+      case ApiType.notificationBadge:
+        return ApiConfig(
+          path: ApiEndpoints.notificationBadge,
+          method: HttpMethod.get,
+          headers: _defaultHeaders,
+        );
+      case ApiType.notificationMarkAsRead:
+        return ApiConfig(
+          path: ApiEndpoints.notificationMarkAsRead,
+          method: HttpMethod.post,
           headers: _defaultHeaders,
         );
       case ApiType.getGiftList:

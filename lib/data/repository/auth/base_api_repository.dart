@@ -43,7 +43,11 @@ abstract class BaseApiRepository {
   Future<DefaultResponse<UserModel>> changePassword(
     ChangePasswordRequest changePasswordRequest,
   );
-  Future<DefaultResponse<List<NotificationResponse>>> getNotifications();
+  Future<DefaultResponse<List<NotificationResponse>>> getNotifications({
+    int page = 1,
+  });
+  Future<DefaultResponse<bool>> getNotificationBadge();
+  Future<DefaultResponse> markNotificationAsRead();
   Future<DefaultResponse<UserModel>> updateUserInfo(
     UserInfoRequest userInfoRequest,
   );

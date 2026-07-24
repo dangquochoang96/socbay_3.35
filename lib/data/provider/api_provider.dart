@@ -359,26 +359,87 @@ class ApiProvider {
     }
   }
 
-  Future<DefaultResponse<List<NotificationResponse>>> getNotifications() async {
+  Future<DefaultResponse<List<NotificationResponse>>> getNotifications({
+    int page = 1,
+  }) async {
     try {
-      var dio = Dio();
-      var response = await dio.get(
-        AppConfig.instance.apiUrl(ApiEndpoints.notificationList),
-        options: Options(contentType: 'application/json'),
+      final Map resJson = await _baseAPI.request(
+        manager: ApiManager(ApiType.getNotifications),
+        queryParams: {"page": page},
       );
-      var res = Map<String, dynamic>.from(jsonDecode(response.toString()));
-      // final res = response.data;
-      if (res["code"] != null && res["code"] == 1 && res["data"] != null) {
-        var response = DefaultResponse(
-          status: res["code"],
-          data: List<NotificationResponse>.from(
-            res["data"].map((model) => NotificationResponse.fromJson(model)),
-          ),
+      final res = DefaultResponse.fromMap(resJson);
+      final isSuccess =
+          (resJson['code'] == 1 || res.status == 1 || res.status == 200);
+      final rawData = resJson['data'] ?? res.data;
+
+      if (isSuccess && rawData != null) {
+        List rawList = [];
+        if (rawData is List) {
+          rawList = rawData;
+        } else if (rawData is Map && rawData['data'] is List) {
+          rawList = rawData['data'];
+        }
+
+        List<NotificationResponse> list = [];
+        for (final item in rawList) {
+          if (item is Map) {
+            list.add(
+              NotificationResponse.fromJson(Map<String, dynamic>.from(item)),
+            );
+          }
+        }
+
+        return DefaultResponse(
+          data: list,
+          status: resJson['code'] ?? res.status ?? 1,
         );
-        return response;
       } else {
-        return DefaultResponse(message: res["message"]);
+        return DefaultResponse(
+          status: res.status,
+          message: resJson['message'] ?? res.message,
+        );
       }
+    } catch (e) {
+      return DefaultResponse.withError(Error(message: e.toString()));
+    }
+  }
+
+  Future<DefaultResponse<bool>> getNotificationBadge() async {
+    try {
+      final Map resJson = await _baseAPI.request(
+        manager: ApiManager(ApiType.notificationBadge),
+      );
+      final res = DefaultResponse.fromMap(resJson);
+      final isSuccess =
+          (resJson['code'] == 1 || res.status == 1 || res.status == 200);
+      bool hasUnread = false;
+      if (resJson['data'] is bool) {
+        hasUnread = resJson['data'] as bool;
+      } else if (resJson['data'] != null) {
+        hasUnread = resJson['data'].toString().toLowerCase() == 'true' ||
+            resJson['data'].toString() == '1';
+      }
+
+      return DefaultResponse(
+        data: hasUnread,
+        status: isSuccess ? 1 : res.status,
+        message: resJson['message'] ?? res.message,
+      );
+    } catch (e) {
+      return DefaultResponse.withError(Error(message: e.toString()));
+    }
+  }
+
+  Future<DefaultResponse> markNotificationAsRead() async {
+    try {
+      final Map resJson = await _baseAPI.request(
+        manager: ApiManager(ApiType.notificationMarkAsRead),
+      );
+      final res = DefaultResponse.fromMap(resJson);
+      return DefaultResponse(
+        status: resJson['code'] ?? res.status ?? 1,
+        message: resJson['message'] ?? res.message,
+      );
     } catch (e) {
       return DefaultResponse.withError(Error(message: e.toString()));
     }

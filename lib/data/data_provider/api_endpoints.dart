@@ -48,8 +48,9 @@ abstract final class ApiEndpoints {
   // =========================
   // NOTIFICATION
   // =========================
-  static const notifications = '/notify';
-  static const notificationList = '/notify/list';
+  static const notificationList = '/notifications';
+  static const notificationBadge = '/notifications/badge';
+  static const notificationMarkAsRead = '/notifications/markAsRead';
 
   // =========================
   // SETTING / BANNER

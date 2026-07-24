@@ -25,7 +25,6 @@ class _RootState extends State<Root> {
 
   @override
   void initState() {
-    //_rootBloc = BlocProvider.of<RootBloc>(context);
     _rootBloc = RootBloc();
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {

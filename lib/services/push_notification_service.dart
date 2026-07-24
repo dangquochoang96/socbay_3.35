@@ -62,11 +62,16 @@ class PushNotificationService {
   }
 
   Future<String?> getToken() async {
-    final token = await _messaging.getToken();
-    if (token != null && token.isNotEmpty) {
-      await SecureStorageUtil.shared.writeData(_fcmTokenStorageKey, token);
+    try {
+      final token = await _messaging.getToken();
+      if (token != null && token.isNotEmpty) {
+        await SecureStorageUtil.shared.writeData(_fcmTokenStorageKey, token);
+      }
+      return token;
+    } catch (e) {
+      LoggerUtil.error('Error getting FCM token: $e');
+      return null;
     }
-    return token;
   }
 
   Future<void> setAuthenticatedUser(String userId) async {
@@ -75,22 +80,30 @@ class PushNotificationService {
   }
 
   Future<void> clearAuthenticatedUser() async {
-    final currentTopic = await SecureStorageUtil.shared.readData(
-      _currentTopicStorageKey,
-    );
-    if (currentTopic != null && currentTopic.isNotEmpty) {
-      await _messaging.unsubscribeFromTopic(currentTopic);
-      await SecureStorageUtil.shared.deleteKey(_currentTopicStorageKey);
+    try {
+      final currentTopic = await SecureStorageUtil.shared.readData(
+        _currentTopicStorageKey,
+      );
+      if (currentTopic != null && currentTopic.isNotEmpty) {
+        await _messaging.unsubscribeFromTopic(currentTopic);
+        await SecureStorageUtil.shared.deleteKey(_currentTopicStorageKey);
+      }
+    } catch (e) {
+      LoggerUtil.error('Error clearing authenticated user FCM topic: $e');
     }
   }
 
   Future<void> _requestPermission() async {
-    await _messaging.requestPermission(
-      alert: true,
-      badge: true,
-      sound: true,
-      provisional: false,
-    );
+    try {
+      await _messaging.requestPermission(
+        alert: true,
+        badge: true,
+        sound: true,
+        provisional: false,
+      );
+    } catch (e) {
+      LoggerUtil.error('Error requesting FCM permission: $e');
+    }
   }
 
   Future<void> _cacheCurrentToken() async {
@@ -138,29 +151,38 @@ class PushNotificationService {
   }
 
   Future<void> _subscribeToUserTopic(String userId) async {
-    final topic = 'user_$userId';
-    final currentTopic = await SecureStorageUtil.shared.readData(
-      _currentTopicStorageKey,
-    );
+    try {
+      final topic = 'user_$userId';
+      final currentTopic = await SecureStorageUtil.shared.readData(
+        _currentTopicStorageKey,
+      );
 
-    if (currentTopic == topic) {
-      return;
+      if (currentTopic == topic) {
+        return;
+      }
+
+      if (currentTopic != null && currentTopic.isNotEmpty) {
+        await _messaging.unsubscribeFromTopic(currentTopic);
+      }
+
+      await _messaging.subscribeToTopic(topic);
+      await SecureStorageUtil.shared.writeData(_currentTopicStorageKey, topic);
+    } catch (e) {
+      LoggerUtil.error('Error subscribing to FCM topic: $e');
     }
-
-    if (currentTopic != null && currentTopic.isNotEmpty) {
-      await _messaging.unsubscribeFromTopic(currentTopic);
-    }
-
-    await _messaging.subscribeToTopic(topic);
-    await SecureStorageUtil.shared.writeData(_currentTopicStorageKey, topic);
   }
 
   void _navigateFromPayload(Map<String, dynamic> data) {
-    final target = data['screen']?.toString();
-    final taskId = data['task_id']?.toString();
-    final rentTaskId = data['rent_task_id']?.toString();
-    final orderId = data['order_id']?.toString();
-    print(target);
+    final target =
+        data['screen']?.toString() ?? data['action_type']?.toString();
+    final taskId = data['id']?.toString() ??
+        data['task_id']?.toString() ??
+        data['action_value']?.toString();
+    final rentTaskId = data['id']?.toString() ??
+        data['rent_task_id']?.toString() ??
+        data['action_value']?.toString();
+    final orderId =
+        data['order_id']?.toString() ?? data['action_value']?.toString();
 
     if (target == 'notification' || target == 'notification-list') {
       NavigationService.instance.navigateTo(Routes.notificationScreen);
@@ -175,7 +197,7 @@ class PushNotificationService {
       return;
     }
 
-    if (target == 'rent-tasks') {
+    if (target == 'rent-tasks' || target == 'rent_tasks') {
       NavigationService.instance.navigateTo(
         Routes.detailRentBookingScreen,
         args: {'id': rentTaskId},

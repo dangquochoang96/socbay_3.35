@@ -12,7 +12,6 @@ import 'package:socbay/blocs/staff/new_task_sale/staff_service_screen_sale_event
 import 'package:socbay/blocs/staff/new_task_sale/staff_service_screen_sale_state.dart';
 import 'package:socbay/blocs/tab_bar/tab_bar_bloc.dart';
 import 'package:socbay/blocs/tab_bar/tab_bar_event.dart';
-import 'package:socbay/blocs/task/task_screen_bloc.dart';
 import 'package:socbay/blocs/task/task_screen_event.dart';
 import 'package:socbay/blocs/task/task_screen_sale_bloc.dart';
 import 'package:socbay/config/app_config.dart';
@@ -24,7 +23,6 @@ import 'package:socbay/data/model/product_model.dart';
 import 'package:socbay/data/model/request/create_task_request.dart';
 import 'package:socbay/data/model/request/user_address_request.dart';
 import 'package:socbay/data/model/user_model.dart';
-import 'package:socbay/routes.dart';
 import 'package:socbay/screens/staff/technique/technique_screen.dart';
 import 'package:socbay/utils/color_util.dart';
 import 'package:socbay/utils/context_extension.dart';

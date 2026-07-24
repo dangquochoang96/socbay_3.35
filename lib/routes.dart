@@ -36,7 +36,6 @@ import 'package:socbay/blocs/user_info/user_new_order/user_new_order_bloc.dart';
 import 'package:socbay/blocs/user_info/user_screen_bloc.dart';
 import 'package:socbay/data/model/bill_data.dart';
 import 'package:socbay/data/model/blog_model.dart';
-import 'package:socbay/data/model/notification_response.dart';
 import 'package:socbay/data/model/product_category.dart';
 import 'package:socbay/data/model/product_model.dart';
 import 'package:socbay/data/repository/auth/api_repository.dart';
@@ -66,7 +65,6 @@ import 'package:socbay/screens/home/search_staff_screen.dart';
 import 'package:socbay/screens/home/service_screen.dart';
 import 'package:socbay/screens/home/staff_info_screen.dart';
 import 'package:socbay/screens/map_screen.dart';
-import 'package:socbay/screens/notification/notification_detail_screen.dart';
 import 'package:socbay/screens/notification/notification_screen.dart';
 import 'package:socbay/screens/machines/machine_detail_screen.dart';
 import 'package:socbay/screens/machines/machine_screen.dart';
@@ -124,7 +122,6 @@ class Routes {
   static const String staffProfileScreen = '/staffProfileScreen';
   static const String accountInfoScreen = '/accountInfoScreen';
   static const String notificationScreen = '/notificationScreen';
-  static const String notificationDetailScreen = '/notificationDetailScreen';
   static const String giftScreen = '/giftScreen';
   static const String favouriteProduct = '/favouriteProduct';
   static const String favouriteStaff = '/favouriteStaff';
@@ -219,10 +216,6 @@ class Routes {
               create: (context) =>
                   NotificationScreenBloc(apiRepository: apiRepository),
               child: const NotificationScreen(),
-            );
-          case notificationDetailScreen:
-            return NotificationDetailScreen(
-              notificationResponse: settings.arguments as NotificationResponse,
             );
           case giftScreen:
             return BlocProvider<GiftScreenBloc>(
@@ -461,9 +454,8 @@ class Routes {
             );
           case customerOrderListScreen:
             return BlocProvider<CustomerOrderPaymentBloc>(
-              create: (builderContext) => CustomerOrderPaymentBloc(
-                apiRepository: apiRepository,
-              ),
+              create: (builderContext) =>
+                  CustomerOrderPaymentBloc(apiRepository: apiRepository),
               child: const CustomerOrderListScreen(),
             );
           case staffCommentAndRatingList:
@@ -601,7 +593,8 @@ class Routes {
             return const WarehouseUI();
           case hrManagementSummary:
             return BlocProvider<HRManagementBloc>(
-              create: (context) => HRManagementBloc(apiRepository: apiRepository),
+              create: (context) =>
+                  HRManagementBloc(apiRepository: apiRepository),
               child: const HRManagementSummaryScreen(),
             );
           case taskTimelineScreen:

@@ -9,6 +9,7 @@ class Images {
   static const String iconSearch = "ic_search.png";
   static const String iconProduct = "ic_product.png";
   static const String iconNoti = "icon_notification.png";
+  static const String iconNotiUnread = "icon_notification3.png";
   static const String iconPoint = "icon_point.jpg";
   static const String iconWorker = "icon_worker.png";
   static const String banner = "banner.png";

@@ -113,12 +113,24 @@ class ApiRepository extends BaseApiRepository {
   }
 
   @override
-  Future<DefaultResponse<List<NotificationResponse>>> getNotifications() {
+  Future<DefaultResponse<List<NotificationResponse>>> getNotifications({
+    int page = 1,
+  }) {
     try {
-      return _apiProvider.getNotifications();
+      return _apiProvider.getNotifications(page: page);
     } catch (e) {
-      return _apiProvider.getNotifications();
+      return _apiProvider.getNotifications(page: page);
     }
+  }
+
+  @override
+  Future<DefaultResponse<bool>> getNotificationBadge() {
+    return _apiProvider.getNotificationBadge();
+  }
+
+  @override
+  Future<DefaultResponse> markNotificationAsRead() {
+    return _apiProvider.markNotificationAsRead();
   }
 
   @override

@@ -32,6 +32,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   List<StaffSalesIncomeModel> staffSalesIncomes = [];
   List<OrderFilterCoreModel> orderFilterCore = [];
   bool isLoading = false;
+  bool hasUnreadNotification = false;
   int totalOrderAll = 0;
   double totalPriceAll = 0;
   double totalChietKhauAll = 0;
@@ -62,10 +63,32 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       _mapGetListServiceEventToState(null, emit),
       _mapGetBannerEventToState(null, emit),
       _mapGetLastReplaceFilterCore(),
+      _mapGetNotificationBadge(),
     ]).then((value) {
       isLoading = false;
       emit(HomeInitialState());
     });
+  }
+
+  Future<void> _mapGetNotificationBadge() async {
+    try {
+      final res = await apiRepository.getNotificationBadge();
+      if ((res.status == 1 || res.status == HttpStatus.ok) &&
+          res.data != null) {
+        hasUnreadNotification = res.data!;
+      }
+    } catch (ex) {
+      LoggerUtil.error(ex.toString());
+    }
+  }
+
+  Future<void> markNotificationAsRead() async {
+    try {
+      hasUnreadNotification = false;
+      await apiRepository.markNotificationAsRead();
+    } catch (ex) {
+      LoggerUtil.error(ex.toString());
+    }
   }
 
   Future<void> _mapGetUserInfo() async {
