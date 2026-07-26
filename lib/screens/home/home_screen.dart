@@ -782,8 +782,6 @@ class _HomeScreenState extends State<HomeScreen> {
             Navigator.pushNamed(context, Routes.evaluateScreen);
           } else if (index == 1) {
             Navigator.pushNamed(context, Routes.orderManagerScreenBySale);
-            // } else if (index == 2) {
-            //   Navigator.pushNamed(context, Routes.notificationScreen);
           } else if (index == 2) {
             Navigator.pushNamed(context, Routes.feedbackkScreen);
           } else if (index == 3) {

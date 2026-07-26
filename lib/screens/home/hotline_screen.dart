@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:socbay/blocs/home/hotline/hotline_screen_event.dart';
 import 'package:socbay/blocs/home/hotline/hotline_screen_state.dart';
 import 'package:socbay/data/model/user_model.dart';
@@ -25,6 +27,10 @@ class _HotlineScreenState extends State<HotlineScreen> {
   late TextEditingController _searchController;
   String _searchQuery = '';
 
+  bool _isLocating = false;
+  bool _sortByDistance = false;
+  Map<int, double> _distancesInKm = {};
+
   @override
   void initState() {
     super.initState();
@@ -37,6 +43,167 @@ class _HotlineScreenState extends State<HotlineScreen> {
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  Future<Location?> _geocodeAddress(String addressStr) async {
+    final cleanAddr = addressStr.trim();
+    if (cleanAddr.isEmpty) return null;
+
+    try {
+      final locations = await locationFromAddress(cleanAddr);
+      if (locations.isNotEmpty) return locations.first;
+    } catch (_) {}
+
+    if (!cleanAddr.toLowerCase().contains("việt nam") &&
+        !cleanAddr.toLowerCase().contains("vietnam")) {
+      try {
+        final locations = await locationFromAddress("$cleanAddr, Việt Nam");
+        if (locations.isNotEmpty) return locations.first;
+      } catch (_) {}
+    }
+
+    return null;
+  }
+
+  Future<void> _onFindNearMe() async {
+    if (_sortByDistance) {
+      setState(() {
+        _sortByDistance = false;
+      });
+      return;
+    }
+
+    setState(() {
+      _isLocating = true;
+    });
+
+    try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Vui lòng bật dịch vụ định vị (GPS) để tìm thợ gần bạn.',
+              ),
+            ),
+          );
+        }
+        return;
+      }
+
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Quyền truy cập vị trí bị từ chối.'),
+              ),
+            );
+          }
+          return;
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Quyền vị trí bị từ chối vĩnh viễn. Vui lòng mở Cài đặt ứng dụng để cấp quyền.',
+              ),
+            ),
+          );
+        }
+        return;
+      }
+
+      final position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+        ),
+      );
+
+      final double myLat = position.latitude;
+      final double myLng = position.longitude;
+
+      final Map<int, double> newDistances = {};
+
+      for (var user in _bloc.users) {
+        if (user.id == null) continue;
+        double? techLat;
+        double? techLng;
+
+        if (user.address != null && user.address!.trim().isNotEmpty) {
+          final loc = await _geocodeAddress(user.address!);
+          print("loc: $loc");
+          if (loc != null) {
+            techLat = loc.latitude;
+            techLng = loc.longitude;
+          }
+        }
+
+        // Fallback to user.lat / user.lng if geocoding failed or address was empty
+        if (techLat == null || techLng == null) {
+          if (user.lat != null &&
+              user.lat != 0 &&
+              user.lng != null &&
+              user.lng != 0) {
+            techLat = user.lat;
+            techLng = user.lng;
+          }
+        }
+
+        if (techLat != null && techLng != null) {
+          double distanceInMeters = Geolocator.distanceBetween(
+            myLat,
+            myLng,
+            techLat,
+            techLng,
+          );
+          newDistances[user.id!] = distanceInMeters / 1000.0;
+        }
+      }
+
+      if (mounted) {
+        setState(() {
+          _distancesInKm = newDistances;
+          _sortByDistance = true;
+        });
+
+        if (newDistances.isEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Đã lấy vị trí của bạn. Không thể xác định tọa độ từ địa chỉ của kỹ thuật viên.',
+              ),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Lỗi khi lấy vị trí: $e')));
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLocating = false;
+        });
+      }
+    }
+  }
+
+  String _formatDistance(double distKm) {
+    if (distKm < 1.0) {
+      final meters = (distKm * 1000).round();
+      return "Cách $meters m";
+    }
+    return "Cách ${distKm.toStringAsFixed(1)} km";
   }
 
   @override
@@ -56,12 +223,20 @@ class _HotlineScreenState extends State<HotlineScreen> {
   }
 
   Widget _builder(BuildContext context, HotlineScreenState state) {
-    final filteredUsers = _bloc.users.where((user) {
+    List<UserModel> filteredUsers = _bloc.users.where((user) {
       final name = (user.username ?? '').toLowerCase();
       final phone = (user.phone ?? '').toLowerCase();
       final query = _searchQuery.toLowerCase();
       return name.contains(query) || phone.contains(query);
     }).toList();
+
+    if (_sortByDistance) {
+      filteredUsers.sort((a, b) {
+        final distA = _distancesInKm[a.id] ?? double.infinity;
+        final distB = _distancesInKm[b.id] ?? double.infinity;
+        return distA.compareTo(distB);
+      });
+    }
 
     return SafeArea(
       child: Scaffold(
@@ -75,57 +250,124 @@ class _HotlineScreenState extends State<HotlineScreen> {
           isLoading: _bloc.isLoading,
           child: Column(
             children: [
-              // Modern Search Bar
+              // Search Bar & "Tìm thợ gần tôi" Button
               Container(
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
                 color: Colors.white,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade100,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.grey.shade200, width: 1),
-                  ),
-                  child: TextField(
-                    controller: _searchController,
-                    onChanged: (val) {
-                      setState(() {
-                        _searchQuery = val;
-                      });
-                    },
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: ColorUtil.raisinBlack,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: Colors.grey.shade200,
+                            width: 1,
+                          ),
+                        ),
+                        child: TextField(
+                          controller: _searchController,
+                          onChanged: (val) {
+                            setState(() {
+                              _searchQuery = val;
+                            });
+                          },
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: ColorUtil.raisinBlack,
+                          ),
+                          decoration: InputDecoration(
+                            hintText: "Tìm kiếm nhân viên...",
+                            hintStyle: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey.shade400,
+                            ),
+                            prefixIcon: Icon(
+                              Icons.search_rounded,
+                              color: Colors.grey.shade500,
+                              size: 20,
+                            ),
+                            suffixIcon: _searchQuery.isNotEmpty
+                                ? GestureDetector(
+                                    onTap: () {
+                                      _searchController.clear();
+                                      setState(() {
+                                        _searchQuery = '';
+                                      });
+                                    },
+                                    child: Icon(
+                                      Icons.cancel_rounded,
+                                      color: Colors.grey.shade400,
+                                      size: 20,
+                                    ),
+                                  )
+                                : null,
+                            border: InputBorder.none,
+                            contentPadding: const EdgeInsets.symmetric(
+                              vertical: 12,
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
-                    decoration: InputDecoration(
-                      hintText: "Tìm kiếm nhân viên...",
-                      hintStyle: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey.shade400,
-                      ),
-                      prefixIcon: Icon(
-                        Icons.search_rounded,
-                        color: Colors.grey.shade500,
-                        size: 20,
-                      ),
-                      suffixIcon: _searchQuery.isNotEmpty
-                          ? GestureDetector(
-                              onTap: () {
-                                _searchController.clear();
-                                setState(() {
-                                  _searchQuery = '';
-                                });
-                              },
-                              child: Icon(
-                                Icons.cancel_rounded,
-                                color: Colors.grey.shade400,
-                                size: 20,
+                    const SizedBox(width: 8),
+                    InkWell(
+                      onTap: _isLocating ? null : _onFindNearMe,
+                      borderRadius: BorderRadius.circular(12),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 12,
+                        ),
+                        decoration: BoxDecoration(
+                          color: _sortByDistance
+                              ? ColorUtil.bangladeshGreen
+                              : ColorUtil.bangladeshGreen.withValues(
+                                  alpha: 0.08,
+                                ),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: ColorUtil.bangladeshGreen,
+                            width: 1,
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            if (_isLocating) ...[
+                              const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: ColorUtil.bangladeshGreen,
+                                ),
                               ),
-                            )
-                          : null,
-                      border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                            ] else ...[
+                              Icon(
+                                Icons.my_location_rounded,
+                                size: 18,
+                                color: _sortByDistance
+                                    ? Colors.white
+                                    : ColorUtil.bangladeshGreen,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                _sortByDistance ? "Gần nhất" : "Gần tôi",
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: MyFontWeight.bold,
+                                  color: _sortByDistance
+                                      ? Colors.white
+                                      : ColorUtil.bangladeshGreen,
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
               ),
 
@@ -149,6 +391,8 @@ class _HotlineScreenState extends State<HotlineScreen> {
   }
 
   Widget _buildUserCard(BuildContext context, UserModel item) {
+    final hasDistance = item.id != null && _distancesInKm.containsKey(item.id!);
+    final double? distKm = hasDistance ? _distancesInKm[item.id!] : null;
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8),
       decoration: BoxDecoration(
@@ -258,6 +502,52 @@ class _HotlineScreenState extends State<HotlineScreen> {
                                     ),
                                   ],
                                 ),
+                                if (item.address != null &&
+                                    item.address!.trim().isNotEmpty) ...[
+                                  const SizedBox(height: 4),
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.location_on_outlined,
+                                        size: 14,
+                                        color: Colors.grey.shade400,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Expanded(
+                                        child: Text(
+                                          item.address!,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color: Colors.grey.shade600,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                                if (hasDistance && distKm != null) ...[
+                                  const SizedBox(height: 6),
+                                  Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.near_me_rounded,
+                                        size: 13,
+                                        color: ColorUtil.bangladeshGreen,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        _formatDistance(distKm),
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: MyFontWeight.semiBold,
+                                          color: ColorUtil.bangladeshGreen,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
                                 if (item.point != null && item.point! > 0) ...[
                                   const SizedBox(height: 8),
                                   Container(
