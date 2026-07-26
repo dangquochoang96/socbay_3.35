@@ -67,11 +67,6 @@ class HomeServiceModel {
       name: 'GÓP Ý & KHIẾU NẠI',
     ),
     HomeServiceModel(
-      image: Images.iconHotline,
-      des: 'Liên hệ Hotline',
-      name: 'HOTLINE',
-    ),
-    HomeServiceModel(
       image: Images.iconReplace,
       des: 'Ngày thay tiếp theo',
       name: 'NGÀY THAY TIẾP THEO',

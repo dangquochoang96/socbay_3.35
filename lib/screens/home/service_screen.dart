@@ -84,6 +84,11 @@ class _ServiceScreenState extends State<ServiceScreen> {
     _currentSelectedValue = _listService.isNotEmpty
         ? _listService[int.tryParse(_bloc.args['index']) ?? 0].id.toString()
         : "0";
+    if (_bloc.args['favouriteStaff'] != null && _bloc.args['favouriteStaff'] is UserModel) {
+      _favouriteStaff = _bloc.args['favouriteStaff'] as UserModel;
+    } else if (_bloc.args['staffInfo'] != null && _bloc.args['staffInfo'] is UserModel) {
+      _favouriteStaff = _bloc.args['staffInfo'] as UserModel;
+    }
     _picker = ImagePicker();
     if (selectedDate != null) {
       setState(() {

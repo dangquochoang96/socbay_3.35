@@ -28,6 +28,7 @@ import '../../utils/image_util.dart';
 import '../../widgets/banner_widget.dart';
 import '../../widgets/box_shadow_widget.dart';
 import '../../widgets/header_card_widget.dart';
+import '../../widgets/ktv_slider_widget.dart';
 import '../../widgets/status_bar_color_widget.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -108,6 +109,12 @@ class _HomeScreenState extends State<HomeScreen> {
               //product info
               if (App.instance.userApp?.isUserCustomer() == true)
                 _buildProductInfo(),
+
+              /// KTV slider (only for customer accounts)
+              if (App.instance.userApp?.isUserCustomer() == true) ...[
+                const SizedBox(height: 15),
+                KtvSliderWidget(ktvList: _bloc.ktvList),
+              ],
 
               /// service
               const SizedBox(height: 15),
@@ -737,8 +744,6 @@ class _HomeScreenState extends State<HomeScreen> {
               arguments: {"fbId": "0", "orderId": "0"},
             );
           } else if (index == 3) {
-            Navigator.pushNamed(context, Routes.hotlineScreen);
-          } else if (index == 4) {
             Navigator.pushNamed(
               context,
               Routes.coreReplacementServiceScreen,

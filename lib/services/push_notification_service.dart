@@ -63,7 +63,13 @@ class PushNotificationService {
 
   Future<String?> getToken() async {
     try {
-      final token = await _messaging.getToken();
+      final token = await _messaging.getToken().timeout(
+        const Duration(seconds: 3),
+        onTimeout: () {
+          LoggerUtil.warning('Getting FCM token timed out');
+          return null;
+        },
+      );
       if (token != null && token.isNotEmpty) {
         await SecureStorageUtil.shared.writeData(_fcmTokenStorageKey, token);
       }
@@ -85,7 +91,10 @@ class PushNotificationService {
         _currentTopicStorageKey,
       );
       if (currentTopic != null && currentTopic.isNotEmpty) {
-        await _messaging.unsubscribeFromTopic(currentTopic);
+        await _messaging.unsubscribeFromTopic(currentTopic).timeout(
+          const Duration(seconds: 3),
+          onTimeout: () => null,
+        );
         await SecureStorageUtil.shared.deleteKey(_currentTopicStorageKey);
       }
     } catch (e) {
@@ -162,10 +171,16 @@ class PushNotificationService {
       }
 
       if (currentTopic != null && currentTopic.isNotEmpty) {
-        await _messaging.unsubscribeFromTopic(currentTopic);
+        await _messaging.unsubscribeFromTopic(currentTopic).timeout(
+          const Duration(seconds: 3),
+          onTimeout: () => null,
+        );
       }
 
-      await _messaging.subscribeToTopic(topic);
+      await _messaging.subscribeToTopic(topic).timeout(
+        const Duration(seconds: 3),
+        onTimeout: () => null,
+      );
       await SecureStorageUtil.shared.writeData(_currentTopicStorageKey, topic);
     } catch (e) {
       LoggerUtil.error('Error subscribing to FCM topic: $e');

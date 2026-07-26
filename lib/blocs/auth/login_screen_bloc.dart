@@ -32,7 +32,12 @@ class LoginScreenBloc extends Bloc<LoginScreenEvent, LoginScreenState> {
     emit(LoginInitialState());
     try {
       LoggerUtil.info('login started phone=${event.phone}', tag: tag);
-      final fcmToken = await PushNotificationService.instance.getToken();
+      final fcmToken = await PushNotificationService.instance
+          .getToken()
+          .timeout(
+            const Duration(seconds: 3),
+            onTimeout: () => null,
+          );
       final result = await apiRepository.loginAccount(
         event.phone,
         event.password,
@@ -66,7 +71,7 @@ class LoginScreenBloc extends Bloc<LoginScreenEvent, LoginScreenState> {
             'Login succeeded but user payload is missing',
             tag: tag,
           );
-          emit(LogInFailureState(result.message ?? 'Du lieu user khong hop le'));
+          emit(LogInFailureState(result.message ?? 'Dữ liệu người dùng không hợp lệ'));
           return;
         }
 
@@ -77,32 +82,43 @@ class LoginScreenBloc extends Bloc<LoginScreenEvent, LoginScreenState> {
           );
           emit(
             LogInFailureState(
-              result.message ?? 'Khong the dang nhap: user id khong hop le',
+              result.message ?? 'Không thể đăng nhập: ID người dùng không hợp lệ',
             ),
           );
           return;
         }
 
         App.instance.userApp = userProfile;
-        await PushNotificationService.instance.setAuthenticatedUser(
-          userProfile.id.toString(),
-        );
+        try {
+          await PushNotificationService.instance
+              .setAuthenticatedUser(userProfile.id.toString())
+              .timeout(
+                const Duration(seconds: 3),
+                onTimeout: () => null,
+              );
+        } catch (e) {
+          LoggerUtil.error('Failed setting authenticated user FCM: $e', tag: tag);
+        }
 
         if (kDebugMode) {
-          print('Thong tin tai khoan: ${loginResponse.user?.toJson()}');
+          print('Thông tin tài khoản: ${loginResponse.user?.toJson()}');
         }
 
         if (defaultTargetPlatform == TargetPlatform.android ||
             defaultTargetPlatform == TargetPlatform.iOS) {
-          final database = await $FloorAppDatabase
-              .databaseBuilder('socbay.db')
-              .build();
-          final userGetMapper = UserModelToUser();
-          final user = userGetMapper(userProfile);
-          await database.userDao.deleteAllUser();
-          await database.userDao.insertUser(user);
-          await database.close();
-          LoggerUtil.info('saved user to local db id=${user.id}', tag: tag);
+          try {
+            final database = await $FloorAppDatabase
+                .databaseBuilder('socbay.db')
+                .build();
+            final userGetMapper = UserModelToUser();
+            final user = userGetMapper(userProfile);
+            await database.userDao.deleteAllUser();
+            await database.userDao.insertUser(user);
+            await database.close();
+            LoggerUtil.info('saved user to local db id=${user.id}', tag: tag);
+          } catch (e) {
+            LoggerUtil.error('Error saving user to local db: $e', tag: tag);
+          }
         }
 
         await Future.delayed(const Duration(milliseconds: 500));
@@ -118,9 +134,10 @@ class LoginScreenBloc extends Bloc<LoginScreenEvent, LoginScreenState> {
     } catch (e) {
       LoggerUtil.error('Login error: $e', tag: tag);
       emit(LogInFailureState('Error'));
+    } finally {
+      isLoading = false;
+      LoggerUtil.info('emit LoginInitialState after login flow', tag: tag);
+      emit(LoginInitialState());
     }
-    isLoading = false;
-    LoggerUtil.info('emit LoginInitialState after login flow', tag: tag);
-    emit(LoginInitialState());
   }
 }

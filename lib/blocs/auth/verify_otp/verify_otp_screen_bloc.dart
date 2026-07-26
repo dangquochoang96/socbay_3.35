@@ -71,32 +71,39 @@ class VerifyOtpScreenBloc
   ) async {
     isLoading = true;
     emit(VerifyOtpScreenInitialState());
-    final fcmToken = await PushNotificationService.instance.getToken();
-    final DefaultResponse result = await apiRepository.loginAccount(
-      args['phone'],
-      args['password'],
-      fcmToken,
-    );
-    if (result.status == 200) {
-      LoginResponse loginResponse = result.data;
-      if (loginResponse.accessToken != "") {
-        await SecureStorageUtil.shared.writeData(
-          SecureStorageUtil.tokenStorageKey,
-          loginResponse.accessToken!,
-        );
+    try {
+      final fcmToken = await PushNotificationService.instance
+          .getToken()
+          .timeout(const Duration(seconds: 3), onTimeout: () => null);
+      final DefaultResponse result = await apiRepository.loginAccount(
+        args['phone'],
+        args['password'],
+        fcmToken,
+      );
+      if (result.status == 200 && result.data != null) {
+        LoginResponse loginResponse = result.data;
+        if ((loginResponse.accessToken ?? '').isNotEmpty) {
+          await SecureStorageUtil.shared.writeData(
+            SecureStorageUtil.tokenStorageKey,
+            loginResponse.accessToken!,
+          );
+        }
+        if (args['isStaff'] == true) {
+          await SecureStorageUtil.shared.writeData(
+            SecureStorageUtil.registerStaffKey,
+            args['isStaff'].toString(),
+          );
+        }
+        await Future.delayed(const Duration(milliseconds: 500));
+        emit(VerifyOtpScreenLoginSuccessState());
+      } else {
+        emit(VerifyOtpScreenLogInFailureState(result.message ?? "Error"));
       }
-      if (args['isStaff'] == true) {
-        await SecureStorageUtil.shared.writeData(
-          SecureStorageUtil.registerStaffKey,
-          args['isStaff'].toString(),
-        );
-      }
-      await Future.delayed(const Duration(milliseconds: 500));
-      emit(VerifyOtpScreenLoginSuccessState());
-    } else {
-      emit(VerifyOtpScreenLogInFailureState(result.message ?? "Error"));
+    } catch (e) {
+      emit(VerifyOtpScreenLogInFailureState("Error"));
+    } finally {
+      isLoading = false;
+      emit(VerifyOtpScreenInitialState());
     }
-    isLoading = false;
-    emit(VerifyOtpScreenInitialState());
   }
 }

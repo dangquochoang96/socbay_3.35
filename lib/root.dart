@@ -21,11 +21,8 @@ class Root extends StatefulWidget {
 class _RootState extends State<Root> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  late RootBloc _rootBloc;
-
   @override
   void initState() {
-    _rootBloc = RootBloc();
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       InAppUpdateService.instance.checkForUpdate();
@@ -35,7 +32,6 @@ class _RootState extends State<Root> {
   @override
   void dispose() {
     InAppUpdateService.instance.dispose();
-    _rootBloc.close();
     super.dispose();
   }
 
@@ -81,7 +77,7 @@ class _RootState extends State<Root> {
       leftText: 'OK',
       isLeftPositive: true,
       leftAction: () {
-        _rootBloc.add(DismissAccessTokenExpiredAlert());
+        context.read<RootBloc>().add(DismissAccessTokenExpiredAlert());
         Navigator.pop(context);
       },
     );

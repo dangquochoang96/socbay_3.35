@@ -31,6 +31,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   List<UserModel> favouriteStaffs = [];
   List<StaffSalesIncomeModel> staffSalesIncomes = [];
   List<OrderFilterCoreModel> orderFilterCore = [];
+  List<UserModel> ktvList = [];
   bool isLoading = false;
   bool hasUnreadNotification = false;
   int totalOrderAll = 0;
@@ -64,6 +65,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       _mapGetBannerEventToState(null, emit),
       _mapGetLastReplaceFilterCore(),
       _mapGetNotificationBadge(),
+      if (App.instance.userApp?.isUserCustomer() == true) _mapGetKtvList(),
     ]).then((value) {
       isLoading = false;
       emit(HomeInitialState());
@@ -221,6 +223,21 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
             .map((model) => OrderFilterCoreModel.fromJson(model))
             .toList()
             .cast<OrderFilterCoreModel>();
+      }
+    } catch (ex) {
+      LoggerUtil.error(ex.toString());
+    }
+  }
+
+  Future<void> _mapGetKtvList() async {
+    try {
+      var url = AppConfig.instance.apiUri(ApiEndpoints.userSupport);
+      var res = await http.get(url);
+      if (res.statusCode == HttpStatus.ok) {
+        var l = Map<String, dynamic>.from(json.decode(res.body));
+        ktvList = List<UserModel>.from(
+          l["data"].map((model) => UserModel.fromJson(model)),
+        );
       }
     } catch (ex) {
       LoggerUtil.error(ex.toString());
