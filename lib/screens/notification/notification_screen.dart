@@ -8,6 +8,7 @@ import 'package:socbay/blocs/user_info/notification/notification_screen_state.da
 import 'package:socbay/config/app_config.dart';
 import 'package:socbay/constants/constants.dart';
 import 'package:socbay/data/model/notification_response.dart';
+import 'package:socbay/data/model/order_detail_model.dart';
 import 'package:socbay/routes.dart';
 import 'package:socbay/utils/color_util.dart';
 import 'package:socbay/utils/image_util.dart';
@@ -155,6 +156,18 @@ class _NotificationScreenState extends State<NotificationScreen> {
             context,
             Routes.detailRentBookingScreen,
             arguments: {'id': item.actionValue},
+          );
+        } else if (item.actionType == 'order' &&
+            item.actionValue != null &&
+            item.actionValue!.isNotEmpty) {
+          Navigator.pushNamed(
+            context,
+            Routes.coreReplacementServiceScreen,
+            arguments: {
+              'orderDetail': OrderDetailModel(
+                id: int.tryParse(item.actionValue!),
+              ),
+            },
           );
         }
       },

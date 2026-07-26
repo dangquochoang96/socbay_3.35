@@ -1,4 +1,9 @@
+import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:socbay/config/app_config.dart';
+import 'package:socbay/data/data_provider/api_endpoints.dart';
 import 'package:socbay/data/model/home_service_model.dart';
 import 'package:socbay/data/model/user_model.dart';
 import 'package:socbay/routes.dart';
@@ -7,10 +12,18 @@ import 'package:socbay/utils/image_util.dart';
 import 'package:socbay/widgets/box_shadow_widget.dart';
 import 'package:socbay/widgets/header_card_widget.dart';
 
-class KtvSliderWidget extends StatelessWidget {
+class KtvSliderWidget extends StatefulWidget {
   final List<UserModel> ktvList;
 
   const KtvSliderWidget({super.key, required this.ktvList});
+
+  @override
+  State<KtvSliderWidget> createState() => _KtvSliderWidgetState();
+}
+
+class _KtvSliderWidgetState extends State<KtvSliderWidget> {
+  final Map<int, String> _ratingMap = {};
+  final Set<int> _loadingSet = {};
 
   static const List<String> _dates = [
     "CN, 26/07",
@@ -28,8 +41,75 @@ class KtvSliderWidget extends StatelessWidget {
   static const List<String> _origPrices = ["276k", "290k", "300k", "310k"];
 
   @override
+  void initState() {
+    super.initState();
+    _fetchRatings();
+  }
+
+  @override
+  void didUpdateWidget(covariant KtvSliderWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _fetchRatings();
+  }
+
+  void _fetchRatings() {
+    for (final ktv in widget.ktvList) {
+      if (ktv.id != null &&
+          !_ratingMap.containsKey(ktv.id) &&
+          !_loadingSet.contains(ktv.id)) {
+        _fetchRatingForStaff(ktv.id!);
+      }
+    }
+  }
+
+  Future<void> _fetchRatingForStaff(int staffId) async {
+    _loadingSet.add(staffId);
+    try {
+      final url = AppConfig.instance.apiUri(
+        ApiEndpoints.listOrderRatingByStaff,
+        {'user_id': staffId.toString()},
+      );
+      final res = await http.get(url);
+      if (res.statusCode == HttpStatus.ok) {
+        final Map<String, dynamic> map = Map<String, dynamic>.from(
+          json.decode(res.body),
+        );
+        final data = map['data'];
+        if (data is List && data.isNotEmpty) {
+          double totalRate = 0;
+          int count = 0;
+          for (var item in data) {
+            if (item != null && item['rate'] != null) {
+              final rateVal = double.tryParse(item['rate'].toString());
+              if (rateVal != null && rateVal > 0) {
+                totalRate += rateVal;
+                count++;
+              }
+            }
+          }
+          if (count > 0) {
+            final avgRate = totalRate / count;
+            final formattedAvg = (avgRate % 1 == 0)
+                ? avgRate.toInt().toString()
+                : avgRate.toStringAsFixed(1);
+            if (mounted) {
+              setState(() {
+                _ratingMap[staffId] = '$formattedAvg★';
+              });
+            }
+          }
+        }
+      }
+    } catch (_) {
+      // Keep default on error
+    } finally {
+      _loadingSet.remove(staffId);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final displayList = ktvList.isNotEmpty ? ktvList : [];
+    final displayList = widget.ktvList.isNotEmpty ? widget.ktvList : [];
 
     return BoxShadowWidget(
       child: Column(
@@ -156,9 +236,9 @@ class KtvSliderWidget extends StatelessWidget {
                                 ),
                               ],
                             ),
-                            child: const Text(
-                              '5★',
-                              style: TextStyle(
+                            child: Text(
+                              _ratingMap[ktv.id] ?? '0★',
+                              style: const TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 11,

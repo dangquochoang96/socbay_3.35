@@ -68,69 +68,6 @@ class _CoreReplacementServiceScreenState
     super.dispose();
   }
 
-  // void _createPayment() {
-  //   final amount = _totalPriced?.toString();
-  //   if (amount == null) {
-  //     return;
-  //   }
-  //   //Môi trường Test
-  //   // var ACCESS_CODE_PAYGATE = "6BEB2546"; // Onepay send for merchant
-  //   // var MERCHANT_PAYGATE = "TESTONEPAY"; //  Merchant register with onepay
-  //   // var HASH_KEY = "6D0870CDE5F24F34F3915FB0045120DB"; // Onepay send for merchant
-  //   // var URL_SCHEMES = "merchantappscheme"; // get CFBundleURLSchemes in Info.plist
-  //   const ACCESS_CODE_PAYGATE = "A2905C04";
-  //   const MERCHANT_PAYGATE = "OP_SHOMEAPP";
-  //   const HASH_KEY = "6C6F8CF98A8C9C37214E613411F3E3A1";
-  //   const URL_SCHEMES = "merchantappscheme";
-
-  //   var entity = OPPaymentEntity(
-  //     amount: double.parse(amount),
-  //     orderInformation: "${App.instance.userApp?.phone}",
-  //     currency: OnepayCurrency.vnd,
-  //     accessCode: ACCESS_CODE_PAYGATE,
-  //     merchant: MERCHANT_PAYGATE,
-  //     hashKey: HASH_KEY,
-  //     urlSchemes: URL_SCHEMES,
-  //   );
-  //   OnePayPaygate.open(
-  //     context: context,
-  //     entity: entity,
-  //     onPayResult: (OPPaymentResult result) {
-  //       if (result.isSuccess) {
-  //         setState(() {
-  //           _bloc.add(
-  //             OrderPaymentStatusUpdatedEvent(_bloc.orderDetailModel!.id!),
-  //           );
-  //         });
-  //         showDialog(
-  //           context: context,
-  //           builder: (context) => const AlertDialog(
-  //             title: Text("Thông báo"),
-  //             content: Text("Thanh toán thành công"),
-  //           ),
-  //         );
-  //       } else {
-  //         showDialog(
-  //           context: context,
-  //           builder: (context) => AlertDialog(
-  //             title: const Text("Thông báo"),
-  //             content: Text(result.message ?? "Thanh toán không thành công"),
-  //           ),
-  //         );
-  //       }
-  //     },
-  //     onPayFail: (error) {
-  //       showDialog(
-  //         context: context,
-  //         builder: (context) => AlertDialog(
-  //           title: const Text("Lỗi"),
-  //           content: Text(error.errorCase.name),
-  //         ),
-  //       );
-  //     },
-  //   );
-  // }
-
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<

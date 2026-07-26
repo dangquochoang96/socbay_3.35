@@ -67,7 +67,7 @@ class _HotlineScreenState extends State<HotlineScreen> {
       child: Scaffold(
         backgroundColor: Colors.grey.shade50,
         appBar: MyAppBar(
-          title: "Hotline",
+          title: "Danh sách KTV",
           isBackNavigation: true,
           centerTitle: true,
         ),
@@ -331,7 +331,7 @@ class _HotlineScreenState extends State<HotlineScreen> {
   }
 
   Widget _buildAvatar(UserModel item) {
-    final avatarUrl = item.avatar ?? '';
+    final avatarUrl = item.companyAvatar ?? '';
     if (avatarUrl.isEmpty) {
       final initial = (item.username != null && item.username!.isNotEmpty)
           ? item.username!.substring(0, 1).toUpperCase()
@@ -374,7 +374,7 @@ class _HotlineScreenState extends State<HotlineScreen> {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(26),
         child: ImageUtil.loadNetWorkImage(
-          url: avatarUrl,
+          url: ImageUtil.getUrlFromPath(avatarUrl),
           height: 52,
           width: 52,
         ),

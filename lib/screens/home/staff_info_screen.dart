@@ -147,9 +147,9 @@ class _StaffInfoScreenState extends State<StaffInfoScreen> {
               children: [
                 Row(
                   children: [
-                    staffInfo.avatar != null
+                    staffInfo.companyAvatar != null
                         ? fullScreenHeroWidget(
-                            "$protocol${AppConfig.instance.values.apiUrl}/${staffInfo.avatar!}",
+                            "$protocol${AppConfig.instance.values.apiUrl}/${staffInfo.companyAvatar!}",
                           )
                         : ClipRRect(
                             borderRadius: BorderRadius.circular(14),
@@ -430,8 +430,8 @@ class _StaffInfoScreenState extends State<StaffInfoScreen> {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(10),
                   child: ImageUtil.loadNetWorkImage(
-                    url: _lstOrder?[index].user?.avatar != null
-                        ? ("$protocol${AppConfig.instance.values.apiUrl}/${_lstOrder![index].user!.avatar!}")
+                    url: _lstOrder?[index].user?.companyAvatar != null
+                        ? ("$protocol${AppConfig.instance.values.apiUrl}/${_lstOrder![index].user!.companyAvatar!}")
                         : "",
                     height: MediaQuery.of(context).size.width * 0.12 - 15,
                     width: MediaQuery.of(context).size.width * 0.12 - 15,

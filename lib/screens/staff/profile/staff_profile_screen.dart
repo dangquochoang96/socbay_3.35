@@ -139,15 +139,6 @@ class _StaffProfileScreenState extends State<StaffProfileScreen> {
           children: [
             Row(
               children: [
-                // staffInfo.avatar != null
-                //     ? fullScreenHeroWidget(
-                //         "$protocol${AppConfig.instance.values.apiUrl}/" +
-                //             staffInfo.avatar!)
-                //     : ClipRRect(
-                //         borderRadius: BorderRadius.circular(14),
-                //         child: ImageUtil.loadNetWorkImage(
-                //             url: '', height: 100, width: 100),
-                //       ),
                 _buildAvatar(),
                 const SizedBox(width: 15),
                 Column(
@@ -273,14 +264,6 @@ class _StaffProfileScreenState extends State<StaffProfileScreen> {
     );
   }
 
-  // void _saveFavouriteStaff() {
-  //   if (_bloc.isFavourite) {
-  //     _bloc.add(StaffInfoScreenUnLikeStaffEvent(staffInfo.id!));
-  //   } else {
-  //     _bloc.add(StaffInfoScreenLikeStaffEvent(staffInfo.id!));
-  //   }
-  // }
-
   Widget _buildAvatar() {
     return Center(
       child: GestureDetector(
@@ -289,9 +272,9 @@ class _StaffProfileScreenState extends State<StaffProfileScreen> {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(140),
-              child: staffInfo.avatar != null
+              child: staffInfo.companyAvatar != null
                   ? Image.network(
-                      "$protocol${AppConfig.instance.values.apiUrl}${staffInfo.avatar!}",
+                      "$protocol${AppConfig.instance.values.apiUrl}${staffInfo.companyAvatar!}",
                       height: 160,
                       width: 160,
                       fit: BoxFit.cover,
