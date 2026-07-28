@@ -885,7 +885,7 @@ class _ProductSearchBottomSheetState extends State<ProductSearchBottomSheet> {
     try {
       var url = AppConfig.instance.apiUri(ApiEndpoints.productSearch, {
         'q': query,
-        'cate': '13,14,33,34,42',
+        'is_socbay': 'true',
       });
       var res = await http.get(url);
       if (res.statusCode == HttpStatus.ok) {

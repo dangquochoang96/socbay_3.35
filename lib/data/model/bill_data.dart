@@ -27,6 +27,9 @@ class BillData {
   int? vat;
   List<String>? images;
   String? ghichu;
+  int? subType;
+  String? productName;
+  String? newProductName;
 
   BillData({
     this.usernameId,
@@ -50,6 +53,9 @@ class BillData {
     this.vat,
     this.images,
     this.ghichu,
+    this.subType,
+    this.productName,
+    this.newProductName,
   });
 
   factory BillData.fromJson(Map<String, dynamic> json) => BillData(
@@ -84,6 +90,9 @@ class BillData {
         ? []
         : List<String>.from(json["images"]!.map((x) => x)),
     ghichu: json["ghichu"],
+    subType: json["subType"],
+    productName: json["productName"],
+    newProductName: json["newProductName"],
   );
 
   Map<String, dynamic> toJson() => {
@@ -106,5 +115,8 @@ class BillData {
     "vat": vat,
     "images": images == null ? [] : List<dynamic>.from(images!.map((x) => x)),
     "ghichu": ghichu,
+    "subType": subType,
+    "productName": productName,
+    "newProductName": newProductName,
   };
 }

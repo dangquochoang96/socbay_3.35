@@ -1,6 +1,12 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:full_screen_image_null_safe/full_screen_image_null_safe.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:socbay/utils/auth_http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:socbay/application.dart';
 import 'package:socbay/blocs/booking/detail_booking/detail_booking_bloc.dart';
@@ -14,6 +20,7 @@ import 'package:socbay/blocs/rent-task/rent_task_screen_event.dart'
 import 'package:socbay/blocs/rent-task/rent_task_screen_bloc.dart';
 import 'package:socbay/config/app_config.dart';
 import 'package:socbay/constants/maps.dart';
+import 'package:socbay/data/data_provider/api_endpoints.dart';
 import 'package:socbay/data/model/home_service_model.dart';
 import 'package:socbay/data/model/order_detail_model.dart';
 import 'package:socbay/data/model/task_model.dart';
@@ -39,6 +46,158 @@ class _DetailBookingScreenState extends State<DetailBookingScreen> {
   late dynamic _bloc;
   late dynamic _taskScreenSaleBloc;
   String? _selectedTaskType;
+  bool _isUpdatingAddress = false;
+
+  Future<void> _updateAddressLocation() async {
+    if (_bloc.taskModel?.id == null) return;
+
+    setState(() {
+      _isUpdatingAddress = true;
+    });
+
+    try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Vui lòng bật dịch vụ định vị (GPS) để cập nhật địa chỉ.',
+              ),
+            ),
+          );
+        }
+        return;
+      }
+
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Quyền truy cập vị trí bị từ chối.'),
+              ),
+            );
+          }
+          return;
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Quyền vị trí bị từ chối vĩnh viễn. Vui lòng mở Cài đặt ứng dụng để cấp quyền.',
+              ),
+            ),
+          );
+        }
+        return;
+      }
+
+      final position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+        ),
+      );
+
+      String addressString = '${position.latitude}, ${position.longitude}';
+      try {
+        List<Placemark> placemarks = await placemarkFromCoordinates(
+          position.latitude,
+          position.longitude,
+        );
+        if (placemarks.isNotEmpty) {
+          final p = placemarks.first;
+          List<String> parts = [];
+          if (p.street != null && p.street!.trim().isNotEmpty) {
+            parts.add(p.street!.trim());
+          }
+          if (p.subAdministrativeArea != null &&
+              p.subAdministrativeArea!.trim().isNotEmpty) {
+            parts.add(p.subAdministrativeArea!.trim());
+          }
+          if (p.administrativeArea != null &&
+              p.administrativeArea!.trim().isNotEmpty) {
+            parts.add(p.administrativeArea!.trim());
+          }
+          if (p.country != null && p.country!.trim().isNotEmpty) {
+            parts.add(p.country!.trim());
+          }
+          if (parts.isNotEmpty) {
+            addressString = parts.join(', ');
+          }
+        }
+      } catch (e) {
+        LoggerUtil.error("Error reverse geocoding: $e");
+      }
+
+      final String endpoint = widget.isRent
+          ? ApiEndpoints.rentTaskUpdateAddress(_bloc.taskModel!.id)
+          : ApiEndpoints.taskUpdateAddress(_bloc.taskModel!.id);
+      final url = AppConfig.instance.apiUri(endpoint);
+
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: {'current_address': addressString},
+      );
+
+      if (response.statusCode == HttpStatus.ok) {
+        final data = Map<String, dynamic>.from(json.decode(response.body));
+        if (data['code'] == 1) {
+          if (data['data'] != null) {
+            try {
+              _bloc.taskModel = TaskModel.fromJson(data['data']);
+            } catch (e) {
+              LoggerUtil.error("Error parsing updated taskModel: $e");
+            }
+          }
+          if (mounted) {
+            setState(() {});
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Cập nhật địa chỉ thành công!')),
+            );
+          }
+          _bloc.add(DetailBookingStartedEvent());
+        } else {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(data['message'] ?? 'Cập nhật địa chỉ thất bại'),
+              ),
+            );
+          }
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Lỗi phản hồi từ máy chủ (Mã: ${response.statusCode})',
+              ),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      LoggerUtil.error("Error updating address: $e");
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Có lỗi xảy ra: $e')));
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isUpdatingAddress = false;
+        });
+      }
+    }
+  }
 
   @override
   void initState() {
@@ -211,7 +370,6 @@ class _DetailBookingScreenState extends State<DetailBookingScreen> {
             valueColor: ColorUtil.red,
             isBold: true,
           ),
-          // _buildInfoRow("Công việc:", taskModel?.name ?? ""),
           Padding(
             padding: const EdgeInsets.only(bottom: 8.0),
             child: Row(
@@ -366,6 +524,105 @@ class _DetailBookingScreenState extends State<DetailBookingScreen> {
     );
   }
 
+  Widget _buildCurrentAddressRow(TaskModel? taskModel) {
+    if (taskModel?.currentAddress == null ||
+        taskModel!.currentAddress!.trim().isEmpty) {
+      return const SizedBox();
+    }
+    final addressText = taskModel.currentAddress!.trim();
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            flex: 2,
+            child: Text(
+              "Vị trí hiện tại (Google Maps):",
+              style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+            ),
+          ),
+          Expanded(
+            flex: 3,
+            child: GestureDetector(
+              onTap: () async {
+                if (isAndroid) {
+                  final AndroidIntent intent = AndroidIntent(
+                    action: 'action_view',
+                    data:
+                        'google.navigation:q=${Uri.encodeComponent(addressText)}',
+                    package: 'package:com.google.android.apps.maps',
+                  );
+                  await intent.launch();
+                } else {
+                  commonLaunchUrl(
+                    '$GOOGLE_MAP_PREFIX${Uri.encodeFull(addressText)}',
+                    launchMode: LaunchMode.externalApplication,
+                  );
+                }
+              },
+              child: Text(
+                addressText,
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: ColorUtil.bangladeshGreen,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.right,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLocationUpdateButton() {
+    return InkWell(
+      onTap: _isUpdatingAddress ? null : _updateAddressLocation,
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+        decoration: BoxDecoration(
+          color: ColorUtil.bangladeshGreen.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: ColorUtil.bangladeshGreen, width: 1),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (_isUpdatingAddress)
+              const SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: ColorUtil.bangladeshGreen,
+                ),
+              )
+            else
+              const Icon(
+                Icons.my_location,
+                color: ColorUtil.bangladeshGreen,
+                size: 18,
+              ),
+            const SizedBox(width: 8),
+            Text(
+              _isUpdatingAddress
+                  ? "Đang lấy vị trí..."
+                  : "Cập nhật địa chỉ hiện tại",
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+                color: ColorUtil.bangladeshGreen,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildProductInfoCard(TaskModel? taskModel) {
     return _buildCard(
       title: "Thông tin thiết bị & Yêu cầu",
@@ -382,6 +639,11 @@ class _DetailBookingScreenState extends State<DetailBookingScreen> {
               "Vị trí lắp đặt:",
               taskModel?.productInfo?.address ?? "",
             ),
+          _buildCurrentAddressRow(taskModel),
+          const SizedBox(height: 8),
+          if (App.instance.userApp?.isUserCustomer() == true) ...[
+            _buildLocationUpdateButton(),
+          ],
         ],
       ),
     );

@@ -51,16 +51,7 @@ class _ProductScreenState extends State<ProductScreen> {
 
   void listener(BuildContext context, ProductScreenState state) {}
   //// ADDING THE SCROLL LISTINER
-  void _scrollListener() {
-    if (_scrollController.offset >=
-            _scrollController.position.maxScrollExtent &&
-        !_scrollController.position.outOfRange) {
-      setState(() {
-        offSet = offSet + 20;
-        _bloc.add(ProductScreenGetProductCategoryEvent(offSet: offSet));
-      });
-    }
-  }
+  void _scrollListener() {}
 
   Widget _builder(BuildContext context, ProductScreenState state) {
     return Scaffold(

@@ -25,21 +25,6 @@ class _KtvSliderWidgetState extends State<KtvSliderWidget> {
   final Map<int, String> _ratingMap = {};
   final Set<int> _loadingSet = {};
 
-  static const List<String> _dates = [
-    "CN, 26/07",
-    "T2, 27/07",
-    "T3, 28/07",
-    "T4, 29/07",
-  ];
-  static const List<String> _times = [
-    "08:00 - 11:00",
-    "13:30 - 16:30",
-    "09:00 - 12:00",
-    "14:00 - 17:00",
-  ];
-  static const List<String> _prices = ["261k", "250k", "270k", "280k"];
-  static const List<String> _origPrices = ["276k", "290k", "300k", "310k"];
-
   @override
   void initState() {
     super.initState();
@@ -143,14 +128,13 @@ class _KtvSliderWidgetState extends State<KtvSliderWidget> {
 
   Widget _buildKtvCard(BuildContext context, UserModel ktv, int index) {
     final nameText = ktv.username ?? 'KTV Chuyên nghiệp';
-    final ageText = ktv.birthday != null && ktv.birthday!.isNotEmpty
-        ? _calculateAge(ktv.birthday)
-        : (35 + (index * 7) % 15).toString();
-
-    final dateText = _dates[index % _dates.length];
-    final timeText = "${_times[index % _times.length]}*";
-    final priceText = _prices[index % _prices.length];
-    final origPriceText = _origPrices[index % _origPrices.length];
+    final phoneText = (ktv.phone != null && ktv.phone!.isNotEmpty)
+        ? ktv.phone!
+        : 'Chưa cập nhật';
+    final addressText = (ktv.address != null && ktv.address!.isNotEmpty)
+        ? ktv.address!
+        : 'Chưa cập nhật';
+    const workTimeText = '8h đến 20h';
 
     final avatarUrl = ImageUtil.getUrlFromPath(ktv.companyAvatar ?? '');
 
@@ -282,35 +266,35 @@ class _KtvSliderWidgetState extends State<KtvSliderWidget> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // Name & Age
+                      // Tên KTV
                       Text(
-                        "$nameText, $ageText",
+                        nameText,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                          fontSize: 15,
                           color: ColorUtil.raisinBlack,
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 6),
 
-                      // Date
+                      // Số điện thoại
                       Row(
                         children: [
                           const Icon(
-                            Icons.calendar_month_rounded,
-                            size: 16,
+                            Icons.phone_rounded,
+                            size: 15,
                             color: Color(0xFF52C41A),
                           ),
                           const SizedBox(width: 6),
                           Expanded(
                             child: Text(
-                              dateText,
+                              phoneText,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
-                                fontSize: 13,
+                                fontSize: 12,
                                 fontWeight: FontWeight.w500,
                                 color: Color(0xFF434343),
                               ),
@@ -320,55 +304,50 @@ class _KtvSliderWidgetState extends State<KtvSliderWidget> {
                       ),
                       const SizedBox(height: 4),
 
-                      // Time slot
+                      // Địa chỉ
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.location_on_rounded,
+                            size: 15,
+                            color: Color(0xFF52C41A),
+                          ),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              addressText,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                                color: Color(0xFF434343),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+
+                      // Thời gian làm việc
                       Row(
                         children: [
                           const Icon(
                             Icons.access_time_rounded,
-                            size: 16,
+                            size: 15,
                             color: Color(0xFF52C41A),
                           ),
                           const SizedBox(width: 6),
                           Expanded(
                             child: Text(
-                              timeText,
+                              workTimeText,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
-                                fontSize: 13,
+                                fontSize: 12,
                                 fontWeight: FontWeight.w500,
                                 color: Color(0xFF434343),
                               ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-
-                      // Price
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.monetization_on_outlined,
-                            size: 16,
-                            color: Color(0xFF52C41A),
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            priceText,
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF52C41A),
-                            ),
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            origPriceText,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              decoration: TextDecoration.lineThrough,
-                              color: Color(0xFFBDBDBD),
                             ),
                           ),
                         ],

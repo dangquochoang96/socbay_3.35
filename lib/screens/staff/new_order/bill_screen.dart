@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'dart:ui' as ui;
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -93,6 +92,29 @@ class _BillScreenState extends State<BillScreen> {
     }
   }
 
+  String _getSubTypeLabel(int? subType) {
+    switch (subType) {
+      case 1:
+        return 'Lắp máy';
+      case 2:
+        return 'Thay thế';
+      case 3:
+        return 'VSBD';
+      case 4:
+        return 'Online';
+      case 5:
+        return 'Ship';
+      case 6:
+        return 'Lọc tổng chính';
+      case 7:
+        return 'Lọc tổng phụ';
+      case 8:
+        return 'Lắp máy sàn';
+      default:
+        return '';
+    }
+  }
+
   String formatCurrency(int amount) {
     return NumberFormat.currency(locale: 'vi').format(amount);
   }
@@ -104,6 +126,7 @@ class _BillScreenState extends State<BillScreen> {
 
   Widget _builder(BuildContext context, StaffNewOrderState state) {
     final billData = widget.billData;
+    final subTypeLabel = _getSubTypeLabel(billData.subType);
     return Scaffold(
       appBar: MyAppBar(title: "Đơn hàng", isBackNavigation: true),
       body: SingleChildScrollView(
@@ -137,6 +160,26 @@ class _BillScreenState extends State<BillScreen> {
                   'SDT: ${billData.phone}',
                   style: const TextStyle(fontSize: 18),
                 ),
+                if (subTypeLabel.isNotEmpty)
+                  Text(
+                    'Loại đơn: $subTypeLabel',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                if (billData.productName != null &&
+                    billData.productName!.isNotEmpty)
+                  Text(
+                    'Sản phẩm máy (có sẵn): ${billData.productName}',
+                    style: const TextStyle(fontSize: 18),
+                  ),
+                if (billData.newProductName != null &&
+                    billData.newProductName!.isNotEmpty)
+                  Text(
+                    'Sản phẩm máy (lắp mới): ${billData.newProductName}',
+                    style: const TextStyle(fontSize: 18),
+                  ),
                 if (billData.ghichu != null && billData.ghichu!.isNotEmpty)
                   Text(
                     'Ghi chú: ${billData.ghichu}',
@@ -342,10 +385,7 @@ class _BillScreenState extends State<BillScreen> {
                         flex: 1,
                         child: Column(
                           children: [
-                            const Text(
-                              'Cả 2',
-                              style: TextStyle(fontSize: 18),
-                            ),
+                            const Text('Cả 2', style: TextStyle(fontSize: 18)),
                             SizedBox(
                               height: 24,
                               width: 24,

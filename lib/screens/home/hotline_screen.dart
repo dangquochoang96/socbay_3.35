@@ -138,7 +138,6 @@ class _HotlineScreenState extends State<HotlineScreen> {
 
         if (user.address != null && user.address!.trim().isNotEmpty) {
           final loc = await _geocodeAddress(user.address!);
-          print("loc: $loc");
           if (loc != null) {
             techLat = loc.latitude;
             techLng = loc.longitude;

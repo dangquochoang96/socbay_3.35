@@ -230,8 +230,18 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
     if (state is StaffNewOrderInitialState) {
       setState(() {
         subSavePointController.text = _bloc.subSavePoint.toString();
-        _currentSelectedProductValue =
-            int.tryParse(_bloc.taskModel?.productId ?? "") ?? 0;
+        final int taskType = int.tryParse(_bloc.taskModel?.type ?? "") ?? 0;
+        final bool isLapMay =
+            taskType == 4 ||
+            taskType == 5 ||
+            _bloc.taskModel?.type == '1' ||
+            _bloc.orderDetail?.subType == '1';
+        if (isLapMay) {
+          _currentSelectedProductValue = 0;
+        } else {
+          _currentSelectedProductValue =
+              int.tryParse(_bloc.taskModel?.productId ?? "") ?? 0;
+        }
         _isLoading = _bloc.isLoading;
         addressCustomerController.text =
             _bloc.taskModel?.customer?.address ?? '';
@@ -986,6 +996,50 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                       }
                     }
 
+                    final bool hasNewProduct = getProductNew.isNotEmpty;
+                    final int taskType =
+                        int.tryParse(_bloc.taskModel?.type ?? '') ?? 0;
+                    final int calculatedSubType;
+                    if (taskType == 7) {
+                      calculatedSubType = 4;
+                    } else if (taskType == 8) {
+                      calculatedSubType = 5;
+                    } else if (taskType == 9) {
+                      calculatedSubType = 6;
+                    } else if (taskType == 10) {
+                      calculatedSubType = 7;
+                    } else if (taskType == 11) {
+                      calculatedSubType = 8;
+                    } else if (hasNewProduct &&
+                        (taskType == 4 || taskType == 5)) {
+                      calculatedSubType = 1;
+                    } else if (_bloc.totalPay != 0) {
+                      calculatedSubType = 2;
+                    } else {
+                      calculatedSubType = 3;
+                    }
+
+                    String? productName;
+                    if (_currentSelectedProductValue != 0) {
+                      final selectedProd = _listProducts.where(
+                        (e) => e.id == _currentSelectedProductValue,
+                      );
+                      if (selectedProd.isNotEmpty) {
+                        productName = selectedProd.first.product?.name;
+                      }
+                      productName ??= _bloc.taskModel?.productInfo?.name;
+                    }
+
+                    String? newProductName;
+                    if (hasNewProduct) {
+                      newProductName = getProductNew.first.name;
+                    } else if (currentSelectedProductAllValue.text
+                        .trim()
+                        .isNotEmpty) {
+                      newProductName = currentSelectedProductAllValue.text
+                          .trim();
+                    }
+
                     billData = BillData(
                       usernameId: _bloc.taskModel?.customer?.id,
                       saleId: _bloc.taskModel?.saleId,
@@ -997,6 +1051,9 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                       newProductId: getProductNew.isNotEmpty
                           ? getProductNew.first.id
                           : 0,
+                      productName: productName,
+                      newProductName: newProductName,
+                      subType: calculatedSubType,
                       lstNew: lst1,
                       lstMaintain: lst2,
                       total: _bloc.total,

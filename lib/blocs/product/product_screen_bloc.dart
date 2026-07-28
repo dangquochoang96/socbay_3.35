@@ -29,28 +29,30 @@ class ProductScreenBloc extends Bloc<ProductScreenEvent, ProductScreenState> {
     ProductScreenGetProductCategoryEvent event,
     Emitter<ProductScreenState> emit,
   ) async {
-    // if (isLoading) return;
     isLoading = true;
     emit(ProductScreenInitialState());
     var categoryId = args.isNotEmpty ? args['cateId'] : null;
     try {
-      var url = AppConfig.instance.apiUri(ApiEndpoints.productSearch, {
-        'page': event.refresh ? "0" : offset.toString(),
-        'cate': categoryId.toString(),
-      });
+      Map<String, String> queryParams = {};
+      if (categoryId != null) {
+        queryParams['cate'] = categoryId.toString();
+      }
+      var url = AppConfig.instance.apiUri(
+        ApiEndpoints.productSearch,
+        queryParams,
+      );
       var res = await http.get(url);
       if (res.statusCode == HttpStatus.ok) {
         var l = Map<String, dynamic>.from(json.decode(res.body));
         List<ProductModel> newListProductModel = List<ProductModel>.from(
           l["data"]["data"].map((model) => ProductModel.fromJson(model)),
         );
-        event.refresh ? listProductModel.clear() : listProductModel;
-        listProductModel.addAll(newListProductModel);
-        offset = listProductModel.length;
+        listProductModel = newListProductModel;
         isLoading = false;
       }
     } catch (exception) {
       LoggerUtil.log(exception.toString());
+      isLoading = false;
     }
     emit(ProductScreenInitialState());
   }

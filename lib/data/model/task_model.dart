@@ -27,6 +27,7 @@ class TaskModel {
   final UserModel? customer;
   final UserModel? sale;
   final List<String>? images;
+  final String? currentAddress;
 
   TaskModel({
     this.id,
@@ -52,6 +53,7 @@ class TaskModel {
     this.customer,
     this.sale,
     this.images,
+    this.currentAddress,
   });
 
   factory TaskModel.fromJson(Map<String, dynamic> json) => TaskModel(
@@ -73,6 +75,7 @@ class TaskModel {
     origin: json["origin"]?.toString(),
     productId: json["product_id"]?.toString(),
     orderId: json["order_id"]?.toString(),
+    currentAddress: json["current_address"]?.toString(),
     productInfo: json["product_info"] != null
         ? ProductModel.fromJson(json["product_info"])
         : null,
@@ -103,6 +106,7 @@ class TaskModel {
     "user_customer": userCustomer,
     "origin": origin,
     "order_id": orderId,
+    "current_address": currentAddress,
     "created_at": createdAt,
   };
 

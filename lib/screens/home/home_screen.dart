@@ -111,7 +111,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 _buildProductInfo(),
 
               /// KTV slider (only for customer accounts)
-              if (App.instance.userApp?.isUserCustomer() == true) ...[
+              if (App.instance.userApp?.isUserRole() == false) ...[
                 const SizedBox(height: 15),
                 KtvSliderWidget(ktvList: _bloc.ktvList),
               ],

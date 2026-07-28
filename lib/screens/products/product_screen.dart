@@ -24,7 +24,6 @@ class ProductScreen extends StatefulWidget {
 
 class _ProductScreenState extends State<ProductScreen> {
   late ProductScreenBloc _bloc;
-  // late ScrollController _scrollController;
   int offSet = 0;
   @override
   void initState() {
@@ -109,7 +108,6 @@ class _ProductScreenState extends State<ProductScreen> {
           Padding(
             padding: const EdgeInsets.all(10.0),
             child: AlignedGridView.count(
-              //controller: _scrollController,
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               mainAxisSpacing: 10,
@@ -163,44 +161,12 @@ class _ProductScreenState extends State<ProductScreen> {
                 ),
               ),
               const SizedBox(height: 5),
-              // Row(
-              //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              //   children: [
-              //     if (productInfo.price != 0 && productInfo.price != null)
-              //       Flexible(
-              //         child: Text(
-              //           NumberFormatUtil.parseToVND(productInfo.price),
-              //           style: const TextStyle(
-              //               fontSize: 12,
-              //               overflow: TextOverflow.ellipsis,
-              //               fontWeight: FontWeight.bold,
-              //               color: ColorUtil.brightYellow),
-              //           maxLines: 1,
-              //         ),
-              //       ),
-              //     const SizedBox(width: 4),
-              //     if (productInfo.priceSale != 0 &&
-              //         productInfo.priceSale != null)
-              //       Flexible(
-              //         child: Text(
-              //             NumberFormatUtil.parseToVND(productInfo.priceSale),
-              //             style: const TextStyle(
-              //                 color: Colors.grey,
-              //                 fontSize: 11,
-              //                 decoration: TextDecoration.lineThrough)),
-              //       )
-              //   ],
-              // )
             ],
           ),
         ),
       ),
     );
   }
-
-  // Future<void> _onRefresh() async {
-  //   _bloc.add(ProductScreenGetProductCategoryEvent(offSet: 0, refresh: true));
-  // }
 
   void goToProductViewMore(ProductModel item) {
     Navigator.pushNamed(context, Routes.productViewMoreScreen, arguments: item);
