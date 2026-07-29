@@ -43,7 +43,11 @@ class FeedbackScreenidBloc
     Emitter<FeedbackScreenidState> emit,
   ) async {
     if (event.index == 0) {
-      currentOrderId = int.parse(args["orderId"]);
+      if (args["orderId"] != null) {
+        currentOrderId = int.tryParse(args["orderId"].toString()) ?? 0;
+      } else {
+        currentOrderId = 0;
+      }
       await _getListOrderByCustomer();
     } else {
       await _mapTabListFeedPressEventToState("CST");

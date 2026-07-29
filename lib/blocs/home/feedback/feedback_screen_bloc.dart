@@ -42,7 +42,11 @@ class FeedbackScreenBloc
     Emitter<FeedbackScreenState> emit,
   ) async {
     if (event.index == 0) {
-      currentOrderId = int.parse(args["orderId"]);
+      if (args["orderId"] != null) {
+        currentOrderId = int.tryParse(args["orderId"].toString()) ?? 0;
+      } else {
+        currentOrderId = 0;
+      }
       await _getListOrderByCustomer();
     } else {
       await _mapTabListFeedPressEventToState("CST");
@@ -89,8 +93,12 @@ class FeedbackScreenBloc
   ) async {
     List<String>? images = event.images;
     var url = AppConfig.instance.apiUri(ApiEndpoints.feedbacks);
+    String? orderIdValue = (event.orderId.isNotEmpty && event.orderId != "0")
+        ? event.orderId
+        : null;
     Map<String, dynamic> args = {
-      "order_id": event.orderId.toString(),
+      "order_id": orderIdValue,
+      "history_id": event.historyId ?? this.args['history_id']?.toString(),
       "description": event.description.toString(),
       "user_id": App.instance.userApp?.id.toString(),
       "images": images,
@@ -181,7 +189,9 @@ class FeedbackScreenBloc
   ) async {
     isLoading = true;
     emit(FeedbackScreenStaffInitialState());
-    feedbackDetailId = int.parse(args["fbId"]);
+    if (args["fbId"] != null) {
+      feedbackDetailId = int.tryParse(args["fbId"].toString()) ?? 0;
+    }
     try {
       var uri = AppConfig.instance.apiUri(
         ApiEndpoints.feedbackById(feedbackDetailId),

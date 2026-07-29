@@ -7,6 +7,7 @@ import 'package:socbay/blocs/machine/machine_detail/machine_detail_bloc.dart';
 import 'package:socbay/blocs/machine/machine_detail/machine_detail_event.dart';
 import 'package:socbay/blocs/machine/machine_detail/machine_detail_state.dart';
 import 'package:socbay/config/app_config.dart';
+import 'package:socbay/data/model/order_model.dart';
 import 'package:socbay/data/model/order_rent_model.dart';
 import 'package:socbay/routes.dart';
 import 'package:socbay/utils/color_util.dart';
@@ -25,6 +26,7 @@ class _MachineDetailScreenState extends State<MachineDetailScreen> {
   late MachineDetailScreenBloc _bloc;
 
   bool isLike = false;
+  bool _isFilterCoresExpanded = false;
 
   @override
   void initState() {
@@ -88,6 +90,9 @@ class _MachineDetailScreenState extends State<MachineDetailScreen> {
         ? ""
         : "$protocol${AppConfig.instance.values.apiUrl}${_bloc.order.product!.images![0].link!}";
 
+    final filterCores = _bloc.order.productFilterCoresModel;
+    final hasFilterCores = filterCores != null && filterCores.isNotEmpty;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -136,8 +141,141 @@ class _MachineDetailScreenState extends State<MachineDetailScreen> {
               fontWeight: FontWeight.bold,
             ),
           ),
+          if (hasFilterCores) ...[
+            const SizedBox(height: 16),
+            const Divider(height: 1),
+            const SizedBox(height: 12),
+            InkWell(
+              onTap: () {
+                setState(() {
+                  _isFilterCoresExpanded = !_isFilterCoresExpanded;
+                });
+              },
+              borderRadius: BorderRadius.circular(8),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 10,
+                ),
+                decoration: BoxDecoration(
+                  color: ColorUtil.bangladeshGreen.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.tune,
+                          size: 18,
+                          color: ColorUtil.bangladeshGreen,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          "Danh sách lõi lọc sản phẩm (${filterCores.length})",
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: ColorUtil.bangladeshGreen,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Icon(
+                      _isFilterCoresExpanded
+                          ? Icons.keyboard_arrow_up
+                          : Icons.keyboard_arrow_down,
+                      color: ColorUtil.bangladeshGreen,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            if (_isFilterCoresExpanded) ...[
+              const SizedBox(height: 12),
+              ListView.separated(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: filterCores.length,
+                separatorBuilder: (_, _) => const Divider(height: 16),
+                itemBuilder: (context, index) {
+                  return _buildProductFilterCoreItem(filterCores[index]);
+                },
+              ),
+            ],
+          ],
         ],
       ),
+    );
+  }
+
+  Widget _buildProductFilterCoreItem(ProductFilterCoresModel core) {
+    String coreImgUrl = (core.image == null || core.image!.isEmpty)
+        ? ""
+        : core.image!.startsWith("http")
+        ? core.image!
+        : "$protocol${AppConfig.instance.values.apiUrl}${core.image!}";
+
+    return Row(
+      children: [
+        if (coreImgUrl.isNotEmpty)
+          ClipRRect(
+            borderRadius: BorderRadius.circular(6),
+            child: ImageUtil.loadNetWorkImage(
+              url: coreImgUrl,
+              width: 44,
+              height: 44,
+            ),
+          )
+        else
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: Colors.grey[200],
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: const Icon(
+              Icons.filter_alt_outlined,
+              size: 22,
+              color: Colors.grey,
+            ),
+          ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                core.name ?? "Lõi lọc",
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: ColorUtil.raisinBlack,
+                ),
+              ),
+              if (core.replacementTime != null &&
+                  core.replacementTime!.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: 2),
+                  child: Text(
+                    "Hạn thay thế: ${core.replacementTime}",
+                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                  ),
+                ),
+              if (core.startTime != null || core.endTime != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 2),
+                  child: Text(
+                    "Thời gian: ${core.startTime ?? ''} - ${core.endTime ?? ''}",
+                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -237,7 +375,21 @@ class _MachineDetailScreenState extends State<MachineDetailScreen> {
       child: Column(
         children: [
           _buildInfoRow("Số cấp lọc", _bloc.order.filterCoreLevel ?? "0"),
-          _buildInfoRow("Ngày lắp máy", _bloc.order.createdAt ?? ""),
+          _buildInfoRow(
+            "Ngày lắp máy",
+            _bloc.order.createdAt != null
+                ? () {
+                    try {
+                      final dt = DateTime.parse(
+                        _bloc.order.createdAt!,
+                      ).toLocal();
+                      return DateFormat('dd/MM/yyyy HH:mm:ss').format(dt);
+                    } catch (_) {
+                      return _bloc.order.createdAt!;
+                    }
+                  }()
+                : "",
+          ),
           _buildInfoRow("Vị trí lắp đặt", _bloc.order.address ?? ""),
         ],
       ),

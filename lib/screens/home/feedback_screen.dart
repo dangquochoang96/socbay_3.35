@@ -71,6 +71,33 @@ class _FeedbackScreenState extends State<FeedbackScreen>
     );
   }
 
+  void _initPrefilledDescription() {
+    if (_bloc.args.isNotEmpty && describeRequestTxtController.text.isEmpty) {
+      String taskId =
+          _bloc.args['taskId']?.toString() ??
+          _bloc.args['history_id']?.toString() ??
+          '';
+      String staffName = _bloc.args['staffName']?.toString() ?? '';
+      String staffPhone = _bloc.args['staffPhone']?.toString() ?? '';
+
+      List<String> infoLines = [];
+      if (taskId.isNotEmpty) {
+        infoLines.add("Mã công việc (Task ID): #$taskId");
+      }
+      if (staffName.isNotEmpty || staffPhone.isNotEmpty) {
+        String ktvText = "KTV: $staffName";
+        if (staffPhone.isNotEmpty) {
+          ktvText += " - SĐT: $staffPhone";
+        }
+        infoLines.add(ktvText);
+      }
+      if (infoLines.isNotEmpty) {
+        describeRequestTxtController.text =
+            "${infoLines.join('\n')}\nNội dung góp ý: ";
+      }
+    }
+  }
+
   void _listener(BuildContext context, FeedbackScreenState state) {
     if (state is FeedbackScreenChangeTabState) {
       setState(() {
@@ -80,6 +107,7 @@ class _FeedbackScreenState extends State<FeedbackScreen>
           _listOrders.addAll(_bloc.ordersModel);
           _selectedValue = _bloc.currentOrderId.toString();
           describeRequestTxtController.clear();
+          _initPrefilledDescription();
         } else {
           _tabController.index = 1;
         }
@@ -192,6 +220,9 @@ class _FeedbackScreenState extends State<FeedbackScreen>
     _bloc.add(
       FeedbackCreateEvent(
         orderId: _selectedValue ?? "",
+        historyId:
+            _bloc.args['history_id']?.toString() ??
+            _bloc.args['taskId']?.toString(),
         description: describeRequestTxtController.text,
         images: _listFile,
       ),
@@ -537,6 +568,13 @@ class _FeedbackScreenState extends State<FeedbackScreen>
   }
 
   Widget _buildDropdownFieldOrders() {
+    final bool valueExists = _listOrders.any(
+      (item) => item.id.toString() == _selectedValue,
+    );
+    final String? effectiveValue = valueExists
+        ? _selectedValue
+        : (_listOrders.isNotEmpty ? _listOrders.first.id.toString() : null);
+
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8.0),
@@ -545,7 +583,7 @@ class _FeedbackScreenState extends State<FeedbackScreen>
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
-          value: _selectedValue,
+          value: effectiveValue,
           isDense: true,
           isExpanded: true,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),

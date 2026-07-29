@@ -107,15 +107,18 @@ class _FeedbackScreenState extends State<StaffDetailFeedbackScreen>
                   text: "Xem chi tiết đơn hàng",
                   isPositive: true,
                   action: () {
+                    final orderIdStr =
+                        _bloc.feedbackDetail.orderId?.toString();
+                    final orderIdInt = int.tryParse(orderIdStr ?? "");
+                    if (orderIdInt == null || orderIdInt <= 0) {
+                      context.showSnackBar("Không có thông tin đơn hàng!");
+                      return;
+                    }
                     Navigator.pushNamed(
                       context,
                       Routes.coreReplacementServiceScreen,
                       arguments: {
-                        "orderDetail": OrderDetailModel(
-                          id: int.parse(
-                            _bloc.feedbackDetail.orderId.toString(),
-                          ),
-                        ),
+                        "orderDetail": OrderDetailModel(id: orderIdInt),
                       },
                     );
                   },

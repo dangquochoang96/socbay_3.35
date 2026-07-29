@@ -14,11 +14,13 @@ class FeedbackCreateEvent extends FeedbackScreenEvent {
   final String orderId;
   final String description;
   final List<String> images;
+  final String? historyId;
 
   FeedbackCreateEvent({
     required this.orderId,
     required this.description,
     required this.images,
+    this.historyId,
   });
 }
 

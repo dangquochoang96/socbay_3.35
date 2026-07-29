@@ -31,11 +31,13 @@ class OrderModel {
   final String? count;
   final String? filterCoreLevel;
   final String? address;
+  final String? productDetailCode;
   final String? orderTypeLabel;
   final MachineModel? product;
   final List<OrderFilterCoreModel>? orderFilterCoresModel;
   final OrderRent? orderRent;
   final ProductModel? proad;
+  final List<ProductFilterCoresModel>? productFilterCoresModel;
 
   OrderModel({
     this.id,
@@ -51,13 +53,16 @@ class OrderModel {
     this.orderRent,
     this.proad,
     this.address,
+    this.productDetailCode,
     this.orderTypeLabel,
     this.orderFilterCoresModel,
+    this.productFilterCoresModel,
   });
 
   factory OrderModel.fromJson(Map<String, dynamic> json) {
     final productJson = _asMap(json['product']);
     final orderFilterCoresJson = _asList(json['order_filter_cores']);
+    final productFilterCoresJson = _asList(json['product_filter_cores']);
     final orderRentJson = _asMap(json['orderRent']);
     final proadJson = _asMap(json['proad']);
 
@@ -72,6 +77,7 @@ class OrderModel {
       count: json['count'] as String?,
       filterCoreLevel: json['filter_core_level'] as String?,
       address: json['address'] as String?,
+      productDetailCode: json['product_detail_code'] as String?,
       orderTypeLabel: json['order_type_label'] as String?,
       product: productJson != null ? MachineModel.fromJson(productJson) : null,
       orderFilterCoresModel: orderFilterCoresJson
@@ -83,6 +89,11 @@ class OrderModel {
           ? OrderRent.fromJson(orderRentJson)
           : null,
       proad: proadJson != null ? ProductModel.fromJson(proadJson) : null,
+      productFilterCoresModel: productFilterCoresJson
+          ?.map(_asMap)
+          .whereType<Map<String, dynamic>>()
+          .map((e) => ProductFilterCoresModel.fromJson(e))
+          .toList(),
     );
   }
 
@@ -99,8 +110,52 @@ class OrderModel {
     'product': product,
     'proad': proad,
     'address': address,
+    'product_detail_code': productDetailCode,
     'order_type_label': orderTypeLabel,
     'order_filter_core': orderFilterCoresModel,
     'order_rent': orderRent,
+    'product_filter_cores': productFilterCoresModel,
+  };
+}
+
+class ProductFilterCoresModel {
+  final int? id;
+  final String? filterProductId;
+  final String? name;
+  final String? image;
+  final String? startTime;
+  final String? endTime;
+  final String? replacementTime;
+
+  ProductFilterCoresModel({
+    this.id,
+    this.filterProductId,
+    this.name,
+    this.image,
+    this.startTime,
+    this.endTime,
+    this.replacementTime,
+  });
+
+  factory ProductFilterCoresModel.fromJson(Map<String, dynamic> json) {
+    return ProductFilterCoresModel(
+      id: _asInt(json['id']),
+      filterProductId: json['filter_product_id'] as String?,
+      name: json['name'] as String?,
+      image: json['image'] as String?,
+      startTime: json['start_time'] as String?,
+      endTime: json['end_time'] as String?,
+      replacementTime: json['replacement_time'] as String?,
+    );
+  }
+
+  Map<String, dynamic> toJson() => <String, dynamic>{
+    'id': id,
+    'filter_product_id': filterProductId,
+    'name': name,
+    'image': image,
+    'start_time': startTime,
+    'end_time': endTime,
+    'replacement_time': replacementTime,
   };
 }

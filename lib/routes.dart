@@ -326,7 +326,7 @@ class Routes {
             return BlocProvider<FeedbackScreenBloc>(
               create: (context) => FeedbackScreenBloc(
                 apiRepository: apiRepository,
-                args: settings.arguments as Map<String, dynamic>,
+                args: (settings.arguments as Map<String, dynamic>?) ?? {},
               ),
               child: const FeedbackScreen(),
             );
@@ -334,7 +334,7 @@ class Routes {
             return BlocProvider<FeedbackScreenBloc>(
               create: (context) => FeedbackScreenBloc(
                 apiRepository: apiRepository,
-                args: settings.arguments as Map<String, dynamic>,
+                args: (settings.arguments as Map<String, dynamic>?) ?? {},
               ),
               child: const StaffFeedbackScreen(),
             );

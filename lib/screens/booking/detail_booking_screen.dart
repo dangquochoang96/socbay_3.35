@@ -292,6 +292,33 @@ class _DetailBookingScreenState extends State<DetailBookingScreen> {
         title: 'Chi tiết đơn hàng ${_bloc.taskModel?.id}',
         centerTitle: true,
         actionWidgets: [
+          if (App.instance.userApp?.isUserCustomer() == true)
+            GestureDetector(
+              onTap: () {
+                Navigator.pushNamed(
+                  context,
+                  Routes.feedbackScreen,
+                  arguments: {
+                    'history_id': _bloc.taskModel?.id?.toString(),
+                    'taskId': _bloc.taskModel?.id?.toString(),
+                    'staffName': _bloc.taskModel?.staff?.username,
+                    'staffPhone': _bloc.taskModel?.staff?.phone,
+                  },
+                );
+              },
+              child: const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 8.0),
+                child: Center(
+                  child: Text(
+                    'Góp ý',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: ColorUtil.white,
+                    ),
+                  ),
+                ),
+              ),
+            ),
           if ((_bloc.taskModel?.status == '1' ||
                   _bloc.taskModel?.status == '2' ||
                   _bloc.taskModel?.status == '5') &&
@@ -325,6 +352,30 @@ class _DetailBookingScreenState extends State<DetailBookingScreen> {
               _buildCustomerInfoCard(_bloc.taskModel),
             _buildMediaCard(),
             const SizedBox(height: 16),
+            if (App.instance.userApp?.isUserCustomer() == true)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: Row(
+                  children: [
+                    _buildButton(
+                      text: 'GÓP Ý',
+                      isPositive: true,
+                      action: () {
+                        Navigator.pushNamed(
+                          context,
+                          Routes.feedbackScreen,
+                          arguments: {
+                            'history_id': _bloc.taskModel?.id?.toString(),
+                            'taskId': _bloc.taskModel?.id?.toString(),
+                            'staffName': _bloc.taskModel?.staff?.username,
+                            'staffPhone': _bloc.taskModel?.staff?.phone,
+                          },
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
             if (App.instance.userApp?.isUserRole() == true) ...[
               if (_bloc.taskModel?.status == "3") _detailTask(),
               if (_bloc.taskModel?.status != "3" &&
@@ -639,9 +690,9 @@ class _DetailBookingScreenState extends State<DetailBookingScreen> {
               "Vị trí lắp đặt:",
               taskModel?.productInfo?.address ?? "",
             ),
-          _buildCurrentAddressRow(taskModel),
-          const SizedBox(height: 8),
           if (App.instance.userApp?.isUserCustomer() == true) ...[
+            _buildCurrentAddressRow(taskModel),
+            const SizedBox(height: 8),
             _buildLocationUpdateButton(),
           ],
         ],
@@ -782,6 +833,7 @@ class _DetailBookingScreenState extends State<DetailBookingScreen> {
                 ],
               ),
             ),
+          _buildCurrentAddressRow(taskModel),
         ],
       ),
     );
