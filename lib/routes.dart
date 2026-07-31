@@ -99,7 +99,6 @@ import 'blocs/product/product_screen_bloc.dart';
 import 'blocs/technique/technique_screen_bloc.dart';
 import 'blocs/user_Information/customer_information_list_bloc.dart';
 import 'blocs/user_info/notification/notification_screen_bloc.dart';
-import 'screens/staff/comment_and_rating/comment_and_rating_list_screen.dart';
 import 'screens/staff/feedback/staff_feedback_detail_screen.dart';
 import 'screens/staff/order_manager/order_mng_screen.dart';
 
@@ -154,10 +153,8 @@ class Routes {
   static const String addUserAddressScreen = '/addUserAddressScreen';
   static const String detailBookingScreen = '/detailBookingScreen';
   static const String detailRentBookingScreen = '/detailRentBookingScreen';
-  // static const String detailTaskProcessedScreen = '/detailTaskProcessed';
   static const String productCategoryScreen = '/productCategoryScreen';
   static const String coreReplacementServiceScreen = '/coreReplatementService';
-  static const String staffCommentAndRatingList = '/CommentAndRatingList';
   static const String orderManagerScreen = '/OrderManagerScreen';
   static const String staffServiceScreen = '/staffServiceScreen';
   static const String createOrderScreen = '/createOrderScreen';
@@ -166,14 +163,12 @@ class Routes {
   static const String detailFeedBackScreen = '/detailFeedbackScreen';
   static const String histoyridCScreen = '/histoyridCScreen';
   static const String staffDetailFeedBackScreen = '/staffDetailFeedbackScreen';
-  static const String staffCustomerInformationList =
-      '/CustomerInformationList'; //
+  static const String staffCustomerInformationList = '/CustomerInformationList';
   static const String evaluateScreen = '/evaluateScreen';
   static const String staffCommentTechniqueList = '/staffCommentTechniqueList';
   static const String feedbackkScreen = '/feedbackkScreen';
   static const String staffFeedbackListScreen = '/staffFeedbackListScreen';
   static const String staffServiceScreenSale = '/staffServiceScreenSale';
-  // static const String rentBookingServiceScreen = '/rentBookingServiceScreen';
   static const String orderManagerScreenBySale = '/orderManagerScreenBySale';
   static const String retailOrderScreen = '/retailOrderScreen';
   static const String warehouseScreen = '/warehouseScreen';
@@ -331,12 +326,23 @@ class Routes {
               child: const FeedbackScreen(),
             );
           case staffFeedbackScreen:
-            return BlocProvider<FeedbackScreenBloc>(
-              create: (context) => FeedbackScreenBloc(
-                apiRepository: apiRepository,
-                args: (settings.arguments as Map<String, dynamic>?) ?? {},
-              ),
-              child: const StaffFeedbackScreen(),
+            final argsFeedback =
+                (settings.arguments as Map<String, dynamic>?) ?? {};
+            final initialTabFeedback = argsFeedback["initialTab"] as int? ?? 1;
+            return MultiBlocProvider(
+              providers: [
+                BlocProvider<FeedbackScreenBloc>(
+                  create: (context) => FeedbackScreenBloc(
+                    apiRepository: apiRepository,
+                    args: argsFeedback,
+                  ),
+                ),
+                BlocProvider<CommentAndRatingBloc>(
+                  create: (builderContext) =>
+                      CommentAndRatingBloc(apiRepository: apiRepository),
+                ),
+              ],
+              child: StaffFeedbackScreen(initialTab: initialTabFeedback),
             );
           case staffFeedbackListScreen:
             return BlocProvider<FeedbackScreenidBloc>(
@@ -372,11 +378,6 @@ class Routes {
               ),
               child: const SearchStaffScreen(),
             );
-          // case techniqueScreen:
-          //   return BlocProvider<TechniqueScreenBloc>(
-          //     create: (context) => TechniqueScreenBloc( apiRepository),
-          //     child:const TechniqueScreen(),
-          //   );
           case hotlineScreen:
             return BlocProvider<HotlineScreenBloc>(
               create: (context) => HotlineScreenBloc(apiRepository),
@@ -458,12 +459,6 @@ class Routes {
                   CustomerOrderPaymentBloc(apiRepository: apiRepository),
               child: const CustomerOrderListScreen(),
             );
-          case staffCommentAndRatingList:
-            return BlocProvider<CommentAndRatingBloc>(
-              create: (builderContext) =>
-                  CommentAndRatingBloc(apiRepository: apiRepository),
-              child: const CommentAndRatingListScreen(),
-            );
           case staffCommentTechniqueList:
             return BlocProvider<CommentTechniqueBloc>(
               create: (builderContext) => CommentTechniqueBloc(
@@ -502,16 +497,6 @@ class Routes {
               ),
               child: const StaffServiceSaleScreen(),
             );
-          // case rentBookingServiceScreen:
-          //   return BlocProvider<StaffServiceSaleScreenBloc>(
-          //     create: (context) => StaffServiceSaleScreenBloc(
-          //       apiRepository: apiRepository,
-          //       args: settings.arguments as Map<String, dynamic>,
-          //     ),
-          //     child: const StaffServiceSaleScreen(
-          //       initialOrderType: TaskOrderType.rent,
-          //     ),
-          //   );
           case createOrderScreen:
             return BlocProvider<StaffNewOrderBloc>(
               create: (ctx) => StaffNewOrderBloc(

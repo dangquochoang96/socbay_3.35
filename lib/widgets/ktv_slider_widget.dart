@@ -382,15 +382,4 @@ class _KtvSliderWidgetState extends State<KtvSliderWidget> {
       },
     );
   }
-
-  static String _calculateAge(String? birthday) {
-    try {
-      if (birthday == null || birthday.isEmpty) return "35";
-      final birthDate = DateTime.parse(birthday);
-      final age = DateTime.now().year - birthDate.year;
-      return age > 0 ? age.toString() : "35";
-    } catch (_) {
-      return "35";
-    }
-  }
 }

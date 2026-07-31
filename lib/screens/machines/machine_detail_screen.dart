@@ -268,7 +268,7 @@ class _MachineDetailScreenState extends State<MachineDetailScreen> {
                 Padding(
                   padding: const EdgeInsets.only(top: 2),
                   child: Text(
-                    "Thời gian: ${core.startTime ?? ''} - ${core.endTime ?? ''}",
+                    "Thời gian: ${_formatTimeRange(core.startTime, core.endTime)}",
                     style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                   ),
                 ),
@@ -277,6 +277,28 @@ class _MachineDetailScreenState extends State<MachineDetailScreen> {
         ),
       ],
     );
+  }
+
+  String _formatDate(String? dateStr) {
+    if (dateStr == null || dateStr.isEmpty || dateStr.contains("-0001")) {
+      return "";
+    }
+    try {
+      final parsed = DateTime.tryParse(dateStr);
+      if (parsed != null) {
+        return DateFormat("dd/MM/yyyy").format(parsed);
+      }
+    } catch (_) {}
+    return dateStr;
+  }
+
+  String _formatTimeRange(String? startTime, String? endTime) {
+    final start = _formatDate(startTime);
+    final end = _formatDate(endTime);
+    if (start.isNotEmpty && end.isNotEmpty) {
+      return "$start - $end";
+    }
+    return start.isNotEmpty ? start : end;
   }
 
   Widget _buildInfoRow(

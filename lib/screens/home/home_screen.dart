@@ -761,20 +761,18 @@ class _HomeScreenState extends State<HomeScreen> {
           }
         } else if (App.instance.userApp?.isUserRole() == true) {
           if (index == 0) {
-            Navigator.pushNamed(context, Routes.staffCommentAndRatingList);
-          } else if (index == 1) {
-            Navigator.pushNamed(context, Routes.orderManagerScreen);
-          } else if (index == 2) {
             Navigator.pushNamed(
               context,
               Routes.staffFeedbackScreen,
               arguments: {"fbId": "0", "orderId": "0"},
             );
-          } else if (index == 3) {
+          } else if (index == 1) {
+            Navigator.pushNamed(context, Routes.orderManagerScreen);
+          } else if (index == 2) {
             Navigator.pushNamed(context, Routes.retailOrderScreen);
-          } else if (index == 4) {
+          } else if (index == 3) {
             Navigator.pushNamed(context, Routes.warehouseScreen);
-          } else if (index == 5) {
+          } else if (index == 4) {
             Navigator.pushNamed(context, Routes.ktvWalletScreen);
           }
         } else {

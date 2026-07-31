@@ -65,7 +65,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       _mapGetBannerEventToState(null, emit),
       _mapGetLastReplaceFilterCore(),
       _mapGetNotificationBadge(),
-      if (App.instance.userApp?.isUserCustomer() == true) _mapGetKtvList(),
+      if (App.instance.userApp?.isUserRole() == false) _mapGetKtvList(),
     ]).then((value) {
       isLoading = false;
       emit(HomeInitialState());

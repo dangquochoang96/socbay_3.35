@@ -75,18 +75,13 @@ class HomeServiceModel {
   static List<HomeServiceModel> staffServiceList = [
     HomeServiceModel(
       image: Images.iconAdvise,
-      des: 'Đánh giá & nhận xét',
-      name: 'Đánh giá & nhận xét',
+      des: 'Đánh giá & Góp ý khiếu nại',
+      name: 'ĐÁNH GIÁ & GÓP Ý',
     ),
     HomeServiceModel(
       image: Images.iconFeedback,
       des: 'Đơn hàng',
       name: 'Quản lý đơn hàng',
-    ),
-    HomeServiceModel(
-      image: Images.iconinventory,
-      des: 'Góp ý & khiếu nại',
-      name: 'GÓP Ý & KHIẾU NẠI',
     ),
     HomeServiceModel(
       image: Images.warehouseImport,

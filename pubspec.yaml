@@ -78,6 +78,7 @@ dependencies:
   fluttertoast: ^9.0.0
   syncfusion_flutter_calendar: ^32.1.23
   in_app_update: ^4.2.5
+  flutter_foreground_task: ^10.0.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
