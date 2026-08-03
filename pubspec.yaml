@@ -79,6 +79,7 @@ dependencies:
   syncfusion_flutter_calendar: ^32.1.23
   in_app_update: ^4.2.5
   flutter_foreground_task: ^10.0.0
+  battery_plus: ^7.1.1
 dev_dependencies:
   flutter_test:
     sdk: flutter

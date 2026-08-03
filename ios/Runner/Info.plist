@@ -36,12 +36,15 @@
 	<string>Ứng dụng cần truy cập vị trí của bạn để tìm kiếm và điều phối kỹ thuật viên gần nhất.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>Ứng dụng cần truy cập vị trí của bạn để tìm kiếm và điều phối kỹ thuật viên gần nhất.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>Ứng dụng cần truy cập vị trí chạy ngầm để theo dõi hành trình kỹ thuật viên.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>
 		<string>fetch</string>
+		<string>location</string>
 	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>

@@ -209,4 +209,11 @@ abstract final class ApiEndpoints {
   static const walletDeposit = '/socbay/wallet/deposit';
   static String deleteTransactions(Object? transactionId) =>
       '/socbay/wallet/transaction/$transactionId';
+
+  // =========================
+  // LOCATION TRACK
+  // =========================
+  static const updateLocation = '/socbay/location/update';
+  static const startTrip = '/socbay/location/trip/start';
+  static const stopTrip = '/socbay/location/trip/stop';
 }

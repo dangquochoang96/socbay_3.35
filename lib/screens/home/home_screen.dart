@@ -14,6 +14,7 @@ import 'package:socbay/constants/constants.dart';
 import 'package:socbay/data/model/home_service_model.dart';
 import 'package:socbay/data/model/order_detail_model.dart';
 import 'package:socbay/routes.dart';
+import 'package:socbay/services/location_tracking_service.dart';
 import 'package:socbay/utils/context_extension.dart';
 import 'package:socbay/widgets/button_widget.dart';
 import 'package:socbay/widgets/loading_indicator.dart';
@@ -40,6 +41,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late HomeBloc _bloc;
+  bool _isTrackingShift = false;
 
   @override
   void initState() {
@@ -49,6 +51,18 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _bloc = BlocProvider.of(context);
     _bloc.add(HomeStartedEvent());
+    if (App.instance.userApp?.isUserRole() == true) {
+      _checkTrackingStatus();
+    }
+  }
+
+  Future<void> _checkTrackingStatus() async {
+    bool isTracking = await LocationTrackingService.instance.isTracking();
+    if (mounted) {
+      setState(() {
+        _isTrackingShift = isTracking;
+      });
+    }
   }
 
   @override
@@ -105,6 +119,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   child: BannerSliderWidget(banners: _bloc.banners),
                 ),
+
+              /// Công tắc Ca làm việc / Theo dõi vị trí ngầm (Chỉ hiển thị cho tài khoản Kỹ thuật viên)
+              if (App.instance.userApp?.isUserRole() == true) ...[
+                const SizedBox(height: 15),
+                _buildTechnicianShiftCard(),
+              ],
 
               //product info
               if (App.instance.userApp?.isUserCustomer() == true)
@@ -946,5 +966,86 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _onRefresh() async {
     _bloc.add(HomeStartedEvent());
+  }
+
+  Widget _buildTechnicianShiftCard() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: paddingHorizontal),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: const [
+          BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 2)),
+        ],
+        border: Border.all(
+          color: _isTrackingShift
+              ? ColorUtil.bangladeshGreen
+              : Colors.grey.shade300,
+          width: 1.5,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: _isTrackingShift
+                  ? ColorUtil.bangladeshGreen.withValues(alpha: 0.1)
+                  : Colors.grey.shade100,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              _isTrackingShift ? Icons.my_location : Icons.location_off,
+              color: _isTrackingShift ? ColorUtil.bangladeshGreen : Colors.grey,
+              size: 24,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  _isTrackingShift
+                      ? "Đang trong ca làm việc"
+                      : "Bắt đầu ca làm việc",
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  _isTrackingShift
+                      ? "Đang bật vị trí ngầm KTV"
+                      : "Gạt để bật vị trí ngầm KTV",
+                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                ),
+              ],
+            ),
+          ),
+          Switch(
+            value: _isTrackingShift,
+            activeThumbColor: ColorUtil.bangladeshGreen,
+            onChanged: (value) async {
+              if (value) {
+                bool started = await LocationTrackingService.instance
+                    .startTracking();
+                if (mounted) {
+                  setState(() => _isTrackingShift = started);
+                }
+              } else {
+                await LocationTrackingService.instance.stopTracking();
+                if (mounted) {
+                  setState(() => _isTrackingShift = false);
+                }
+              }
+            },
+          ),
+        ],
+      ),
+    );
   }
 }

@@ -10,6 +10,8 @@ import 'package:socbay/blocs/root/root_event.dart';
 import 'package:socbay/config/app_config.dart';
 import 'package:socbay/config/app_localization.dart';
 import 'package:socbay/my_app.dart';
+import 'package:flutter_foreground_task/flutter_foreground_task.dart';
+import 'package:socbay/services/location_tracking_service.dart';
 import 'package:socbay/services/push_notification_service.dart';
 import 'package:socbay/utils/logger_util.dart';
 import 'package:socbay/utils/simple_bloc_delegate.dart';
@@ -28,10 +30,12 @@ class MyHttpOverrides extends HttpOverrides {
 Future main() async {
   await runZonedGuarded(() async {
     WidgetsFlutterBinding.ensureInitialized();
+    FlutterForegroundTask.initCommunicationPort();
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
     await PushNotificationService.instance.initialize();
+    LocationTrackingService.instance.init();
 
     Bloc.observer = SimpleBlocObserver();
     //transparent status bar and navigation bar
