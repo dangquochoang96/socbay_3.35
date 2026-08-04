@@ -1018,9 +1018,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  _isTrackingShift
-                      ? "Đang bật vị trí ngầm KTV"
-                      : "Gạt để bật vị trí ngầm KTV",
+                  _isTrackingShift ? "Đang bật vị trí" : "Gạt để bật vị trí",
                   style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
                 ),
               ],

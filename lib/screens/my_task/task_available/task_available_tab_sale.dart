@@ -32,14 +32,28 @@ class _TaskAvailableTabState extends State<TaskAvailableTabSale> {
   late ScrollController _scrollController;
   late TextEditingController _feedbackController;
   late TextEditingController _searchController;
-  int _page = 0;
   String _searchQuery = '';
+  String? _selectedStatusFilter;
+  static const _statusFilters = [
+    _StatusFilterOption(label: 'Tất cả'),
+    _StatusFilterOption(label: 'Chưa giao', value: '1'),
+    _StatusFilterOption(label: 'Đã giao', value: '5'),
+    _StatusFilterOption(label: 'Đang thực hiện', value: '2'),
+    _StatusFilterOption(label: 'Hoàn thành', value: '3'),
+    _StatusFilterOption(label: 'Hủy', value: '4'),
+  ];
   DateTime? selectedDate;
   TimeOfDay? selectedTime;
   @override
   void initState() {
     _bloc = BlocProvider.of(context);
-    _bloc.add(StaffTaskScreenGetTaskAssigedEvent(page: _page));
+    _bloc.add(
+      StaffTaskScreenGetTaskAssigedEvent(
+        isRefresh: true,
+        page: 0,
+        status: _selectedStatusFilter,
+      ),
+    );
     _blocDetail = BlocProvider.of<DetailBookingBloc>(context);
     _scrollController = ScrollController();
     _feedbackController = TextEditingController();
@@ -47,14 +61,15 @@ class _TaskAvailableTabState extends State<TaskAvailableTabSale> {
     _scrollController.addListener(() {
       scrollPaginationListener(
         scrollController: _scrollController,
-        condition:
-            (_scrollController.hasClients &&
-                _scrollController.position.pixels ==
-                    _scrollController.position.maxScrollExtent) ||
-            _bloc.isLoading,
+        condition: !_bloc.isLoading && _bloc.hasMoreTaskAssigned,
         paginationFunction: () {
-          _page++;
-          _bloc.add(StaffTaskScreenGetTaskAssigedEvent(page: _page));
+          _bloc.add(
+            StaffTaskScreenGetTaskAssigedEvent(
+              isRefresh: false,
+              page: _bloc.pageTaskAssigned,
+              status: _selectedStatusFilter,
+            ),
+          );
         },
       );
     });
@@ -79,9 +94,7 @@ class _TaskAvailableTabState extends State<TaskAvailableTabSale> {
     _scrollController.dispose();
     _feedbackController.dispose();
     _searchController.dispose();
-    _page = 0;
     _bloc.listTaskModel.clear();
-    _bloc.close();
     super.dispose();
   }
 
@@ -96,9 +109,18 @@ class _TaskAvailableTabState extends State<TaskAvailableTabSale> {
   void _listener(BuildContext context, state) {
     if (state is BookingUpdateSuccessState) {
       context.showSnackBar("Cập nhật thành công!");
-      _bloc.add(const StaffTaskScreenGetTaskByDayEvent(isRefresh: true));
       _bloc.add(
-        const StaffTaskScreenGetTaskAssigedEvent(isRefresh: true, page: 0),
+        StaffTaskScreenGetTaskByDayEvent(
+          isRefresh: true,
+          status: _bloc.selectedTaskByDayStatus,
+        ),
+      );
+      _bloc.add(
+        StaffTaskScreenGetTaskAssigedEvent(
+          isRefresh: true,
+          page: 0,
+          status: _selectedStatusFilter,
+        ),
       );
     }
     if (state is BookingUpdateErrorState) {
@@ -116,26 +138,21 @@ class _TaskAvailableTabState extends State<TaskAvailableTabSale> {
   }
 
   List<TaskModel> get _filteredTasks {
-    if (_searchQuery.isEmpty) {
-      return _bloc
-          .staffListTaskAssigedModel; // Return all tasks if search query is empty
-    } else {
-      // Filter tasks based on service ID containing the search query
-      return _bloc.staffListTaskAssigedModel.where((task) {
-        return (task.customer?.phone != null &&
-                task.customer!.phone!.toLowerCase().contains(
-                  _searchQuery.toLowerCase(),
-                ) ||
-            task.customer?.username != null &&
-                task.customer!.username!.toLowerCase().contains(
-                  _searchQuery.toLowerCase(),
-                ) ||
-            task.customer?.address != null &&
-                task.customer!.address!.toLowerCase().contains(
-                  _searchQuery.toLowerCase(),
-                ));
-      }).toList();
-    }
+    final query = _searchQuery.toLowerCase();
+    return _bloc.staffListTaskAssigedModel.where((task) {
+      final matchesStatus =
+          _selectedStatusFilter == null || task.status == _selectedStatusFilter;
+      if (!matchesStatus) return false;
+      if (query.isEmpty) return true;
+      return (task.customer?.phone != null &&
+              task.customer!.phone!.toLowerCase().contains(query)) ||
+          (task.customer?.username != null &&
+              task.customer!.username!.toLowerCase().contains(query)) ||
+          (task.customer?.address != null &&
+              task.customer!.address!.toLowerCase().contains(query)) ||
+          (task.name != null && task.name!.toLowerCase().contains(query)) ||
+          (task.id != null && task.id.toString().contains(query));
+    }).toList();
   }
 
   Widget _builder(BuildContext context, state) {
@@ -180,19 +197,21 @@ class _TaskAvailableTabState extends State<TaskAvailableTabSale> {
             ],
           ),
         ),
+        _buildStatusFilterBar(),
         Expanded(
           child: LoadingIndicator(
             isLoading: _bloc.isLoading,
             child: RefreshIndicator(
               onRefresh: () async {
                 _bloc.add(
-                  const StaffTaskScreenGetTaskAssigedEvent(
+                  StaffTaskScreenGetTaskAssigedEvent(
                     isRefresh: true,
                     page: 0,
+                    status: _selectedStatusFilter,
                   ),
                 );
               },
-              child: _bloc.staffListTaskAssigedModel.isEmpty && !_bloc.isLoading
+              child: _filteredTasks.isEmpty && !_bloc.isLoading
                   ? const CustomScrollView(
                       physics: AlwaysScrollableScrollPhysics(),
                       slivers: [
@@ -311,11 +330,13 @@ class _TaskAvailableTabState extends State<TaskAvailableTabSale> {
                   Icons.phone_outlined,
                   'SĐT:',
                   taskModel.customer?.phone ?? '',
-                  onTap: (taskModel.customer?.phone != null &&
+                  onTap:
+                      (taskModel.customer?.phone != null &&
                           taskModel.customer!.phone!.isNotEmpty)
                       ? () async {
-                          final Uri telUri =
-                              Uri.parse('tel:${taskModel.customer!.phone}');
+                          final Uri telUri = Uri.parse(
+                            'tel:${taskModel.customer!.phone}',
+                          );
                           if (await canLaunchUrl(telUri)) {
                             await launchUrl(telUri);
                           }
@@ -351,14 +372,13 @@ class _TaskAvailableTabState extends State<TaskAvailableTabSale> {
                   ),
                 ],
 
-                if ((taskModel.status == '1' ||
-                    taskModel.status == '2' ||
-                    taskModel.status == '5')) ...[
+                if (_canShowActions(taskModel)) ...[
                   const SizedBox(height: 16),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      if ((taskModel.userId == null ||
+                      if (_canAssignOrCancel(taskModel) &&
+                          (taskModel.userId == null ||
                               taskModel.userId!.isEmpty ||
                               taskModel.userId == "0") &&
                           taskModel.staff?.id == null) ...[
@@ -377,14 +397,16 @@ class _TaskAvailableTabState extends State<TaskAvailableTabSale> {
                         onTap: () => _editBooking(taskModel),
                         isOutlined: true,
                       ),
-                      const SizedBox(width: 12),
-                      _buildActionButton(
-                        icon: Icons.cancel_outlined,
-                        text: 'Huỷ',
-                        color: Colors.red,
-                        onTap: () => _cancelTask(taskModel),
-                        isOutlined: true,
-                      ),
+                      if (_canAssignOrCancel(taskModel)) ...[
+                        const SizedBox(width: 12),
+                        _buildActionButton(
+                          icon: Icons.cancel_outlined,
+                          text: 'Huỷ',
+                          color: Colors.red,
+                          onTap: () => _cancelTask(taskModel),
+                          isOutlined: true,
+                        ),
+                      ],
                     ],
                   ),
                 ],
@@ -396,13 +418,68 @@ class _TaskAvailableTabState extends State<TaskAvailableTabSale> {
     );
   }
 
+  bool _canShowActions(TaskModel taskModel) {
+    return ['1', '2', '3', '4', '5'].contains(taskModel.status);
+  }
+
+  bool _canAssignOrCancel(TaskModel taskModel) {
+    return ['1', '2', '5'].contains(taskModel.status);
+  }
+
+  Widget _buildStatusFilterBar() {
+    return SizedBox(
+      height: 42,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        itemCount: _statusFilters.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 8),
+        itemBuilder: (context, index) {
+          final option = _statusFilters[index];
+          final isSelected = option.value == _selectedStatusFilter;
+          return ChoiceChip(
+            label: Text(option.label),
+            selected: isSelected,
+            labelStyle: TextStyle(
+              color: isSelected ? Colors.white : ColorUtil.bangladeshGreen,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+            selectedColor: ColorUtil.bangladeshGreen,
+            backgroundColor: Colors.white,
+            side: BorderSide(
+              color: isSelected
+                  ? ColorUtil.bangladeshGreen
+                  : ColorUtil.bangladeshGreen.withValues(alpha: 0.35),
+            ),
+            visualDensity: VisualDensity.compact,
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            onSelected: (_) {
+              setState(() {
+                _selectedStatusFilter = option.value;
+              });
+              _bloc.add(
+                StaffTaskScreenGetTaskAssigedEvent(
+                  isRefresh: true,
+                  page: 0,
+                  status: _selectedStatusFilter,
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+
   void _onAssignTechnician(TaskModel taskModel) {
     Navigator.of(context)
         .push(
           MaterialPageRoute(
-            builder: (context) => const TechniqueScreen(
-              initialTabIndex: 1,
-            ),
+            builder: (context) => const TechniqueScreen(initialTabIndex: 1),
           ),
         )
         .then((value) {
@@ -410,11 +487,13 @@ class _TaskAvailableTabState extends State<TaskAvailableTabSale> {
             Map<String, dynamic> result = value as Map<String, dynamic>;
             UserModel? selectedStaff = result['favouriteStaff'] as UserModel?;
             if (selectedStaff != null) {
-              _bloc.add(StaffTaskScreenAssignTechnicianEvent(
-                taskId: taskModel.id!,
-                staffId: selectedStaff.id!,
-                taskModel: taskModel,
-              ));
+              _bloc.add(
+                StaffTaskScreenAssignTechnicianEvent(
+                  taskId: taskModel.id!,
+                  staffId: selectedStaff.id!,
+                  taskModel: taskModel,
+                ),
+              );
             }
           }
         });
@@ -544,9 +623,17 @@ class _TaskAvailableTabState extends State<TaskAvailableTabSale> {
           setState(() {
             _blocDetail.add(DetailBookingStartedEvent());
             _bloc.add(
-              const StaffTaskScreenGetTaskAssigedEvent(isRefresh: true),
+              StaffTaskScreenGetTaskAssigedEvent(
+                isRefresh: true,
+                status: _selectedStatusFilter,
+              ),
             );
-            _bloc.add(const StaffTaskScreenGetTaskByDayEvent(isRefresh: true));
+            _bloc.add(
+              StaffTaskScreenGetTaskByDayEvent(
+                isRefresh: true,
+                status: _bloc.selectedTaskByDayStatus,
+              ),
+            );
           });
         }
       }
@@ -653,4 +740,11 @@ class _TaskAvailableTabState extends State<TaskAvailableTabSale> {
       return dateTimeString ?? "";
     }
   }
+}
+
+class _StatusFilterOption {
+  final String label;
+  final String? value;
+
+  const _StatusFilterOption({required this.label, this.value});
 }

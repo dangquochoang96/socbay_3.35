@@ -19,8 +19,9 @@ class LocationTaskHandler extends TaskHandler {
   Position? _lastSentPosition;
   DateTime? _lastSentTime;
 
-  static const int _minTimeIntervalSeconds = 30;
-  static const double _minDistanceMeters = 10.0;
+  static const int _movingTimeIntervalSeconds = 30;
+  static const int _stationaryTimeIntervalSeconds = 300; // 5 phut
+  static const double _minMovingDistanceMeters = 50.0; // 50m
 
   @override
   Future<void> onStart(DateTime timestamp, TaskStarter starter) async {
@@ -95,6 +96,7 @@ class LocationTaskHandler extends TaskHandler {
     int timeDifference = 0;
 
     if (_lastSentPosition == null || _lastSentTime == null) {
+      // Lan dau khoi chay ca -> Gui ngay
       shouldSend = true;
     } else {
       timeDifference = now.difference(_lastSentTime!).inSeconds;
@@ -105,9 +107,19 @@ class LocationTaskHandler extends TaskHandler {
         position.longitude,
       );
 
-      if (distance >= _minDistanceMeters ||
-          timeDifference >= _minTimeIntervalSeconds) {
-        shouldSend = true;
+      final bool isMoving = distance >= _minMovingDistanceMeters;
+
+      if (isMoving) {
+        // Truong hop ĐANG DI CHUYỂN (>= 50m HOẶC >= 30s)
+        if (distance >= _minMovingDistanceMeters ||
+            timeDifference >= _movingTimeIntervalSeconds) {
+          shouldSend = true;
+        }
+      } else {
+        // Truong hop ĐỨNG YÊN (< 50m): Chi luu sau moi 5 phut (300s)
+        if (timeDifference >= _stationaryTimeIntervalSeconds) {
+          shouldSend = true;
+        }
       }
     }
 
@@ -159,7 +171,7 @@ class LocationTaskHandler extends TaskHandler {
       });
     } else {
       print(
-        '⏳ [LOCATION SKIP] Filtered out (Dist: ${distance.toStringAsFixed(1)}m < 10m, TimeDiff: ${timeDifference}s < 30s)',
+        '⏳ [LOCATION SKIP] Filtered out (Dist: ${distance.toStringAsFixed(1)}m, TimeDiff: ${timeDifference}s - Require >= 50m OR 30s when moving, 300s when stationary)',
       );
     }
   }
@@ -169,19 +181,26 @@ class LocationTaskHandler extends TaskHandler {
     print('🔄 [LOCATION BG REPEAT] Event triggered at $timestamp');
     final now = DateTime.now();
 
-    // Khi dung yen (0m di chuyen), kiem tra neu da qua 30 giay chua gui thi lay vi tri va cap nhat API
-    if (_lastSentTime == null ||
-        now.difference(_lastSentTime!).inSeconds >= _minTimeIntervalSeconds) {
-      try {
-        Position position = await Geolocator.getCurrentPosition(
-          locationSettings: const LocationSettings(
-            accuracy: LocationAccuracy.high,
-          ),
-        ).timeout(const Duration(seconds: 5));
-        _handleLocationUpdate(position);
-      } catch (e) {
-        print('❌ [LOCATION REPEAT ERROR] $e');
+    if (_lastSentTime == null) {
+      _fetchAndSendCurrentLocation();
+    } else {
+      final timeDiff = now.difference(_lastSentTime!).inSeconds;
+      if (timeDiff >= _movingTimeIntervalSeconds) {
+        _fetchAndSendCurrentLocation();
       }
+    }
+  }
+
+  Future<void> _fetchAndSendCurrentLocation() async {
+    try {
+      Position position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+        ),
+      ).timeout(const Duration(seconds: 5));
+      _handleLocationUpdate(position);
+    } catch (e) {
+      print('❌ [LOCATION REPEAT ERROR] $e');
     }
   }
 

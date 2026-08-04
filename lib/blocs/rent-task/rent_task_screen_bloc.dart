@@ -41,6 +41,33 @@ class RentTaskScreenSaleBloc
   int page = 1;
   int total = 1;
   int pageTaskByday = 0;
+  bool hasMoreTaskByday = true;
+  int pageTaskAssigned = 0;
+  bool hasMoreTaskAssigned = true;
+  String? selectedTaskByDayStatus;
+  String? selectedTaskAssignedStatus;
+
+  String _taskPaginationKey(TaskModel task) {
+    return [
+      task.id?.toString() ?? "",
+      task.status ?? "",
+      task.timeStart ?? "",
+      task.name ?? "",
+      task.customer?.phone ?? "",
+    ].join('|');
+  }
+
+  int _addNewTasks(List<TaskModel> currentList, List<TaskModel> newTasks) {
+    final existingKeys = currentList.map(_taskPaginationKey).toSet();
+    var addedCount = 0;
+    for (final task in newTasks) {
+      if (existingKeys.add(_taskPaginationKey(task))) {
+        currentList.add(task);
+        addedCount++;
+      }
+    }
+    return addedCount;
+  }
 
   FutureOr<void> _mapGetTaskAvailableEventToState(
     TaskScreenGetTaskAvailableEvent event,
@@ -83,14 +110,27 @@ class RentTaskScreenSaleBloc
     StaffTaskScreenGetTaskByDayEvent event,
     Emitter<RentTaskScreenState> emit,
   ) async {
+    if (event.isRefresh) {
+      pageTaskByday = 0;
+      hasMoreTaskByday = true;
+    }
+    selectedTaskByDayStatus = event.status;
+    if (!hasMoreTaskByday && !event.isRefresh) {
+      return;
+    }
     isLoading = true;
     emit(MyTaskScreenInitialState());
     try {
-      var url = AppConfig.instance.apiUri(ApiEndpoints.rentTasks, {
-        'page': event.isRefresh ? "0" : pageTaskByday.toString(),
+      final params = {
+        'page': pageTaskByday.toString(),
+        'limit': '20',
         'sale_id': App.instance.userApp?.id.toString(),
         'start': DateFormat("yyyy-MM-dd").format(DateTime.now()),
-      });
+      };
+      if (selectedTaskByDayStatus != null) {
+        params['status'] = selectedTaskByDayStatus!;
+      }
+      var url = AppConfig.instance.apiUri(ApiEndpoints.rentTasks, params);
       var res = await http.get(url);
       if (res.statusCode == HttpStatus.ok) {
         var l = Map<String, dynamic>.from(json.decode(res.body));
@@ -99,12 +139,17 @@ class RentTaskScreenSaleBloc
         );
         if (event.isRefresh) {
           staffListTaskBydayModel.clear();
-          pageTaskByday = 0;
         }
-        if (newlistTaskModel.isNotEmpty) {
+        final addedCount = _addNewTasks(
+          staffListTaskBydayModel,
+          newlistTaskModel,
+        );
+        if (newlistTaskModel.length < 20 || addedCount == 0) {
+          hasMoreTaskByday = false;
+        }
+        if (addedCount > 0) {
           pageTaskByday++;
         }
-        staffListTaskBydayModel.addAll(newlistTaskModel);
       }
     } catch (exception) {
       LoggerUtil.log(jsonEncode(exception));
@@ -117,13 +162,29 @@ class RentTaskScreenSaleBloc
     StaffTaskScreenGetTaskAssigedEvent event,
     Emitter<RentTaskScreenState> emit,
   ) async {
+    if (event.isRefresh || event.page == 0) {
+      pageTaskAssigned = 0;
+      hasMoreTaskAssigned = true;
+    }
+    selectedTaskAssignedStatus = event.status;
+    if (!hasMoreTaskAssigned && !event.isRefresh && event.page != 0) {
+      return;
+    }
     isLoading = true;
     emit(MyTaskScreenInitialState());
     try {
-      var url = AppConfig.instance.apiUri(ApiEndpoints.rentTasksPending, {
+      final params = {
+        'page': pageTaskAssigned.toString(),
+        'limit': '20',
         'sale_id': App.instance.userApp?.id.toString(),
-      });
-      // Fetch data from the new API endpoint
+      };
+      if (selectedTaskAssignedStatus != null) {
+        params['status'] = selectedTaskAssignedStatus!;
+      }
+      var url = AppConfig.instance.apiUri(
+        ApiEndpoints.rentTasksPending,
+        params,
+      );
       var res = await http.get(url);
       if (res.statusCode == HttpStatus.ok) {
         var responseMap = Map<String, dynamic>.from(json.decode(res.body));
@@ -131,9 +192,19 @@ class RentTaskScreenSaleBloc
           responseMap["data"].map((model) => TaskModel.fromJson(model)),
         );
 
-        // Clear the list before adding new data, as we're fetching all data at once
-        staffListTaskAssigedModel.clear();
-        staffListTaskAssigedModel.addAll(newTaskModelList);
+        if (event.isRefresh || event.page == 0) {
+          staffListTaskAssigedModel.clear();
+        }
+        final addedCount = _addNewTasks(
+          staffListTaskAssigedModel,
+          newTaskModelList,
+        );
+        if (newTaskModelList.length < 20 || addedCount == 0) {
+          hasMoreTaskAssigned = false;
+        }
+        if (addedCount > 0) {
+          pageTaskAssigned++;
+        }
       }
     } catch (exception) {
       LoggerUtil.log(jsonEncode(exception));
@@ -295,12 +366,13 @@ class RentTaskScreenSaleBloc
   ) async {
     isLoading = true;
     emit(MyTaskScreenInitialState());
-    
+
     String timeStartFormatted = "";
     if (event.taskModel.timeStart != null) {
       try {
-        timeStartFormatted = DateFormat('dd/MM/yyyy HH:mm')
-            .format(DateTime.parse(event.taskModel.timeStart!));
+        timeStartFormatted = DateFormat(
+          'dd/MM/yyyy HH:mm',
+        ).format(DateTime.parse(event.taskModel.timeStart!));
       } catch (_) {
         timeStartFormatted = event.taskModel.timeStart!;
       }
@@ -315,7 +387,8 @@ class RentTaskScreenSaleBloc
       "priority": event.taskModel.priority ?? "1",
       "status": "5",
       "des": event.taskModel.des ?? "",
-      "user_create": event.taskModel.userCreate ?? App.instance.userApp!.id.toString(),
+      "user_create":
+          event.taskModel.userCreate ?? App.instance.userApp!.id.toString(),
       "customer": event.taskModel.customer?.id ?? event.taskModel.userId,
       "images": event.taskModel.images ?? [],
     };

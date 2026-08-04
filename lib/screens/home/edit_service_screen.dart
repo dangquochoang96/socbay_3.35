@@ -46,6 +46,7 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
   String? _currentSelectedValue;
   String? _dateStart;
   String? _timeStart;
+  int? _selectedStatus;
   var resultLocation = {};
   DateTime? selectedDate;
   TimeOfDay? selectedTime;
@@ -108,6 +109,9 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
   void _listener(BuildContext context, EditServiceState state) {
     if (state is EditServiceInitialState) {
       _currentSelectedValue = _bloc.taskModel?.type;
+      if (_selectedStatus == null && _bloc.taskModel?.status != null) {
+        _selectedStatus = _parseTaskStatus(_bloc.taskModel?.status);
+      }
       if (_bloc.taskModel?.timeStart != null &&
           _bloc.taskModel!.timeStart!.isNotEmpty) {
         final parsed = _parseDateTime(_bloc.taskModel!.timeStart!);
@@ -151,6 +155,14 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
     if (state is EditServiceFailedState) {
       context.showSnackBar('Sửa thông tin thất bại');
     }
+  }
+
+  int _parseTaskStatus(String? status) {
+    final value = int.tryParse(status ?? "");
+    if (value != null && value >= 1 && value <= 5) {
+      return value;
+    }
+    return 1;
   }
 
   Widget _builder(BuildContext context, EditServiceState state) {
@@ -217,6 +229,8 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
                 ),
                 const SizedBox(height: 8),
                 _buildDropdownField(),
+                const SizedBox(height: 8),
+                _buildStatusDropdownField(),
                 const SizedBox(height: 8),
                 _buildFormDoubleHorizontal(
                   'Hẹn lịch',
@@ -286,11 +300,6 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
     }
 
     final currentTimeStart = '$_dateStart $_timeStart';
-    final bool isTimeChanged =
-        _initialTimeStart != null && currentTimeStart != _initialTimeStart;
-    final int statusToUpdate = isTimeChanged
-        ? 5
-        : (_favouriteStaff?.id == null ? 1 : 5);
 
     _bloc.add(
       EditServiceUpdateTaskEvent(
@@ -298,7 +307,7 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
           type: int.parse(_currentSelectedValue ?? "1"),
           name: serviceName,
           des: describeRequestTxtController.text,
-          status: statusToUpdate,
+          status: _selectedStatus ?? 1,
           priority: int.parse(_bloc.taskModel?.priority ?? "1"),
           serviceId: int.parse(_currentSelectedValue ?? "1"),
           timeStart: currentTimeStart,
@@ -390,6 +399,47 @@ class _EditServiceScreenState extends State<EditServiceScreen> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildStatusDropdownField() {
+    const statuses = [
+      DropdownMenuItem<int>(value: 1, child: Text('Chưa giao cho ai')),
+      DropdownMenuItem<int>(value: 2, child: Text('Đang thực hiện')),
+      DropdownMenuItem<int>(value: 3, child: Text('Hoàn thành')),
+      DropdownMenuItem<int>(value: 4, child: Text('Hủy')),
+      DropdownMenuItem<int>(value: 5, child: Text('Đã giao')),
+    ];
+
+    return DropdownButtonFormField<int>(
+      value: _selectedStatus,
+      isDense: true,
+      decoration: InputDecoration(
+        labelText: 'Trạng thái công việc',
+        hintText: 'Chọn trạng thái',
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8.0),
+          borderSide: const BorderSide(
+            color: ColorUtil.bangladeshGreen,
+            width: 0.5,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8.0),
+          borderSide: const BorderSide(
+            color: ColorUtil.bangladeshGreen,
+            width: 0.5,
+          ),
+        ),
+        prefixIcon: const Icon(Icons.flag_outlined),
+      ),
+      onChanged: (int? newValue) {
+        setState(() {
+          _selectedStatus = newValue;
+          desDraft = describeRequestTxtController.text;
+        });
+      },
+      items: statuses,
     );
   }
 

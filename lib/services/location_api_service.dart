@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:battery_plus/battery_plus.dart';
-import 'package:intl/intl.dart';
 import 'package:socbay/config/app_config.dart';
 import 'package:socbay/data/data_provider/api_endpoints.dart';
 import 'package:socbay/utils/auth_http.dart' as http;

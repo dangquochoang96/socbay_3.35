@@ -14,15 +14,18 @@ class TaskScreenGetTaskAvailableEvent extends TaskScreenEvent {}
 
 class StaffTaskScreenGetTaskByDayEvent extends TaskScreenEvent {
   final bool isRefresh;
-  const StaffTaskScreenGetTaskByDayEvent({this.isRefresh = false});
+  final String? status;
+  const StaffTaskScreenGetTaskByDayEvent({this.isRefresh = false, this.status});
 }
 
 class StaffTaskScreenGetTaskAssigedEvent extends TaskScreenEvent {
   final bool isRefresh;
   final int page;
+  final String? status;
   const StaffTaskScreenGetTaskAssigedEvent({
     this.isRefresh = false,
     this.page = 0,
+    this.status,
   });
 }
 
