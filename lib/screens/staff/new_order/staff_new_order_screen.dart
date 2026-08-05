@@ -231,16 +231,19 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
       setState(() {
         subSavePointController.text = _bloc.subSavePoint.toString();
         final int taskType = int.tryParse(_bloc.taskModel?.type ?? "") ?? 0;
-        final bool isLapMay =
+        final bool isExcludedFromProductAutoFill =
             taskType == 4 ||
             taskType == 5 ||
-            _bloc.taskModel?.type == '1' ||
+            taskType == 8 ||
+            taskType == 11 ||
             _bloc.orderDetail?.subType == '1';
-        if (isLapMay) {
+        if (isExcludedFromProductAutoFill) {
           _currentSelectedProductValue = 0;
         } else {
           _currentSelectedProductValue =
-              int.tryParse(_bloc.taskModel?.productId ?? "") ?? 0;
+              int.tryParse(_bloc.taskModel?.productId ?? "") ??
+              _bloc.taskModel?.productInfo?.id ??
+              0;
         }
         _isLoading = _bloc.isLoading;
         addressCustomerController.text =

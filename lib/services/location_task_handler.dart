@@ -19,9 +19,11 @@ class LocationTaskHandler extends TaskHandler {
   Position? _lastSentPosition;
   DateTime? _lastSentTime;
 
-  static const int _movingTimeIntervalSeconds = 30;
-  static const int _stationaryTimeIntervalSeconds = 300; // 5 phut
-  static const double _minMovingDistanceMeters = 50.0; // 50m
+  static const int _movingTimeIntervalSeconds = 60; // Di chuyen: 1 phut (60s)
+  static const int _stationaryTimeIntervalSeconds =
+      3600; // Dung yen: 60 phut (3600s)
+  static const double _movementDistanceThresholdMeters =
+      15.0; // Nguong nhan biet di chuyen (15m)
 
   @override
   Future<void> onStart(DateTime timestamp, TaskStarter starter) async {
@@ -35,14 +37,14 @@ class LocationTaskHandler extends TaskHandler {
     if (defaultTargetPlatform == TargetPlatform.android) {
       locationSettings = AndroidSettings(
         accuracy: LocationAccuracy.high,
-        distanceFilter: 10,
-        intervalDuration: const Duration(seconds: 5),
+        distanceFilter: 15,
+        intervalDuration: const Duration(seconds: 10),
       );
     } else if (defaultTargetPlatform == TargetPlatform.iOS ||
         defaultTargetPlatform == TargetPlatform.macOS) {
       locationSettings = AppleSettings(
         accuracy: LocationAccuracy.high,
-        distanceFilter: 10,
+        distanceFilter: 15,
         activityType: ActivityType.fitness,
         allowBackgroundLocationUpdates: true,
         showBackgroundLocationIndicator: true,
@@ -50,7 +52,7 @@ class LocationTaskHandler extends TaskHandler {
     } else {
       locationSettings = const LocationSettings(
         accuracy: LocationAccuracy.high,
-        distanceFilter: 10,
+        distanceFilter: 15,
       );
     }
 
@@ -96,7 +98,7 @@ class LocationTaskHandler extends TaskHandler {
     int timeDifference = 0;
 
     if (_lastSentPosition == null || _lastSentTime == null) {
-      // Lan dau khoi chay ca -> Gui ngay
+      // Lan dau khoi chay ca -> Gui vi tri ban dau ngay
       shouldSend = true;
     } else {
       timeDifference = now.difference(_lastSentTime!).inSeconds;
@@ -107,16 +109,18 @@ class LocationTaskHandler extends TaskHandler {
         position.longitude,
       );
 
-      final bool isMoving = distance >= _minMovingDistanceMeters;
+      // Nhan biet thiet bi dang DI CHUYEN hay ĐỨNG YÊN
+      final bool isMoving =
+          (distance >= _movementDistanceThresholdMeters) ||
+          (position.speed > 0.5);
 
       if (isMoving) {
-        // Truong hop ĐANG DI CHUYỂN (>= 50m HOẶC >= 30s)
-        if (distance >= _minMovingDistanceMeters ||
-            timeDifference >= _movingTimeIntervalSeconds) {
+        // ĐANG DI CHUYỂN: Cap nhat 1 phut 1 lan (>= 60s)
+        if (timeDifference >= _movingTimeIntervalSeconds) {
           shouldSend = true;
         }
       } else {
-        // Truong hop ĐỨNG YÊN (< 50m): Chi luu sau moi 5 phut (300s)
+        // ĐỨNG YÊN: Cap nhat 5 phut 1 lan (>= 300s)
         if (timeDifference >= _stationaryTimeIntervalSeconds) {
           shouldSend = true;
         }
@@ -128,7 +132,7 @@ class LocationTaskHandler extends TaskHandler {
       _lastSentTime = now;
 
       print(
-        '🚀 [LOCATION BG SEND] Sending location update! (Dist: ${distance.toStringAsFixed(1)}m, TimeDiff: ${timeDifference}s) -> Lat: ${position.latitude.toStringAsFixed(6)}, Lng: ${position.longitude.toStringAsFixed(6)}',
+        '🚀 [LOCATION BG SEND] Sending location update! (Dist: ${distance.toStringAsFixed(1)}m, TimeDiff: ${timeDifference}s, IsMoving: ${(distance >= _movementDistanceThresholdMeters) || (position.speed > 0.5)}) -> Lat: ${position.latitude.toStringAsFixed(6)}, Lng: ${position.longitude.toStringAsFixed(6)}',
       );
 
       // 1. Lay dung luong pin & trip_id da luu
@@ -170,24 +174,26 @@ class LocationTaskHandler extends TaskHandler {
         'timestamp': position.timestamp.millisecondsSinceEpoch,
       });
     } else {
+      final bool isMoving =
+          (distance >= _movementDistanceThresholdMeters) ||
+          (position.speed > 0.5);
       print(
-        '⏳ [LOCATION SKIP] Filtered out (Dist: ${distance.toStringAsFixed(1)}m, TimeDiff: ${timeDifference}s - Require >= 50m OR 30s when moving, 300s when stationary)',
+        '⏳ [LOCATION SKIP] Bỏ qua bản ghi (Đang ${isMoving ? "DI CHUYỂN" : "ĐỨNG YÊN"}: Dist=${distance.toStringAsFixed(1)}m, TimeDiff=${timeDifference}s - Yêu cầu: Di chuyển >= 60s, Đứng yên >= 3600s (60 phút))',
       );
     }
   }
 
   @override
   void onRepeatEvent(DateTime timestamp) async {
-    print('🔄 [LOCATION BG REPEAT] Event triggered at $timestamp');
     final now = DateTime.now();
 
-    if (_lastSentTime == null) {
+    if (_lastSentTime == null ||
+        now.difference(_lastSentTime!).inSeconds >=
+            _movingTimeIntervalSeconds) {
+      print(
+        '🔄 [LOCATION BG REPEAT] Event triggered at $timestamp (Checking location update...)',
+      );
       _fetchAndSendCurrentLocation();
-    } else {
-      final timeDiff = now.difference(_lastSentTime!).inSeconds;
-      if (timeDiff >= _movingTimeIntervalSeconds) {
-        _fetchAndSendCurrentLocation();
-      }
     }
   }
 

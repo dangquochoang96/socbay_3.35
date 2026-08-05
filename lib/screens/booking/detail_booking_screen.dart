@@ -257,7 +257,7 @@ class _DetailBookingScreenState extends State<DetailBookingScreen> {
                 //  kỹ thuật
                 if (App.instance.userApp?.isUserRole() == true)
                   const TextSpan(
-                    text: 'Chi tiết công việc ',
+                    text: 'Chi tiết công việc KT ',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       decoration: TextDecoration.underline,
