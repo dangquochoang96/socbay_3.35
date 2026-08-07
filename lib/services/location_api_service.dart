@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:battery_plus/battery_plus.dart';
 import 'package:socbay/config/app_config.dart';
 import 'package:socbay/data/data_provider/api_endpoints.dart';
+import 'package:socbay/services/location_task_handler.dart';
 import 'package:socbay/utils/auth_http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -131,6 +132,17 @@ class LocationApiService {
     }
   }
 
+  /// Xoa thong tin thoi gian gui vi tri cuoi cung
+  static Future<void> clearLastSentState() async {
+    try {
+      LocationTaskHandler.resetState();
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('location_last_sent_time');
+      await prefs.remove('location_last_sent_lat');
+      await prefs.remove('location_last_sent_lng');
+    } catch (_) {}
+  }
+
   /// 3. Goi API Ket thuc ca / Stop Trip
   static Future<bool> stopTrip({
     dynamic tripId,
@@ -157,10 +169,12 @@ class LocationApiService {
         '📡 [LOCATION API] stopTrip status: ${response.statusCode}, body: ${response.body}',
       );
       await saveTripId(null);
+      await clearLastSentState();
       return response.statusCode == 200 || response.statusCode == 201;
     } catch (e) {
       print('❌ [LOCATION API ERROR] stopTrip failed: $e');
       await saveTripId(null);
+      await clearLastSentState();
       return false;
     }
   }

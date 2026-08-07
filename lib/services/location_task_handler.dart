@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:socbay/config/app_config.dart';
 import 'package:socbay/services/location_api_service.dart';
 
@@ -16,14 +17,71 @@ void startCallback() {
 
 class LocationTaskHandler extends TaskHandler {
   StreamSubscription<Position>? _positionSubscription;
-  Position? _lastSentPosition;
-  DateTime? _lastSentTime;
+  static Position? _lastSentPosition;
+  static DateTime? _lastSentTime;
 
-  static const int _movingTimeIntervalSeconds = 60; // Di chuyen: 1 phut (60s)
+  static const String _keyLastSentTime = 'location_last_sent_time';
+  static const String _keyLastSentLat = 'location_last_sent_lat';
+  static const String _keyLastSentLng = 'location_last_sent_lng';
+
+  static const int _movingTimeIntervalSeconds = 60; // Di chuyển: 1 phút (60s)
   static const int _stationaryTimeIntervalSeconds =
-      3600; // Dung yen: 60 phut (3600s)
+      3600; // Đứng yên: 60 phút (3600s)
   static const double _movementDistanceThresholdMeters =
-      15.0; // Nguong nhan biet di chuyen (15m)
+      20.0; // Ngưỡng nhận biết di chuyển thực tế (20m)
+
+  /// Reset bộ nhớ vị trí đã gửi
+  static void resetState() {
+    _lastSentPosition = null;
+    _lastSentTime = null;
+  }
+
+  static Future<void> _loadLastSentState() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final timeStr = prefs.getString(_keyLastSentTime);
+      final lat = prefs.getDouble(_keyLastSentLat);
+      final lng = prefs.getDouble(_keyLastSentLng);
+      if (timeStr != null && timeStr.isNotEmpty) {
+        _lastSentTime = DateTime.tryParse(timeStr);
+      } else {
+        _lastSentTime = null;
+      }
+      if (lat != null && lng != null) {
+        _lastSentPosition = Position(
+          longitude: lng,
+          latitude: lat,
+          timestamp: _lastSentTime ?? DateTime.now(),
+          accuracy: 0,
+          altitude: 0,
+          heading: 0,
+          speed: 0,
+          speedAccuracy: 0,
+          altitudeAccuracy: 0,
+          headingAccuracy: 0,
+        );
+      } else {
+        _lastSentPosition = null;
+      }
+    } catch (_) {
+      _lastSentPosition = null;
+      _lastSentTime = null;
+    }
+  }
+
+  static Future<void> _saveLastSentState(
+    Position position,
+    DateTime time,
+  ) async {
+    _lastSentPosition = position;
+    _lastSentTime = time;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_keyLastSentTime, time.toIso8601String());
+      await prefs.setDouble(_keyLastSentLat, position.latitude);
+      await prefs.setDouble(_keyLastSentLng, position.longitude);
+    } catch (_) {}
+  }
 
   @override
   Future<void> onStart(DateTime timestamp, TaskStarter starter) async {
@@ -32,6 +90,10 @@ class LocationTaskHandler extends TaskHandler {
       'type': 'status',
       'message': 'Background Task started successfully ($starter)',
     });
+
+    // Reset state cũ khi bắt đầu ca theo dõi mới
+    resetState();
+    await _loadLastSentState();
 
     late final LocationSettings locationSettings;
     if (defaultTargetPlatform == TargetPlatform.android) {
@@ -45,7 +107,8 @@ class LocationTaskHandler extends TaskHandler {
       locationSettings = AppleSettings(
         accuracy: LocationAccuracy.high,
         distanceFilter: 15,
-        activityType: ActivityType.fitness,
+        activityType: ActivityType.other,
+        pauseLocationUpdatesAutomatically: false,
         allowBackgroundLocationUpdates: true,
         showBackgroundLocationIndicator: true,
       );
@@ -60,7 +123,7 @@ class LocationTaskHandler extends TaskHandler {
         Geolocator.getPositionStream(locationSettings: locationSettings).listen(
           (Position position) {
             print(
-              '📍 [LOCATION STREAM] Lat: ${position.latitude.toStringAsFixed(6)}, Lng: ${position.longitude.toStringAsFixed(6)}, Speed: ${position.speed}m/s',
+              '📍 [LOCATION STREAM] Lat: ${position.latitude.toStringAsFixed(6)}, Lng: ${position.longitude.toStringAsFixed(6)}, Speed: ${position.speed}m/s, Accuracy: ${position.accuracy}m',
             );
             _handleLocationUpdate(position);
           },
@@ -73,7 +136,7 @@ class LocationTaskHandler extends TaskHandler {
           },
         );
 
-    // Lay vi tri hien tai ban dau ngay khi khoi chay (co timeout de tranh treo tren Simulator)
+    // Lấy vị trí hiện tại ban đầu ngay khi khởi chạy (có timeout để tránh treo trên Simulator)
     try {
       Position currentPos = await Geolocator.getCurrentPosition(
         locationSettings: locationSettings,
@@ -92,13 +155,21 @@ class LocationTaskHandler extends TaskHandler {
   }
 
   Future<void> _handleLocationUpdate(Position position) async {
+    // Bỏ qua vị trí nếu độ chính xác quá kém (do nhiễu GPS lớn > 100m)
+    if (position.accuracy > 100.0) {
+      print(
+        '⏳ [LOCATION SKIP] Bỏ qua vị trí do sai số GPS quá lớn (Accuracy: ${position.accuracy}m > 100m)',
+      );
+      return;
+    }
+
     final now = DateTime.now();
     bool shouldSend = false;
     double distance = 0;
     int timeDifference = 0;
 
     if (_lastSentPosition == null || _lastSentTime == null) {
-      // Lan dau khoi chay ca -> Gui vi tri ban dau ngay
+      // Lần đầu khởi chạy ca -> Gửi vị trí ban đầu ngay
       shouldSend = true;
     } else {
       timeDifference = now.difference(_lastSentTime!).inSeconds;
@@ -109,18 +180,18 @@ class LocationTaskHandler extends TaskHandler {
         position.longitude,
       );
 
-      // Nhan biet thiet bi dang DI CHUYEN hay ĐỨNG YÊN
-      final bool isMoving =
-          (distance >= _movementDistanceThresholdMeters) ||
-          (position.speed > 0.5);
+      // Nhận biết thiết bị đang DI CHUYỂN hay ĐỨNG YÊN
+      final bool hasRealSpeed = (position.speed > 0.5);
+      final bool hasRealDistance = distance >= _movementDistanceThresholdMeters;
+      final bool isMoving = hasRealDistance || hasRealSpeed;
 
       if (isMoving) {
-        // ĐANG DI CHUYỂN: Cap nhat 1 phut 1 lan (>= 60s)
+        // ĐANG DI CHUYỂN: Cập nhật 1 phút 1 lần (>= 60s)
         if (timeDifference >= _movingTimeIntervalSeconds) {
           shouldSend = true;
         }
       } else {
-        // ĐỨNG YÊN: Cap nhat 5 phut 1 lan (>= 300s)
+        // ĐỨNG YÊN: Cập nhật 60 phút 1 lần (>= 3600s)
         if (timeDifference >= _stationaryTimeIntervalSeconds) {
           shouldSend = true;
         }
@@ -128,11 +199,10 @@ class LocationTaskHandler extends TaskHandler {
     }
 
     if (shouldSend) {
-      _lastSentPosition = position;
-      _lastSentTime = now;
+      await _saveLastSentState(position, now);
 
       print(
-        '🚀 [LOCATION BG SEND] Sending location update! (Dist: ${distance.toStringAsFixed(1)}m, TimeDiff: ${timeDifference}s, IsMoving: ${(distance >= _movementDistanceThresholdMeters) || (position.speed > 0.5)}) -> Lat: ${position.latitude.toStringAsFixed(6)}, Lng: ${position.longitude.toStringAsFixed(6)}',
+        '🚀 [LOCATION BG SEND] Sending location update! (Dist: ${distance.toStringAsFixed(1)}m, TimeDiff: ${timeDifference}s) -> Lat: ${position.latitude.toStringAsFixed(6)}, Lng: ${position.longitude.toStringAsFixed(6)}',
       );
 
       // 1. Lay dung luong pin & trip_id da luu
@@ -174,11 +244,12 @@ class LocationTaskHandler extends TaskHandler {
         'timestamp': position.timestamp.millisecondsSinceEpoch,
       });
     } else {
-      final bool isMoving =
-          (distance >= _movementDistanceThresholdMeters) ||
-          (position.speed > 0.5);
+      final bool hasRealSpeed =
+          (position.speed > 1.2) && (position.accuracy <= 30.0);
+      final bool hasRealDistance = distance >= _movementDistanceThresholdMeters;
+      final bool isMoving = hasRealDistance || hasRealSpeed;
       print(
-        '⏳ [LOCATION SKIP] Bỏ qua bản ghi (Đang ${isMoving ? "DI CHUYỂN" : "ĐỨNG YÊN"}: Dist=${distance.toStringAsFixed(1)}m, TimeDiff=${timeDifference}s - Yêu cầu: Di chuyển >= 60s, Đứng yên >= 3600s (60 phút))',
+        '⏳ [LOCATION SKIP] Bỏ qua bản ghi (Đang ${isMoving ? "DI CHUYỂN" : "ĐỨNG YÊN"}: Dist=${distance.toStringAsFixed(1)}m, TimeDiff=${timeDifference}s - Yêu cầu: Di chuyển >= 60s, Đứng yên >= 3600s)',
       );
     }
   }
@@ -203,7 +274,7 @@ class LocationTaskHandler extends TaskHandler {
         locationSettings: const LocationSettings(
           accuracy: LocationAccuracy.high,
         ),
-      ).timeout(const Duration(seconds: 5));
+      ).timeout(const Duration(seconds: 10));
       _handleLocationUpdate(position);
     } catch (e) {
       print('❌ [LOCATION REPEAT ERROR] $e');
