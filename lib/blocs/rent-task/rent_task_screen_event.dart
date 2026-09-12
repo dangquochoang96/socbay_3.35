@@ -15,17 +15,24 @@ class TaskScreenGetTaskAvailableEvent extends RentTaskScreenEvent {}
 class StaffTaskScreenGetTaskByDayEvent extends RentTaskScreenEvent {
   final bool isRefresh;
   final String? status;
-  const StaffTaskScreenGetTaskByDayEvent({this.isRefresh = false, this.status});
+  final String? query;
+  const StaffTaskScreenGetTaskByDayEvent({
+    this.isRefresh = false,
+    this.status,
+    this.query,
+  });
 }
 
 class StaffTaskScreenGetTaskAssigedEvent extends RentTaskScreenEvent {
   final bool isRefresh;
   final int page;
   final String? status;
+  final String? query;
   const StaffTaskScreenGetTaskAssigedEvent({
     this.isRefresh = false,
     this.page = 0,
     this.status,
+    this.query,
   });
 }
 

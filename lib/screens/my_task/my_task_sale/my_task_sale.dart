@@ -44,6 +44,34 @@ class _MyTaskTabState extends State<MyTaskTabSale> {
 
   DateTime? selectedDate;
   TimeOfDay? selectedTime;
+
+  void _onSearch() {
+    setState(() {
+      _searchQuery = _searchController.text.trim();
+    });
+    _bloc.add(
+      StaffTaskScreenGetTaskByDayEvent(
+        isRefresh: true,
+        status: _selectedStatusFilter,
+        query: _searchQuery,
+      ),
+    );
+  }
+
+  void _onClearSearch() {
+    setState(() {
+      _searchQuery = '';
+      _searchController.clear();
+    });
+    _bloc.add(
+      StaffTaskScreenGetTaskByDayEvent(
+        isRefresh: true,
+        status: _selectedStatusFilter,
+        query: '',
+      ),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -52,6 +80,7 @@ class _MyTaskTabState extends State<MyTaskTabSale> {
       StaffTaskScreenGetTaskByDayEvent(
         isRefresh: true,
         status: _selectedStatusFilter,
+        query: _searchQuery,
       ),
     );
     _scrollController = ScrollController();
@@ -66,6 +95,7 @@ class _MyTaskTabState extends State<MyTaskTabSale> {
             StaffTaskScreenGetTaskByDayEvent(
               isRefresh: false,
               status: _selectedStatusFilter,
+              query: _searchQuery,
             ),
           );
         },
@@ -108,6 +138,7 @@ class _MyTaskTabState extends State<MyTaskTabSale> {
         StaffTaskScreenGetTaskByDayEvent(
           isRefresh: true,
           status: _selectedStatusFilter,
+          query: _searchQuery,
         ),
       );
       _bloc.add(
@@ -115,6 +146,7 @@ class _MyTaskTabState extends State<MyTaskTabSale> {
           isRefresh: true,
           page: 0,
           status: _bloc.selectedTaskAssignedStatus,
+          query: _bloc.selectedTaskAssignedQuery,
         ),
       );
       _feedbackController.clear();
@@ -128,6 +160,7 @@ class _MyTaskTabState extends State<MyTaskTabSale> {
         StaffTaskScreenGetTaskByDayEvent(
           isRefresh: true,
           status: _selectedStatusFilter,
+          query: _searchQuery,
         ),
       );
       _bloc.add(
@@ -135,6 +168,7 @@ class _MyTaskTabState extends State<MyTaskTabSale> {
           isRefresh: true,
           page: 0,
           status: _bloc.selectedTaskAssignedStatus,
+          query: _bloc.selectedTaskAssignedQuery,
         ),
       );
     }
@@ -146,23 +180,7 @@ class _MyTaskTabState extends State<MyTaskTabSale> {
     }
   }
 
-  List<TaskModel> get _filteredTasks {
-    final query = _searchQuery.toLowerCase();
-    return _bloc.staffListTaskBydayModel.where((task) {
-      final matchesStatus =
-          _selectedStatusFilter == null || task.status == _selectedStatusFilter;
-      if (!matchesStatus) return false;
-      if (query.isEmpty) return true;
-      return (task.customer?.phone != null &&
-              task.customer!.phone!.toLowerCase().contains(query)) ||
-          (task.customer?.username != null &&
-              task.customer!.username!.toLowerCase().contains(query)) ||
-          (task.customer?.address != null &&
-              task.customer!.address!.toLowerCase().contains(query)) ||
-          (task.name != null && task.name!.toLowerCase().contains(query)) ||
-          (task.id != null && task.id.toString().contains(query));
-    }).toList();
-  }
+  List<TaskModel> get _tasks => _bloc.staffListTaskBydayModel;
 
   Widget _builder(BuildContext context, state) {
     return Column(
@@ -174,9 +192,11 @@ class _MyTaskTabState extends State<MyTaskTabSale> {
               Expanded(
                 child: TextField(
                   controller: _searchController,
+                  textInputAction: TextInputAction.search,
+                  onSubmitted: (_) => _onSearch(),
                   decoration: const InputDecoration(
                     labelText: "Tìm Kiếm",
-                    hintText: "Tìm Kiếm",
+                    hintText: "SĐT, tên, địa chỉ khách hàng...",
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(25.0)),
                     ),
@@ -185,22 +205,13 @@ class _MyTaskTabState extends State<MyTaskTabSale> {
               ),
               const SizedBox(width: 5),
               ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    _searchQuery = _searchController.text;
-                  });
-                },
+                onPressed: _onSearch,
                 child: const Text('Search'),
               ),
               const SizedBox(width: 5),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                onPressed: () {
-                  setState(() {
-                    _searchQuery = '';
-                    _searchController.clear();
-                  });
-                },
+                onPressed: _onClearSearch,
                 child: const Text('All', style: TextStyle(color: Colors.white)),
               ),
             ],
@@ -216,10 +227,11 @@ class _MyTaskTabState extends State<MyTaskTabSale> {
                   StaffTaskScreenGetTaskByDayEvent(
                     isRefresh: true,
                     status: _selectedStatusFilter,
+                    query: _searchQuery,
                   ),
                 );
               },
-              child: _filteredTasks.isEmpty && !_bloc.isLoading
+              child: _tasks.isEmpty && !_bloc.isLoading
                   ? const CustomScrollView(
                       physics: AlwaysScrollableScrollPhysics(),
                       slivers: [
@@ -232,7 +244,7 @@ class _MyTaskTabState extends State<MyTaskTabSale> {
                       physics: const AlwaysScrollableScrollPhysics(),
                       controller: _scrollController,
                       itemBuilder: _itemBuilder,
-                      itemCount: _filteredTasks.length,
+                      itemCount: _tasks.length,
                       padding: const EdgeInsets.symmetric(
                         horizontal: paddingHorizontal,
                         vertical: paddingVertical,
@@ -252,10 +264,10 @@ class _MyTaskTabState extends State<MyTaskTabSale> {
   }
 
   Widget _itemBuilder(BuildContext context, int index) {
-    if (index >= _filteredTasks.length) {
+    if (index >= _tasks.length) {
       return const IndicatorLoadMore();
     }
-    TaskModel taskModel = _filteredTasks[index];
+    TaskModel taskModel = _tasks[index];
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -473,6 +485,7 @@ class _MyTaskTabState extends State<MyTaskTabSale> {
                 StaffTaskScreenGetTaskByDayEvent(
                   isRefresh: true,
                   status: _selectedStatusFilter,
+                  query: _searchQuery,
                 ),
               );
             },
@@ -631,12 +644,14 @@ class _MyTaskTabState extends State<MyTaskTabSale> {
             StaffTaskScreenGetTaskByDayEvent(
               isRefresh: true,
               status: _selectedStatusFilter,
+              query: _searchQuery,
             ),
           );
           _bloc.add(
             StaffTaskScreenGetTaskAssigedEvent(
               isRefresh: true,
               status: _bloc.selectedTaskAssignedStatus,
+              query: _bloc.selectedTaskAssignedQuery,
             ),
           );
         }

@@ -45,6 +45,8 @@ class TaskScreenSaleBloc extends Bloc<TaskScreenEvent, TaskScreenState> {
   bool hasMoreTaskAssigned = true;
   String? selectedTaskByDayStatus;
   String? selectedTaskAssignedStatus;
+  String? selectedTaskByDayQuery;
+  String? selectedTaskAssignedQuery;
 
   String _taskPaginationKey(TaskModel task) {
     return [
@@ -114,6 +116,7 @@ class TaskScreenSaleBloc extends Bloc<TaskScreenEvent, TaskScreenState> {
       hasMoreTaskByday = true;
     }
     selectedTaskByDayStatus = event.status;
+    selectedTaskByDayQuery = event.query;
     if (!hasMoreTaskByday && !event.isRefresh) {
       return;
     }
@@ -128,6 +131,10 @@ class TaskScreenSaleBloc extends Bloc<TaskScreenEvent, TaskScreenState> {
       };
       if (selectedTaskByDayStatus != null) {
         params['status'] = selectedTaskByDayStatus!;
+      }
+      if (selectedTaskByDayQuery != null &&
+          selectedTaskByDayQuery!.trim().isNotEmpty) {
+        params['q'] = selectedTaskByDayQuery!.trim();
       }
       var url = AppConfig.instance.apiUri(ApiEndpoints.tasks, params);
       var res = await http.get(url);
@@ -166,6 +173,7 @@ class TaskScreenSaleBloc extends Bloc<TaskScreenEvent, TaskScreenState> {
       hasMoreTaskAssigned = true;
     }
     selectedTaskAssignedStatus = event.status;
+    selectedTaskAssignedQuery = event.query;
     if (!hasMoreTaskAssigned && !event.isRefresh && event.page != 0) {
       return;
     }
@@ -179,6 +187,10 @@ class TaskScreenSaleBloc extends Bloc<TaskScreenEvent, TaskScreenState> {
       };
       if (selectedTaskAssignedStatus != null) {
         params['status'] = selectedTaskAssignedStatus!;
+      }
+      if (selectedTaskAssignedQuery != null &&
+          selectedTaskAssignedQuery!.trim().isNotEmpty) {
+        params['q'] = selectedTaskAssignedQuery!.trim();
       }
       var url = AppConfig.instance.apiUri(ApiEndpoints.tasksPending, params);
       var res = await http.get(url);

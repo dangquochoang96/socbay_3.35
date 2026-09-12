@@ -44,6 +44,36 @@ class _RentTaskAvailableTabState extends State<RentTaskAvailableTabSale> {
   ];
   DateTime? selectedDate;
   TimeOfDay? selectedTime;
+
+  void _onSearch() {
+    setState(() {
+      _searchQuery = _searchController.text.trim();
+    });
+    _bloc.add(
+      StaffTaskScreenGetTaskAssigedEvent(
+        isRefresh: true,
+        page: 0,
+        status: _selectedStatusFilter,
+        query: _searchQuery,
+      ),
+    );
+  }
+
+  void _onClearSearch() {
+    setState(() {
+      _searchQuery = '';
+      _searchController.clear();
+    });
+    _bloc.add(
+      StaffTaskScreenGetTaskAssigedEvent(
+        isRefresh: true,
+        page: 0,
+        status: _selectedStatusFilter,
+        query: '',
+      ),
+    );
+  }
+
   @override
   void initState() {
     _bloc = BlocProvider.of(context);
@@ -52,6 +82,7 @@ class _RentTaskAvailableTabState extends State<RentTaskAvailableTabSale> {
         isRefresh: true,
         page: 0,
         status: _selectedStatusFilter,
+        query: _searchQuery,
       ),
     );
     _blocDetail = BlocProvider.of<DetailBookingBloc>(context);
@@ -68,6 +99,7 @@ class _RentTaskAvailableTabState extends State<RentTaskAvailableTabSale> {
               isRefresh: false,
               page: _bloc.pageTaskAssigned,
               status: _selectedStatusFilter,
+              query: _searchQuery,
             ),
           );
         },
@@ -113,6 +145,7 @@ class _RentTaskAvailableTabState extends State<RentTaskAvailableTabSale> {
         StaffTaskScreenGetTaskByDayEvent(
           isRefresh: true,
           status: _bloc.selectedTaskByDayStatus,
+          query: _bloc.selectedTaskByDayQuery,
         ),
       );
       _bloc.add(
@@ -120,6 +153,7 @@ class _RentTaskAvailableTabState extends State<RentTaskAvailableTabSale> {
           isRefresh: true,
           page: 0,
           status: _selectedStatusFilter,
+          query: _searchQuery,
         ),
       );
     }
@@ -137,23 +171,7 @@ class _RentTaskAvailableTabState extends State<RentTaskAvailableTabSale> {
     }
   }
 
-  List<TaskModel> get _filteredTasks {
-    final query = _searchQuery.toLowerCase();
-    return _bloc.staffListTaskAssigedModel.where((task) {
-      final matchesStatus =
-          _selectedStatusFilter == null || task.status == _selectedStatusFilter;
-      if (!matchesStatus) return false;
-      if (query.isEmpty) return true;
-      return (task.customer?.phone != null &&
-              task.customer!.phone!.toLowerCase().contains(query)) ||
-          (task.customer?.username != null &&
-              task.customer!.username!.toLowerCase().contains(query)) ||
-          (task.customer?.address != null &&
-              task.customer!.address!.toLowerCase().contains(query)) ||
-          (task.name != null && task.name!.toLowerCase().contains(query)) ||
-          (task.id != null && task.id.toString().contains(query));
-    }).toList();
-  }
+  List<TaskModel> get _tasks => _bloc.staffListTaskAssigedModel;
 
   Widget _builder(BuildContext context, state) {
     return Column(
@@ -165,9 +183,11 @@ class _RentTaskAvailableTabState extends State<RentTaskAvailableTabSale> {
               Expanded(
                 child: TextField(
                   controller: _searchController,
+                  textInputAction: TextInputAction.search,
+                  onSubmitted: (_) => _onSearch(),
                   decoration: const InputDecoration(
                     labelText: "Tìm Kiếm",
-                    hintText: "Tìm Kiếm",
+                    hintText: "SĐT, tên, địa chỉ khách hàng...",
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(25.0)),
                     ),
@@ -176,22 +196,13 @@ class _RentTaskAvailableTabState extends State<RentTaskAvailableTabSale> {
               ),
               const SizedBox(width: 5), // Add some spacing
               ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    _searchQuery = _searchController.text;
-                  });
-                },
+                onPressed: _onSearch,
                 child: const Text('Search'),
               ),
               const SizedBox(width: 5), // Add some spacing
               ElevatedButton(
                 style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                onPressed: () {
-                  setState(() {
-                    _searchQuery = '';
-                    _searchController.clear();
-                  });
-                },
+                onPressed: _onClearSearch,
                 child: const Text('All', style: TextStyle(color: Colors.white)),
               ),
             ],
@@ -208,10 +219,11 @@ class _RentTaskAvailableTabState extends State<RentTaskAvailableTabSale> {
                     isRefresh: true,
                     page: 0,
                     status: _selectedStatusFilter,
+                    query: _searchQuery,
                   ),
                 );
               },
-              child: _filteredTasks.isEmpty && !_bloc.isLoading
+              child: _tasks.isEmpty && !_bloc.isLoading
                   ? const CustomScrollView(
                       physics: AlwaysScrollableScrollPhysics(),
                       slivers: [
@@ -224,7 +236,7 @@ class _RentTaskAvailableTabState extends State<RentTaskAvailableTabSale> {
                       physics: const AlwaysScrollableScrollPhysics(),
                       controller: _scrollController,
                       itemBuilder: _itemBuilder,
-                      itemCount: _filteredTasks.length,
+                      itemCount: _tasks.length,
                       padding: const EdgeInsets.symmetric(
                         horizontal: paddingHorizontal,
                         vertical: paddingVertical,
@@ -244,10 +256,10 @@ class _RentTaskAvailableTabState extends State<RentTaskAvailableTabSale> {
   }
 
   Widget _itemBuilder(BuildContext context, int index) {
-    if (index >= _filteredTasks.length) {
+    if (index >= _tasks.length) {
       return const IndicatorLoadMore();
     }
-    TaskModel taskModel = _filteredTasks[index];
+    TaskModel taskModel = _tasks[index];
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -466,6 +478,7 @@ class _RentTaskAvailableTabState extends State<RentTaskAvailableTabSale> {
                   isRefresh: true,
                   page: 0,
                   status: _selectedStatusFilter,
+                  query: _searchQuery,
                 ),
               );
             },
@@ -626,12 +639,14 @@ class _RentTaskAvailableTabState extends State<RentTaskAvailableTabSale> {
               StaffTaskScreenGetTaskAssigedEvent(
                 isRefresh: true,
                 status: _selectedStatusFilter,
+                query: _searchQuery,
               ),
             );
             _bloc.add(
               StaffTaskScreenGetTaskByDayEvent(
                 isRefresh: true,
                 status: _bloc.selectedTaskByDayStatus,
+                query: _bloc.selectedTaskByDayQuery,
               ),
             );
           });

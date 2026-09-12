@@ -139,8 +139,8 @@ class UserModel {
   // bool isUserCustomer() => type == "1";
   // bool isUserSale() => type == "3";
 
-  bool isUserRole() => type == "2" && ["1", "3", "5"].contains(typeStaff);
+  bool isUserRole() => type != "1" && ["0", "1", "3", "5"].contains(typeStaff);
   bool isUserCustomer() => type == "1" && typeStaff == "0";
   bool isUserSale() =>
-      type == "2" && ["2", "4", "6", "7", "8"].contains(typeStaff);
+      type != "1" && ["2", "4", "6", "7", "8"].contains(typeStaff);
 }

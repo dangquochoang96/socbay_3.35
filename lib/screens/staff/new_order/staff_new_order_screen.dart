@@ -233,7 +233,6 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
         final int taskType = int.tryParse(_bloc.taskModel?.type ?? "") ?? 0;
         final bool isExcludedFromProductAutoFill =
             taskType == 4 ||
-            taskType == 5 ||
             taskType == 8 ||
             taskType == 11 ||
             _bloc.orderDetail?.subType == '1';
@@ -431,21 +430,52 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                   ],
                 ),
 
-                _buildCard(
-                  children: [
-                    _buildSectionTitle(
-                      'Thông tin sản phẩm',
-                      Icons.inventory_2_outlined,
-                    ),
-                    _buildInputRow(
-                      'THAY LÕI/SỬA CHỮA CHỌN SẢN PHẨM ĐÃ CÓ',
-                      _buildDropdownFieldPruducts(),
-                    ),
-                    _buildInputRow(
-                      'LẮP ĐẶT MÁY MỚI THÌ CHỌN SẢN PHẨM',
-                      _selectNewProduct(),
-                    ),
-                  ],
+                Builder(
+                  builder: (context) {
+                    final int taskType =
+                        int.tryParse(_bloc.taskModel?.type ?? '') ?? 0;
+                    final bool hasHistoryMachine = _listProducts.any(
+                      (sv) =>
+                          (sv.id ?? 0) != 0 &&
+                          (widget.isRent
+                              ? sv.orderTypeLabel == 'Thuê'
+                              : sv.orderTypeLabel == 'Bán'),
+                    );
+
+                    // Khách cũ (có lịch sử máy): taskType = 4 ẩn chọn sp cũ, taskType = 5 / 1 / 2 / 3 ẩn chọn sp mới
+                    // Khách mới (không có lịch sử máy): ẩn chọn sp cũ, chỉ hiện chọn sp mới
+                    final bool showOldProductField =
+                        hasHistoryMachine && taskType != 4;
+                    final bool showNewProductField =
+                        !hasHistoryMachine ||
+                        (taskType != 1 &&
+                            taskType != 2 &&
+                            taskType != 3 &&
+                            taskType != 5);
+
+                    if (!showOldProductField && !showNewProductField) {
+                      return const SizedBox.shrink();
+                    }
+
+                    return _buildCard(
+                      children: [
+                        _buildSectionTitle(
+                          'Thông tin sản phẩm',
+                          Icons.inventory_2_outlined,
+                        ),
+                        if (showOldProductField)
+                          _buildInputRow(
+                            'CHỌN SẢN PHẨM ĐÃ CÓ',
+                            _buildDropdownFieldPruducts(),
+                          ),
+                        if (showNewProductField)
+                          _buildInputRow(
+                            'CHỌN SẢN PHẨM THÊM MỚI',
+                            _selectNewProduct(),
+                          ),
+                      ],
+                    );
+                  },
                 ),
                 if (widget.isRent && _showRentalDetails)
                   _buildCard(
@@ -2075,9 +2105,50 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                 });
               },
               items: filteredProducts.map((OrderModel sv) {
+                final String name = sv.product?.name ?? sv.proad?.name ?? "";
+                final String address = sv.address?.trim() ?? "";
+
+                if (sv.id == 0 || address.isEmpty) {
+                  return DropdownMenuItem<String>(
+                    value: sv.id.toString(),
+                    child: Text(
+                      name,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: ColorUtil.raisinBlack,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  );
+                }
+
                 return DropdownMenuItem<String>(
                   value: sv.id.toString(),
-                  child: Text(sv.product?.name ?? ""),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        name,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: ColorUtil.raisinBlack,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        address,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey.shade600,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
                 );
               }).toList(),
             ),
