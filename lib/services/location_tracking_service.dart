@@ -20,8 +20,8 @@ class LocationTrackingService {
     FlutterForegroundTask.init(
       androidNotificationOptions: AndroidNotificationOptions(
         channelId: 'location_tracking_channel',
-        channelName: 'Location Tracking Service',
-        channelDescription: 'Thông báo dịch vụ theo dõi vị trí kỹ thuật viên',
+        channelName: 'Dịch vụ vị trí ca làm việc',
+        channelDescription: 'Thông báo dịch vụ theo dõi hành trình ca làm việc kỹ thuật viên',
         channelImportance: NotificationChannelImportance.LOW,
         priority: NotificationPriority.LOW,
       ),
@@ -30,7 +30,7 @@ class LocationTrackingService {
         playSound: false,
       ),
       foregroundTaskOptions: ForegroundTaskOptions(
-        eventAction: ForegroundTaskEventAction.repeat(5000),
+        eventAction: ForegroundTaskEventAction.repeat(10000),
         autoRunOnBoot: true,
         allowWakeLock: true,
         allowWifiLock: true,
@@ -41,8 +41,9 @@ class LocationTrackingService {
     FlutterForegroundTask.addTaskDataCallback((data) {
       if (data is Map<String, dynamic>) {
         if (data.containsKey('latitude')) {
+          final totalKm = ((data['total_distance'] ?? 0) as num) / 1000.0;
           print(
-            '📍 [LOCATION MAIN RECEIVE] 🟢 Vị trí mới: Lat=${data['latitude']}, Lng=${data['longitude']} (Accuracy=${data['accuracy']}m, Speed=${data['speed']}m/s)',
+            '📍 [LOCATION MAIN RECEIVE] 🟢 Tọa độ: Lat=${data['latitude']}, Lng=${data['longitude']} | Tổng đi: ${totalKm.toStringAsFixed(2)}km (Speed=${data['speed']}m/s)',
           );
         } else if (data.containsKey('message')) {
           print(
@@ -127,7 +128,7 @@ class LocationTrackingService {
       return true;
     }
 
-    // 1. Lay vi tri ban dau de goi API startTrip
+    // 1. Lấy vị trí ban đầu để gọi API startTrip
     Position? initialPos;
     try {
       initialPos = await Geolocator.getCurrentPosition(
@@ -149,8 +150,8 @@ class LocationTrackingService {
     print('🚀 [LOCATION SERVICE] Starting Foreground Service...');
     final reqResult = await FlutterForegroundTask.startService(
       serviceId: 257,
-      notificationTitle: 'Đang theo dõi vị trí kỹ thuật viên',
-      notificationText: 'Khởi tạo dịch vụ vị trí...',
+      notificationTitle: 'Đang theo dõi ca làm việc',
+      notificationText: 'Đã di chuyển: 0.00 km',
       notificationIcon: const NotificationIcon(metaDataName: 'ic_launcher'),
       callback: startCallback,
     );
@@ -173,14 +174,17 @@ class LocationTrackingService {
       ).timeout(const Duration(seconds: 3));
     } catch (_) {}
 
-    // 1. Goi API stopTrip
+    final totalDistance = await LocationApiService.getTotalDistance();
+
+    // 1. Gọi API stopTrip kèm tổng quãng đường đã di chuyển
     print('📡 [LOCATION SERVICE] Calling API stopTrip...');
     await LocationApiService.stopTrip(
       latitude: currentPos?.latitude,
       longitude: currentPos?.longitude,
+      totalDistance: totalDistance,
     );
 
-    // 2. Dung service ngam
+    // 2. Dừng service ngầm
     if (await FlutterForegroundTask.isRunningService) {
       print('🛑 [LOCATION SERVICE] Stopping foreground tracking service...');
       final reqResult = await FlutterForegroundTask.stopService();
@@ -196,6 +200,17 @@ class LocationTrackingService {
   /// Kiểm tra trạng thái service đang chạy
   Future<bool> isTracking() async {
     return await FlutterForegroundTask.isRunningService;
+  }
+
+  /// Lấy tổng quãng đường hiện tại của ca (tính theo km)
+  Future<double> getCurrentShiftDistanceKm() async {
+    final meters = await LocationApiService.getTotalDistance();
+    return meters / 1000.0;
+  }
+
+  /// Lấy thời gian bắt đầu ca
+  Future<DateTime?> getShiftStartTime() async {
+    return await LocationApiService.getTripStartTime();
   }
 
   /// Đăng ký nhận dữ liệu vị trí đẩy về Main Isolate

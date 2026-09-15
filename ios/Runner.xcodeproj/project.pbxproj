@@ -504,17 +504,17 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
-				CURRENT_PROJECT_VERSION = 1127;
+				CURRENT_PROJECT_VERSION = 1130;
 				DEVELOPMENT_TEAM = F5D9SH282W;
 				ENABLE_BITCODE = NO;
-				FLUTTER_BUILD_NAME = 3.0.7;
-				FLUTTER_BUILD_NUMBER = 1127;
+				FLUTTER_BUILD_NAME = 3.0.8;
+				FLUTTER_BUILD_NUMBER = 1130;
 				INFOPLIST_FILE = Runner/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.0.7;
+				MARKETING_VERSION = 3.0.8;
 				PRODUCT_BUNDLE_IDENTIFIER = com.thongdd.thayloilocsocbay;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -700,17 +700,17 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
-				CURRENT_PROJECT_VERSION = 1127;
+				CURRENT_PROJECT_VERSION = 1130;
 				DEVELOPMENT_TEAM = F5D9SH282W;
 				ENABLE_BITCODE = NO;
-				FLUTTER_BUILD_NAME = 3.0.7;
-				FLUTTER_BUILD_NUMBER = 1127;
+				FLUTTER_BUILD_NAME = 3.0.8;
+				FLUTTER_BUILD_NUMBER = 1130;
 				INFOPLIST_FILE = Runner/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.0.7;
+				MARKETING_VERSION = 3.0.8;
 				PRODUCT_BUNDLE_IDENTIFIER = com.thongdd.thayloilocsocbay;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -732,17 +732,17 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
-				CURRENT_PROJECT_VERSION = 1127;
+				CURRENT_PROJECT_VERSION = 1130;
 				DEVELOPMENT_TEAM = F5D9SH282W;
 				ENABLE_BITCODE = NO;
-				FLUTTER_BUILD_NAME = 3.0.7;
-				FLUTTER_BUILD_NUMBER = 1127;
+				FLUTTER_BUILD_NAME = 3.0.8;
+				FLUTTER_BUILD_NUMBER = 1130;
 				INFOPLIST_FILE = Runner/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 3.0.7;
+				MARKETING_VERSION = 3.0.8;
 				PRODUCT_BUNDLE_IDENTIFIER = com.thongdd.thayloilocsocbay;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";

@@ -19,29 +19,35 @@ class LocationTaskHandler extends TaskHandler {
   StreamSubscription<Position>? _positionSubscription;
   static Position? _lastSentPosition;
   static DateTime? _lastSentTime;
+  static Position? _lastRecordedPosition;
+  static double _totalDistance = 0.0; // mét
 
   static const String _keyLastSentTime = 'location_last_sent_time';
   static const String _keyLastSentLat = 'location_last_sent_lat';
   static const String _keyLastSentLng = 'location_last_sent_lng';
 
-  static const int _movingTimeIntervalSeconds = 60; // Di chuyển: 1 phút (60s)
-  static const int _stationaryTimeIntervalSeconds =
-      3600; // Đứng yên: 60 phút (3600s)
-  static const double _movementDistanceThresholdMeters =
-      20.0; // Ngưỡng nhận biết di chuyển thực tế (20m)
+  static const int _movingTimeIntervalSeconds = 30; // Di chuyển: gửi cập nhật mỗi 30s
+  static const int _stationaryHeartbeatSeconds = 300; // Đứng yên: gửi heartbeat mỗi 5 phút (300s)
+  static const double _movementDistanceThresholdMeters = 20.0; // Ngưỡng nhận biết di chuyển
+  static const double _forceSendDistanceMeters = 100.0; // Di chuyển quá 100m gửi ngay
 
-  /// Reset bộ nhớ vị trí đã gửi
+  /// Reset bộ nhớ vị trí đã gửi và quãng đường
   static void resetState() {
     _lastSentPosition = null;
     _lastSentTime = null;
+    _lastRecordedPosition = null;
+    _totalDistance = 0.0;
   }
 
   static Future<void> _loadLastSentState() async {
     try {
       final prefs = await SharedPreferences.getInstance();
+      await prefs.reload();
       final timeStr = prefs.getString(_keyLastSentTime);
       final lat = prefs.getDouble(_keyLastSentLat);
       final lng = prefs.getDouble(_keyLastSentLng);
+      _totalDistance = prefs.getDouble(LocationApiService.keyTotalDistance) ?? 0.0;
+
       if (timeStr != null && timeStr.isNotEmpty) {
         _lastSentTime = DateTime.tryParse(timeStr);
       } else {
@@ -60,12 +66,16 @@ class LocationTaskHandler extends TaskHandler {
           altitudeAccuracy: 0,
           headingAccuracy: 0,
         );
+        _lastRecordedPosition = _lastSentPosition;
       } else {
         _lastSentPosition = null;
+        _lastRecordedPosition = null;
       }
     } catch (_) {
       _lastSentPosition = null;
       _lastSentTime = null;
+      _lastRecordedPosition = null;
+      _totalDistance = 0.0;
     }
   }
 
@@ -80,6 +90,7 @@ class LocationTaskHandler extends TaskHandler {
       await prefs.setString(_keyLastSentTime, time.toIso8601String());
       await prefs.setDouble(_keyLastSentLat, position.latitude);
       await prefs.setDouble(_keyLastSentLng, position.longitude);
+      await prefs.setDouble(LocationApiService.keyTotalDistance, _totalDistance);
     } catch (_) {}
   }
 
@@ -99,15 +110,15 @@ class LocationTaskHandler extends TaskHandler {
     if (defaultTargetPlatform == TargetPlatform.android) {
       locationSettings = AndroidSettings(
         accuracy: LocationAccuracy.high,
-        distanceFilter: 15,
+        distanceFilter: 10,
         intervalDuration: const Duration(seconds: 10),
       );
     } else if (defaultTargetPlatform == TargetPlatform.iOS ||
         defaultTargetPlatform == TargetPlatform.macOS) {
       locationSettings = AppleSettings(
         accuracy: LocationAccuracy.high,
-        distanceFilter: 15,
-        activityType: ActivityType.other,
+        distanceFilter: 10,
+        activityType: ActivityType.automotiveNavigation,
         pauseLocationUpdatesAutomatically: false,
         allowBackgroundLocationUpdates: true,
         showBackgroundLocationIndicator: true,
@@ -115,7 +126,7 @@ class LocationTaskHandler extends TaskHandler {
     } else {
       locationSettings = const LocationSettings(
         accuracy: LocationAccuracy.high,
-        distanceFilter: 15,
+        distanceFilter: 10,
       );
     }
 
@@ -155,17 +166,39 @@ class LocationTaskHandler extends TaskHandler {
   }
 
   Future<void> _handleLocationUpdate(Position position) async {
-    // Bỏ qua vị trí nếu độ chính xác quá kém (do nhiễu GPS lớn > 100m)
-    if (position.accuracy > 100.0) {
+    // Bỏ qua vị trí nếu độ chính xác quá kém (do nhiễu GPS lớn > 50m)
+    if (position.accuracy > 50.0) {
       print(
-        '⏳ [LOCATION SKIP] Bỏ qua vị trí do sai số GPS quá lớn (Accuracy: ${position.accuracy}m > 100m)',
+        '⏳ [LOCATION SKIP] Bỏ qua vị trí do sai số GPS lớn (Accuracy: ${position.accuracy}m > 50m)',
       );
       return;
     }
 
     final now = DateTime.now();
+
+    // 1. TÍNH TOÁN QUÃNG ĐƯỜNG TÍCH LŨY (MÉT)
+    double stepDistance = 0.0;
+    if (_lastRecordedPosition != null) {
+      stepDistance = Geolocator.distanceBetween(
+        _lastRecordedPosition!.latitude,
+        _lastRecordedPosition!.longitude,
+        position.latitude,
+        position.longitude,
+      );
+
+      // Lọc hiện tượng GPS trôi (GPS drift/jitter) khi đứng yên một chỗ (< 5m và speed < 0.5m/s)
+      if (stepDistance >= 5.0 || position.speed >= 0.6) {
+        _totalDistance += stepDistance;
+        _lastRecordedPosition = position;
+        LocationApiService.saveTotalDistance(_totalDistance);
+      }
+    } else {
+      _lastRecordedPosition = position;
+    }
+
+    // 2. KIỂM TRA ĐIỀU KIỆN GỬI BẢN GHI LÊN SERVER
     bool shouldSend = false;
-    double distance = 0;
+    double distFromLastSent = 0.0;
     int timeDifference = 0;
 
     if (_lastSentPosition == null || _lastSentTime == null) {
@@ -173,7 +206,7 @@ class LocationTaskHandler extends TaskHandler {
       shouldSend = true;
     } else {
       timeDifference = now.difference(_lastSentTime!).inSeconds;
-      distance = Geolocator.distanceBetween(
+      distFromLastSent = Geolocator.distanceBetween(
         _lastSentPosition!.latitude,
         _lastSentPosition!.longitude,
         position.latitude,
@@ -181,18 +214,21 @@ class LocationTaskHandler extends TaskHandler {
       );
 
       // Nhận biết thiết bị đang DI CHUYỂN hay ĐỨNG YÊN
-      final bool hasRealSpeed = (position.speed > 0.5);
-      final bool hasRealDistance = distance >= _movementDistanceThresholdMeters;
+      final bool hasRealSpeed = (position.speed >= 0.8);
+      final bool hasRealDistance = distFromLastSent >= _movementDistanceThresholdMeters;
       final bool isMoving = hasRealDistance || hasRealSpeed;
 
-      if (isMoving) {
-        // ĐANG DI CHUYỂN: Cập nhật 1 phút 1 lần (>= 60s)
+      if (distFromLastSent >= _forceSendDistanceMeters) {
+        // Di chuyển được khoảng cách lớn (>= 100m) -> gửi ngay
+        shouldSend = true;
+      } else if (isMoving) {
+        // ĐANG DI CHUYỂN: Gửi cập nhật định kỳ mỗi 30s
         if (timeDifference >= _movingTimeIntervalSeconds) {
           shouldSend = true;
         }
       } else {
-        // ĐỨNG YÊN: Cập nhật 60 phút 1 lần (>= 3600s)
-        if (timeDifference >= _stationaryTimeIntervalSeconds) {
+        // ĐỨNG YÊN: Gửi heartbeat định kỳ mỗi 5 phút (300s)
+        if (timeDifference >= _stationaryHeartbeatSeconds) {
           shouldSend = true;
         }
       }
@@ -201,16 +237,17 @@ class LocationTaskHandler extends TaskHandler {
     if (shouldSend) {
       await _saveLastSentState(position, now);
 
+      final double totalKm = _totalDistance / 1000.0;
       print(
-        '🚀 [LOCATION BG SEND] Sending location update! (Dist: ${distance.toStringAsFixed(1)}m, TimeDiff: ${timeDifference}s) -> Lat: ${position.latitude.toStringAsFixed(6)}, Lng: ${position.longitude.toStringAsFixed(6)}',
+        '🚀 [LOCATION BG SEND] Sending location update! (DistStep: ${distFromLastSent.toStringAsFixed(1)}m, Total: ${totalKm.toStringAsFixed(2)}km, TimeDiff: ${timeDifference}s) -> Lat: ${position.latitude.toStringAsFixed(6)}, Lng: ${position.longitude.toStringAsFixed(6)}',
       );
 
-      // 1. Lay dung luong pin & trip_id da luu
+      // 1. Lấy dung lượng pin & trip_id đã lưu
       final int batteryLevel = await LocationApiService.getBatteryLevel();
       final dynamic tripId = await LocationApiService.getSavedTripId();
       final String recordedAt = DateFormat('yyyy-MM-dd HH:mm:ss').format(now);
 
-      // 2. Goi API updateLocation
+      // 2. Gọi API updateLocation kèm khoảng cách chặng và tổng quãng đường
       await LocationApiService.updateLocation(
         latitude: position.latitude,
         longitude: position.longitude,
@@ -221,16 +258,18 @@ class LocationTaskHandler extends TaskHandler {
         isMock: position.isMocked == true,
         tripId: tripId,
         recordedAt: recordedAt,
+        distance: distFromLastSent,
+        totalDistance: _totalDistance,
       );
 
-      // 3. Cap nhat thong bao tren thanh trang thai Android
+      // 3. Cập nhật thông báo trực tiếp trên thanh trạng thái Notification
       FlutterForegroundTask.updateService(
-        notificationTitle: 'Đang theo dõi vị trí kỹ thuật viên',
+        notificationTitle: 'Đang theo dõi ca làm việc',
         notificationText:
-            'Tọa độ: ${position.latitude.toStringAsFixed(5)}, ${position.longitude.toStringAsFixed(5)}',
+            'Đã di chuyển: ${totalKm.toStringAsFixed(2)} km | Tọa độ: ${position.latitude.toStringAsFixed(4)}, ${position.longitude.toStringAsFixed(4)}',
       );
 
-      // 4. Gui du lieu vi tri sang Main Isolate
+      // 4. Gửi dữ liệu vị trí và quãng đường sang Main Isolate
       FlutterForegroundTask.sendDataToMain({
         'latitude': position.latitude,
         'longitude': position.longitude,
@@ -241,16 +280,10 @@ class LocationTaskHandler extends TaskHandler {
         'is_mock': position.isMocked,
         'trip_id': tripId,
         'recorded_at': recordedAt,
+        'distance_step': distFromLastSent,
+        'total_distance': _totalDistance,
         'timestamp': position.timestamp.millisecondsSinceEpoch,
       });
-    } else {
-      final bool hasRealSpeed =
-          (position.speed > 1.2) && (position.accuracy <= 30.0);
-      final bool hasRealDistance = distance >= _movementDistanceThresholdMeters;
-      final bool isMoving = hasRealDistance || hasRealSpeed;
-      print(
-        '⏳ [LOCATION SKIP] Bỏ qua bản ghi (Đang ${isMoving ? "DI CHUYỂN" : "ĐỨNG YÊN"}: Dist=${distance.toStringAsFixed(1)}m, TimeDiff=${timeDifference}s - Yêu cầu: Di chuyển >= 60s, Đứng yên >= 3600s)',
-      );
     }
   }
 
@@ -259,8 +292,7 @@ class LocationTaskHandler extends TaskHandler {
     final now = DateTime.now();
 
     if (_lastSentTime == null ||
-        now.difference(_lastSentTime!).inSeconds >=
-            _movingTimeIntervalSeconds) {
+        now.difference(_lastSentTime!).inSeconds >= _movingTimeIntervalSeconds) {
       print(
         '🔄 [LOCATION BG REPEAT] Event triggered at $timestamp (Checking location update...)',
       );

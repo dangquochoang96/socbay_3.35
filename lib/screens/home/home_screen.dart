@@ -42,6 +42,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   late HomeBloc _bloc;
   bool _isTrackingShift = false;
+  double _shiftTotalDistanceKm = 0.0;
 
   @override
   void initState() {
@@ -53,14 +54,36 @@ class _HomeScreenState extends State<HomeScreen> {
     _bloc.add(HomeStartedEvent());
     if (App.instance.userApp?.isUserRole() == true) {
       _checkTrackingStatus();
+      LocationTrackingService.instance.addTaskDataCallback(_onLocationDataReceived);
+    }
+  }
+
+  @override
+  void dispose() {
+    if (App.instance.userApp?.isUserRole() == true) {
+      LocationTrackingService.instance.removeTaskDataCallback(_onLocationDataReceived);
+    }
+    super.dispose();
+  }
+
+  void _onLocationDataReceived(dynamic data) {
+    if (!mounted) return;
+    if (data is Map<String, dynamic> && data.containsKey('total_distance')) {
+      final totalMeters = (data['total_distance'] as num?)?.toDouble() ?? 0.0;
+      setState(() {
+        _shiftTotalDistanceKm = totalMeters / 1000.0;
+      });
     }
   }
 
   Future<void> _checkTrackingStatus() async {
     bool isTracking = await LocationTrackingService.instance.isTracking();
+    double distanceKm =
+        await LocationTrackingService.instance.getCurrentShiftDistanceKm();
     if (mounted) {
       setState(() {
         _isTrackingShift = isTracking;
+        _shiftTotalDistanceKm = distanceKm;
       });
     }
   }
@@ -932,10 +955,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     color: ColorUtil.bangladeshGreen,
                   ),
                 ),
-                // Padding(
-                //   padding: const EdgeInsets.symmetric(vertical: 4),
-                //   child: Html(data: itemBlog.shortdes ?? ""),
-                // ),
               ],
             ),
           ),
@@ -1018,8 +1037,17 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  _isTrackingShift ? "Đang bật vị trí" : "Gạt để bật vị trí",
-                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                  _isTrackingShift
+                      ? "🚗 Đã đi: ${_shiftTotalDistanceKm.toStringAsFixed(2)} km (Đang chạy ngầm)"
+                      : "Gạt để bắt đầu tính quãng đường di chuyển",
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: _isTrackingShift
+                        ? ColorUtil.bangladeshGreen
+                        : Colors.grey.shade600,
+                    fontWeight:
+                        _isTrackingShift ? FontWeight.w600 : FontWeight.normal,
+                  ),
                 ),
               ],
             ),
@@ -1032,12 +1060,20 @@ class _HomeScreenState extends State<HomeScreen> {
                 bool started = await LocationTrackingService.instance
                     .startTracking();
                 if (mounted) {
-                  setState(() => _isTrackingShift = started);
+                  setState(() {
+                    _isTrackingShift = started;
+                    if (started) {
+                      _shiftTotalDistanceKm = 0.0;
+                    }
+                  });
                 }
               } else {
                 await LocationTrackingService.instance.stopTracking();
                 if (mounted) {
-                  setState(() => _isTrackingShift = false);
+                  setState(() {
+                    _isTrackingShift = false;
+                    _shiftTotalDistanceKm = 0.0;
+                  });
                 }
               }
             },
