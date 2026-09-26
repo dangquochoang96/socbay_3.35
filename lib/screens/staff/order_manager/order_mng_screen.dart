@@ -647,6 +647,12 @@ class _OrderManagerScreenState extends State<OrderManagerScreen> {
     double grandCash = 0;
     double grandTransfer = 0;
     double totalThayLoiRev = _getSumDouble((item) => item.totalPriceThayThe);
+    double hotBonus = 0;
+    if (totalThayLoiRev >= 5000000) {
+      hotBonus = 300000;
+    } else if (totalThayLoiRev >= 2500000) {
+      hotBonus = 100000;
+    }
 
     List<Map<String, dynamic>> orderRows = [];
     for (var order in _bloc.staffLstOrders) {
@@ -912,7 +918,7 @@ class _OrderManagerScreenState extends State<OrderManagerScreen> {
                 const TableCell(child: SizedBox.shrink()),
                 const TableCell(child: SizedBox.shrink()),
                 _buildTableCell(
-                  'Thưởng nóng:',
+                  'Thưởng nóng: ${hotBonus > 0 ? _formatK(hotBonus) : '0k'}',
                   isBold: true,
                   align: TextAlign.left,
                 ),
