@@ -6,6 +6,7 @@ import 'package:socbay/utils/parse_util.dart';
 class TaskModel {
   final int? id;
   final String? type;
+  final String? isLongDistance;
   final String? name;
   final String? createdAt;
   final String? updatedAt;
@@ -32,6 +33,7 @@ class TaskModel {
   TaskModel({
     this.id,
     this.type,
+    this.isLongDistance,
     this.name,
     this.createdAt,
     this.updatedAt,
@@ -59,6 +61,7 @@ class TaskModel {
   factory TaskModel.fromJson(Map<String, dynamic> json) => TaskModel(
     id: Parse.toIntValue(json["id"]),
     type: json["type"]?.toString(),
+    isLongDistance: json["is_long_distance"]?.toString(),
     name: json["name"]?.toString(),
     createdAt: json["created_at"]?.toString(),
     updatedAt: json["updated_at"]?.toString(),
@@ -94,6 +97,7 @@ class TaskModel {
   Map<String, dynamic> toJson() => {
     "id": id,
     "type": type,
+    "is_long_distance": isLongDistance,
     "name": name,
     "status": status,
     "des": des,
@@ -125,6 +129,9 @@ class TaskModel {
     }
     return "";
   }
+
+  bool get isLongDistanceTask =>
+      isLongDistance == '1' || isLongDistance?.toLowerCase() == 'true';
 
   static List<String> getImages(List<dynamic>? images) {
     List<String> imgs = [];

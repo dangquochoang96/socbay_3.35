@@ -89,21 +89,37 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
   @override
   void initState() {
     _bloc = BlocProvider.of<StaffNewOrderBloc>(context);
+    _bloc.paymentType = null;
     _bloc.add(StaffNewOrderInitEvent());
     String dateDefault = DateTime.now()
         .add(Duration(days: widget.isRent ? 91 : 183))
         .toDateString(format: "dd/MM/yyyy");
-    lstKeyValueCores
-      ..add(KeyValue(TextEditingController(), TextEditingController()))
-      ..add(KeyValue(TextEditingController(), TextEditingController()))
-      ..add(KeyValue(TextEditingController(), TextEditingController()));
-    lstKeyValueMaintainCores
-      ..add(
+    final int initTaskType =
+        int.tryParse(
+          _bloc.taskModel?.type ?? _bloc.args['taskType']?.toString() ?? '',
+        ) ??
+        0;
+    final String? defaultCoreName = initTaskType == 7
+        ? "Hỗ trợ online"
+        : (initTaskType == 8
+              ? "Giao máy"
+              : (initTaskType == 4 || initTaskType == 9 || initTaskType == 11
+                    ? "Lắp đặt máy mới"
+                    : null));
+    final String defaultPrice = "0".toVND();
+    if (defaultCoreName != null) {
+      lstKeyValueCores.add(
         KeyValue(
-          TextEditingController(),
-          TextEditingController(text: dateDefault),
+          TextEditingController(text: defaultCoreName),
+          TextEditingController(text: defaultPrice),
         ),
-      )
+      );
+    } else {
+      lstKeyValueCores
+        ..add(KeyValue(TextEditingController(), TextEditingController()))
+        ..add(KeyValue(TextEditingController(), TextEditingController()));
+    }
+    lstKeyValueMaintainCores
       ..add(
         KeyValue(
           TextEditingController(),
@@ -231,11 +247,41 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
       setState(() {
         subSavePointController.text = _bloc.subSavePoint.toString();
         final int taskType = int.tryParse(_bloc.taskModel?.type ?? "") ?? 0;
+        final String? defaultCoreName = taskType == 7
+            ? "Hỗ trợ online"
+            : (taskType == 8
+                  ? "Giao máy"
+                  : (taskType == 4 || taskType == 9 || taskType == 11
+                        ? "Lắp đặt máy mới"
+                        : null));
+        final String defaultPrice = "0".toVND();
+        final bool hasDefaultCore = defaultCoreName != null;
+        if (hasDefaultCore) {
+          if (lstKeyValueCores.isEmpty) {
+            lstKeyValueCores.add(
+              KeyValue(
+                TextEditingController(text: defaultCoreName),
+                TextEditingController(text: defaultPrice),
+              ),
+            );
+          } else {
+            lstKeyValueCores[0].key.text = defaultCoreName;
+            if (lstKeyValueCores[0].value.text.isEmpty) {
+              lstKeyValueCores[0].value.text = defaultPrice;
+            }
+            if (lstKeyValueCores.length > 1 &&
+                lstKeyValueCores
+                    .skip(1)
+                    .every((e) => e.key.text.isEmpty && e.value.text.isEmpty)) {
+              lstKeyValueCores.removeRange(1, lstKeyValueCores.length);
+            }
+          }
+          _recalculateTotal();
+        }
+        final bool isNewInstall =
+            taskType == 4 || taskType == 8 || taskType == 9 || taskType == 11;
         final bool isExcludedFromProductAutoFill =
-            taskType == 4 ||
-            taskType == 8 ||
-            taskType == 11 ||
-            _bloc.orderDetail?.subType == '1';
+            isNewInstall || _bloc.orderDetail?.subType == '1';
         if (isExcludedFromProductAutoFill) {
           _currentSelectedProductValue = 0;
         } else {
@@ -402,6 +448,21 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                         ],
                       ),
                     ),
+                    if (_bloc.isTaskLongDistance == true)
+                      _buildInfoRow(
+                        'Đơn xa',
+                        const Align(
+                          alignment: Alignment.centerRight,
+                          child: Text(
+                            'Có',
+                            style: TextStyle(
+                              color: ColorUtil.red,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                      ),
                     const Divider(color: Color(0xFFF1F5F9), height: 24),
                     _buildInputRow(
                       'Địa chỉ khách',
@@ -442,16 +503,18 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                               : sv.orderTypeLabel == 'Bán'),
                     );
 
-                    // Khách cũ (có lịch sử máy): taskType = 4 ẩn chọn sp cũ, taskType = 5 / 1 / 2 / 3 ẩn chọn sp mới
+                    final bool isNewInstallTask =
+                        taskType == 4 ||
+                        taskType == 8 ||
+                        taskType == 9 ||
+                        taskType == 11;
+
+                    // Khách cũ (có lịch sử máy): Lắp máy, Lắp lọc tổng (thợ chính), Lắp máy đơn sàn ẩn chọn sp cũ; các loại công việc khác ẩn chọn sp mới
                     // Khách mới (không có lịch sử máy): ẩn chọn sp cũ, chỉ hiện chọn sp mới
                     final bool showOldProductField =
-                        hasHistoryMachine && taskType != 4;
+                        hasHistoryMachine && !isNewInstallTask;
                     final bool showNewProductField =
-                        !hasHistoryMachine ||
-                        (taskType != 1 &&
-                            taskType != 2 &&
-                            taskType != 3 &&
-                            taskType != 5);
+                        !hasHistoryMachine || isNewInstallTask;
 
                     if (!showOldProductField && !showNewProductField) {
                       return const SizedBox.shrink();
@@ -962,6 +1025,12 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                 _buildSectionMedia(),
                 ButtonWidget(
                   onTap: () {
+                    if (_bloc.paymentType == null || _bloc.paymentType == 0) {
+                      context.showSnackBar(
+                        'Vui lòng chọn hình thức thanh toán',
+                      );
+                      return;
+                    }
                     var getProductNew = _listProductsAll.where(
                       (element) =>
                           element.name == currentSelectedProductAllValue.text,
@@ -976,13 +1045,17 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                     for (var item in lstKeyValueCores) {
                       if (item.key.text.isNotEmpty) {
                         String priceText = item.value.text.trim();
-                        String priceValue = priceText.isEmpty
-                            ? "0"
-                            : priceText
-                                  .replaceAll(".", "")
-                                  .replaceAll("đ", "")
-                                  .nonBreaking
-                                  .trim();
+                        if (priceText.isEmpty) {
+                          context.showSnackBar(
+                            'Vui lòng nhập thành tiền cho vật tư ${item.key.text}',
+                          );
+                          return;
+                        }
+                        String priceValue = priceText
+                            .replaceAll(".", "")
+                            .replaceAll("đ", "")
+                            .nonBreaking
+                            .trim();
                         lst1.add(
                           OrderFilterCoreModel(
                             name: item.key.text,
@@ -1105,10 +1178,11 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                       subSavePoint: (_bloc.total == 0 && _bloc.totalPay == 0)
                           ? 0
                           : (int.tryParse(subSavePointController.text) ?? 0),
-                      paymentType: _bloc.paymentType,
+                      paymentType: _bloc.paymentType!,
                       images: _listPath,
                       staff: _bloc.taskModel?.staff?.username,
                       ghichu: _noteController.text,
+                      isLongDistance: _bloc.isTaskLongDistance,
                     );
 
                     Navigator.pushNamed(
@@ -1153,6 +1227,12 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                       } else {
                         _goToOrderManager();
                       }
+                      return;
+                    }
+                    if (_bloc.paymentType == null || _bloc.paymentType == 0) {
+                      context.showSnackBar(
+                        'Vui lòng chọn hình thức thanh toán',
+                      );
                       return;
                     }
                     final now = DateTime.now().millisecondsSinceEpoch;
@@ -1215,13 +1295,17 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                     for (var item in lstKeyValueCores) {
                       if (item.key.text.isNotEmpty) {
                         String priceText = item.value.text.trim();
-                        String priceValue = priceText.isEmpty
-                            ? "0"
-                            : priceText
-                                  .replaceAll(".", "")
-                                  .replaceAll("đ", "")
-                                  .nonBreaking
-                                  .trim();
+                        if (priceText.isEmpty) {
+                          context.showSnackBar(
+                            'Vui lòng nhập thành tiền cho vật tư ${item.key.text}',
+                          );
+                          return;
+                        }
+                        String priceValue = priceText
+                            .replaceAll(".", "")
+                            .replaceAll("đ", "")
+                            .nonBreaking
+                            .trim();
                         lst1.add(
                           OrderFilterCoreModel(
                             name: item.key.text,
@@ -1317,7 +1401,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                             : (int.tryParse(subSavePointController.text) ?? 0),
                         _bloc.totalPay,
                         _bloc.savePoint,
-                        _bloc.paymentType,
+                        _bloc.paymentType!,
                         _vatController.text.isEmpty ? '0' : _vatController.text,
                         _listPath,
                         addressCustomerController.text,
@@ -2277,9 +2361,23 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
           ),
         ),
         if (lstKeyValueCores.isNotEmpty)
-          ...List.generate(
-            lstKeyValueCores.length,
-            (i) => Container(
+          ...List.generate(lstKeyValueCores.length, (i) {
+            final int taskType =
+                int.tryParse(
+                  _bloc.taskModel?.type ??
+                      _bloc.args['taskType']?.toString() ??
+                      '',
+                ) ??
+                0;
+            final bool hasDefaultCore =
+                taskType == 7 ||
+                taskType == 8 ||
+                taskType == 4 ||
+                taskType == 9 ||
+                taskType == 11;
+            final bool isFixedFirstRow = hasDefaultCore && i == 0;
+
+            return Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
                 border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
@@ -2299,9 +2397,11 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                         : TextFormField(
                             controller: lstKeyValueCores[i].key,
                             readOnly: true,
-                            onTap: () {
-                              _showCoreSearchSelector(context, i);
-                            },
+                            onTap: isFixedFirstRow
+                                ? null
+                                : () {
+                                    _showCoreSearchSelector(context, i);
+                                  },
                             decoration: InputDecoration(
                               hintText: _ktvWarehouseCores.isEmpty
                                   ? 'Kho trống!'
@@ -2323,24 +2423,29 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                                   color: Colors.grey.shade300,
                                 ),
                               ),
-                              suffixIcon:
-                                  lstKeyValueCores[i].key.text.isNotEmpty
-                                  ? IconButton(
-                                      padding: EdgeInsets.zero,
-                                      constraints: const BoxConstraints(),
-                                      icon: const Icon(Icons.clear, size: 16),
-                                      onPressed: () {
-                                        setState(() {
-                                          lstKeyValueCores[i].key.clear();
-                                          lstKeyValueCores[i].value.clear();
-                                          _recalculateTotal();
-                                        });
-                                      },
-                                    )
-                                  : const Icon(
-                                      Icons.arrow_drop_down,
-                                      color: Colors.grey,
-                                    ),
+                              suffixIcon: isFixedFirstRow
+                                  ? null
+                                  : (lstKeyValueCores[i].key.text.isNotEmpty
+                                        ? IconButton(
+                                            padding: EdgeInsets.zero,
+                                            constraints: const BoxConstraints(),
+                                            icon: const Icon(
+                                              Icons.clear,
+                                              size: 16,
+                                            ),
+                                            onPressed: () {
+                                              setState(() {
+                                                lstKeyValueCores[i].key.clear();
+                                                lstKeyValueCores[i].value
+                                                    .clear();
+                                                _recalculateTotal();
+                                              });
+                                            },
+                                          )
+                                        : const Icon(
+                                            Icons.arrow_drop_down,
+                                            color: Colors.grey,
+                                          )),
                             ),
                             style: const TextStyle(fontSize: 13),
                           ),
@@ -2354,7 +2459,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                       keyboardType: TextInputType.number,
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       decoration: InputDecoration(
-                        hintText: '0',
+                        hintText: 'Nhập giá',
                         isDense: true,
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 12,
@@ -2376,20 +2481,30 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                           return;
                         } else {
                           setState(() {
-                            String formattedText = (text.isEmpty ? "0" : text)
+                            final cleanDigits = text
                                 .replaceAll(".", "")
                                 .replaceAll("đ", "")
                                 .nonBreaking
-                                .trim()
-                                .toVND();
-                            lstKeyValueCores[i].value.value = TextEditingValue(
-                              text: formattedText,
-                              selection: TextSelection.collapsed(
-                                offset: formattedText.length > 2
-                                    ? formattedText.length - 2
-                                    : formattedText.length,
-                              ),
-                            );
+                                .trim();
+                            if (cleanDigits.isEmpty) {
+                              lstKeyValueCores[i]
+                                  .value
+                                  .value = const TextEditingValue(
+                                text: '',
+                                selection: TextSelection.collapsed(offset: 0),
+                              );
+                            } else {
+                              String formattedText = cleanDigits.toVND();
+                              lstKeyValueCores[i].value.value =
+                                  TextEditingValue(
+                                    text: formattedText,
+                                    selection: TextSelection.collapsed(
+                                      offset: formattedText.length > 2
+                                          ? formattedText.length - 2
+                                          : formattedText.length,
+                                    ),
+                                  );
+                            }
                             _recalculateTotal();
                           });
                         }
@@ -2397,25 +2512,28 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  IconButton(
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                    icon: const Icon(
-                      Icons.delete_outline,
-                      color: Colors.red,
-                      size: 20,
+                  if (isFixedFirstRow)
+                    const SizedBox(width: 20)
+                  else
+                    IconButton(
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      icon: const Icon(
+                        Icons.delete_outline,
+                        color: Colors.red,
+                        size: 20,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          lstKeyValueCores.removeAt(i);
+                          _recalculateTotal();
+                        });
+                      },
                     ),
-                    onPressed: () {
-                      setState(() {
-                        lstKeyValueCores.removeAt(i);
-                        _recalculateTotal();
-                      });
-                    },
-                  ),
                 ],
               ),
-            ),
-          ),
+            );
+          }),
       ],
     );
   }
@@ -2773,7 +2891,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setModalState) {
             final List<String> filteredList = [];
-            const String manualOption = "Lắp đặt mới; VSBD; Dv khác...";
+            const String manualOption = "Kiểm tra; VSBD; Dịch vụ khác...";
             if (searchQuery.isEmpty ||
                 manualOption.toLowerCase().contains(
                   searchQuery.toLowerCase(),
@@ -3258,7 +3376,17 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
         children: [
           Text(title, style: const TextStyle(fontSize: 13)),
           const SizedBox(height: 4),
-          Radio<int>(value: value),
+          Radio<int>(
+            value: value,
+            groupValue: _bloc.paymentType,
+            onChanged: (val) {
+              if (val != null) {
+                setState(() {
+                  _bloc.paymentType = val;
+                });
+              }
+            },
+          ),
         ],
       ),
     );

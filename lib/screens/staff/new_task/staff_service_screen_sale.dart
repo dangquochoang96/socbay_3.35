@@ -72,6 +72,7 @@ class _StaffServiceSaleScreenState extends State<StaffServiceSaleScreen> {
   String _timeStart = '';
   UserModel? _favouriteStaff;
   late TaskOrderType _selectedOrderType;
+  bool _isLongDistance = false;
 
   bool _addNewCustomer = false;
   DateTime? selectedDate;
@@ -330,10 +331,75 @@ class _StaffServiceSaleScreenState extends State<StaffServiceSaleScreen> {
           const SizedBox(height: 16),
           _buildDropdownField(),
           const SizedBox(height: 16),
+          _buildLongDistanceSwitch(),
+          const SizedBox(height: 16),
           _buildSearchCustomer(),
           const SizedBox(height: 16),
           _buildDropdownFieldPruducts(),
         ],
+      ),
+    );
+  }
+
+  Widget _buildLongDistanceSwitch() {
+    return InkWell(
+      onTap: () {
+        setState(() {
+          _isLongDistance = !_isLongDistance;
+        });
+      },
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        height: 54,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        decoration: BoxDecoration(
+          color: Colors.grey.shade50,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: _isLongDistance
+                ? ColorUtil.bangladeshGreen.withValues(alpha: 0.5)
+                : Colors.grey.shade200,
+            width: 1.5,
+          ),
+        ),
+        child: Row(
+          children: [
+            const Icon(
+              Icons.explore_outlined,
+              color: ColorUtil.bangladeshGreen,
+              size: 22,
+            ),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Text(
+                'Đơn xa',
+                style: TextStyle(
+                  color: ColorUtil.raisinBlack,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+            Text(
+              _isLongDistance ? 'Có' : 'Không',
+              style: TextStyle(
+                color: _isLongDistance ? ColorUtil.red : ColorUtil.spanishGray,
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Switch(
+              value: _isLongDistance,
+              activeColor: ColorUtil.bangladeshGreen,
+              onChanged: (bool value) {
+                setState(() {
+                  _isLongDistance = value;
+                });
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1257,6 +1323,7 @@ class _StaffServiceSaleScreenState extends State<StaffServiceSaleScreen> {
           address: addressSPRequestTxtController.text,
           productId: _currentSelectedProductValue,
           images: _listPath,
+          isLongDistance: _isLongDistance,
         ),
         false,
         createTaskEndpoint: _selectedOrderType == TaskOrderType.rent

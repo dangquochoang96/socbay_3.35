@@ -30,6 +30,7 @@ class BillData {
   int? subType;
   String? productName;
   String? newProductName;
+  bool? isLongDistance;
 
   BillData({
     this.usernameId,
@@ -56,6 +57,7 @@ class BillData {
     this.subType,
     this.productName,
     this.newProductName,
+    this.isLongDistance,
   });
 
   factory BillData.fromJson(Map<String, dynamic> json) => BillData(
@@ -93,6 +95,10 @@ class BillData {
     subType: json["subType"],
     productName: json["productName"],
     newProductName: json["newProductName"],
+    isLongDistance: json["isLongDistance"] == true ||
+        json["isLongDistance"] == '1' ||
+        json["is_long_distance"] == '1' ||
+        json["is_long_distance"] == true,
   );
 
   Map<String, dynamic> toJson() => {
@@ -118,5 +124,6 @@ class BillData {
     "subType": subType,
     "productName": productName,
     "newProductName": newProductName,
+    "isLongDistance": isLongDistance,
   };
 }

@@ -403,6 +403,16 @@ class _DetailBookingScreenState extends State<DetailBookingScreen> {
     );
   }
 
+  bool _isLongDistance(TaskModel? taskModel) {
+    if (taskModel?.isLongDistanceTask == true) return true;
+    final dynamic rawArgs = _bloc?.args;
+    if (rawArgs is Map) {
+      final argVal = rawArgs['isLongDistance']?.toString();
+      return argVal == '1' || argVal?.toLowerCase() == 'true';
+    }
+    return false;
+  }
+
   Widget _buildGeneralInfoCard(TaskModel? taskModel) {
     final String? effectiveType = _selectedTaskType ?? taskModel?.type;
     final bool typeExists = HomeServiceModel.taskServiceList.any(
@@ -487,6 +497,15 @@ class _DetailBookingScreenState extends State<DetailBookingScreen> {
             valueColor: ColorUtil.red,
             isBold: true,
           ),
+          if ((App.instance.userApp?.isUserRole() == true ||
+                  App.instance.userApp?.isUserSale() == true) &&
+              _isLongDistance(taskModel))
+            _buildInfoRow(
+              "Đơn xa:",
+              "Có",
+              valueColor: ColorUtil.red,
+              isBold: true,
+            ),
           if (taskModel?.staff?.username != null)
             Padding(
               padding: const EdgeInsets.only(bottom: 8.0),
@@ -1161,7 +1180,13 @@ class _DetailBookingScreenState extends State<DetailBookingScreen> {
     Navigator.pushNamed(
       context,
       widget.isRent ? Routes.createRentOrderScreen : Routes.createOrderScreen,
-      arguments: {'id': id, 'taskType': effectiveType},
+      arguments: {
+        'id': id,
+        'taskType': effectiveType,
+        'isLongDistance':
+            _bloc.taskModel?.isLongDistance ??
+            (_bloc.args is Map ? _bloc.args['isLongDistance'] : null),
+      },
     );
   }
 }

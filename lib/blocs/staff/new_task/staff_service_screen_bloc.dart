@@ -87,6 +87,8 @@ class StaffServiceScreenBloc
         "images": images,
         "address": event.createTaskRequest.address.toString(),
         "request_user_id": App.instance.userApp!.id.toString(),
+        "is_long_distance":
+            event.createTaskRequest.isLongDistance == true ? "1" : "0",
       };
       var url = AppConfig.instance.apiUri(
         event.createTaskEndpoint ?? ApiEndpoints.taskCreate,

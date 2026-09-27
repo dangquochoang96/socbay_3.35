@@ -37,11 +37,16 @@ class StaffNewOrderBloc extends Bloc<StaffNewOrderEvent, StaffNewOrderState> {
       savePoint = 0,
       vatAmount = 0;
   num vatPercentage = 0;
-  int paymentType = 1;
+  int? paymentType;
   OrderDetailModel? orderDetail;
   List<String> paths = [];
 
   bool get isRent => args['isRent'] == true;
+  bool get isTaskLongDistance {
+    final val = taskModel?.isLongDistance ?? args['isLongDistance']?.toString();
+    return val == '1' || val?.toLowerCase() == 'true';
+  }
+
   StaffNewOrderBloc({required this.apiRepository, required this.args})
     : super(StaffNewOrderInitialState()) {
     on<StaffNewOrderInitEvent>(_mapChangeTypeServiceEventToState);
@@ -58,6 +63,7 @@ class StaffNewOrderBloc extends Bloc<StaffNewOrderEvent, StaffNewOrderState> {
     StaffNewOrderInitEvent event,
     Emitter<StaffNewOrderState> emit,
   ) async {
+    paymentType = null;
     if (args['id'] == null) {
       return;
     }
@@ -72,10 +78,14 @@ class StaffNewOrderBloc extends Bloc<StaffNewOrderEvent, StaffNewOrderState> {
       if (res.statusCode == HttpStatus.ok) {
         var l = Map<String, dynamic>.from(json.decode(res.body));
         taskModel = TaskModel.fromJson(l["data"]);
-        if (args['taskType'] != null && args['taskType'].toString().isNotEmpty) {
+        final effectiveLongDistance =
+            taskModel?.isLongDistance ?? args['isLongDistance']?.toString();
+        if (args['taskType'] != null &&
+            args['taskType'].toString().isNotEmpty) {
           taskModel = TaskModel(
             id: taskModel?.id,
             type: args['taskType'].toString(),
+            isLongDistance: effectiveLongDistance,
             name: taskModel?.name,
             createdAt: taskModel?.createdAt,
             updatedAt: taskModel?.updatedAt,
@@ -95,7 +105,38 @@ class StaffNewOrderBloc extends Bloc<StaffNewOrderEvent, StaffNewOrderState> {
             productInfo: taskModel?.productInfo,
             staff: taskModel?.staff,
             customer: taskModel?.customer,
+            sale: taskModel?.sale,
             images: taskModel?.images,
+            currentAddress: taskModel?.currentAddress,
+          );
+        } else if (taskModel?.isLongDistance == null &&
+            effectiveLongDistance != null) {
+          taskModel = TaskModel(
+            id: taskModel?.id,
+            type: taskModel?.type,
+            isLongDistance: effectiveLongDistance,
+            name: taskModel?.name,
+            createdAt: taskModel?.createdAt,
+            updatedAt: taskModel?.updatedAt,
+            status: taskModel?.status,
+            des: taskModel?.des,
+            noti: taskModel?.noti,
+            priority: taskModel?.priority,
+            timeStart: taskModel?.timeStart,
+            timeEnd: taskModel?.timeEnd,
+            userId: taskModel?.userId,
+            saleId: taskModel?.saleId,
+            userCreate: taskModel?.userCreate,
+            userCustomer: taskModel?.userCustomer,
+            origin: taskModel?.origin,
+            productId: taskModel?.productId,
+            orderId: taskModel?.orderId,
+            productInfo: taskModel?.productInfo,
+            staff: taskModel?.staff,
+            customer: taskModel?.customer,
+            sale: taskModel?.sale,
+            images: taskModel?.images,
+            currentAddress: taskModel?.currentAddress,
           );
         }
         subSavePoint = taskModel?.customer?.point ?? 0;
@@ -187,6 +228,7 @@ class StaffNewOrderBloc extends Bloc<StaffNewOrderEvent, StaffNewOrderState> {
             'type_payment': event.paymentType.toString(),
             'staff': App.instance.userApp?.id.toString() ?? '',
             'sale_id': taskModel?.saleId?.toString(),
+            if (isTaskLongDistance) 'is_long_distance': '1',
           };
           if (isRent) {
             queryParams.addAll({
@@ -294,6 +336,7 @@ class StaffNewOrderBloc extends Bloc<StaffNewOrderEvent, StaffNewOrderState> {
           'sale_id': taskModel?.saleId?.toString() ?? event.saleId.toString(),
           'address': event.newAddressSP.toString(),
           'sub_type': event.subType.toString(),
+          if (isTaskLongDistance) 'is_long_distance': '1',
           if (event.paymentType == 3) ...{
             'cash_amount': event.cashAmount?.toString(),
             'transfer_amount': event.transferAmount?.toString(),
@@ -324,6 +367,10 @@ class StaffNewOrderBloc extends Bloc<StaffNewOrderEvent, StaffNewOrderState> {
             }
             orderDetail = OrderDetailModel.fromJson({
               ...n,
+              if (isTaskLongDistance &&
+                  (n['is_long_distance'] == null ||
+                      n['is_long_distance'].toString().isEmpty))
+                'is_long_distance': '1',
               'order_payment': orderPayment?.toJson(),
             });
             var urleditTask = AppConfig.instance.apiUri(
@@ -347,6 +394,7 @@ class StaffNewOrderBloc extends Bloc<StaffNewOrderEvent, StaffNewOrderState> {
                 'product_id': event.productId.toString(),
                 'order_id': orderDetail?.id.toString(),
                 'address': event.newAddress,
+                if (isTaskLongDistance) 'is_long_distance': '1',
               },
             );
             var resEditTask = await http.post(urleditTask);

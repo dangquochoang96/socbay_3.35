@@ -10,6 +10,7 @@ class OrderDetailModel {
   final String? userId;
   final String? type;
   final String? subType;
+  final String? isLongDistance;
   final String? price;
   final String? chietKhau;
   final String? tichDiem;
@@ -43,6 +44,7 @@ class OrderDetailModel {
     this.userId,
     this.type,
     this.subType,
+    this.isLongDistance,
     this.price,
     this.chietKhau,
     this.tichDiem,
@@ -80,6 +82,7 @@ class OrderDetailModel {
     userId: _asString(json['user_id']),
     type: _asString(json['type']),
     subType: _asString(json['sub_type']),
+    isLongDistance: _asString(json['is_long_distance']),
     price: _asString(json['price']),
     chietKhau: _asString(json['chiet_khau']),
     tichDiem: _asString(json['tich_diem']),
@@ -135,6 +138,7 @@ class OrderDetailModel {
     'user_id': userId,
     'type': type,
     'sub_type': subType,
+    'is_long_distance': isLongDistance,
     'price': price,
     'chiet_khau': chietKhau,
     'tich_diem': tichDiem,
@@ -155,6 +159,9 @@ class OrderDetailModel {
     'code': code,
     'order_code': orderCode,
   };
+
+  bool get isLongDistanceOrder =>
+      isLongDistance == '1' || isLongDistance?.toLowerCase() == 'true';
 
   static List<OrderPaymentModel>? _getOrderPayments(dynamic orderPayment) {
     if (orderPayment is List) {

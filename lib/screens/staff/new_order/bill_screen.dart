@@ -168,6 +168,22 @@ class _BillScreenState extends State<BillScreen> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
+                if (billData.isLongDistance == true)
+                  RichText(
+                    text: const TextSpan(
+                      style: TextStyle(fontSize: 18, color: Colors.black),
+                      children: [
+                        TextSpan(text: 'Đơn xa: '),
+                        TextSpan(
+                          text: 'Có',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.red,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 if (billData.productName != null &&
                     billData.productName!.isNotEmpty)
                   Text(
