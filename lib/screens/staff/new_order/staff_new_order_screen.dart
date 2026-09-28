@@ -59,6 +59,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
   List<KeyValue> lstKeyValueMaintainCores = [];
   List<String> _ktvWarehouseCores = [];
   bool _isLoadingWarehouse = false;
+  bool _hasUserSelectedPayment = false;
 
   bool _showRentalDetails = false;
   DateTime _selectedEndDate = DateTime.now();
@@ -89,6 +90,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
   @override
   void initState() {
     _bloc = BlocProvider.of<StaffNewOrderBloc>(context);
+    _hasUserSelectedPayment = false;
     _bloc.paymentType = null;
     _bloc.add(StaffNewOrderInitEvent());
     String dateDefault = DateTime.now()
@@ -103,9 +105,17 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
         ? "Hỗ trợ online"
         : (initTaskType == 8
               ? "Giao máy"
-              : (initTaskType == 4 || initTaskType == 9 || initTaskType == 11
-                    ? "Lắp đặt máy mới"
-                    : null));
+              : (initTaskType == 5
+                    ? "Chuyển máy"
+                    : (initTaskType == 9
+                          ? "Lắp máy lọc tổng"
+                          : (initTaskType == 10
+                                ? "Phụ lắp máy lọc tổng"
+                                : (initTaskType == 11
+                                      ? "Lắp máy đơn sàn (công 200k)"
+                                      : (initTaskType == 4 || initTaskType == 12
+                                            ? "Lắp máy mới"
+                                            : null))))));
     final String defaultPrice = "0".toVND();
     if (defaultCoreName != null) {
       lstKeyValueCores.add(
@@ -153,6 +163,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
     _rentalDurationController.addListener(() {
       _calculateEndDate();
     });
+    _recalculateTotal();
     super.initState();
   }
 
@@ -251,9 +262,17 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
             ? "Hỗ trợ online"
             : (taskType == 8
                   ? "Giao máy"
-                  : (taskType == 4 || taskType == 9 || taskType == 11
-                        ? "Lắp đặt máy mới"
-                        : null));
+                  : (taskType == 5
+                        ? "Chuyển máy"
+                        : (taskType == 9
+                              ? "Lắp máy lọc tổng"
+                              : (taskType == 10
+                                    ? "Phụ lắp máy lọc tổng"
+                                    : (taskType == 11
+                                          ? "Lắp máy đơn sàn (công 200k)"
+                                          : (taskType == 4 || taskType == 12
+                                                ? "Lắp máy mới"
+                                                : null))))));
         final String defaultPrice = "0".toVND();
         final bool hasDefaultCore = defaultCoreName != null;
         if (hasDefaultCore) {
@@ -276,10 +295,14 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
               lstKeyValueCores.removeRange(1, lstKeyValueCores.length);
             }
           }
-          _recalculateTotal();
         }
+        _recalculateTotal();
         final bool isNewInstall =
-            taskType == 4 || taskType == 8 || taskType == 9 || taskType == 11;
+            taskType == 4 ||
+            taskType == 8 ||
+            taskType == 9 ||
+            taskType == 11 ||
+            taskType == 12;
         final bool isExcludedFromProductAutoFill =
             isNewInstall || _bloc.orderDetail?.subType == '1';
         if (isExcludedFromProductAutoFill) {
@@ -494,7 +517,12 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                 Builder(
                   builder: (context) {
                     final int taskType =
-                        int.tryParse(_bloc.taskModel?.type ?? '') ?? 0;
+                        int.tryParse(
+                          _bloc.taskModel?.type ??
+                              _bloc.args['taskType']?.toString() ??
+                              '',
+                        ) ??
+                        0;
                     final bool hasHistoryMachine = _listProducts.any(
                       (sv) =>
                           (sv.id ?? 0) != 0 &&
@@ -507,9 +535,10 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                         taskType == 4 ||
                         taskType == 8 ||
                         taskType == 9 ||
-                        taskType == 11;
+                        taskType == 11 ||
+                        taskType == 12;
 
-                    // Khách cũ (có lịch sử máy): Lắp máy, Lắp lọc tổng (thợ chính), Lắp máy đơn sàn ẩn chọn sp cũ; các loại công việc khác ẩn chọn sp mới
+                    // Khách cũ (có lịch sử máy): Lắp máy, Lắp lọc tổng (thợ chính), Lắp máy đơn sàn, Lắp máy và thay thế ẩn chọn sp cũ; các loại công việc khác ẩn chọn sp mới
                     // Khách mới (không có lịch sử máy): ẩn chọn sp cũ, chỉ hiện chọn sp mới
                     final bool showOldProductField =
                         hasHistoryMachine && !isNewInstallTask;
@@ -855,6 +884,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                         if (value == null) return;
 
                         setState(() {
+                          _hasUserSelectedPayment = true;
                           _bloc.paymentType = value;
                         });
                       },
@@ -1025,7 +1055,12 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                 _buildSectionMedia(),
                 ButtonWidget(
                   onTap: () {
-                    if (_bloc.paymentType == null || _bloc.paymentType == 0) {
+                    if (_bloc.totalPay == 0 &&
+                        (_bloc.paymentType == null || _bloc.paymentType == 0)) {
+                      _bloc.paymentType = 1;
+                    }
+                    if (_bloc.totalPay > 0 &&
+                        (_bloc.paymentType == null || _bloc.paymentType == 0)) {
                       context.showSnackBar(
                         'Vui lòng chọn hình thức thanh toán',
                       );
@@ -1104,7 +1139,12 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
 
                     final bool hasNewProduct = getProductNew.isNotEmpty;
                     final int taskType =
-                        int.tryParse(_bloc.taskModel?.type ?? '') ?? 0;
+                        int.tryParse(
+                          _bloc.taskModel?.type ??
+                              _bloc.args['taskType']?.toString() ??
+                              '',
+                        ) ??
+                        0;
                     final int calculatedSubType;
                     if (taskType == 7) {
                       calculatedSubType = 4;
@@ -1116,6 +1156,8 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                       calculatedSubType = 7;
                     } else if (taskType == 11) {
                       calculatedSubType = 8;
+                    } else if (taskType == 12) {
+                      calculatedSubType = 9;
                     } else if (hasNewProduct &&
                         (taskType == 4 || taskType == 5)) {
                       calculatedSubType = 1;
@@ -1229,7 +1271,12 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                       }
                       return;
                     }
-                    if (_bloc.paymentType == null || _bloc.paymentType == 0) {
+                    if (_bloc.totalPay == 0 &&
+                        (_bloc.paymentType == null || _bloc.paymentType == 0)) {
+                      _bloc.paymentType = 1;
+                    }
+                    if (_bloc.totalPay > 0 &&
+                        (_bloc.paymentType == null || _bloc.paymentType == 0)) {
                       context.showSnackBar(
                         'Vui lòng chọn hình thức thanh toán',
                       );
@@ -1360,7 +1407,12 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
 
                     final bool hasNewProduct = getProductNew.isNotEmpty;
                     final int taskType =
-                        int.tryParse(_bloc.taskModel?.type ?? '') ?? 0;
+                        int.tryParse(
+                          _bloc.taskModel?.type ??
+                              _bloc.args['taskType']?.toString() ??
+                              '',
+                        ) ??
+                        0;
                     final int subType;
                     if (taskType == 7) {
                       subType = 4;
@@ -1372,6 +1424,8 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                       subType = 7;
                     } else if (taskType == 11) {
                       subType = 8;
+                    } else if (taskType == 12) {
+                      subType = 9;
                     } else if (hasNewProduct &&
                         (taskType == 4 || taskType == 5)) {
                       subType = 1;
@@ -2370,11 +2424,14 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                 ) ??
                 0;
             final bool hasDefaultCore =
+                taskType == 4 ||
+                taskType == 5 ||
                 taskType == 7 ||
                 taskType == 8 ||
-                taskType == 4 ||
                 taskType == 9 ||
-                taskType == 11;
+                taskType == 10 ||
+                taskType == 11 ||
+                taskType == 12;
             final bool isFixedFirstRow = hasDefaultCore && i == 0;
 
             return Container(
@@ -2781,6 +2838,15 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
 
     _bloc.totalPay = baseAmount + _bloc.vatAmount;
     _bloc.savePoint = (_bloc.totalPay * 3 / 100000).ceil();
+
+    if (_bloc.totalPay == 0) {
+      _bloc.paymentType = 1;
+      _hasUserSelectedPayment = false;
+    } else {
+      if (!_hasUserSelectedPayment) {
+        _bloc.paymentType = null;
+      }
+    }
   }
 
   Future<void> _scanQrCodeReplacement() async {
@@ -3369,6 +3435,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
     return GestureDetector(
       onTap: () {
         setState(() {
+          _hasUserSelectedPayment = true;
           _bloc.paymentType = value;
         });
       },
@@ -3382,6 +3449,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
             onChanged: (val) {
               if (val != null) {
                 setState(() {
+                  _hasUserSelectedPayment = true;
                   _bloc.paymentType = val;
                 });
               }

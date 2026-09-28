@@ -28,16 +28,16 @@
 	<true/>
 	<key>NSCameraUsageDescription</key>
 	<string>Ứng dụng cần truy cập camera để chụp ảnh và tải ảnh lên công việc.</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Ứng dụng cần truy cập thư viện ảnh để tải ảnh lên công việc.</string>
-	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>Ứng dụng cần truy cập thư viện ảnh để lưu mã QR thanh toán.</string>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Ứng dụng cần truy cập vị trí của bạn để tìm kiếm và điều phối kỹ thuật viên gần nhất.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>Ứng dụng cần truy cập vị trí của bạn để tìm kiếm và điều phối kỹ thuật viên gần nhất.</string>
 	<key>NSLocationAlwaysUsageDescription</key>
 	<string>Ứng dụng cần truy cập vị trí chạy ngầm để theo dõi hành trình kỹ thuật viên.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Ứng dụng cần truy cập vị trí của bạn để tìm kiếm và điều phối kỹ thuật viên gần nhất.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Ứng dụng cần truy cập thư viện ảnh để lưu mã QR thanh toán.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Ứng dụng cần truy cập thư viện ảnh để tải ảnh lên công việc.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UIBackgroundModes</key>

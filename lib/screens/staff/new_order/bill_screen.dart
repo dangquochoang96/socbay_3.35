@@ -110,6 +110,8 @@ class _BillScreenState extends State<BillScreen> {
         return 'Lọc tổng phụ';
       case 8:
         return 'Lắp máy sàn';
+      case 9:
+        return 'Lắp máy và thay thế';
       default:
         return '';
     }

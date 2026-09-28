@@ -372,6 +372,11 @@ class _OrderManagerScreenState extends State<OrderManagerScreen> {
     final rentCount = _getSumInt((item) => item.totalRentOrder);
     final rentRev = _getSumDouble((item) => item.totalPriceRent);
 
+    final longDistanceCount = _getSumInt((item) => item.totalOrderLongDistance);
+    final longDistanceRev = _getSumDouble(
+      (item) => item.totalPriceLongDistance,
+    );
+
     return Container(
       margin: const EdgeInsets.only(top: 8),
       decoration: BoxDecoration(
@@ -444,6 +449,11 @@ class _OrderManagerScreenState extends State<OrderManagerScreen> {
                     locTongPhuRev,
                   ),
                   _buildDetailRow('Đơn thuê máy', rentCount, rentRev),
+                  _buildDetailRow(
+                    'Đơn đi xa',
+                    longDistanceCount,
+                    longDistanceRev,
+                  ),
                 ],
               ),
             ),
@@ -1018,6 +1028,9 @@ class _OrderManagerScreenState extends State<OrderManagerScreen> {
         break;
       case '8':
         subTypeLabel = 'Lắp máy sàn';
+        break;
+      case '9':
+        subTypeLabel = 'Lắp máy và thay thế';
         break;
       default:
         subTypeLabel = subTypeRaw;
