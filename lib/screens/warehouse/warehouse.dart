@@ -143,8 +143,17 @@ class _WarehouseScreenState extends State<WarehouseScreen>
     _filteredExportHistoryList = _allHistory.where((history) {
       final name = history.userName?.toLowerCase() ?? '';
       final phone = history.userPhone?.toLowerCase() ?? '';
+      final verifier = history.verifierName?.toLowerCase() ?? '';
+      final verifierPhone = history.verifierPhone?.toLowerCase() ?? '';
+      final status = history.statusText?.toLowerCase() ?? '';
+      final id = history.id?.toString() ?? '';
       final search = searchQuery.toLowerCase();
-      return name.contains(search) || phone.contains(search);
+      return name.contains(search) ||
+          phone.contains(search) ||
+          verifier.contains(search) ||
+          verifierPhone.contains(search) ||
+          status.contains(search) ||
+          id.contains(search);
     }).toList();
   }
 
@@ -1584,6 +1593,7 @@ class _WarehouseScreenState extends State<WarehouseScreen>
 
     final TextEditingController notesController = TextEditingController();
     final TextEditingController searchController = TextEditingController();
+    String? notesError;
 
     Map<int, int> selectedQuantities = {};
     Map<int, TextEditingController> quantityControllers = {};
@@ -1705,6 +1715,16 @@ class _WarehouseScreenState extends State<WarehouseScreen>
                             Fluttertoast.showToast(
                               msg:
                                   'Vui lòng chọn ít nhất một sản phẩm để hoàn kho',
+                            );
+                            return;
+                          }
+
+                          if (notesController.text.trim().isEmpty) {
+                            dialogSetState(() {
+                              notesError = 'Vui lòng nhập ghi chú';
+                            });
+                            Fluttertoast.showToast(
+                              msg: 'Vui lòng nhập ghi chú',
                             );
                             return;
                           }
@@ -2417,11 +2437,19 @@ class _WarehouseScreenState extends State<WarehouseScreen>
                         TextField(
                           controller: notesController,
                           maxLines: 3,
-                          decoration: const InputDecoration(
-                            labelText: 'Ghi chú',
+                          decoration: InputDecoration(
+                            labelText: 'Ghi chú *',
                             hintText: 'Nhập ghi chú hoàn kho...',
-                            border: OutlineInputBorder(),
+                            border: const OutlineInputBorder(),
+                            errorText: notesError,
                           ),
+                          onChanged: (val) {
+                            if (notesError != null && val.trim().isNotEmpty) {
+                              dialogSetState(() {
+                                notesError = null;
+                              });
+                            }
+                          },
                         ),
                       ],
                     ),
@@ -3073,6 +3101,117 @@ class _WarehouseScreenState extends State<WarehouseScreen>
     );
   }
 
+  Widget _buildHistoryStatusBadge(OrderWarehouseHistories history) {
+    final statusText =
+        history.statusText ??
+        (history.status == 1 ? 'Đã xác nhận' : 'Chưa xác nhận');
+    Color bgColor;
+    Color textColor;
+
+    switch (history.status) {
+      case 1:
+        bgColor = const Color(0xff4caf50).withValues(alpha: 0.12);
+        textColor = const Color(0xff4caf50);
+        break;
+      case 0:
+        bgColor = Colors.orange.withValues(alpha: 0.12);
+        textColor = Colors.orange.shade800;
+        break;
+      case -1:
+        bgColor = Colors.red.withValues(alpha: 0.12);
+        textColor = Colors.red;
+        break;
+      default:
+        final lower = statusText.toLowerCase();
+        if (lower.contains('đã xác nhận') || lower.contains('thành công')) {
+          bgColor = const Color(0xff4caf50).withValues(alpha: 0.12);
+          textColor = const Color(0xff4caf50);
+        } else if (lower.contains('chưa') || lower.contains('chờ')) {
+          bgColor = Colors.orange.withValues(alpha: 0.12);
+          textColor = Colors.orange.shade800;
+        } else if (lower.contains('hủy') || lower.contains('từ chối')) {
+          bgColor = Colors.red.withValues(alpha: 0.12);
+          textColor = Colors.red;
+        } else {
+          bgColor = Colors.blue.withValues(alpha: 0.12);
+          textColor = Colors.blue;
+        }
+    }
+
+    return _buildBadge(statusText, bgColor, textColor);
+  }
+
+  Widget _buildHistoryImages(List<String> images) {
+    return SizedBox(
+      height: 72,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: images.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 8),
+        itemBuilder: (context, idx) {
+          final imageUrl = _getImageUrl(images[idx]);
+          return GestureDetector(
+            onTap: () {
+              showDialog(
+                context: context,
+                builder: (_) => Dialog(
+                  backgroundColor: Colors.transparent,
+                  insetPadding: const EdgeInsets.all(16),
+                  child: Stack(
+                    alignment: Alignment.topRight,
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Image.network(
+                          imageUrl,
+                          fit: BoxFit.contain,
+                          errorBuilder: (_, __, ___) => Container(
+                            color: Colors.white,
+                            padding: const EdgeInsets.all(24),
+                            child: const Text('Không thể tải hình ảnh'),
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        icon: const CircleAvatar(
+                          backgroundColor: Colors.black54,
+                          radius: 16,
+                          child: Icon(
+                            Icons.close,
+                            color: Colors.white,
+                            size: 18,
+                          ),
+                        ),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Container(
+                width: 72,
+                height: 72,
+                color: Colors.grey.shade100,
+                child: Image.network(
+                  imageUrl,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => const Icon(
+                    Icons.broken_image_outlined,
+                    size: 24,
+                    color: Colors.grey,
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
   Widget _buildHistoryCard(OrderWarehouseHistories history) {
     final bool isExpanded = _expandedCards[history.id ?? 0] ?? false;
 
@@ -3090,9 +3229,24 @@ class _WarehouseScreenState extends State<WarehouseScreen>
           });
         },
         shape: const Border(),
-        title: Text(
-          'Đơn xuất kho #${history.id}',
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+        title: Row(
+          children: [
+            Flexible(
+              child: Text(
+                'Đơn xuất kho #${history.id}',
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            if (history.statusText != null &&
+                history.statusText!.isNotEmpty) ...[
+              const SizedBox(width: 8),
+              _buildHistoryStatusBadge(history),
+            ],
+          ],
         ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -3102,6 +3256,14 @@ class _WarehouseScreenState extends State<WarehouseScreen>
               'Khách hàng: ${history.userName ?? 'N/A'}',
               style: const TextStyle(fontSize: 12),
             ),
+            if (history.verifierName != null &&
+                history.verifierName!.isNotEmpty) ...[
+              const SizedBox(height: 2),
+              Text(
+                'Xác nhận bởi: ${history.verifierName}',
+                style: TextStyle(color: Colors.grey.shade700, fontSize: 11),
+              ),
+            ],
             const SizedBox(height: 2),
             Text(
               'Ngày: ${DateFormat('dd/MM/yyyy HH:mm').format(history.date ?? DateTime.now())}',
@@ -3167,6 +3329,141 @@ class _WarehouseScreenState extends State<WarehouseScreen>
                     ),
                     title: Text(history.userAddress ?? ''),
                   ),
+                if (history.statusText != null ||
+                    history.verifierName != null ||
+                    (history.verifierPhone != null &&
+                        history.verifierPhone != '0') ||
+                    (history.confirmImages != null &&
+                        history.confirmImages!.isNotEmpty) ||
+                    (history.images != null && history.images!.isNotEmpty)) ...[
+                  const Divider(height: 16),
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: const Color(0xfff7f8fa),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.grey.shade200),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(
+                              Icons.verified_outlined,
+                              size: 16,
+                              color: ColorUtil.bangladeshGreen,
+                            ),
+                            const SizedBox(width: 6),
+                            const Text(
+                              'Thông tin kiểm duyệt / xác nhận',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
+                              ),
+                            ),
+                            const Spacer(),
+                            if (history.statusText != null &&
+                                history.statusText!.isNotEmpty)
+                              _buildHistoryStatusBadge(history),
+                          ],
+                        ),
+                        if (history.verifierName != null &&
+                            history.verifierName!.isNotEmpty) ...[
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.person_outline,
+                                size: 15,
+                                color: Colors.grey,
+                              ),
+                              const SizedBox(width: 6),
+                              const Text(
+                                'Người xác nhận: ',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                              Expanded(
+                                child: Text(
+                                  history.verifierName!,
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                        if (history.verifierPhone != null &&
+                            history.verifierPhone!.isNotEmpty &&
+                            history.verifierPhone != '0') ...[
+                          const SizedBox(height: 6),
+                          InkWell(
+                            onTap: () => _makePhoneCall(history.verifierPhone!),
+                            onLongPress: () =>
+                                _copyPhoneNumber(history.verifierPhone!),
+                            child: Row(
+                              children: [
+                                const Icon(
+                                  Icons.phone_outlined,
+                                  size: 15,
+                                  color: Colors.blue,
+                                ),
+                                const SizedBox(width: 6),
+                                const Text(
+                                  'SĐT xác nhận: ',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                                Text(
+                                  history.verifierPhone!,
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.blue,
+                                    decoration: TextDecoration.underline,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                        if (history.confirmImages != null &&
+                            history.confirmImages!.isNotEmpty) ...[
+                          const SizedBox(height: 8),
+                          const Text(
+                            'Ảnh xác nhận:',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          _buildHistoryImages(history.confirmImages!),
+                        ],
+                        if (history.images != null &&
+                            history.images!.isNotEmpty) ...[
+                          const SizedBox(height: 8),
+                          const Text(
+                            'Ảnh đính kèm:',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          _buildHistoryImages(history.images!),
+                        ],
+                      ],
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 12),
                 const Text(
                   'Danh sách sản phẩm:',

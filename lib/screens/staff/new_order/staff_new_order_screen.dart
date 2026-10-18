@@ -47,7 +47,6 @@ class StaffNewOrderScreen extends StatefulWidget {
 class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
   late dynamic _bloc;
   late BillData billData;
-  StaffCreateOrderCoresSuccessState? _successState;
   int _lastClickTime = 0;
   late Map<String, dynamic> billDataMap;
   int _currentSelectedProductValue = 0;
@@ -101,21 +100,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
           _bloc.taskModel?.type ?? _bloc.args['taskType']?.toString() ?? '',
         ) ??
         0;
-    final String? defaultCoreName = initTaskType == 7
-        ? "Hỗ trợ online"
-        : (initTaskType == 8
-              ? "Giao máy"
-              : (initTaskType == 5
-                    ? "Chuyển máy"
-                    : (initTaskType == 9
-                          ? "Lắp máy lọc tổng"
-                          : (initTaskType == 10
-                                ? "Phụ lắp máy lọc tổng"
-                                : (initTaskType == 11
-                                      ? "Lắp máy đơn sàn (công 200k)"
-                                      : (initTaskType == 4 || initTaskType == 12
-                                            ? "Lắp máy mới"
-                                            : null))))));
+    final String? defaultCoreName = _getDefaultCoreName(initTaskType);
     final String defaultPrice = "0".toVND();
     if (defaultCoreName != null) {
       lstKeyValueCores.add(
@@ -124,6 +109,20 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
           TextEditingController(text: defaultPrice),
         ),
       );
+      final bool isMachineInstall =
+          initTaskType == 4 ||
+          initTaskType == 9 ||
+          initTaskType == 11 ||
+          initTaskType == 12;
+      if (isMachineInstall) {
+        final initialMachineName = _getSelectedMachineName();
+        lstKeyValueCores.add(
+          KeyValue(
+            TextEditingController(text: initialMachineName),
+            TextEditingController(text: defaultPrice),
+          ),
+        );
+      }
     } else {
       lstKeyValueCores
         ..add(KeyValue(TextEditingController(), TextEditingController()))
@@ -145,6 +144,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
     _picker = ImagePicker();
     _fetchKtvWarehouse();
     currentSelectedProductAllValue.addListener(() {
+      _syncSelectedMachineToCoreTable();
       if (_listProductsAll
           .where(
             (element) => element.name == currentSelectedProductAllValue.text,
@@ -217,6 +217,98 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
     }
   }
 
+  int get _currentTaskType =>
+      int.tryParse(
+        _bloc.taskModel?.type ?? _bloc.args['taskType']?.toString() ?? '',
+      ) ??
+      0;
+
+  bool get _isMachineInstallTask {
+    final type = _currentTaskType;
+    return type == 4 || type == 9 || type == 11 || type == 12;
+  }
+
+  String? _getDefaultCoreName([int? type]) {
+    final taskType = type ?? _currentTaskType;
+    return taskType == 7
+        ? "Hỗ trợ online"
+        : (taskType == 8
+              ? "Giao máy"
+              : (taskType == 5
+                    ? "Chuyển máy"
+                    : (taskType == 9
+                          ? "Lắp máy lọc tổng"
+                          : (taskType == 10
+                                ? "Phụ lắp máy lọc tổng"
+                                : (taskType == 11
+                                      ? "Lắp máy đơn sàn (công 200k)"
+                                      : (taskType == 4 || taskType == 12
+                                            ? "Lắp máy mới"
+                                            : null))))));
+  }
+
+  String _getSelectedMachineName() {
+    if (currentSelectedProductAllValue.text.trim().isNotEmpty) {
+      return currentSelectedProductAllValue.text.trim();
+    }
+    if (_currentSelectedProductValue != 0) {
+      final selectedProd = _listProducts.where(
+        (e) => e.id == _currentSelectedProductValue,
+      );
+      if (selectedProd.isNotEmpty) {
+        final name =
+            selectedProd.first.product?.name ?? selectedProd.first.proad?.name;
+        if (name != null && name.trim().isNotEmpty) {
+          return name.trim();
+        }
+      }
+    }
+    final modelName = _bloc.taskModel?.productInfo?.name?.trim();
+    if (modelName != null && modelName.isNotEmpty) {
+      return modelName;
+    }
+    return '';
+  }
+
+  void _syncSelectedMachineToCoreTable() {
+    if (!_isMachineInstallTask) return;
+    final String machineName = _getSelectedMachineName();
+    final String defaultPrice = "0".toVND();
+    final String? defaultCoreName = _getDefaultCoreName();
+
+    if (lstKeyValueCores.isEmpty) {
+      if (defaultCoreName != null) {
+        lstKeyValueCores.add(
+          KeyValue(
+            TextEditingController(text: defaultCoreName),
+            TextEditingController(text: defaultPrice),
+          ),
+        );
+      }
+    } else if (defaultCoreName != null &&
+        lstKeyValueCores[0].key.text.isEmpty) {
+      lstKeyValueCores[0].key.text = defaultCoreName;
+    }
+
+    if (lstKeyValueCores.isNotEmpty) {
+      if (lstKeyValueCores.length < 2) {
+        lstKeyValueCores.add(
+          KeyValue(
+            TextEditingController(text: machineName),
+            TextEditingController(text: defaultPrice),
+          ),
+        );
+      } else {
+        if (lstKeyValueCores[1].key.text != machineName) {
+          lstKeyValueCores[1].key.text = machineName;
+        }
+        if (lstKeyValueCores[1].value.text.isEmpty) {
+          lstKeyValueCores[1].value.text = defaultPrice;
+        }
+      }
+    }
+  }
+
   void _calculateEndDate() {
     if (_rentalDurationController.text.isNotEmpty) {
       try {
@@ -257,22 +349,8 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
     if (state is StaffNewOrderInitialState) {
       setState(() {
         subSavePointController.text = _bloc.subSavePoint.toString();
-        final int taskType = int.tryParse(_bloc.taskModel?.type ?? "") ?? 0;
-        final String? defaultCoreName = taskType == 7
-            ? "Hỗ trợ online"
-            : (taskType == 8
-                  ? "Giao máy"
-                  : (taskType == 5
-                        ? "Chuyển máy"
-                        : (taskType == 9
-                              ? "Lắp máy lọc tổng"
-                              : (taskType == 10
-                                    ? "Phụ lắp máy lọc tổng"
-                                    : (taskType == 11
-                                          ? "Lắp máy đơn sàn (công 200k)"
-                                          : (taskType == 4 || taskType == 12
-                                                ? "Lắp máy mới"
-                                                : null))))));
+        final int taskType = _currentTaskType;
+        final String? defaultCoreName = _getDefaultCoreName(taskType);
         final String defaultPrice = "0".toVND();
         final bool hasDefaultCore = defaultCoreName != null;
         if (hasDefaultCore) {
@@ -288,6 +366,31 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
             if (lstKeyValueCores[0].value.text.isEmpty) {
               lstKeyValueCores[0].value.text = defaultPrice;
             }
+          }
+          if (_isMachineInstallTask) {
+            final String machineName = _getSelectedMachineName();
+            if (lstKeyValueCores.length < 2) {
+              lstKeyValueCores.add(
+                KeyValue(
+                  TextEditingController(text: machineName),
+                  TextEditingController(text: defaultPrice),
+                ),
+              );
+            } else {
+              if (machineName.isNotEmpty) {
+                lstKeyValueCores[1].key.text = machineName;
+              }
+              if (lstKeyValueCores[1].value.text.isEmpty) {
+                lstKeyValueCores[1].value.text = defaultPrice;
+              }
+            }
+            if (lstKeyValueCores.length > 2 &&
+                lstKeyValueCores
+                    .skip(2)
+                    .every((e) => e.key.text.isEmpty && e.value.text.isEmpty)) {
+              lstKeyValueCores.removeRange(2, lstKeyValueCores.length);
+            }
+          } else {
             if (lstKeyValueCores.length > 1 &&
                 lstKeyValueCores
                     .skip(1)
@@ -307,6 +410,13 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
             isNewInstall || _bloc.orderDetail?.subType == '1';
         if (isExcludedFromProductAutoFill) {
           _currentSelectedProductValue = 0;
+          if (currentSelectedProductAllValue.text.isEmpty &&
+              _bloc.taskModel?.productInfo?.name != null &&
+              _bloc.taskModel!.productInfo!.name!.isNotEmpty) {
+            currentSelectedProductAllValue.text =
+                _bloc.taskModel!.productInfo!.name!;
+            _syncSelectedMachineToCoreTable();
+          }
         } else {
           _currentSelectedProductValue =
               int.tryParse(_bloc.taskModel?.productId ?? "") ??
@@ -372,12 +482,15 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
     if (state is StaffCreateOrderCoresSuccessState) {
       setState(() {
         _isLoading = false;
-        _successState = state;
       });
       if ((_bloc.paymentType == 2 || _bloc.paymentType == 3) &&
           state.orderPayment?.qrUrl != null &&
           state.orderPayment!.qrUrl!.isNotEmpty) {
-        _showTransferQrSheet(state);
+        Navigator.pushReplacementNamed(
+          context,
+          Routes.staffQrPaymentScreen,
+          arguments: {'order': state.order, 'orderPayment': state.orderPayment},
+        );
       } else {
         _goToOrderManager();
       }
@@ -1075,6 +1188,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                       context.showSnackBar('Vui lòng chọn sản phẩm');
                       return;
                     }
+                    _syncSelectedMachineToCoreTable();
                     List<OrderFilterCoreModel> lst1 = [];
                     List<OrderFilterCoreModel> lst2 = [];
                     for (var item in lstKeyValueCores) {
@@ -1261,16 +1375,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                 ),
                 ButtonWidget(
                   onTap: () {
-                    if (_successState != null) {
-                      if ((_bloc.paymentType == 2 || _bloc.paymentType == 3) &&
-                          _successState!.orderPayment?.qrUrl != null &&
-                          _successState!.orderPayment!.qrUrl!.isNotEmpty) {
-                        _showTransferQrSheet(_successState!);
-                      } else {
-                        _goToOrderManager();
-                      }
-                      return;
-                    }
+                    if (_isLoading) return;
                     if (_bloc.totalPay == 0 &&
                         (_bloc.paymentType == null || _bloc.paymentType == 0)) {
                       _bloc.paymentType = 1;
@@ -1337,6 +1442,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                       context.showSnackBar('Tổng thanh toán không được âm');
                       return;
                     }
+                    _syncSelectedMachineToCoreTable();
                     List<OrderFilterCoreModel> lst1 = [];
                     List<OrderFilterCoreModel> lst2 = [];
                     for (var item in lstKeyValueCores) {
@@ -1507,13 +1613,9 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                   ),
                   color: ColorUtil.bangladeshGreen,
                   child: Text(
-                    _successState != null
-                        ? ((_bloc.paymentType == 2 || _bloc.paymentType == 3)
-                              ? "XEM MÃ QR THANH TOÁN"
-                              : "HOÀN THÀNH")
-                        : (_bloc.paymentType == 2 || _bloc.paymentType == 3
-                              ? "TẠO ĐƠN & HIỂN THỊ QR"
-                              : "HOÀN THÀNH"),
+                    _bloc.paymentType == 2 || _bloc.paymentType == 3
+                        ? "TẠO ĐƠN & HIỂN THỊ QR"
+                        : "HOÀN THÀNH",
                     textAlign: TextAlign.center,
                     style: const TextStyle(fontSize: 16, color: Colors.white),
                   ),
@@ -1524,518 +1626,6 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
         ),
       ),
     );
-  }
-
-  void _showTransferQrSheet(StaffCreateOrderCoresSuccessState state) {
-    final order = state.order;
-    final orderPayment = state.orderPayment;
-    final qrUrl = orderPayment?.qrUrl ?? '';
-    final amount = int.tryParse(orderPayment?.amount ?? '');
-    final orderId = order?.id;
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      isDismissible: false,
-      enableDrag: false,
-      useSafeArea: true,
-      backgroundColor: Colors.transparent,
-      builder: (sheetContext) {
-        return Container(
-          margin: const EdgeInsets.all(12),
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(24),
-          ),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 44,
-                  height: 5,
-                  margin: const EdgeInsets.only(bottom: 18),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
-                    borderRadius: BorderRadius.circular(100),
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFEFF6FF),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: const Icon(
-                    Icons.qr_code_2_rounded,
-                    color: Color(0xFF2563EB),
-                    size: 34,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                const Text(
-                  'Quét QR để chuyển khoản',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: ColorUtil.raisinBlack,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Đơn hàng #${orderId ?? ''}',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: ColorUtil.spanishGray,
-                    fontSize: 13,
-                  ),
-                ),
-                const SizedBox(height: 18),
-                Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: const Color(0xFFE5E7EB)),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.06),
-                        blurRadius: 18,
-                        offset: const Offset(0, 8),
-                      ),
-                    ],
-                  ),
-                  child: Image.network(
-                    qrUrl,
-                    height: 260,
-                    width: 260,
-                    fit: BoxFit.contain,
-                    errorBuilder: (_, _, _) => const SizedBox(
-                      height: 220,
-                      child: Center(
-                        child: Text(
-                          'Không tải được mã QR.\nVui lòng kiểm tra kết nối mạng.',
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 18),
-                _buildQrInfoRow(
-                  'Số tiền',
-                  amount != null
-                      ? amount.toString().toVND()
-                      : (orderPayment?.amount ?? ''),
-                  isHighlight: true,
-                ),
-                _buildQrInfoRow(
-                  'Nội dung CK',
-                  orderPayment?.transferContent ?? '',
-                ),
-                const SizedBox(height: 18),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () {
-                          if (orderId == null) {
-                            context.showSnackBar(
-                              'Không tìm thấy mã đơn hàng để cập nhật trạng thái.',
-                            );
-                            return;
-                          }
-                          Navigator.of(sheetContext).pop();
-                          _bloc.add(
-                            StaffNewOrderUploadPaymentProofEvent(
-                              orderPaymentId: orderPayment!.id!,
-                              notes: '',
-                              files: [],
-                              paymentStatus: 0,
-                            ),
-                          );
-                        },
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          side: const BorderSide(color: Color(0xFFCBD5E1)),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                        ),
-                        child: const Text(
-                          'Khách chưa thanh toán',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(color: ColorUtil.raisinBlack),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          final orderPaymentId = orderPayment?.id;
-                          if (orderPaymentId == null) {
-                            context.showSnackBar(
-                              'Không tìm thấy thông tin thanh toán để lưu bill.',
-                            );
-                            return;
-                          }
-                          Navigator.of(sheetContext).pop();
-                          _showPaymentProofSheet(
-                            orderPaymentId: orderPaymentId,
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: ColorUtil.green,
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                        ),
-                        child: const Text(
-                          'Khách đã thanh toán',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildQrInfoRow(
-    String label,
-    String value, {
-    bool isHighlight = false,
-  }) {
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: const TextStyle(color: ColorUtil.spanishGray, fontSize: 13),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              value,
-              textAlign: TextAlign.right,
-              style: TextStyle(
-                color: isHighlight ? ColorUtil.red : ColorUtil.raisinBlack,
-                fontWeight: isHighlight ? FontWeight.bold : FontWeight.w600,
-                fontSize: isHighlight ? 16 : 14,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showPaymentProofSheet({required int orderPaymentId}) {
-    final notesController = TextEditingController();
-    final List<File> billFiles = [];
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      backgroundColor: Colors.transparent,
-      builder: (sheetContext) {
-        return StatefulBuilder(
-          builder: (context, setSheetState) {
-            return Container(
-              margin: const EdgeInsets.all(12),
-              padding: EdgeInsets.only(
-                left: 20,
-                right: 20,
-                top: 12,
-                bottom: MediaQuery.of(context).viewInsets.bottom + 20,
-              ),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(24),
-              ),
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Center(
-                      child: Container(
-                        width: 44,
-                        height: 5,
-                        margin: const EdgeInsets.only(bottom: 18),
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade300,
-                          borderRadius: BorderRadius.circular(100),
-                        ),
-                      ),
-                    ),
-                    const Text(
-                      'Xác nhận thanh toán',
-                      style: TextStyle(
-                        color: ColorUtil.raisinBlack,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    const Text(
-                      'Chụp hoặc chọn ảnh bill chuyển khoản của khách hàng. Ảnh này sẽ được gửi cho kế toán kiểm tra.',
-                      style: TextStyle(
-                        color: ColorUtil.spanishGray,
-                        fontSize: 13,
-                        height: 1.35,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: OutlinedButton.icon(
-                            onPressed: () async {
-                              final files = await _pickPaymentBillImages(
-                                source: ImageSource.camera,
-                              );
-                              if (files.isNotEmpty) {
-                                setSheetState(() {
-                                  billFiles.addAll(files);
-                                });
-                              }
-                            },
-                            icon: const Icon(Icons.photo_camera_outlined),
-                            label: const Text('Chụp bill'),
-                            style: OutlinedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(vertical: 13),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14),
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: OutlinedButton.icon(
-                            onPressed: () async {
-                              final files = await _pickPaymentBillImages(
-                                source: ImageSource.gallery,
-                                allowMultiple: true,
-                              );
-                              if (files.isNotEmpty) {
-                                setSheetState(() {
-                                  billFiles.addAll(files);
-                                });
-                              }
-                            },
-                            icon: const Icon(Icons.photo_library_outlined),
-                            label: const Text('Chọn ảnh'),
-                            style: OutlinedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(vertical: 13),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 14),
-                    if (billFiles.isEmpty)
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(18),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF8FAFC),
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: const Color(0xFFE5E7EB)),
-                        ),
-                        child: const Column(
-                          children: [
-                            Icon(
-                              Icons.receipt_long_outlined,
-                              color: ColorUtil.spanishGray,
-                              size: 34,
-                            ),
-                            SizedBox(height: 8),
-                            Text(
-                              'Chưa có ảnh bill',
-                              style: TextStyle(color: ColorUtil.spanishGray),
-                            ),
-                          ],
-                        ),
-                      )
-                    else
-                      SizedBox(
-                        height: 104,
-                        child: ListView.separated(
-                          scrollDirection: Axis.horizontal,
-                          itemCount: billFiles.length,
-                          separatorBuilder: (_, _) => const SizedBox(width: 10),
-                          itemBuilder: (_, index) {
-                            return Stack(
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(14),
-                                  child: Image.file(
-                                    billFiles[index],
-                                    width: 92,
-                                    height: 104,
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                                Positioned(
-                                  top: 4,
-                                  right: 4,
-                                  child: InkWell(
-                                    onTap: () {
-                                      setSheetState(() {
-                                        billFiles.removeAt(index);
-                                      });
-                                    },
-                                    child: Container(
-                                      padding: const EdgeInsets.all(4),
-                                      decoration: const BoxDecoration(
-                                        color: Colors.black54,
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: const Icon(
-                                        Icons.close,
-                                        color: Colors.white,
-                                        size: 14,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            );
-                          },
-                        ),
-                      ),
-                    const SizedBox(height: 16),
-                    _buildTextFieldWrapper(
-                      TextField(
-                        controller: notesController,
-                        maxLines: 3,
-                        decoration: const InputDecoration(
-                          border: InputBorder.none,
-                          hintText: 'Ghi chú cho kế toán (nếu có)...',
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 18),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          if (billFiles.isEmpty) {
-                            context.showSnackBar(
-                              'Vui lòng chụp hoặc chọn ít nhất 1 ảnh bill.',
-                            );
-                            return;
-                          }
-                          final notes = notesController.text.trim();
-                          Navigator.of(sheetContext).pop();
-                          _bloc.add(
-                            StaffNewOrderUploadPaymentProofEvent(
-                              orderPaymentId: orderPaymentId,
-                              notes: notes,
-                              files: billFiles,
-                            ),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: ColorUtil.green,
-                          padding: const EdgeInsets.symmetric(vertical: 15),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                        ),
-                        child: const Text(
-                          'Lưu ảnh bill',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
-        );
-      },
-    ).whenComplete(notesController.dispose);
-  }
-
-  Future<List<File>> _pickPaymentBillImages({
-    required ImageSource source,
-    bool allowMultiple = false,
-  }) async {
-    final List<File> selectedFiles = [];
-
-    if (source == ImageSource.camera) {
-      if (!await Permission.camera.request().isGranted) {
-        CustomAlertDialog.show(
-          context,
-          leftText: "Cài đặt",
-          rightText: "Hủy",
-          isLeftPositive: true,
-          leftAction: () {
-            Navigator.pop(context);
-            openAppSettings();
-          },
-          content: 'Vui lòng cấp quyền truy cập camera.',
-        );
-        return selectedFiles;
-      }
-      final pickedFile = await _picker.pickImage(
-        source: ImageSource.camera,
-        imageQuality: 70,
-      );
-      if (pickedFile != null) {
-        selectedFiles.add(File(pickedFile.path));
-      }
-    } else if (allowMultiple) {
-      bool isGranted = true;
-      if (Theme.of(context).platform == TargetPlatform.iOS) {
-        isGranted = await Permission.photos.request().isGranted;
-      }
-      if (!isGranted) {
-        context.showSnackBar('Vui lòng cấp quyền truy cập thư viện ảnh.');
-        return selectedFiles;
-      }
-      final pickedFiles = await _picker.pickMultiImage(imageQuality: 70);
-      selectedFiles.addAll(pickedFiles.map((item) => File(item.path)));
-    } else {
-      final pickedFile = await _picker.pickImage(
-        source: ImageSource.gallery,
-        imageQuality: 70,
-      );
-      if (pickedFile != null) {
-        selectedFiles.add(File(pickedFile.path));
-      }
-    }
-
-    return selectedFiles;
   }
 
   Widget _buildSectionMedia() {
@@ -2416,13 +2006,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
         ),
         if (lstKeyValueCores.isNotEmpty)
           ...List.generate(lstKeyValueCores.length, (i) {
-            final int taskType =
-                int.tryParse(
-                  _bloc.taskModel?.type ??
-                      _bloc.args['taskType']?.toString() ??
-                      '',
-                ) ??
-                0;
+            final int taskType = _currentTaskType;
             final bool hasDefaultCore =
                 taskType == 4 ||
                 taskType == 5 ||
@@ -2433,6 +2017,8 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                 taskType == 11 ||
                 taskType == 12;
             final bool isFixedFirstRow = hasDefaultCore && i == 0;
+            final bool isFixedMachineRow = _isMachineInstallTask && i == 1;
+            final bool isReadOnlyRow = isFixedFirstRow || isFixedMachineRow;
 
             return Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -2454,15 +2040,23 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                         : TextFormField(
                             controller: lstKeyValueCores[i].key,
                             readOnly: true,
-                            onTap: isFixedFirstRow
-                                ? null
+                            onTap: isReadOnlyRow
+                                ? (isFixedMachineRow
+                                      ? () {
+                                          context.showSnackBar(
+                                            'Vui lòng chọn máy ở mục "Thông tin sản phẩm"',
+                                          );
+                                        }
+                                      : null)
                                 : () {
                                     _showCoreSearchSelector(context, i);
                                   },
                             decoration: InputDecoration(
-                              hintText: _ktvWarehouseCores.isEmpty
-                                  ? 'Kho trống!'
-                                  : 'Chọn lõi/máy...',
+                              hintText: isFixedMachineRow
+                                  ? 'Chọn máy ở Thông tin sản phẩm'
+                                  : (_ktvWarehouseCores.isEmpty
+                                        ? 'Kho trống!'
+                                        : 'Chọn lõi/máy...'),
                               isDense: true,
                               contentPadding: const EdgeInsets.symmetric(
                                 horizontal: 12,
@@ -2480,7 +2074,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                                   color: Colors.grey.shade300,
                                 ),
                               ),
-                              suffixIcon: isFixedFirstRow
+                              suffixIcon: isReadOnlyRow
                                   ? null
                                   : (lstKeyValueCores[i].key.text.isNotEmpty
                                         ? IconButton(
@@ -2569,7 +2163,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  if (isFixedFirstRow)
+                  if (isReadOnlyRow)
                     const SizedBox(width: 20)
                   else
                     IconButton(
@@ -2888,9 +2482,14 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
 
                 if (matchedCore != null) {
                   setState(() {
-                    int emptyIndex = lstKeyValueCores.indexWhere(
-                      (item) => item.key.text.isEmpty,
-                    );
+                    final startIndex = _isMachineInstallTask ? 2 : 1;
+                    int emptyIndex = -1;
+                    for (int i = startIndex; i < lstKeyValueCores.length; i++) {
+                      if (lstKeyValueCores[i].key.text.isEmpty) {
+                        emptyIndex = i;
+                        break;
+                      }
+                    }
                     if (emptyIndex != -1) {
                       lstKeyValueCores[emptyIndex].key.text = matchedCore!;
                     } else {
@@ -3298,6 +2897,8 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                       return GestureDetector(
                         onTap: () {
                           onSelected(option);
+                          _syncSelectedMachineToCoreTable();
+                          setState(() {});
                           var add =
                               _listProducts
                                   .where(

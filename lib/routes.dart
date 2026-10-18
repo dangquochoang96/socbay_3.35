@@ -75,6 +75,9 @@ import 'package:socbay/screens/staff/customer_information/customer_information_l
 import 'package:socbay/screens/staff/feedback/staff_feedback_screen.dart';
 import 'package:socbay/screens/staff/new_order/bill_screen.dart';
 import 'package:socbay/screens/staff/new_order/staff_new_order_screen.dart';
+import 'package:socbay/screens/staff/new_order/staff_qr_payment_screen.dart';
+import 'package:socbay/data/model/order_detail_model.dart';
+import 'package:socbay/data/model/order_payment_model.dart';
 import 'package:socbay/screens/staff/new_task/staff_service_screen.dart';
 import 'package:socbay/screens/staff/new_task/staff_service_screen_sale.dart';
 import 'package:socbay/screens/staff/profile/staff_profile_screen.dart';
@@ -176,6 +179,7 @@ class Routes {
   static const String taskTimelineScreen = '/taskTimelineScreen';
   static const String ktvWalletScreen = '/ktvWalletScreen';
   static const String customerOrderListScreen = '/customerOrderListScreen';
+  static const String staffQrPaymentScreen = '/staffQrPaymentScreen';
   CupertinoPageRoute routePage(RouteSettings settings) {
     return CupertinoPageRoute(
       settings: settings,
@@ -521,6 +525,22 @@ class Routes {
               create: (context) =>
                   StaffNewOrderBloc(apiRepository: apiRepository, args: {}),
               child: BillScreen(billData: settings.arguments as BillData),
+            );
+          case staffQrPaymentScreen:
+            final dynamic rawArgs = settings.arguments;
+            OrderDetailModel? order;
+            OrderPaymentModel? orderPayment;
+            if (rawArgs is Map<String, dynamic>) {
+              order = rawArgs['order'] as OrderDetailModel?;
+              orderPayment = rawArgs['orderPayment'] as OrderPaymentModel?;
+            }
+            return BlocProvider<StaffNewOrderBloc>(
+              create: (context) =>
+                  StaffNewOrderBloc(apiRepository: apiRepository, args: {}),
+              child: StaffOrderQrPaymentScreen(
+                order: order,
+                orderPayment: orderPayment,
+              ),
             );
           case staffDetailFeedBackScreen:
             return BlocProvider<FeedbackScreenBloc>(

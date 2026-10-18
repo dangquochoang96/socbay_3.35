@@ -155,6 +155,13 @@ class OrderWarehouseHistories {
   String? totalAmount;
   List<WarehouseProduct>? products;
   String? notes;
+  int? status;
+  String? verifyBy;
+  String? statusText;
+  String? verifierName;
+  String? verifierPhone;
+  List<String>? images;
+  List<String>? confirmImages;
   DateTime? createdAt;
   DateTime? updatedAt;
 
@@ -170,6 +177,13 @@ class OrderWarehouseHistories {
     this.totalAmount,
     this.products,
     this.notes,
+    this.status,
+    this.verifyBy,
+    this.statusText,
+    this.verifierName,
+    this.verifierPhone,
+    this.images,
+    this.confirmImages,
     this.createdAt,
     this.updatedAt,
   });
@@ -189,6 +203,19 @@ class OrderWarehouseHistories {
             ? productsFromMap(json["products"])
             : null,
         notes: json["notes"],
+        status: json["status"] is int
+            ? json["status"]
+            : int.tryParse(json["status"]?.toString() ?? ''),
+        verifyBy: json["verify_by"]?.toString(),
+        statusText: json["status_text"]?.toString(),
+        verifierName: json["verifier_name"]?.toString(),
+        verifierPhone: json["verifier_phone"]?.toString(),
+        images: json["images"] != null
+            ? _parseWarehouseImagesList(json["images"])
+            : null,
+        confirmImages: json["confirm_images"] != null
+            ? _parseWarehouseImagesList(json["confirm_images"])
+            : null,
         createdAt: json["created_at"] == null
             ? null
             : DateTime.tryParse(json["created_at"]),
@@ -208,9 +235,30 @@ class OrderWarehouseHistories {
     "discount": discount,
     "total_amount": totalAmount,
     "notes": notes,
+    "status": status,
+    "verify_by": verifyBy,
+    "status_text": statusText,
+    "verifier_name": verifierName,
+    "verifier_phone": verifierPhone,
+    "images": images,
+    "confirm_images": confirmImages,
     "created_at": createdAt?.toIso8601String(),
     "updated_at": updatedAt?.toIso8601String(),
   };
+}
+
+List<String> _parseWarehouseImagesList(dynamic json) {
+  if (json == null) return [];
+  if (json is List) {
+    return json.map((x) {
+      if (x is String) return x;
+      if (x is Map && x['image'] != null) return x['image'].toString();
+      if (x is Map && x['link'] != null) return x['link'].toString();
+      if (x is Map && x['url'] != null) return x['url'].toString();
+      return x.toString();
+    }).toList();
+  }
+  return [];
 }
 
 WarehouseProduct productFromJson(String str) =>
@@ -232,8 +280,11 @@ class WarehouseProduct {
 
   factory WarehouseProduct.fromJson(Map<String, dynamic> json) =>
       WarehouseProduct(
-        id: json["id"],
-        name: json["name"],
+        id: json["id"] ??
+            (json["product_id"] != null
+                ? int.tryParse(json["product_id"].toString())
+                : null),
+        name: json["name"] ?? json["product_name"],
         quantity: json["quantity"] is int
             ? json["quantity"]
             : int.tryParse(json["quantity"]?.toString() ?? '0'),

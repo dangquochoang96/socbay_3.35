@@ -342,16 +342,27 @@ class _RetailOrderScreenState extends State<RetailOrderScreen> {
     final String orderIdStr = order.id.toString();
     final bool isExpanded = _expandedOrderIds.contains(orderIdStr);
 
-    final currentUserId = App.instance.userApp?.id?.toString();
+    final currentUser = App.instance.userApp;
+    final currentUserId = currentUser?.id?.toString();
+    final currentUserPhone = currentUser?.phone?.trim();
+
+    final bool isMyOrder =
+        currentUserId != null &&
+        (order.userId == currentUserId ||
+            order.customerId == currentUserId ||
+            order.users?.id?.toString() == currentUserId ||
+            order.customer?.id?.toString() == currentUserId ||
+            (currentUserPhone != null &&
+                currentUserPhone.isNotEmpty &&
+                order.orderUserPhone?.trim() == currentUserPhone));
+
     bool hasUploadedProof = false;
     if (order.retailOrderShipment?.shipmentUsers != null) {
       for (var assign in order.retailOrderShipment!.shipmentUsers!) {
-        if (assign.userId == currentUserId) {
-          final hasImages = assign.images != null && assign.images!.isNotEmpty;
-          final hasNote = assign.note != null && assign.note!.isNotEmpty;
-          if (hasImages || hasNote) {
-            hasUploadedProof = true;
-          }
+        final hasImages = assign.images != null && assign.images!.isNotEmpty;
+        final hasNote = assign.note != null && assign.note!.isNotEmpty;
+        if (hasImages || hasNote) {
+          hasUploadedProof = true;
           break;
         }
       }
@@ -603,7 +614,7 @@ class _RetailOrderScreenState extends State<RetailOrderScreen> {
             ),
           ],
 
-          if (order.status == '4' && !hasUploadedProof) ...[
+          if (isMyOrder && order.status == '4' && !hasUploadedProof) ...[
             const Divider(height: 1, color: Color(0xfff1f2f6)),
             Padding(
               padding: const EdgeInsets.all(16.0),
