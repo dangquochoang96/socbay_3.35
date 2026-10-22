@@ -247,17 +247,93 @@ class OrderWarehouseHistories {
   };
 }
 
-List<String> _parseWarehouseImagesList(dynamic json) {
-  if (json == null) return [];
-  if (json is List) {
-    return json.map((x) {
-      if (x is String) return x;
-      if (x is Map && x['image'] != null) return x['image'].toString();
-      if (x is Map && x['link'] != null) return x['link'].toString();
-      if (x is Map && x['url'] != null) return x['url'].toString();
-      return x.toString();
-    }).toList();
+String _cleanWarehouseImagePath(String raw) {
+  var s = raw.trim();
+  while ((s.startsWith('"') && s.endsWith('"')) ||
+      (s.startsWith("'") && s.endsWith("'")) ||
+      (s.startsWith(r'\"') && s.endsWith(r'\"')) ||
+      (s.startsWith('[') && s.endsWith(']'))) {
+    if (s.startsWith(r'\"') && s.endsWith(r'\"') && s.length >= 4) {
+      s = s.substring(2, s.length - 2).trim();
+    } else if (s.length >= 2) {
+      s = s.substring(1, s.length - 1).trim();
+    } else {
+      break;
+    }
   }
+  s = s.replaceAll(r'\"', '').replaceAll('"', '').replaceAll("'", '').trim();
+  return s;
+}
+
+List<String> _parseWarehouseImagesList(dynamic rawJson) {
+  if (rawJson == null) return [];
+
+  if (rawJson is String) {
+    final trimmed = rawJson.trim();
+    if (trimmed.isEmpty || trimmed == '[]' || trimmed == 'null') {
+      return [];
+    }
+    if (trimmed.startsWith('[') || trimmed.startsWith('{')) {
+      try {
+        final decoded = json.decode(trimmed);
+        return _parseWarehouseImagesList(decoded);
+      } catch (_) {
+        final stripped =
+            trimmed.replaceAll(RegExp(r'^[\[\]]+|[\[\]]+$'), '').trim();
+        if (stripped.isEmpty) return [];
+        return stripped
+            .split(',')
+            .map((s) => _cleanWarehouseImagePath(s))
+            .where((s) => s.isNotEmpty)
+            .toList();
+      }
+    }
+    if (trimmed.contains(',')) {
+      return trimmed
+          .split(',')
+          .map((s) => _cleanWarehouseImagePath(s))
+          .where((s) => s.isNotEmpty)
+          .toList();
+    }
+    final cleaned = _cleanWarehouseImagePath(trimmed);
+    return cleaned.isNotEmpty ? [cleaned] : [];
+  }
+
+  if (rawJson is List) {
+    final List<String> results = [];
+    for (var x in rawJson) {
+      if (x == null) continue;
+      if (x is String) {
+        final trimmed = x.trim();
+        if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+          results.addAll(_parseWarehouseImagesList(trimmed));
+        } else {
+          final cleaned = _cleanWarehouseImagePath(trimmed);
+          if (cleaned.isNotEmpty) results.add(cleaned);
+        }
+      } else if (x is Map) {
+        final val = x['image'] ?? x['link'] ?? x['url'] ?? x['path'];
+        if (val != null) {
+          final cleaned = _cleanWarehouseImagePath(val.toString());
+          if (cleaned.isNotEmpty) results.add(cleaned);
+        }
+      } else {
+        final cleaned = _cleanWarehouseImagePath(x.toString());
+        if (cleaned.isNotEmpty) results.add(cleaned);
+      }
+    }
+    return results;
+  }
+
+  if (rawJson is Map) {
+    final val =
+        rawJson['image'] ?? rawJson['link'] ?? rawJson['url'] ?? rawJson['path'];
+    if (val != null) {
+      final cleaned = _cleanWarehouseImagePath(val.toString());
+      return cleaned.isNotEmpty ? [cleaned] : [];
+    }
+  }
+
   return [];
 }
 

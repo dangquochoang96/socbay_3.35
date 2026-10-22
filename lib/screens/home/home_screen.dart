@@ -54,14 +54,18 @@ class _HomeScreenState extends State<HomeScreen> {
     _bloc.add(HomeStartedEvent());
     if (App.instance.userApp?.isUserRole() == true) {
       _checkTrackingStatus();
-      LocationTrackingService.instance.addTaskDataCallback(_onLocationDataReceived);
+      LocationTrackingService.instance.addTaskDataCallback(
+        _onLocationDataReceived,
+      );
     }
   }
 
   @override
   void dispose() {
     if (App.instance.userApp?.isUserRole() == true) {
-      LocationTrackingService.instance.removeTaskDataCallback(_onLocationDataReceived);
+      LocationTrackingService.instance.removeTaskDataCallback(
+        _onLocationDataReceived,
+      );
     }
     super.dispose();
   }
@@ -78,8 +82,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _checkTrackingStatus() async {
     bool isTracking = await LocationTrackingService.instance.isTracking();
-    double distanceKm =
-        await LocationTrackingService.instance.getCurrentShiftDistanceKm();
+    double distanceKm = await LocationTrackingService.instance
+        .getCurrentShiftDistanceKm();
     if (mounted) {
       setState(() {
         _isTrackingShift = isTracking;
@@ -622,6 +626,19 @@ class _HomeScreenState extends State<HomeScreen> {
                             _bloc.totalPriceAll.toInt().toVND(),
                             Images.iconPoint,
                           ),
+                          _buildBoxSummary(
+                            context,
+                            "Thưởng DS",
+                            _formatMonthlyBonus(
+                              _bloc.user?.userProfile?.monthlyBonus ??
+                                  App
+                                      .instance
+                                      .userApp
+                                      ?.userProfile
+                                      ?.monthlyBonus,
+                            ),
+                            Images.iconStats,
+                          ),
                         ],
                       ],
                     ),
@@ -687,6 +704,13 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  String _formatMonthlyBonus(String? bonus) {
+    if (bonus == null || bonus.trim().isEmpty) return 0.toVND();
+    final clean = bonus.replaceAll(',', '').replaceAll('.', '').trim();
+    final parsed = int.tryParse(clean) ?? (double.tryParse(bonus) ?? 0).toInt();
+    return parsed.toVND();
+  }
+
   Widget _buildBoxSummary(
     BuildContext context,
     String title,
@@ -700,25 +724,28 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.only(top: 10),
-              child: Stack(
+              padding: const EdgeInsets.only(top: 10, left: 4, right: 4),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.only(left: 15),
-                    child: ImageUtil.loadAssetsImage(
-                      fileName: image,
-                      width: 20,
-                      height: 20,
-                    ),
+                  ImageUtil.loadAssetsImage(
+                    fileName: image,
+                    width: 18,
+                    height: 18,
                   ),
-                  Container(
-                    alignment: Alignment.center,
-                    child: Text(
-                      title,
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: ColorUtil.bangladeshGreen,
+                  const SizedBox(width: 4),
+                  Flexible(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        title,
+                        maxLines: 1,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: ColorUtil.bangladeshGreen,
+                        ),
                       ),
                     ),
                   ),
@@ -728,11 +755,16 @@ class _HomeScreenState extends State<HomeScreen> {
             Expanded(
               child: Container(
                 alignment: Alignment.center,
-                child: Text(
-                  value,
-                  style: const TextStyle(
-                    fontSize: 17,
-                    color: ColorUtil.bangladeshGreen,
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    value,
+                    maxLines: 1,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: ColorUtil.bangladeshGreen,
+                    ),
                   ),
                 ),
               ),
@@ -1045,8 +1077,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     color: _isTrackingShift
                         ? ColorUtil.bangladeshGreen
                         : Colors.grey.shade600,
-                    fontWeight:
-                        _isTrackingShift ? FontWeight.w600 : FontWeight.normal,
+                    fontWeight: _isTrackingShift
+                        ? FontWeight.w600
+                        : FontWeight.normal,
                   ),
                 ),
               ],

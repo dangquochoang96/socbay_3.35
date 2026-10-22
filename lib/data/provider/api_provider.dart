@@ -1114,6 +1114,7 @@ class ApiProvider {
           bankInfo: baseProfile?.bankInfo,
           bankQr: baseProfile?.bankQr,
           basicSalary: baseProfile?.basicSalary,
+          monthlyBonus: baseProfile?.monthlyBonus,
           bhxh: baseProfile?.bhxh,
           totalIncome: baseProfile?.totalIncome,
           typeStaff: baseProfile?.typeStaff,

@@ -15,11 +15,23 @@ class ImageUtil {
   }
 
   static String getUrlFromStoragePath(String path) {
-    final storagePath = path.replaceFirst('public/', '');
     if (path.isEmpty) {
       return '';
     }
-    return '$_host/storage/$storagePath';
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return path;
+    }
+    var cleanPath = path.trim().replaceFirst(RegExp(r'^public/'), '');
+    if (cleanPath.startsWith('/storage/')) {
+      return '$_host$cleanPath';
+    }
+    if (cleanPath.startsWith('storage/')) {
+      return '$_host/$cleanPath';
+    }
+    if (!cleanPath.startsWith('/')) {
+      cleanPath = '/$cleanPath';
+    }
+    return '$_host/storage$cleanPath';
   }
   static Widget loadNetWorkImage({
     required String url,

@@ -22,6 +22,7 @@ import 'package:socbay/widgets/my_app_bar.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:socbay/components/qr_reader_view.dart';
 import 'package:socbay/data/model/product_model.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:socbay/widgets/dialog/custom_alert_dialog.dart';
 
 class WarehouseUI extends StatelessWidget {
@@ -173,9 +174,36 @@ class _WarehouseScreenState extends State<WarehouseScreen>
   }
 
   String _getImageUrl(String? path) {
-    if (path == null || path.isEmpty) return '';
-    if (path.startsWith('http://') || path.startsWith('https://')) return path;
-    return "$protocol${AppConfig.instance.values.apiUrl}$path";
+    if (path == null) return '';
+    var cleanPath = path.trim();
+    while (cleanPath.isNotEmpty &&
+        (cleanPath.startsWith('"') ||
+            cleanPath.startsWith("'") ||
+            cleanPath.startsWith('[') ||
+            cleanPath.startsWith(r'\'))) {
+      cleanPath = cleanPath.substring(1).trim();
+    }
+    while (cleanPath.isNotEmpty &&
+        (cleanPath.endsWith('"') ||
+            cleanPath.endsWith("'") ||
+            cleanPath.endsWith(']') ||
+            cleanPath.endsWith(r'\'))) {
+      cleanPath = cleanPath.substring(0, cleanPath.length - 1).trim();
+    }
+    cleanPath = cleanPath.replaceAll('"', '').replaceAll("'", '').trim();
+    if (cleanPath.isEmpty) return '';
+
+    if (cleanPath.startsWith('http://') || cleanPath.startsWith('https://')) {
+      return cleanPath;
+    }
+
+    cleanPath = cleanPath.replaceFirst(RegExp(r'^public/'), '');
+    if (!cleanPath.startsWith('/')) {
+      cleanPath = '/$cleanPath';
+    }
+
+    final host = AppConfig.instance.apiHost;
+    return '$protocol$host$cleanPath';
   }
 
   String _formatCurrency(dynamic value) {
@@ -218,6 +246,13 @@ class _WarehouseScreenState extends State<WarehouseScreen>
   }
 
   Future<void> _handleRefund(OrderWarehouseHistories history) async {
+    final bool isHoanKho =
+        history.notes != null &&
+        history.notes!.toLowerCase().contains('hoàn kho');
+    if (isHoanKho) {
+      Fluttertoast.showToast(msg: 'Đơn hoàn kho không thể hoàn tác');
+      return;
+    }
     final bool? confirm = await showDialog<bool>(
       context: context,
       builder: (BuildContext ctx) {
@@ -2745,14 +2780,30 @@ class _WarehouseScreenState extends State<WarehouseScreen>
                                                   height: 80,
                                                   color: Colors.grey.shade100,
                                                   child: imageUrl.isNotEmpty
-                                                      ? Image.network(
-                                                          imageUrl,
+                                                      ? CachedNetworkImage(
+                                                          imageUrl: imageUrl,
                                                           fit: BoxFit.cover,
-                                                          errorBuilder:
+                                                          placeholder: (_, __) => Container(
+                                                            color: Colors
+                                                                .grey
+                                                                .shade100,
+                                                            child: const Center(
+                                                              child: SizedBox(
+                                                                width: 20,
+                                                                height: 20,
+                                                                child:
+                                                                    CircularProgressIndicator(
+                                                                      strokeWidth:
+                                                                          2,
+                                                                    ),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                          errorWidget:
                                                               (
                                                                 _,
-                                                                _,
-                                                                _,
+                                                                __,
+                                                                ___,
                                                               ) => const Icon(
                                                                 Icons
                                                                     .image_not_supported,
@@ -2935,104 +2986,145 @@ class _WarehouseScreenState extends State<WarehouseScreen>
           return Column(
             children: [
               Card(
-                margin: const EdgeInsets.all(12),
+                margin: const EdgeInsets.fromLTRB(12, 10, 12, 8),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(color: Colors.grey.shade200),
                 ),
                 elevation: 0,
+                color: Colors.white,
                 child: Padding(
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(10),
                   child: Column(
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
+                      InkWell(
+                        onTap: () async {
+                          final DateTimeRange? picked =
+                              await showDateRangePicker(
+                                context: context,
+                                firstDate: DateTime(2020),
+                                lastDate: DateTime(2100),
+                                initialDateRange: DateTimeRange(
+                                  start: _fromDate,
+                                  end: _toDate,
+                                ),
+                              );
+                          if (picked != null) {
+                            setState(() {
+                              _fromDate = picked.start;
+                              _toDate = picked.end;
+                            });
+                            _fetchData(isRefresh: true);
+                          }
+                        },
+                        borderRadius: BorderRadius.circular(6),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xfff7f8fa),
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(
+                              color: Colors.grey.shade200,
+                              width: 0.7,
+                            ),
+                          ),
+                          child: Row(
                             children: [
-                              Icon(
-                                Icons.date_range,
-                                size: 16,
-                                color: Colors.grey.shade600,
+                              const Icon(
+                                Icons.calendar_today_outlined,
+                                size: 13,
+                                color: ColorUtil.bangladeshGreen,
                               ),
-                              const SizedBox(width: 4),
+                              const SizedBox(width: 6),
                               Text(
                                 '${DateFormat('dd/MM/yyyy').format(_fromDate)} - ${DateFormat('dd/MM/yyyy').format(_toDate)}',
-                                style: TextStyle(
+                                style: const TextStyle(
                                   fontSize: 12,
-                                  color: Colors.grey.shade600,
+                                  fontWeight: FontWeight.w500,
                                 ),
+                              ),
+                              const Spacer(),
+                              const Text(
+                                'Đổi ngày',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: ColorUtil.bangladeshGreen,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const SizedBox(width: 2),
+                              const Icon(
+                                Icons.arrow_drop_down,
+                                size: 18,
+                                color: ColorUtil.bangladeshGreen,
                               ),
                             ],
                           ),
-                          TextButton(
-                            onPressed: () async {
-                              final DateTimeRange? picked =
-                                  await showDateRangePicker(
-                                    context: context,
-                                    firstDate: DateTime(2020),
-                                    lastDate: DateTime(2100),
-                                    initialDateRange: DateTimeRange(
-                                      start: _fromDate,
-                                      end: _toDate,
-                                    ),
-                                  );
-                              if (picked != null) {
-                                setState(() {
-                                  _fromDate = picked.start;
-                                  _toDate = picked.end;
-                                });
-                                _fetchData(isRefresh: true);
-                              }
-                            },
-                            child: const Text(
-                              'Chọn khoảng ngày',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: ColorUtil.bangladeshGreen,
-                              ),
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
                       const SizedBox(height: 8),
                       Row(
                         children: [
                           Expanded(
                             child: _buildStatItem(
-                              'Tổng đơn hàng',
+                              'Tổng đơn xuất',
                               '${stats?.totalOrder ?? 0}',
-                              Colors.orange,
+                              Colors.orange.shade800,
+                              icon: Icons.receipt_long_outlined,
                             ),
                           ),
-                          Container(
-                            width: 1,
-                            height: 30,
-                            color: Colors.grey.shade200,
-                          ),
+                          const SizedBox(width: 8),
                           Expanded(
                             child: _buildStatItem(
                               'Doanh thu',
                               stats?.formattedPrice() ?? '0 đ',
                               ColorUtil.bangladeshGreen,
+                              icon: Icons.attach_money_outlined,
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 8),
                       SizedBox(
-                        height: 38,
+                        height: 36,
                         child: TextField(
                           controller: _exportSearchController,
+                          style: const TextStyle(fontSize: 12),
                           decoration: InputDecoration(
                             hintText: 'Tìm kiếm tên hoặc SĐT khách hàng...',
+                            hintStyle: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey.shade400,
+                            ),
                             prefixIcon: const Icon(Icons.search, size: 16),
                             contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 12,
+                              horizontal: 10,
+                              vertical: 0,
                             ),
+                            filled: true,
+                            fillColor: const Color(0xfff9fafb),
                             border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
+                              borderRadius: BorderRadius.circular(6),
                               borderSide: BorderSide(
                                 color: Colors.grey.shade200,
+                                width: 0.8,
+                              ),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(6),
+                              borderSide: BorderSide(
+                                color: Colors.grey.shade200,
+                                width: 0.8,
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(6),
+                              borderSide: const BorderSide(
+                                color: ColorUtil.bangladeshGreen,
+                                width: 1,
                               ),
                             ),
                           ),
@@ -3066,20 +3158,50 @@ class _WarehouseScreenState extends State<WarehouseScreen>
     );
   }
 
-  Widget _buildStatItem(String label, String value, Color color) {
-    return Column(
-      children: [
-        Text(label, style: const TextStyle(fontSize: 11, color: Colors.grey)),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.bold,
-            color: color,
+  Widget _buildStatItem(
+    String label,
+    String value,
+    Color color, {
+    IconData? icon,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Row(
+        children: [
+          if (icon != null) ...[
+            Icon(icon, size: 16, color: color),
+            const SizedBox(width: 6),
+          ],
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(fontSize: 10.5, color: Colors.grey.shade600),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    color: color,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -3141,434 +3263,659 @@ class _WarehouseScreenState extends State<WarehouseScreen>
     return _buildBadge(statusText, bgColor, textColor);
   }
 
-  Widget _buildHistoryImages(List<String> images) {
+  Widget _buildHistoryImages(List<String> images, {dynamic historyId}) {
+    final validImages = images
+        .map((e) => _getImageUrl(e))
+        .where((url) => url.isNotEmpty)
+        .toList();
+
+    if (validImages.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
     return SizedBox(
-      height: 72,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        itemCount: images.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 8),
-        itemBuilder: (context, idx) {
-          final imageUrl = _getImageUrl(images[idx]);
-          return GestureDetector(
-            onTap: () {
-              showDialog(
-                context: context,
-                builder: (_) => Dialog(
-                  backgroundColor: Colors.transparent,
-                  insetPadding: const EdgeInsets.all(16),
-                  child: Stack(
-                    alignment: Alignment.topRight,
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: Image.network(
-                          imageUrl,
-                          fit: BoxFit.contain,
-                          errorBuilder: (_, __, ___) => Container(
-                            color: Colors.white,
-                            padding: const EdgeInsets.all(24),
-                            child: const Text('Không thể tải hình ảnh'),
+      height: 56,
+      child: PageStorage(
+        bucket: PageStorageBucket(),
+        child: ListView.separated(
+          key: PageStorageKey<String>(
+            'history_images_${historyId ?? validImages.hashCode}',
+          ),
+          scrollDirection: Axis.horizontal,
+          itemCount: validImages.length,
+          separatorBuilder: (_, __) => const SizedBox(width: 6),
+          itemBuilder: (context, idx) {
+            final imageUrl = validImages[idx];
+            return GestureDetector(
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (_) => Dialog(
+                    backgroundColor: Colors.transparent,
+                    insetPadding: const EdgeInsets.all(16),
+                    child: Stack(
+                      alignment: Alignment.topRight,
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Container(
+                            color: Colors.black87,
+                            child: InteractiveViewer(
+                              child: CachedNetworkImage(
+                                imageUrl: imageUrl,
+                                fit: BoxFit.contain,
+                                placeholder: (_, __) => Container(
+                                  color: Colors.black26,
+                                  height: 260,
+                                  child: const Center(
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                                errorWidget: (_, __, ___) => Container(
+                                  color: Colors.white,
+                                  padding: const EdgeInsets.all(24),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: const [
+                                      Icon(
+                                        Icons.broken_image_outlined,
+                                        size: 48,
+                                        color: Colors.grey,
+                                      ),
+                                      SizedBox(height: 8),
+                                      Text(
+                                        'Không thể tải hình ảnh',
+                                        style: TextStyle(color: Colors.grey),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
                           ),
                         ),
-                      ),
-                      IconButton(
-                        icon: const CircleAvatar(
-                          backgroundColor: Colors.black54,
-                          radius: 16,
-                          child: Icon(
-                            Icons.close,
-                            color: Colors.white,
-                            size: 18,
+                        IconButton(
+                          icon: const CircleAvatar(
+                            backgroundColor: Colors.black54,
+                            radius: 16,
+                            child: Icon(
+                              Icons.close,
+                              color: Colors.white,
+                              size: 18,
+                            ),
                           ),
+                          onPressed: () => Navigator.pop(context),
                         ),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              );
-            },
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Container(
-                width: 72,
-                height: 72,
-                color: Colors.grey.shade100,
-                child: Image.network(
-                  imageUrl,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => const Icon(
-                    Icons.broken_image_outlined,
-                    size: 24,
-                    color: Colors.grey,
+                );
+              },
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(6),
+                child: Container(
+                  width: 56,
+                  height: 56,
+                  color: Colors.grey.shade100,
+                  child: CachedNetworkImage(
+                    imageUrl: imageUrl,
+                    fit: BoxFit.cover,
+                    placeholder: (_, __) => Container(
+                      color: Colors.grey.shade100,
+                      child: const Center(
+                        child: SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      ),
+                    ),
+                    errorWidget: (_, __, ___) => Container(
+                      color: Colors.grey.shade100,
+                      child: const Center(
+                        child: Icon(
+                          Icons.broken_image_outlined,
+                          size: 24,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }
 
   Widget _buildHistoryCard(OrderWarehouseHistories history) {
     final bool isExpanded = _expandedCards[history.id ?? 0] ?? false;
+    final bool isHoanKho =
+        history.notes != null &&
+        history.notes!.toLowerCase().contains('hoàn kho');
+    final confirmImagesList =
+        (history.confirmImages != null && history.confirmImages!.isNotEmpty)
+        ? history.confirmImages!
+        : (history.images ?? []);
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      elevation: 0,
-      color: Colors.white,
-      child: ExpansionTile(
-        key: PageStorageKey<int>(history.id ?? 0),
-        initiallyExpanded: isExpanded,
-        onExpansionChanged: (val) {
-          setState(() {
-            _expandedCards[history.id ?? 0] = val;
-          });
-        },
-        shape: const Border(),
-        title: Row(
-          children: [
-            Flexible(
-              child: Text(
-                'Đơn xuất kho #${history.id}',
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: isExpanded
+              ? ColorUtil.bangladeshGreen.withValues(alpha: 0.4)
+              : Colors.grey.shade200,
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 3,
+            offset: const Offset(0, 1),
+          ),
+        ],
+      ),
+      child: Theme(
+        data: Theme.of(context).copyWith(
+          dividerColor: Colors.transparent,
+          splashColor: Colors.transparent,
+          highlightColor: Colors.transparent,
+        ),
+        child: ExpansionTile(
+          key: ValueKey<int>(history.id ?? 0),
+          initiallyExpanded: isExpanded,
+          tilePadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+          childrenPadding: EdgeInsets.zero,
+          onExpansionChanged: (val) {
+            setState(() {
+              _expandedCards[history.id ?? 0] = val;
+            });
+          },
+          shape: const Border(),
+          collapsedShape: const Border(),
+          title: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(4),
+                  border: Border.all(color: Colors.grey.shade300, width: 0.7),
                 ),
-                overflow: TextOverflow.ellipsis,
+                child: Text(
+                  '#${history.id}',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                    color: Colors.black87,
+                  ),
+                ),
               ),
-            ),
-            if (history.statusText != null &&
-                history.statusText!.isNotEmpty) ...[
-              const SizedBox(width: 8),
-              _buildHistoryStatusBadge(history),
-            ],
-          ],
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 4),
-            Text(
-              'Khách hàng: ${history.userName ?? 'N/A'}',
-              style: const TextStyle(fontSize: 12),
-            ),
-            if (history.verifierName != null &&
-                history.verifierName!.isNotEmpty) ...[
-              const SizedBox(height: 2),
-              Text(
-                'Xác nhận bởi: ${history.verifierName}',
-                style: TextStyle(color: Colors.grey.shade700, fontSize: 11),
-              ),
-            ],
-            const SizedBox(height: 2),
-            Text(
-              'Ngày: ${DateFormat('dd/MM/yyyy HH:mm').format(history.date ?? DateTime.now())}',
-              style: TextStyle(color: Colors.grey.shade500, fontSize: 11),
-            ),
-          ],
-        ),
-        trailing: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Text(
-              '${_formatCurrency(history.totalAmount)} đ',
-              style: const TextStyle(
-                color: Colors.red,
-                fontWeight: FontWeight.bold,
-                fontSize: 13,
-              ),
-            ),
-            const SizedBox(height: 2),
-            Icon(
-              isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
-              size: 18,
-            ),
-          ],
-        ),
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Divider(height: 1),
-                const SizedBox(height: 12),
-                if (history.userPhone != null && history.userPhone != '0')
-                  ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    dense: true,
-                    leading: const Icon(
-                      Icons.phone,
-                      color: Colors.blue,
-                      size: 18,
+              const SizedBox(width: 6),
+              if (isHoanKho) ...[
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFEDE7F6),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: const Text(
+                    'Hoàn kho',
+                    style: TextStyle(
+                      color: Color(0xFF5E35B1),
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
                     ),
-                    title: Text(
-                      history.userPhone ?? '',
-                      style: const TextStyle(
-                        color: Colors.blue,
-                        decoration: TextDecoration.underline,
+                  ),
+                ),
+                const SizedBox(width: 6),
+              ],
+              _buildHistoryStatusBadge(history),
+              const Spacer(),
+              Text(
+                '${_formatCurrency(history.totalAmount)} đ',
+                style: TextStyle(
+                  color: isHoanKho
+                      ? const Color(0xFF5E35B1)
+                      : Colors.red.shade700,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                ),
+              ),
+            ],
+          ),
+          subtitle: Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.person_outline,
+                        size: 13,
+                        color: Colors.grey.shade600,
+                      ),
+                      const SizedBox(width: 3),
+                      Flexible(
+                        child: Text(
+                          history.userName?.isNotEmpty == true
+                              ? history.userName!
+                              : 'Khách lẻ',
+                          style: TextStyle(
+                            fontSize: 11.5,
+                            color: Colors.grey.shade800,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      if (history.products != null &&
+                          history.products!.isNotEmpty) ...[
+                        Text(
+                          ' • ${history.products!.length} SP',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Colors.grey.shade500,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.access_time,
+                      size: 12,
+                      color: Colors.grey.shade500,
+                    ),
+                    const SizedBox(width: 3),
+                    Text(
+                      DateFormat(
+                        'dd/MM/yy HH:mm',
+                      ).format(history.date ?? DateTime.now()),
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Colors.grey.shade500,
                       ),
                     ),
-                    onTap: () => _makePhoneCall(history.userPhone!),
-                    onLongPress: () => _copyPhoneNumber(history.userPhone!),
-                  ),
-                if (history.userAddress != null &&
-                    history.userAddress!.isNotEmpty)
-                  ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    dense: true,
-                    leading: const Icon(
-                      Icons.location_on,
-                      color: Colors.grey,
-                      size: 18,
-                    ),
-                    title: Text(history.userAddress ?? ''),
-                  ),
-                if (history.statusText != null ||
-                    history.verifierName != null ||
-                    (history.verifierPhone != null &&
-                        history.verifierPhone != '0') ||
-                    (history.confirmImages != null &&
-                        history.confirmImages!.isNotEmpty) ||
-                    (history.images != null && history.images!.isNotEmpty)) ...[
-                  const Divider(height: 16),
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: const Color(0xfff7f8fa),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.grey.shade200),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            const Icon(
-                              Icons.verified_outlined,
-                              size: 16,
-                              color: ColorUtil.bangladeshGreen,
-                            ),
-                            const SizedBox(width: 6),
-                            const Text(
-                              'Thông tin kiểm duyệt / xác nhận',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 12,
+                  ],
+                ),
+              ],
+            ),
+          ),
+          trailing: Icon(
+            isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+            size: 18,
+            color: Colors.grey.shade600,
+          ),
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(10, 0, 10, 10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Divider(height: 1, color: Colors.grey.shade200),
+                  const SizedBox(height: 8),
+                  if ((history.userPhone != null &&
+                          history.userPhone != '0' &&
+                          history.userPhone!.isNotEmpty) ||
+                      (history.userAddress != null &&
+                          history.userAddress!.isNotEmpty)) ...[
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xfff9fafb),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(
+                          color: Colors.grey.shade200,
+                          width: 0.6,
+                        ),
+                      ),
+                      child: Column(
+                        children: [
+                          if (history.userPhone != null &&
+                              history.userPhone != '0' &&
+                              history.userPhone!.isNotEmpty)
+                            InkWell(
+                              onTap: () => _makePhoneCall(history.userPhone!),
+                              onLongPress: () =>
+                                  _copyPhoneNumber(history.userPhone!),
+                              child: Row(
+                                children: [
+                                  const Icon(
+                                    Icons.phone_outlined,
+                                    size: 13,
+                                    color: Colors.blue,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    history.userPhone!,
+                                    style: const TextStyle(
+                                      color: Colors.blue,
+                                      fontSize: 11.5,
+                                      fontWeight: FontWeight.w500,
+                                      decoration: TextDecoration.underline,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  const Icon(
+                                    Icons.copy,
+                                    size: 11,
+                                    color: Colors.blue,
+                                  ),
+                                ],
                               ),
                             ),
-                            const Spacer(),
-                            if (history.statusText != null &&
-                                history.statusText!.isNotEmpty)
-                              _buildHistoryStatusBadge(history),
-                          ],
+                          if (history.userPhone != null &&
+                              history.userPhone != '0' &&
+                              history.userPhone!.isNotEmpty &&
+                              history.userAddress != null &&
+                              history.userAddress!.isNotEmpty)
+                            const SizedBox(height: 4),
+                          if (history.userAddress != null &&
+                              history.userAddress!.isNotEmpty)
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Icon(
+                                  Icons.location_on_outlined,
+                                  size: 13,
+                                  color: Colors.grey.shade600,
+                                ),
+                                const SizedBox(width: 6),
+                                Expanded(
+                                  child: Text(
+                                    history.userAddress!,
+                                    style: TextStyle(
+                                      fontSize: 11.5,
+                                      color: Colors.grey.shade700,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                  ],
+                  if (history.statusText != null ||
+                      history.verifierName != null ||
+                      (history.verifierPhone != null &&
+                          history.verifierPhone != '0') ||
+                      confirmImagesList.isNotEmpty) ...[
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: const Color(0xfff7f8fa),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(
+                          color: Colors.grey.shade200,
+                          width: 0.7,
                         ),
-                        if (history.verifierName != null &&
-                            history.verifierName!.isNotEmpty) ...[
-                          const SizedBox(height: 8),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
                           Row(
                             children: [
                               const Icon(
-                                Icons.person_outline,
-                                size: 15,
-                                color: Colors.grey,
+                                Icons.verified_outlined,
+                                size: 14,
+                                color: ColorUtil.bangladeshGreen,
                               ),
-                              const SizedBox(width: 6),
+                              const SizedBox(width: 5),
                               const Text(
-                                'Người xác nhận: ',
+                                'Thông tin kiểm duyệt',
                                 style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey,
-                                ),
-                              ),
-                              Expanded(
-                                child: Text(
-                                  history.verifierName!,
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 11.5,
                                 ),
                               ),
                             ],
                           ),
-                        ],
-                        if (history.verifierPhone != null &&
-                            history.verifierPhone!.isNotEmpty &&
-                            history.verifierPhone != '0') ...[
-                          const SizedBox(height: 6),
-                          InkWell(
-                            onTap: () => _makePhoneCall(history.verifierPhone!),
-                            onLongPress: () =>
-                                _copyPhoneNumber(history.verifierPhone!),
-                            child: Row(
+                          if (history.verifierName != null &&
+                              history.verifierName!.isNotEmpty) ...[
+                            const SizedBox(height: 4),
+                            Row(
                               children: [
-                                const Icon(
-                                  Icons.phone_outlined,
-                                  size: 15,
-                                  color: Colors.blue,
-                                ),
-                                const SizedBox(width: 6),
-                                const Text(
-                                  'SĐT xác nhận: ',
+                                Text(
+                                  'Người duyệt: ',
                                   style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.grey,
+                                    fontSize: 11,
+                                    color: Colors.grey.shade600,
                                   ),
                                 ),
                                 Text(
-                                  history.verifierPhone!,
+                                  history.verifierName!,
                                   style: const TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.blue,
-                                    decoration: TextDecoration.underline,
+                                    fontSize: 11,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
-                              ],
-                            ),
-                          ),
-                        ],
-                        if (history.confirmImages != null &&
-                            history.confirmImages!.isNotEmpty) ...[
-                          const SizedBox(height: 8),
-                          const Text(
-                            'Ảnh xác nhận:',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          _buildHistoryImages(history.confirmImages!),
-                        ],
-                        if (history.images != null &&
-                            history.images!.isNotEmpty) ...[
-                          const SizedBox(height: 8),
-                          const Text(
-                            'Ảnh đính kèm:',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          _buildHistoryImages(history.images!),
-                        ],
-                      ],
-                    ),
-                  ),
-                ],
-                const SizedBox(height: 12),
-                const Text(
-                  'Danh sách sản phẩm:',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-                ),
-                const SizedBox(height: 8),
-                if (history.products != null)
-                  ...history.products!.map(
-                    (product) => Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 36,
-                            height: 36,
-                            decoration: BoxDecoration(
-                              color: Colors.grey.shade100,
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: product.image != null
-                                ? Image.network(
-                                    _getImageUrl(product.image),
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (_, _, _) => const Icon(
-                                      Icons.image_outlined,
-                                      size: 18,
+                                if (history.verifierPhone != null &&
+                                    history.verifierPhone!.isNotEmpty &&
+                                    history.verifierPhone != '0') ...[
+                                  const Text(
+                                    ' • ',
+                                    style: TextStyle(color: Colors.grey),
+                                  ),
+                                  InkWell(
+                                    onTap: () =>
+                                        _makePhoneCall(history.verifierPhone!),
+                                    child: Text(
+                                      history.verifierPhone!,
+                                      style: const TextStyle(
+                                        fontSize: 11,
+                                        color: Colors.blue,
+                                        decoration: TextDecoration.underline,
+                                      ),
                                     ),
-                                  )
-                                : const Icon(Icons.image_outlined, size: 18),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  product.name ?? '',
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 12,
                                   ),
-                                ),
-                                Text(
-                                  'SL: ${product.quantity} x Price: ${_formatCurrency(product.price)} đ',
-                                  style: TextStyle(
-                                    color: Colors.grey.shade500,
-                                    fontSize: 11,
-                                  ),
-                                ),
+                                ],
                               ],
+                            ),
+                          ],
+                          if (confirmImagesList.isNotEmpty) ...[
+                            const SizedBox(height: 6),
+                            _buildHistoryImages(
+                              confirmImagesList,
+                              historyId: history.id,
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                  ],
+                  const Text(
+                    'Sản phẩm xuất:',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 11.5,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  if (history.products != null)
+                    ...history.products!.map(
+                      (product) => Padding(
+                        padding: const EdgeInsets.only(bottom: 6),
+                        child: Row(
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(4),
+                              child: Container(
+                                width: 32,
+                                height: 32,
+                                color: Colors.grey.shade100,
+                                child:
+                                    product.image != null &&
+                                        product.image!.isNotEmpty
+                                    ? CachedNetworkImage(
+                                        imageUrl: _getImageUrl(product.image),
+                                        fit: BoxFit.cover,
+                                        placeholder: (_, __) => Container(
+                                          color: Colors.grey.shade100,
+                                        ),
+                                        errorWidget: (_, _, _) => const Icon(
+                                          Icons.image_outlined,
+                                          size: 16,
+                                        ),
+                                      )
+                                    : const Icon(
+                                        Icons.image_outlined,
+                                        size: 16,
+                                      ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    product.name ?? '',
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 11.5,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  Text(
+                                    'SL: ${product.quantity} x ${_formatCurrency(product.price)} đ',
+                                    style: TextStyle(
+                                      color: Colors.grey.shade600,
+                                      fontSize: 10.5,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Text(
+                              '${_formatCurrency((double.tryParse((product.price ?? '').replaceAll(RegExp(r'[^\d]'), '')) ?? 0) * (product.quantity ?? 1))} đ',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 11.5,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  const Divider(height: 12),
+                  if (history.vat != null &&
+                      history.vat != '0' &&
+                      history.vat != '0.00')
+                    _buildFeeRow('VAT', '${history.vat} %'),
+                  if (history.discount != null && history.discount != '0')
+                    _buildFeeRow(
+                      'Chiết khấu',
+                      '- ${_formatCurrency(history.discount)} đ',
+                    ),
+                  _buildFeeRow(
+                    'Tổng thanh toán',
+                    '${_formatCurrency(history.totalAmount)} đ',
+                    isBold: true,
+                  ),
+                  if (history.notes != null && history.notes!.isNotEmpty) ...[
+                    const SizedBox(height: 6),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 5,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isHoanKho
+                            ? const Color(0xFFF3E5F5)
+                            : const Color(0xFFFFF8E1),
+                        borderRadius: BorderRadius.circular(4),
+                        border: Border.all(
+                          color: isHoanKho
+                              ? const Color(0xFFCE93D8)
+                              : const Color(0xFFFFE082),
+                          width: 0.8,
+                        ),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(
+                            isHoanKho ? Icons.undo : Icons.note_alt_outlined,
+                            size: 13,
+                            color: isHoanKho
+                                ? const Color(0xFF7B1FA2)
+                                : Colors.amber.shade900,
+                          ),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              'Ghi chú: ${history.notes}',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: isHoanKho
+                                    ? const Color(0xFF4A148C)
+                                    : Colors.brown.shade800,
+                                fontWeight: isHoanKho
+                                    ? FontWeight.w600
+                                    : FontWeight.normal,
+                              ),
                             ),
                           ),
                         ],
                       ),
                     ),
-                  ),
-                const Divider(height: 24),
-                _buildFeeRow('VAT', '${history.vat ?? '0'} %'),
-                _buildFeeRow(
-                  'Chiết khấu',
-                  '${_formatCurrency(history.discount)} đ',
-                ),
-                _buildFeeRow(
-                  'Tổng cộng',
-                  '${_formatCurrency(history.totalAmount)} đ',
-                  isBold: true,
-                ),
-                if (history.notes != null && history.notes!.isNotEmpty) ...[
-                  const SizedBox(height: 8),
-                  Text(
-                    'Ghi chú: ${history.notes}',
-                    style: const TextStyle(
-                      fontStyle: FontStyle.italic,
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
-                if (_isWithin30Days(history.date)) ...[
-                  const SizedBox(height: 16),
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton.icon(
-                      onPressed: () => _handleRefund(history),
-                      icon: const Icon(Icons.undo, size: 16, color: Colors.red),
-                      label: const Text(
-                        'Hoàn tác xuất kho',
-                        style: TextStyle(
+                  ],
+                  if (_isWithin30Days(history.date) && !isHoanKho) ...[
+                    const SizedBox(height: 10),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 34,
+                      child: OutlinedButton.icon(
+                        onPressed: () => _handleRefund(history),
+                        icon: const Icon(
+                          Icons.undo,
+                          size: 14,
                           color: Colors.red,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
                         ),
-                      ),
-                      style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: Colors.red),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                        label: const Text(
+                          'Hoàn tác xuất kho',
+                          style: TextStyle(
+                            color: Colors.red,
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          padding: EdgeInsets.zero,
+                          side: const BorderSide(color: Colors.red, width: 0.8),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(6),
+                          ),
                         ),
                       ),
                     ),
-                  ),
+                  ],
                 ],
-              ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

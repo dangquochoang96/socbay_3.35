@@ -928,7 +928,7 @@ class _OrderManagerScreenState extends State<OrderManagerScreen> {
                 const TableCell(child: SizedBox.shrink()),
                 const TableCell(child: SizedBox.shrink()),
                 _buildTableCell(
-                  'Thưởng nóng: ${hotBonus > 0 ? _formatK(hotBonus) : '0k'}',
+                  'Thưởng DS: ${hotBonus > 0 ? _formatK(hotBonus) : '0k'}',
                   isBold: true,
                   align: TextAlign.left,
                 ),

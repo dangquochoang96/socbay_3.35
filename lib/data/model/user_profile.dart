@@ -22,6 +22,7 @@ class UserProfile {
   String? bankInfo;
   String? bankQr;
   String? basicSalary;
+  String? monthlyBonus;
   String? bhxh;
   String? totalIncome;
   String? typeStaff;
@@ -43,6 +44,7 @@ class UserProfile {
     this.bankInfo,
     this.bankQr,
     this.basicSalary,
+    this.monthlyBonus,
     this.bhxh,
     this.totalIncome,
     this.typeStaff,
@@ -65,6 +67,7 @@ class UserProfile {
     bankInfo: json["bank_info"],
     bankQr: json["bank_qr"],
     basicSalary: json["basic_salary"],
+    monthlyBonus: json["monthly_bonus"]?.toString(),
     bhxh: json["bhxh"],
     totalIncome: json["total"],
     typeStaff: json["type_staff"],
@@ -93,6 +96,7 @@ class UserProfile {
     "bank_info": bankInfo,
     "bank_qr": bankQr,
     "basic_salary": basicSalary,
+    "monthly_bonus": monthlyBonus,
     "bhxh": bhxh,
     "total_income": totalIncome,
     "type_staff": typeStaff,
