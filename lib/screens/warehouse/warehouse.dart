@@ -2783,7 +2783,7 @@ class _WarehouseScreenState extends State<WarehouseScreen>
                                                       ? CachedNetworkImage(
                                                           imageUrl: imageUrl,
                                                           fit: BoxFit.cover,
-                                                          placeholder: (_, __) => Container(
+                                                          placeholder: (_, _) => Container(
                                                             color: Colors
                                                                 .grey
                                                                 .shade100,
@@ -2802,8 +2802,8 @@ class _WarehouseScreenState extends State<WarehouseScreen>
                                                           errorWidget:
                                                               (
                                                                 _,
-                                                                __,
-                                                                ___,
+                                                                _,
+                                                                _,
                                                               ) => const Icon(
                                                                 Icons
                                                                     .image_not_supported,
@@ -3283,7 +3283,7 @@ class _WarehouseScreenState extends State<WarehouseScreen>
           ),
           scrollDirection: Axis.horizontal,
           itemCount: validImages.length,
-          separatorBuilder: (_, __) => const SizedBox(width: 6),
+          separatorBuilder: (_, _) => const SizedBox(width: 6),
           itemBuilder: (context, idx) {
             final imageUrl = validImages[idx];
             return GestureDetector(
@@ -3304,7 +3304,7 @@ class _WarehouseScreenState extends State<WarehouseScreen>
                               child: CachedNetworkImage(
                                 imageUrl: imageUrl,
                                 fit: BoxFit.contain,
-                                placeholder: (_, __) => Container(
+                                placeholder: (_, _) => Container(
                                   color: Colors.black26,
                                   height: 260,
                                   child: const Center(
@@ -3313,7 +3313,7 @@ class _WarehouseScreenState extends State<WarehouseScreen>
                                     ),
                                   ),
                                 ),
-                                errorWidget: (_, __, ___) => Container(
+                                errorWidget: (_, _, _) => Container(
                                   color: Colors.white,
                                   padding: const EdgeInsets.all(24),
                                   child: Column(
@@ -3362,7 +3362,7 @@ class _WarehouseScreenState extends State<WarehouseScreen>
                   child: CachedNetworkImage(
                     imageUrl: imageUrl,
                     fit: BoxFit.cover,
-                    placeholder: (_, __) => Container(
+                    placeholder: (_, _) => Container(
                       color: Colors.grey.shade100,
                       child: const Center(
                         child: SizedBox(
@@ -3372,7 +3372,7 @@ class _WarehouseScreenState extends State<WarehouseScreen>
                         ),
                       ),
                     ),
-                    errorWidget: (_, __, ___) => Container(
+                    errorWidget: (_, _, _) => Container(
                       color: Colors.grey.shade100,
                       child: const Center(
                         child: Icon(
@@ -3768,7 +3768,7 @@ class _WarehouseScreenState extends State<WarehouseScreen>
                                     ? CachedNetworkImage(
                                         imageUrl: _getImageUrl(product.image),
                                         fit: BoxFit.cover,
-                                        placeholder: (_, __) => Container(
+                                        placeholder: (_, _) => Container(
                                           color: Colors.grey.shade100,
                                         ),
                                         errorWidget: (_, _, _) => const Icon(

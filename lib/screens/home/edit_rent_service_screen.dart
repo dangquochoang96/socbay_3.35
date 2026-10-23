@@ -412,7 +412,7 @@ class _EditRentServiceScreenState extends State<EditRentServiceScreen> {
     ];
 
     return DropdownButtonFormField<int>(
-      value: _selectedStatus,
+      initialValue: _selectedStatus,
       isDense: true,
       decoration: InputDecoration(
         labelText: 'Trạng thái công việc',

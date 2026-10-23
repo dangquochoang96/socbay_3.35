@@ -32,7 +32,9 @@ class TechniqueScreenBloc
   ) async {
     isLoading = true;
     emit(TechniqueScreenInitialState());
-    var url = AppConfig.instance.apiUri(ApiEndpoints.userSupport);
+    var url = AppConfig.instance.apiUri(ApiEndpoints.userSupport, {
+      'type': 'ktv',
+    });
     var res = await http.get(url);
     if (res.statusCode == HttpStatus.ok) {
       var l = Map<String, dynamic>.from(json.decode(res.body));

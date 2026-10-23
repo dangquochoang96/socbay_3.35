@@ -195,10 +195,7 @@ class _RentTaskAvailableTabState extends State<RentTaskAvailableTabSale> {
                 ),
               ),
               const SizedBox(width: 5), // Add some spacing
-              ElevatedButton(
-                onPressed: _onSearch,
-                child: const Text('Search'),
-              ),
+              ElevatedButton(onPressed: _onSearch, child: const Text('Search')),
               const SizedBox(width: 5), // Add some spacing
               ElevatedButton(
                 style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
@@ -445,7 +442,7 @@ class _RentTaskAvailableTabState extends State<RentTaskAvailableTabSale> {
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 8),
         itemCount: _statusFilters.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 8),
+        separatorBuilder: (_, _) => const SizedBox(width: 8),
         itemBuilder: (context, index) {
           final option = _statusFilters[index];
           final isSelected = option.value == _selectedStatusFilter;

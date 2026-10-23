@@ -3044,18 +3044,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
         children: [
           Text(title, style: const TextStyle(fontSize: 13)),
           const SizedBox(height: 4),
-          Radio<int>(
-            value: value,
-            groupValue: _bloc.paymentType,
-            onChanged: (val) {
-              if (val != null) {
-                setState(() {
-                  _hasUserSelectedPayment = true;
-                  _bloc.paymentType = val;
-                });
-              }
-            },
-          ),
+          Radio<int>(value: value),
         ],
       ),
     );

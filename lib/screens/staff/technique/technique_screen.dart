@@ -254,6 +254,7 @@ class _TechniqueScreenState extends State<TechniqueScreen>
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Expanded(
                                       child: Text(
@@ -262,9 +263,7 @@ class _TechniqueScreenState extends State<TechniqueScreen>
                                           fontSize: 16,
                                           fontWeight: MyFontWeight.bold,
                                           color: ColorUtil.raisinBlack,
-                                          overflow: TextOverflow.ellipsis,
                                         ),
-                                        maxLines: 1,
                                       ),
                                     ),
                                     const SizedBox(width: 6),

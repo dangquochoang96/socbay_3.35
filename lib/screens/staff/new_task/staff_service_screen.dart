@@ -444,7 +444,7 @@ class _ServiceScreenState extends State<StaffServiceScreen> {
             const SizedBox(width: 8),
             Switch(
               value: _isLongDistance,
-              activeColor: ColorUtil.bangladeshGreen,
+              activeThumbColor: ColorUtil.bangladeshGreen,
               onChanged: (bool value) {
                 setState(() {
                   _isLongDistance = value;
