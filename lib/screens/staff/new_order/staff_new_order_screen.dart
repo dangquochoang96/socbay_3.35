@@ -1205,10 +1205,13 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                             .replaceAll("đ", "")
                             .nonBreaking
                             .trim();
+                        int qty = int.tryParse(item.quantity.text.trim()) ?? 1;
+                        if (qty <= 0) qty = 1;
                         lst1.add(
                           OrderFilterCoreModel(
                             name: item.key.text,
                             price: priceValue,
+                            quantity: qty,
                           ),
                         );
                       }
@@ -1459,10 +1462,13 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                             .replaceAll("đ", "")
                             .nonBreaking
                             .trim();
+                        int qty = int.tryParse(item.quantity.text.trim()) ?? 1;
+                        if (qty <= 0) qty = 1;
                         lst1.add(
                           OrderFilterCoreModel(
                             name: item.key.text,
                             price: priceValue,
+                            quantity: qty,
                           ),
                         );
                       }
@@ -1970,41 +1976,39 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
         Container(
           color: const Color(0xFFFFF3CD),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: const Row(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Expanded(
-                flex: 1,
-                child: Text(
-                  "Tên lõi/ Dịch vụ",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: ColorUtil.raisinBlack,
-                  ),
+              const Text(
+                "Danh sách vật tư / lõi thay thế",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                  color: ColorUtil.raisinBlack,
                 ),
               ),
-              Expanded(
-                flex: 1,
-                child: Text.rich(
-                  TextSpan(
-                    text: "Thành tiền (VNĐ) ",
-                    children: [
-                      TextSpan(
-                        text: "*",
-                        style: TextStyle(color: Colors.red),
-                      ),
-                    ],
-                  ),
-                  textAlign: TextAlign.right,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: ColorUtil.raisinBlack,
-                  ),
+              Text(
+                "${lstKeyValueCores.length} mục",
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey.shade700,
                 ),
               ),
             ],
           ),
         ),
-        if (lstKeyValueCores.isNotEmpty)
+        if (lstKeyValueCores.isEmpty)
+          Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Center(
+              child: Text(
+                "Chưa có vật tư thay thế. Bấm (+) để thêm.",
+                style: TextStyle(fontSize: 13, color: Colors.grey.shade500),
+              ),
+            ),
+          )
+        else
           ...List.generate(lstKeyValueCores.length, (i) {
             final int taskType = _currentTaskType;
             final bool hasDefaultCore =
@@ -2021,166 +2025,366 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
             final bool isReadOnlyRow = isFixedFirstRow || isFixedMachineRow;
 
             return Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               decoration: BoxDecoration(
                 border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
               ),
-              child: Row(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    flex: 2,
-                    child: _isLoadingWarehouse
-                        ? const Center(
-                            child: SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            ),
-                          )
-                        : TextFormField(
-                            controller: lstKeyValueCores[i].key,
-                            readOnly: true,
-                            onTap: isReadOnlyRow
-                                ? (isFixedMachineRow
-                                      ? () {
-                                          context.showSnackBar(
-                                            'Vui lòng chọn máy ở mục "Thông tin sản phẩm"',
-                                          );
-                                        }
-                                      : null)
-                                : () {
-                                    _showCoreSearchSelector(context, i);
-                                  },
-                            decoration: InputDecoration(
-                              hintText: isFixedMachineRow
-                                  ? 'Chọn máy ở Thông tin sản phẩm'
-                                  : (_ktvWarehouseCores.isEmpty
-                                        ? 'Kho trống!'
-                                        : 'Chọn lõi/máy...'),
-                              isDense: true,
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 10,
-                              ),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                                borderSide: BorderSide(
-                                  color: Colors.grey.shade300,
+                  // Hàng trên: Ô sản phẩm + Nút xoá
+                  Row(
+                    children: [
+                      Container(
+                        width: 24,
+                        height: 24,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: ColorUtil.bangladeshGreen.withValues(
+                            alpha: 0.12,
+                          ),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          "${i + 1}",
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: ColorUtil.bangladeshGreen,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: _isLoadingWarehouse
+                            ? const Center(
+                                child: SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                ),
+                              )
+                            : TextFormField(
+                                controller: lstKeyValueCores[i].key,
+                                readOnly: true,
+                                onTap: isReadOnlyRow
+                                    ? (isFixedMachineRow
+                                          ? () {
+                                              context.showSnackBar(
+                                                'Vui lòng chọn máy ở mục "Thông tin sản phẩm"',
+                                              );
+                                            }
+                                          : null)
+                                    : () {
+                                        _showCoreSearchSelector(context, i);
+                                      },
+                                decoration: InputDecoration(
+                                  hintText: isFixedMachineRow
+                                      ? 'Chọn máy ở Thông tin sản phẩm'
+                                      : (_ktvWarehouseCores.isEmpty
+                                            ? 'Kho trống!'
+                                            : 'Chọn lõi / vật tư...'),
+                                  isDense: true,
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 10,
+                                  ),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                    borderSide: BorderSide(
+                                      color: Colors.grey.shade300,
+                                    ),
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                    borderSide: BorderSide(
+                                      color: Colors.grey.shade300,
+                                    ),
+                                  ),
+                                  suffixIcon: isReadOnlyRow
+                                      ? null
+                                      : (lstKeyValueCores[i].key.text.isNotEmpty
+                                            ? IconButton(
+                                                padding: EdgeInsets.zero,
+                                                constraints:
+                                                    const BoxConstraints(),
+                                                icon: const Icon(
+                                                  Icons.clear,
+                                                  size: 16,
+                                                ),
+                                                onPressed: () {
+                                                  setState(() {
+                                                    lstKeyValueCores[i].key
+                                                        .clear();
+                                                    lstKeyValueCores[i].value
+                                                        .clear();
+                                                    lstKeyValueCores[i]
+                                                            .quantity
+                                                            .text =
+                                                        '1';
+                                                    _recalculateTotal();
+                                                  });
+                                                },
+                                              )
+                                            : const Icon(
+                                                Icons.arrow_drop_down,
+                                                color: Colors.grey,
+                                              )),
+                                ),
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500,
                                 ),
                               ),
-                              enabledBorder: OutlineInputBorder(
+                      ),
+                      if (!isReadOnlyRow) ...[
+                        const SizedBox(width: 8),
+                        IconButton(
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                          icon: const Icon(
+                            Icons.delete_outline,
+                            color: Colors.red,
+                            size: 22,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              lstKeyValueCores.removeAt(i);
+                              _recalculateTotal();
+                            });
+                          },
+                        ),
+                      ],
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  // Hàng dưới: Ô Số lượng + Ô Giá
+                  Row(
+                    children: [
+                      const SizedBox(width: 32),
+                      Expanded(
+                        child: Row(
+                          children: [
+                            // Bộ điều chỉnh số lượng (Stepper)
+                            Container(
+                              height: 38,
+                              decoration: BoxDecoration(
+                                color: isReadOnlyRow
+                                    ? Colors.grey.shade100
+                                    : Colors.white,
                                 borderRadius: BorderRadius.circular(8),
-                                borderSide: BorderSide(
-                                  color: Colors.grey.shade300,
-                                ),
+                                border: Border.all(color: Colors.grey.shade300),
                               ),
-                              suffixIcon: isReadOnlyRow
-                                  ? null
-                                  : (lstKeyValueCores[i].key.text.isNotEmpty
-                                        ? IconButton(
-                                            padding: EdgeInsets.zero,
-                                            constraints: const BoxConstraints(),
-                                            icon: const Icon(
-                                              Icons.clear,
-                                              size: 16,
-                                            ),
-                                            onPressed: () {
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                    ),
+                                    child: Text(
+                                      "SL",
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.grey.shade700,
+                                      ),
+                                    ),
+                                  ),
+                                  Container(
+                                    width: 1,
+                                    height: 20,
+                                    color: Colors.grey.shade300,
+                                  ),
+                                  InkWell(
+                                    onTap: isReadOnlyRow
+                                        ? null
+                                        : () {
+                                            int q =
+                                                int.tryParse(
+                                                  lstKeyValueCores[i]
+                                                      .quantity
+                                                      .text
+                                                      .trim(),
+                                                ) ??
+                                                1;
+                                            if (q > 1) {
                                               setState(() {
-                                                lstKeyValueCores[i].key.clear();
-                                                lstKeyValueCores[i].value
-                                                    .clear();
+                                                lstKeyValueCores[i]
+                                                    .quantity
+                                                    .text = (q - 1)
+                                                    .toString();
                                                 _recalculateTotal();
                                               });
-                                            },
-                                          )
-                                        : const Icon(
-                                            Icons.arrow_drop_down,
-                                            color: Colors.grey,
-                                          )),
-                            ),
-                            style: const TextStyle(fontSize: 13),
-                          ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    flex: 2,
-                    child: TextField(
-                      controller: lstKeyValueCores[i].value,
-                      textAlign: TextAlign.right,
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                      decoration: InputDecoration(
-                        hintText: 'Nhập giá',
-                        isDense: true,
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 10,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: Colors.grey.shade300),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: Colors.grey.shade300),
-                        ),
-                      ),
-                      onChanged: (text) {
-                        if (lstKeyValueCores[i].key.text == '') {
-                          lstKeyValueCores[i].value.text = '';
-                          context.showSnackBar("Vui lòng chọn sản phẩm!");
-                          return;
-                        } else {
-                          setState(() {
-                            final cleanDigits = text
-                                .replaceAll(".", "")
-                                .replaceAll("đ", "")
-                                .nonBreaking
-                                .trim();
-                            if (cleanDigits.isEmpty) {
-                              lstKeyValueCores[i]
-                                  .value
-                                  .value = const TextEditingValue(
-                                text: '',
-                                selection: TextSelection.collapsed(offset: 0),
-                              );
-                            } else {
-                              String formattedText = cleanDigits.toVND();
-                              lstKeyValueCores[i].value.value =
-                                  TextEditingValue(
-                                    text: formattedText,
-                                    selection: TextSelection.collapsed(
-                                      offset: formattedText.length > 2
-                                          ? formattedText.length - 2
-                                          : formattedText.length,
+                                            }
+                                          },
+                                    borderRadius: BorderRadius.circular(4),
+                                    child: SizedBox(
+                                      width: 28,
+                                      height: 38,
+                                      child: Icon(
+                                        Icons.remove,
+                                        size: 14,
+                                        color: isReadOnlyRow
+                                            ? Colors.grey.shade400
+                                            : ColorUtil.bangladeshGreen,
+                                      ),
                                     ),
-                                  );
-                            }
-                            _recalculateTotal();
-                          });
-                        }
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  if (isReadOnlyRow)
-                    const SizedBox(width: 20)
-                  else
-                    IconButton(
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
-                      icon: const Icon(
-                        Icons.delete_outline,
-                        color: Colors.red,
-                        size: 20,
+                                  ),
+                                  SizedBox(
+                                    width: 34,
+                                    child: TextField(
+                                      controller: lstKeyValueCores[i].quantity,
+                                      textAlign: TextAlign.center,
+                                      keyboardType: TextInputType.number,
+                                      readOnly: isReadOnlyRow,
+                                      inputFormatters: [
+                                        FilteringTextInputFormatter.digitsOnly,
+                                      ],
+                                      decoration: const InputDecoration(
+                                        border: InputBorder.none,
+                                        isDense: true,
+                                        contentPadding: EdgeInsets.zero,
+                                        hintText: '1',
+                                      ),
+                                      style: const TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.bold,
+                                        color: ColorUtil.raisinBlack,
+                                      ),
+                                      onChanged: (text) {
+                                        _recalculateTotal();
+                                      },
+                                    ),
+                                  ),
+                                  InkWell(
+                                    onTap: isReadOnlyRow
+                                        ? null
+                                        : () {
+                                            int q =
+                                                int.tryParse(
+                                                  lstKeyValueCores[i]
+                                                      .quantity
+                                                      .text
+                                                      .trim(),
+                                                ) ??
+                                                1;
+                                            setState(() {
+                                              lstKeyValueCores[i]
+                                                  .quantity
+                                                  .text = (q + 1)
+                                                  .toString();
+                                              _recalculateTotal();
+                                            });
+                                          },
+                                    borderRadius: BorderRadius.circular(4),
+                                    child: SizedBox(
+                                      width: 28,
+                                      height: 38,
+                                      child: Icon(
+                                        Icons.add,
+                                        size: 14,
+                                        color: isReadOnlyRow
+                                            ? Colors.grey.shade400
+                                            : ColorUtil.bangladeshGreen,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            // Ô nhập Giá / Thành tiền
+                            Expanded(
+                              child: TextField(
+                                controller: lstKeyValueCores[i].value,
+                                textAlign: TextAlign.right,
+                                keyboardType: TextInputType.number,
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.digitsOnly,
+                                ],
+                                decoration: InputDecoration(
+                                  prefixText: 'Giá: ',
+                                  prefixStyle: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.grey.shade600,
+                                  ),
+                                  hintText: '0 đ',
+                                  isDense: true,
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 10,
+                                  ),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                    borderSide: BorderSide(
+                                      color: Colors.grey.shade300,
+                                    ),
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                    borderSide: BorderSide(
+                                      color: Colors.grey.shade300,
+                                    ),
+                                  ),
+                                ),
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.bold,
+                                  color: ColorUtil.raisinBlack,
+                                ),
+                                onChanged: (text) {
+                                  if (lstKeyValueCores[i].key.text == '') {
+                                    lstKeyValueCores[i].value.text = '';
+                                    context.showSnackBar(
+                                      "Vui lòng chọn sản phẩm!",
+                                    );
+                                    return;
+                                  } else {
+                                    setState(() {
+                                      final cleanDigits = text
+                                          .replaceAll(".", "")
+                                          .replaceAll("đ", "")
+                                          .nonBreaking
+                                          .trim();
+                                      if (cleanDigits.isEmpty) {
+                                        lstKeyValueCores[i]
+                                            .value
+                                            .value = const TextEditingValue(
+                                          text: '',
+                                          selection: TextSelection.collapsed(
+                                            offset: 0,
+                                          ),
+                                        );
+                                      } else {
+                                        String formattedText = cleanDigits
+                                            .toVND();
+                                        lstKeyValueCores[i]
+                                            .value
+                                            .value = TextEditingValue(
+                                          text: formattedText,
+                                          selection: TextSelection.collapsed(
+                                            offset: formattedText.length > 2
+                                                ? formattedText.length - 2
+                                                : formattedText.length,
+                                          ),
+                                        );
+                                      }
+                                      _recalculateTotal();
+                                    });
+                                  }
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                      onPressed: () {
-                        setState(() {
-                          lstKeyValueCores.removeAt(i);
-                          _recalculateTotal();
-                        });
-                      },
-                    ),
+                      if (!isReadOnlyRow) const SizedBox(width: 30),
+                    ],
+                  ),
                 ],
               ),
             );
@@ -3054,9 +3258,12 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
 class KeyValue {
   late TextEditingController key;
   late TextEditingController value;
+  late TextEditingController quantity;
 
   //late TextEditingController selectedDate;
-  KeyValue(this.key, this.value);
+  KeyValue(this.key, this.value, [TextEditingController? quantity]) {
+    this.quantity = quantity ?? TextEditingController(text: "1");
+  }
 }
 
 class CurrencyInputFormatter extends TextInputFormatter {

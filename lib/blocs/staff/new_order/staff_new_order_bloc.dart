@@ -187,7 +187,9 @@ class StaffNewOrderBloc extends Bloc<StaffNewOrderEvent, StaffNewOrderState> {
     Emitter<StaffNewOrderState> emit,
   ) async {
     try {
-      var url = AppConfig.instance.apiUri(ApiEndpoints.productListAll);
+      var url = AppConfig.instance.apiUri(ApiEndpoints.productListAll, {
+        'is_socbay': '1',
+      });
       var res = await http.get(url);
       if (res.statusCode == HttpStatus.ok) {
         var l = Map<String, dynamic>.from(json.decode(res.body));
@@ -267,6 +269,7 @@ class StaffNewOrderBloc extends Bloc<StaffNewOrderEvent, StaffNewOrderState> {
         List<String> listReplaceDate = [];
         List<String> listNextDate = [];
         List<String> listPrice = [];
+        List<String> listQuantities = [];
         var lst1 = event.lstNew;
         var lst2 = event.lstMaintain;
         for (OrderFilterCoreModel filterCore in lst1) {
@@ -291,6 +294,12 @@ class StaffNewOrderBloc extends Bloc<StaffNewOrderEvent, StaffNewOrderState> {
                   : "",
             );
             listPrice.add(filterCore.price ?? "0");
+            listQuantities.add(
+              (filterCore.quantity != null && filterCore.quantity! > 0
+                      ? filterCore.quantity!
+                      : 1)
+                  .toString(),
+            );
           }
         }
         for (OrderFilterCoreModel filterCore in lst2) {
@@ -306,6 +315,12 @@ class StaffNewOrderBloc extends Bloc<StaffNewOrderEvent, StaffNewOrderState> {
                   : "",
             );
             listPrice.add(filterCore.price ?? "0");
+            listQuantities.add(
+              (filterCore.quantity != null && filterCore.quantity! > 0
+                      ? filterCore.quantity!
+                      : 1)
+                  .toString(),
+            );
           }
         }
         //Add cores
@@ -332,6 +347,8 @@ class StaffNewOrderBloc extends Bloc<StaffNewOrderEvent, StaffNewOrderState> {
           'name': listCoresName,
           'corePrice': listPrice,
           'listCores': listFilterId,
+          'quantities': listQuantities,
+          'quantity': listQuantities,
           "images": images,
           'sale_id': taskModel?.saleId?.toString() ?? event.saleId.toString(),
           'address': event.newAddressSP.toString(),

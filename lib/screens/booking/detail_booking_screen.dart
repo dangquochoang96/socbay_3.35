@@ -234,7 +234,130 @@ class _DetailBookingScreenState extends State<DetailBookingScreen> {
 
   void _listener(BuildContext context, DetailBookingState state) {}
 
+  Widget _buildLoadingScreen(BuildContext context) {
+    final dynamic taskId = _bloc.taskModel?.id ?? _bloc.args?['id'];
+    String headerTitle = widget.isRent
+        ? 'Chi tiết đơn thuê'
+        : (App.instance.userApp?.isUserCustomer() == true
+              ? 'Chi tiết đặt lịch'
+              : (App.instance.userApp?.isUserRole() == true
+                    ? 'Chi tiết công việc KT'
+                    : 'Chi tiết công việc'));
+    if (taskId != null) {
+      headerTitle += ' #$taskId';
+    }
+
+    return Scaffold(
+      backgroundColor: const Color(0xFFF4F6F8),
+      appBar: MyAppBar(
+        title: headerTitle,
+        centerTitle: true,
+        isBackNavigation: true,
+      ),
+      body: const SafeArea(
+        child: LoadingIndicator(isLoading: true, child: SizedBox.expand()),
+      ),
+    );
+  }
+
+  Widget _buildErrorScreen(BuildContext context) {
+    final dynamic taskId = _bloc.args?['id'];
+    String headerTitle = widget.isRent
+        ? 'Chi tiết đơn thuê'
+        : (App.instance.userApp?.isUserCustomer() == true
+              ? 'Chi tiết đặt lịch'
+              : (App.instance.userApp?.isUserRole() == true
+                    ? 'Chi tiết công việc KT'
+                    : 'Chi tiết công việc'));
+    if (taskId != null) {
+      headerTitle += ' #$taskId';
+    }
+
+    return Scaffold(
+      backgroundColor: const Color(0xFFF4F6F8),
+      appBar: MyAppBar(
+        title: headerTitle,
+        centerTitle: true,
+        isBackNavigation: true,
+      ),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 72,
+                height: 72,
+                decoration: BoxDecoration(
+                  color: Colors.red.shade50,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.error_outline_rounded,
+                  size: 40,
+                  color: Colors.red.shade400,
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                "Không thể tải thông tin đơn hàng",
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: ColorUtil.raisinBlack,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                "Đã có lỗi xảy ra hoặc đơn hàng không tồn tại.\nVui lòng thử lại.",
+                style: TextStyle(
+                  fontSize: 13,
+                  color: Colors.grey.shade600,
+                  height: 1.4,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: ColorUtil.bangladeshGreen,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 12,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  elevation: 0,
+                ),
+                onPressed: () {
+                  _bloc.add(DetailBookingStartedEvent());
+                },
+                icon: const Icon(Icons.refresh_rounded, size: 18),
+                label: const Text(
+                  "Thử lại",
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _builder(BuildContext context, DetailBookingState state) {
+    if (_bloc.taskModel == null) {
+      if (_bloc.isLoading || state is DetailBookingLoadingState) {
+        return _buildLoadingScreen(context);
+      } else {
+        return _buildErrorScreen(context);
+      }
+    }
+
     return Scaffold(
       backgroundColor: const Color(0xFFF4F6F8),
       appBar: MyAppBar(
@@ -243,8 +366,20 @@ class _DetailBookingScreenState extends State<DetailBookingScreen> {
           child: RichText(
             text: TextSpan(
               children: <TextSpan>[
+                //  thuê
+                if (widget.isRent)
+                  const TextSpan(
+                    text: 'Chi tiết đơn thuê ',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      decoration: TextDecoration.underline,
+                      fontSize: 18,
+                      color: ColorUtil.white,
+                    ),
+                  ),
                 //  khách hàng
-                if (App.instance.userApp?.isUserCustomer() == true)
+                if (!widget.isRent &&
+                    App.instance.userApp?.isUserCustomer() == true)
                   const TextSpan(
                     text: 'Chi tiết đặt lịch ',
                     style: TextStyle(
@@ -255,7 +390,8 @@ class _DetailBookingScreenState extends State<DetailBookingScreen> {
                     ),
                   ),
                 //  kỹ thuật
-                if (App.instance.userApp?.isUserRole() == true)
+                if (!widget.isRent &&
+                    App.instance.userApp?.isUserRole() == true)
                   const TextSpan(
                     text: 'Chi tiết công việc KT ',
                     style: TextStyle(
@@ -265,7 +401,8 @@ class _DetailBookingScreenState extends State<DetailBookingScreen> {
                       color: ColorUtil.white,
                     ),
                   ),
-                if (App.instance.userApp?.isUserSale() == true)
+                if (!widget.isRent &&
+                    App.instance.userApp?.isUserSale() == true)
                   const TextSpan(
                     text: 'Chi tiết công việc ',
                     style: TextStyle(
@@ -289,7 +426,9 @@ class _DetailBookingScreenState extends State<DetailBookingScreen> {
           ),
         ),
         isBackNavigation: true,
-        title: 'Chi tiết đơn hàng ${_bloc.taskModel?.id}',
+        title: widget.isRent
+            ? 'Chi tiết đơn thuê ${_bloc.taskModel?.id}'
+            : 'Chi tiết đơn hàng ${_bloc.taskModel?.id}',
         centerTitle: true,
         actionWidgets: [
           if (App.instance.userApp?.isUserCustomer() == true)
@@ -343,61 +482,66 @@ class _DetailBookingScreenState extends State<DetailBookingScreen> {
       ),
       body: LoadingIndicator(
         isLoading: _bloc.isLoading,
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            _buildGeneralInfoCard(_bloc.taskModel),
-            _buildProductInfoCard(_bloc.taskModel),
-            if (App.instance.userApp?.isUserCustomer() == false)
-              _buildCustomerInfoCard(_bloc.taskModel),
-            _buildMediaCard(),
-            const SizedBox(height: 16),
-            if (App.instance.userApp?.isUserCustomer() == true)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: Row(
-                  children: [
-                    _buildButton(
-                      text: 'GÓP Ý',
-                      isPositive: true,
-                      action: () {
-                        Navigator.pushNamed(
-                          context,
-                          Routes.feedbackScreen,
-                          arguments: {
-                            'history_id': _bloc.taskModel?.id?.toString(),
-                            'taskId': _bloc.taskModel?.id?.toString(),
-                            'staffName': _bloc.taskModel?.staff?.username,
-                            'staffPhone': _bloc.taskModel?.staff?.phone,
-                          },
-                        );
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            if (App.instance.userApp?.isUserRole() == true) ...[
-              if (_bloc.taskModel?.status == "3") _detailTask(),
-              if (_bloc.taskModel?.status != "3" &&
-                  _bloc.taskModel?.status != "4" &&
-                  !(App.instance.userApp?.isUserCustomer() == true))
+        child: RefreshIndicator(
+          onRefresh: () async {
+            _bloc.add(DetailBookingStartedEvent());
+          },
+          child: ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              _buildGeneralInfoCard(_bloc.taskModel),
+              _buildProductInfoCard(_bloc.taskModel),
+              if (App.instance.userApp?.isUserCustomer() == false)
+                _buildCustomerInfoCard(_bloc.taskModel),
+              _buildMediaCard(),
+              const SizedBox(height: 16),
+              if (App.instance.userApp?.isUserCustomer() == true)
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8.0),
                   child: Row(
                     children: [
                       _buildButton(
-                        text: 'TẠO HÓA ĐƠN',
+                        text: 'GÓP Ý',
                         isPositive: true,
                         action: () {
-                          _createOrder(_bloc.taskModel?.id ?? 0);
+                          Navigator.pushNamed(
+                            context,
+                            Routes.feedbackScreen,
+                            arguments: {
+                              'history_id': _bloc.taskModel?.id?.toString(),
+                              'taskId': _bloc.taskModel?.id?.toString(),
+                              'staffName': _bloc.taskModel?.staff?.username,
+                              'staffPhone': _bloc.taskModel?.staff?.phone,
+                            },
+                          );
                         },
                       ),
                     ],
                   ),
                 ),
+              if (App.instance.userApp?.isUserRole() == true) ...[
+                if (_bloc.taskModel?.status == "3") _detailTask(),
+                if (_bloc.taskModel?.status != "3" &&
+                    _bloc.taskModel?.status != "4" &&
+                    !(App.instance.userApp?.isUserCustomer() == true))
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Row(
+                      children: [
+                        _buildButton(
+                          text: 'TẠO HÓA ĐƠN',
+                          isPositive: true,
+                          action: () {
+                            _createOrder(_bloc.taskModel?.id ?? 0);
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
+              const SizedBox(height: 30),
             ],
-            const SizedBox(height: 30),
-          ],
+          ),
         ),
       ),
     );

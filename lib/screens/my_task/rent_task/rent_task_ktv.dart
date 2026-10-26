@@ -5,8 +5,10 @@ import 'package:socbay/blocs/rent-task/rent_task_screen_event.dart';
 import 'package:socbay/blocs/rent-task/rent_task_screen_ktv_bloc.dart';
 import 'package:socbay/blocs/rent-task/rent_task_screen_state.dart';
 import 'package:socbay/constants/constants.dart';
+import 'package:socbay/constants/maps.dart';
 import 'package:socbay/data/model/task_model.dart';
 import 'package:socbay/routes.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:socbay/utils/color_util.dart';
 import 'package:socbay/utils/context_extension.dart';
 import 'package:socbay/utils/date_util.dart';
@@ -111,6 +113,7 @@ class _RentTaskTabState extends State<RentTaskTab> {
   }
 
   Widget _builder(BuildContext context, state) {
+    final tasks = _bloc.staffListTaskBydayModel;
     return LoadingIndicator(
       isLoading: _bloc.isLoading,
       child: RefreshIndicator(
@@ -118,20 +121,13 @@ class _RentTaskTabState extends State<RentTaskTab> {
           _isRefresh = true;
           _bloc.add(StaffTaskScreenGetTaskByDayEvent(isRefresh: _isRefresh));
         },
-        child: _bloc.staffListTaskBydayModel.isEmpty && !_bloc.isLoading
-            ? const CustomScrollView(
-                physics: AlwaysScrollableScrollPhysics(),
-                slivers: [
-                  SliverFillRemaining(
-                    child: Center(child: Text("Chưa có công việc")),
-                  ),
-                ],
-              )
+        child: tasks.isEmpty && !_bloc.isLoading
+            ? _buildEmptyState()
             : ListView.separated(
                 physics: const AlwaysScrollableScrollPhysics(),
-                //controller: _scrollController,
+                controller: _scrollController,
                 itemBuilder: _itemBuilder,
-                itemCount: _bloc.staffListTaskBydayModel.length,
+                itemCount: tasks.length,
                 padding: const EdgeInsets.symmetric(
                   horizontal: paddingHorizontal,
                   vertical: paddingVertical,
@@ -152,127 +148,532 @@ class _RentTaskTabState extends State<RentTaskTab> {
     return _buildTaskCard(taskModel);
   }
 
+  Widget _buildEmptyState() {
+    return CustomScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      slivers: [
+        SliverFillRemaining(
+          hasScrollBody: false,
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 76,
+                    height: 76,
+                    decoration: BoxDecoration(
+                      color: ColorUtil.bangladeshGreen.withValues(alpha: 0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.handshake_rounded,
+                      size: 40,
+                      color: ColorUtil.bangladeshGreen,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    "Chưa có đơn thuê trong ngày",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: ColorUtil.raisinBlack,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    "Các đơn thuê thiết bị hôm nay sẽ hiển thị tại đây.\nKéo xuống để làm mới danh sách.",
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.grey.shade600,
+                      height: 1.4,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildTaskCard(TaskModel taskModel) {
+    final statusConfig = _getStatusConfig(taskModel);
+    final hasPhone =
+        taskModel.customer?.phone != null &&
+        taskModel.customer!.phone!.trim().isNotEmpty;
+    final hasAddress =
+        taskModel.customer?.address != null &&
+        taskModel.customer!.address!.trim().isNotEmpty;
+    final canUpdate =
+        taskModel.status == '1' ||
+        taskModel.status == '2' ||
+        taskModel.status == '5';
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE5E7EB), width: 1),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
       child: Material(
         color: Colors.transparent,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
         child: InkWell(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
           onTap: () => _detailTask(taskModel),
           child: Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(14.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Expanded(
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF3F4F6),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(color: const Color(0xFFE5E7EB)),
+                      ),
                       child: Row(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           const Icon(
-                            Icons.confirmation_number_outlined,
-                            size: 20,
+                            Icons.tag_rounded,
+                            size: 13,
                             color: ColorUtil.bangladeshGreen,
                           ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              'Mã DV: ${taskModel.id}',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: ColorUtil.bangladeshGreen,
-                                fontSize: 16,
-                              ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
+                          const SizedBox(width: 3),
+                          Text(
+                            'TH-${taskModel.id ?? 0}',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 12,
+                              color: ColorUtil.raisinBlack,
                             ),
                           ),
                         ],
                       ),
                     ),
-                    _buildStatusBadge(taskModel.getStatus()),
+                    if (taskModel.isLongDistanceTask) ...[
+                      const SizedBox(width: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 7,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFFF7ED),
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(color: const Color(0xFFFFEDD5)),
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.directions_car_filled_outlined,
+                              size: 12,
+                              color: Color(0xFFEA580C),
+                            ),
+                            SizedBox(width: 3),
+                            Text(
+                              'Đi xa',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFFEA580C),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                    const Spacer(),
+                    _buildStatusBadge(statusConfig),
                   ],
                 ),
-                const Divider(
-                  height: 24,
-                  thickness: 1,
-                  color: Color(0xFFEEEEEE),
-                ),
-                _buildInfoRow(
-                  Icons.access_time,
-                  'Thời gian:',
-                  _formatTaskDatetime(taskModel.timeStart),
-                  valueColor: Colors.red,
-                  isBoldValue: true,
-                ),
-                const SizedBox(height: 8),
-                _buildInfoRow(
-                  Icons.person_outline,
-                  'Khách hàng:',
-                  taskModel.customer?.username ?? '',
-                ),
-                const SizedBox(height: 8),
-                _buildInfoRow(
-                  Icons.phone_outlined,
-                  'SĐT:',
-                  taskModel.customer?.phone ?? '',
-                ),
-                const SizedBox(height: 8),
-                _buildInfoRow(
-                  Icons.location_on_outlined,
-                  'Địa chỉ:',
-                  taskModel.customer?.address ?? '',
-                ),
-                const SizedBox(height: 8),
-                _buildInfoRow(
-                  Icons.work_outline,
-                  'Công việc:',
-                  taskModel.name ?? '',
-                ),
-                if (taskModel.des != null && taskModel.des!.isNotEmpty) ...[
-                  const SizedBox(height: 8),
-                  _buildInfoRow(
-                    Icons.description_outlined,
-                    'Nội dung:',
-                    taskModel.des!,
+                const SizedBox(height: 10),
+                Text(
+                  (taskModel.name != null && taskModel.name!.trim().isNotEmpty)
+                      ? taskModel.name!
+                      : 'Đơn thuê thiết bị',
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF1E2336),
+                    height: 1.3,
                   ),
-                ],
-                if (taskModel.noti != null && taskModel.noti!.isNotEmpty) ...[
-                  const SizedBox(height: 8),
-                  _buildInfoRow(
-                    Icons.notifications_none,
-                    'Thông báo:',
-                    taskModel.noti!,
-                    valueColor: Colors.red,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 10),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 8,
                   ),
-                ],
-                if (taskModel.status == '1' ||
-                    taskModel.status == '2' ||
-                    taskModel.status == '5') ...[
-                  const SizedBox(height: 16),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: _buildActionButton(
-                      icon: Icons.edit_outlined,
-                      text: 'Cập nhật',
-                      color: ColorUtil.bangladeshGreen,
-                      onTap: () => _updateTask(taskModel),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF9FAFB),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: const Color(0xFFE5E7EB)),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.access_time_filled_rounded,
+                        size: 16,
+                        color: ColorUtil.bangladeshGreen,
+                      ),
+                      const SizedBox(width: 8),
+                      const Text(
+                        'Thời gian:',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFF6B7280),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          _formatTaskDatetime(taskModel.timeStart),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFFDC2626),
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF9FAFB),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: const Color(0xFFE5E7EB)),
+                  ),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.person_rounded,
+                            size: 16,
+                            color: Color(0xFF6B7280),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              (taskModel.customer?.username != null &&
+                                      taskModel.customer!.username!
+                                          .trim()
+                                          .isNotEmpty)
+                                  ? taskModel.customer!.username!
+                                  : 'Khách hàng',
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF1F2937),
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          if (hasPhone) ...[
+                            InkWell(
+                              onTap: () =>
+                                  _makePhoneCall(taskModel.customer?.phone),
+                              borderRadius: BorderRadius.circular(6),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFECFDF5),
+                                  borderRadius: BorderRadius.circular(6),
+                                  border: Border.all(
+                                    color: const Color(0xFFA7F3D0),
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(
+                                      Icons.phone_in_talk_rounded,
+                                      size: 13,
+                                      color: Color(0xFF059669),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      taskModel.customer!.phone!,
+                                      style: const TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w700,
+                                        color: Color(0xFF059669),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                      if (hasAddress) ...[
+                        const SizedBox(height: 8),
+                        const Divider(
+                          height: 1,
+                          thickness: 1,
+                          color: Color(0xFFE5E7EB),
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Padding(
+                              padding: EdgeInsets.only(top: 1),
+                              child: Icon(
+                                Icons.location_on_rounded,
+                                size: 16,
+                                color: Color(0xFFEF4444),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                taskModel.customer!.address!,
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: Color(0xFF374151),
+                                  height: 1.3,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            InkWell(
+                              onTap: () =>
+                                  _openMap(taskModel.customer?.address),
+                              borderRadius: BorderRadius.circular(6),
+                              child: Container(
+                                padding: const EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(6),
+                                  border: Border.all(
+                                    color: const Color(0xFFD1D5DB),
+                                  ),
+                                ),
+                                child: const Icon(
+                                  Icons.directions_rounded,
+                                  size: 16,
+                                  color: ColorUtil.bangladeshGreen,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                if (taskModel.noti != null &&
+                    taskModel.noti!.trim().isNotEmpty) ...[
+                  const SizedBox(height: 10),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 7,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFEF2F2),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: const Color(0xFFFECACA)),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(
+                          Icons.error_outline_rounded,
+                          size: 15,
+                          color: Color(0xFFDC2626),
+                        ),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: RichText(
+                            text: TextSpan(
+                              children: [
+                                const TextSpan(
+                                  text: 'Thông báo: ',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 12,
+                                    color: Color(0xFFDC2626),
+                                  ),
+                                ),
+                                TextSpan(
+                                  text: taskModel.noti!,
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: Color(0xFF991B1B),
+                                    height: 1.3,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
+                if (taskModel.des != null &&
+                    taskModel.des!.trim().isNotEmpty) ...[
+                  const SizedBox(height: 10),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 7,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF3F4F6),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: const Color(0xFFE5E7EB)),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(
+                          Icons.description_outlined,
+                          size: 15,
+                          color: Color(0xFF6B7280),
+                        ),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: RichText(
+                            text: TextSpan(
+                              children: [
+                                const TextSpan(
+                                  text: 'Nội dung: ',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 12,
+                                    color: Color(0xFF4B5563),
+                                  ),
+                                ),
+                                TextSpan(
+                                  text: taskModel.des!,
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: Color(0xFF374151),
+                                    height: 1.3,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 12),
+                const Divider(
+                  height: 1,
+                  thickness: 1,
+                  color: Color(0xFFF3F4F6),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    InkWell(
+                      onTap: () => _detailTask(taskModel),
+                      borderRadius: BorderRadius.circular(8),
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 4,
+                          vertical: 4,
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'Xem chi tiết',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: ColorUtil.bangladeshGreen,
+                              ),
+                            ),
+                            SizedBox(width: 4),
+                            Icon(
+                              Icons.arrow_forward_ios_rounded,
+                              size: 12,
+                              color: ColorUtil.bangladeshGreen,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    if (canUpdate)
+                      ElevatedButton.icon(
+                        onPressed: () => _updateTask(taskModel),
+                        icon: const Icon(
+                          Icons.edit_calendar_rounded,
+                          size: 15,
+                          color: Colors.white,
+                        ),
+                        label: const Text(
+                          'Cập nhật',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: ColorUtil.bangladeshGreen,
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 8,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          minimumSize: const Size(0, 36),
+                        ),
+                      ),
+                  ],
+                ),
               ],
             ),
           ),
@@ -281,89 +682,127 @@ class _RentTaskTabState extends State<RentTaskTab> {
     );
   }
 
-  Widget _buildStatusBadge(String status) {
+  Widget _buildStatusBadge(_TaskStatusConfig config) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
       decoration: BoxDecoration(
-        color: ColorUtil.bangladeshGreen.withValues(alpha: 0.1),
+        color: config.bg,
         borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: config.border, width: 1),
       ),
-      child: Text(
-        status,
-        style: const TextStyle(
-          color: ColorUtil.bangladeshGreen,
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildInfoRow(
-    IconData icon,
-    String label,
-    String value, {
-    Color? valueColor,
-    bool isBoldValue = false,
-  }) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Icon(icon, size: 18, color: Colors.grey[600]),
-        const SizedBox(width: 8),
-        SizedBox(
-          width: 85,
-          child: Text(
-            label,
-            style: TextStyle(color: Colors.grey[600], fontSize: 14),
-          ),
-        ),
-        Expanded(
-          child: Text(
-            value,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(config.icon, size: 12, color: config.text),
+          const SizedBox(width: 4),
+          Text(
+            config.label,
             style: TextStyle(
-              color: valueColor ?? Colors.black87,
-              fontSize: 14,
-              fontWeight: isBoldValue ? FontWeight.bold : FontWeight.normal,
+              color: config.text,
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
-  Widget _buildActionButton({
-    required IconData icon,
-    required String text,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
-    return ElevatedButton.icon(
-      onPressed: onTap,
-      icon: Icon(icon, size: 18, color: Colors.white),
-      label: Text(
-        text,
-        style: const TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: color,
-        foregroundColor: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        elevation: 0,
-        minimumSize: const Size(0, 36),
-      ),
-    );
+  _TaskStatusConfig _getStatusConfig(TaskModel task) {
+    switch (task.status) {
+      case "1":
+        return _TaskStatusConfig(
+          bg: const Color(0xFFF3F4F6),
+          text: const Color(0xFF4B5563),
+          border: const Color(0xFFE5E7EB),
+          icon: Icons.hourglass_top_rounded,
+          label: task.getStatus().isNotEmpty ? task.getStatus() : "Chưa giao",
+        );
+      case "2":
+        return _TaskStatusConfig(
+          bg: const Color(0xFFFEF3C7),
+          text: const Color(0xFFD97706),
+          border: const Color(0xFFFDE68A),
+          icon: Icons.play_circle_outline_rounded,
+          label: task.getStatus().isNotEmpty
+              ? task.getStatus()
+              : "Đang thực hiện",
+        );
+      case "3":
+        return _TaskStatusConfig(
+          bg: const Color(0xFFD1FAE5),
+          text: const Color(0xFF059669),
+          border: const Color(0xFFA7F3D0),
+          icon: Icons.check_circle_outline_rounded,
+          label: task.getStatus().isNotEmpty ? task.getStatus() : "Hoàn thành",
+        );
+      case "4":
+        return _TaskStatusConfig(
+          bg: const Color(0xFFFEE2E2),
+          text: const Color(0xFFDC2626),
+          border: const Color(0xFFFECACA),
+          icon: Icons.cancel_outlined,
+          label: task.getStatus().isNotEmpty ? task.getStatus() : "Đã hủy",
+        );
+      case "5":
+      default:
+        return _TaskStatusConfig(
+          bg: const Color(0xFFEFF6FF),
+          text: const Color(0xFF2563EB),
+          border: const Color(0xFFBFDBFE),
+          icon: Icons.assignment_ind_outlined,
+          label: task.getStatus().isNotEmpty ? task.getStatus() : "Đã giao",
+        );
+    }
+  }
+
+  Future<void> _makePhoneCall(String? phone) async {
+    if (phone == null || phone.trim().isEmpty) {
+      context.showSnackBar("Số điện thoại không hợp lệ");
+      return;
+    }
+    final cleanPhone = phone.replaceAll(RegExp(r'\s+'), '');
+    final uri = Uri.parse('tel:$cleanPhone');
+    try {
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri);
+      } else {
+        await launchUrl(uri);
+      }
+    } catch (e) {
+      if (mounted) {
+        context.showSnackBar("Không thể thực hiện cuộc gọi");
+      }
+    }
+  }
+
+  Future<void> _openMap(String? address) async {
+    if (address == null || address.trim().isEmpty) {
+      context.showSnackBar("Địa chỉ không hợp lệ");
+      return;
+    }
+    try {
+      final url = '$GOOGLE_MAP_PREFIX${Uri.encodeFull(address.trim())}';
+      final uri = Uri.parse(url);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        await launchUrl(uri);
+      }
+    } catch (e) {
+      if (mounted) {
+        context.showSnackBar("Không thể mở ứng dụng bản đồ");
+      }
+    }
   }
 
   String _formatTaskDatetime(String? dateTimeString) {
     try {
-      if (dateTimeString == null || dateTimeString.isEmpty) return "";
+      if (dateTimeString == null || dateTimeString.isEmpty) {
+        return "Chưa cập nhật";
+      }
       DateTime getDateTime = DateTime.parse(dateTimeString);
-      return DateFormat('HH:mm:ss dd/MM/yyyy').format(getDateTime);
+      return DateFormat('HH:mm • dd/MM/yyyy').format(getDateTime);
     } on Exception catch (ex) {
       print("format datetime error: $ex");
       return dateTimeString ?? "";
@@ -821,3 +1260,20 @@ class _RentTaskTabState extends State<RentTaskTab> {
     );
   }
 }
+
+class _TaskStatusConfig {
+  final Color bg;
+  final Color text;
+  final Color border;
+  final IconData icon;
+  final String label;
+
+  const _TaskStatusConfig({
+    required this.bg,
+    required this.text,
+    required this.border,
+    required this.icon,
+    required this.label,
+  });
+}
+

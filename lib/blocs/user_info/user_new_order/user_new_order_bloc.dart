@@ -186,7 +186,9 @@ class UserNewOrderBloc extends Bloc<UserNewOrderEvent, UserNewOrderState> {
     Emitter<UserNewOrderState> emit,
   ) async {
     try {
-      var url = AppConfig.instance.apiUri(ApiEndpoints.productListAll);
+      var url = AppConfig.instance.apiUri(ApiEndpoints.productListAll, {
+        'is_socbay': '1',
+      });
       var res = await http.get(url);
       if (res.statusCode == HttpStatus.ok) {
         var l = Map<String, dynamic>.from(json.decode(res.body));

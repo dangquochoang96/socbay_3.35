@@ -20,7 +20,12 @@ class DetailBookingBloc extends Bloc<DetailBookingEvent, DetailBookingState> {
   TaskModel? taskModel;
 
   DetailBookingBloc({required this.apiRepository, required this.args})
-    : super(DetailBookingInitialState()) {
+    : isLoading = args['id'] != null,
+      super(
+        args['id'] != null
+            ? DetailBookingLoadingState()
+            : DetailBookingInitialState(),
+      ) {
     on<DetailBookingStartedEvent>(_mapStartedEventToState);
   }
 
@@ -29,14 +34,17 @@ class DetailBookingBloc extends Bloc<DetailBookingEvent, DetailBookingState> {
     Emitter<DetailBookingState> emit,
   ) async {
     isLoading = true;
-    //emit(DetailBookingInitialState());
+    emit(DetailBookingLoadingState());
     try {
       var url = AppConfig.instance.apiUri(ApiEndpoints.taskById(args['id']));
       var res = await http.get(url);
       if (res.statusCode == HttpStatus.ok) {
         var l = Map<String, dynamic>.from(json.decode(res.body));
         taskModel = TaskModel.fromJson(l["data"]);
-        //print(blogs);
+      } else {
+        LoggerUtil.error(
+          "---GET TASK ${args['id']} FAILED (status: ${res.statusCode})---",
+        );
       }
     } catch (ex) {
       LoggerUtil.error("---GET TASK ${args['id']} ERROR---\n$ex");
