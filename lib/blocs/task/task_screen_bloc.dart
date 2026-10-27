@@ -28,12 +28,18 @@ class TaskScreenBloc extends Bloc<TaskScreenEvent, TaskScreenState> {
     on<StaffTaskScreenGetTaskDoneEvent>(_mapGetTaskDoneEventToState);
     on<BookingDeleteTaskEvent>(_mapBookingDeleteTaskEventToState);
     on<BookingDeleteTaskToDayEvent>(_mapBookingDeleteTaskToDayEventToState);
+    on<StaffTaskScreenGetAllTasksEvent>(_mapGetAllTasksEventToState);
+    on<StaffTaskScreenGetContactedTasksEvent>(_mapGetContactedTasksEventToState);
   }
 
   final ApiRepository apiRepository;
   List<TaskModel> listTaskModel = [];
   List<TaskModel> staffListTaskBydayModel = [];
   List<TaskModel> staffListTaskAssigedModel = [];
+  List<TaskModel> staffListAllTasks = [];
+  bool hasMoreAllTasks = true;
+  List<TaskModel> staffListContactedTasks = [];
+  bool hasMoreContactedTasks = true;
   TaskModel? taskModel;
   bool isLoading = true;
   int page = 1;
@@ -136,6 +142,85 @@ class TaskScreenBloc extends Bloc<TaskScreenEvent, TaskScreenState> {
           // pageTaskAssiged = 0;
         }
         staffListTaskAssigedModel.addAll(newlistTaskModel);
+      }
+    } catch (exception) {
+      LoggerUtil.log(jsonEncode(exception));
+    }
+    isLoading = false;
+    emit(MyTaskScreenInitialState());
+  }
+
+  FutureOr<void> _mapGetAllTasksEventToState(
+    StaffTaskScreenGetAllTasksEvent event,
+    Emitter<TaskScreenState> emit,
+  ) async {
+    isLoading = true;
+    emit(MyTaskScreenInitialState());
+    try {
+      final Map<String, dynamic> params = {
+        'page': event.page.toString(),
+        'limit': '20',
+      };
+      if (App.instance.userApp?.id != null) {
+        params['user_id'] = App.instance.userApp!.id.toString();
+      }
+      if (event.isToday) {
+        params['today'] = 'true';
+      }
+      if (event.query != null && event.query!.trim().isNotEmpty) {
+        params['q'] = event.query!.trim();
+      }
+
+      var url = AppConfig.instance.apiUri(ApiEndpoints.allTasks, params);
+      var res = await http.get(url);
+      if (res.statusCode == HttpStatus.ok) {
+        var l = Map<String, dynamic>.from(json.decode(res.body));
+        List<TaskModel> newlistTaskModel = List<TaskModel>.from(
+          (l["data"] as List? ?? []).map((model) => TaskModel.fromJson(model)),
+        );
+        if (event.isRefresh || event.page == 0) {
+          staffListAllTasks.clear();
+        }
+        hasMoreAllTasks = newlistTaskModel.length >= 20;
+        staffListAllTasks.addAll(newlistTaskModel);
+      }
+    } catch (exception) {
+      LoggerUtil.log(jsonEncode(exception));
+    }
+    isLoading = false;
+    emit(MyTaskScreenInitialState());
+  }
+
+  FutureOr<void> _mapGetContactedTasksEventToState(
+    StaffTaskScreenGetContactedTasksEvent event,
+    Emitter<TaskScreenState> emit,
+  ) async {
+    isLoading = true;
+    emit(MyTaskScreenInitialState());
+    try {
+      final Map<String, dynamic> params = {
+        'page': event.page.toString(),
+        'limit': '20',
+      };
+      if (event.isToday) {
+        params['today'] = 'true';
+      }
+      if (event.query != null && event.query!.trim().isNotEmpty) {
+        params['q'] = event.query!.trim();
+      }
+
+      var url = AppConfig.instance.apiUri(ApiEndpoints.contactedTasks, params);
+      var res = await http.get(url);
+      if (res.statusCode == HttpStatus.ok) {
+        var l = Map<String, dynamic>.from(json.decode(res.body));
+        List<TaskModel> newlistTaskModel = List<TaskModel>.from(
+          (l["data"] as List? ?? []).map((model) => TaskModel.fromJson(model)),
+        );
+        if (event.isRefresh || event.page == 0) {
+          staffListContactedTasks.clear();
+        }
+        hasMoreContactedTasks = newlistTaskModel.length >= 20;
+        staffListContactedTasks.addAll(newlistTaskModel);
       }
     } catch (exception) {
       LoggerUtil.log(jsonEncode(exception));

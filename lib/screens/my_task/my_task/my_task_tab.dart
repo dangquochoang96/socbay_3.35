@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -27,65 +29,79 @@ class MyTaskTab extends StatefulWidget {
 class _MyTaskTabState extends State<MyTaskTab> {
   late TaskScreenBloc _bloc;
   late ScrollController _scrollController;
-
+  late TextEditingController _searchController;
   late TextEditingController _feedbackController;
   late TextEditingController _addressController;
-  var _isRefresh = true;
+
+  Timer? _debounceTimer;
+  int _page = 0;
+  bool _isToday = true;
+
   String _dateStart = '';
   String _timeStart = '';
-
   DateTime? selectedDate;
   TimeOfDay? selectedTime;
-  // int? selectedOption = 0 ;
+
   @override
   void initState() {
     super.initState();
     _bloc = BlocProvider.of(context);
-    _bloc.add(StaffTaskScreenGetTaskByDayEvent(isRefresh: _isRefresh));
-    _isRefresh = false;
     _scrollController = ScrollController();
+    _searchController = TextEditingController();
     _feedbackController = TextEditingController();
     _addressController = TextEditingController();
+
+    _fetchTasks(isRefresh: true, resetPage: true);
+
     _scrollController.addListener(() {
       if (_bloc.isClosed) _bloc = BlocProvider.of(context);
       scrollPaginationListener(
         scrollController: _scrollController,
         condition:
             (_scrollController.hasClients &&
-                _scrollController.position.pixels ==
-                    _scrollController.position.maxScrollExtent) ||
-            _bloc.isLoading,
+                _scrollController.position.pixels >=
+                    _scrollController.position.maxScrollExtent - 80) &&
+            !_bloc.isLoading &&
+            _bloc.hasMoreAllTasks,
         paginationFunction: () {
-          _bloc.add(StaffTaskScreenGetTaskByDayEvent(isRefresh: _isRefresh));
+          _page++;
+          _fetchTasks(isRefresh: false, resetPage: false);
         },
       );
     });
 
     if (selectedDate != null) {
-      setState(() {
-        _dateStart = selectedDate!.toDateString(format: 'dd/MM/yyyy');
-      });
+      _dateStart = selectedDate!.toDateString(format: 'dd/MM/yyyy');
     } else {
-      setState(() {
-        _dateStart = DateTime.now().toDateString(format: 'dd/MM/yyyy');
-      });
+      _dateStart = DateTime.now().toDateString(format: 'dd/MM/yyyy');
     }
 
     if (selectedTime != null) {
-      setState(() {
-        _timeStart = selectedTime!.toTimeString();
-      });
+      _timeStart = selectedTime!.toTimeString();
     } else {
-      setState(() {
-        // _timeStart = TimeOfDay.now().toTimeString();
-        _timeStart = DateFormat('HH:mm').format(DateTime.now());
-      });
+      _timeStart = DateFormat('HH:mm').format(DateTime.now());
     }
+  }
+
+  void _fetchTasks({bool isRefresh = false, bool resetPage = false}) {
+    if (resetPage) {
+      _page = 0;
+    }
+    _bloc.add(
+      StaffTaskScreenGetAllTasksEvent(
+        isRefresh: isRefresh,
+        page: _page,
+        query: _searchController.text.trim(),
+        isToday: _isToday,
+      ),
+    );
   }
 
   @override
   void dispose() {
+    _debounceTimer?.cancel();
     _scrollController.dispose();
+    _searchController.dispose();
     _feedbackController.dispose();
     _addressController.dispose();
     super.dispose();
@@ -102,53 +118,226 @@ class _MyTaskTabState extends State<MyTaskTab> {
   void _listener(BuildContext context, state) {
     if (state is BookingUpdateSuccessState) {
       context.showSnackBar("Cập nhật thành công!");
-      _bloc.add(const StaffTaskScreenGetTaskByDayEvent(isRefresh: true));
-      _bloc.add(
-        const StaffTaskScreenGetTaskAssigedEvent(isRefresh: true, page: 0),
-      );
+      _fetchTasks(isRefresh: true, resetPage: true);
     }
     if (state is BookingUpdateErrorState) {
       context.showSnackBar("Cập nhật thất bại!");
     }
+    if (state is BookingDeleteSuccessState) {
+      context.showSnackBar("Hủy thành công!");
+      _fetchTasks(isRefresh: true, resetPage: true);
+    }
+    if (state is BookingDeleteErrorState) {
+      context.showSnackBar("Hủy thất bại!");
+    }
   }
 
   Widget _builder(BuildContext context, state) {
-    final tasks = _bloc.staffListTaskBydayModel;
+    final tasks = _bloc.staffListAllTasks;
     return LoadingIndicator(
-      isLoading: _bloc.isLoading,
-      child: RefreshIndicator(
-        onRefresh: () async {
-          _isRefresh = true;
-          _bloc.add(StaffTaskScreenGetTaskByDayEvent(isRefresh: _isRefresh));
+      isLoading: _bloc.isLoading && tasks.isEmpty,
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+            child: Column(
+              children: [
+                _buildSearchBar(),
+                const SizedBox(height: 8),
+                _buildFilterRow(),
+              ],
+            ),
+          ),
+          Expanded(
+            child: RefreshIndicator(
+              onRefresh: () async {
+                _fetchTasks(isRefresh: true, resetPage: true);
+              },
+              child: tasks.isEmpty && !_bloc.isLoading
+                  ? _buildEmptyState()
+                  : ListView.separated(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      controller: _scrollController,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: paddingHorizontal,
+                        vertical: 8,
+                      ),
+                      itemCount:
+                          tasks.length +
+                          (_bloc.hasMoreAllTasks && tasks.isNotEmpty ? 1 : 0),
+                      itemBuilder: _itemBuilder,
+                      separatorBuilder: (BuildContext context, int index) {
+                        return const SizedBox(height: 12);
+                      },
+                    ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSearchBar() {
+    return Container(
+      height: 44,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE5E7EB)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: TextField(
+        controller: _searchController,
+        textInputAction: TextInputAction.search,
+        onSubmitted: (value) {
+          _debounceTimer?.cancel();
+          _fetchTasks(isRefresh: true, resetPage: true);
         },
-        child: tasks.isEmpty && !_bloc.isLoading
-            ? _buildEmptyState()
-            : ListView.separated(
-                physics: const AlwaysScrollableScrollPhysics(),
-                controller: _scrollController,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: paddingHorizontal,
-                  vertical: paddingVertical,
-                ),
-                itemCount: tasks.length,
-                itemBuilder: _itemBuilder,
-                separatorBuilder: (BuildContext context, int index) {
-                  return const SizedBox(height: 12);
-                },
+        onChanged: (value) {
+          setState(() {});
+          _debounceTimer?.cancel();
+          _debounceTimer = Timer(const Duration(milliseconds: 400), () {
+            _fetchTasks(isRefresh: true, resetPage: true);
+          });
+        },
+        decoration: InputDecoration(
+          hintText: "Tìm kiếm SĐT, tên, địa chỉ...",
+          hintStyle: TextStyle(fontSize: 13.5, color: Colors.grey.shade400),
+          prefixIcon: const Icon(
+            Icons.search_rounded,
+            size: 20,
+            color: ColorUtil.graniteGray,
+          ),
+          suffixIcon: _searchController.text.isNotEmpty
+              ? IconButton(
+                  icon: const Icon(
+                    Icons.cancel_rounded,
+                    size: 18,
+                    color: Colors.grey,
+                  ),
+                  onPressed: () {
+                    _searchController.clear();
+                    setState(() {});
+                    _debounceTimer?.cancel();
+                    _fetchTasks(isRefresh: true, resetPage: true);
+                  },
+                )
+              : null,
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(vertical: 12),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFilterRow() {
+    return Row(
+      children: [
+        _buildFilterChip(
+          title: "Hôm nay",
+          icon: Icons.today_rounded,
+          isSelected: _isToday,
+          onTap: () {
+            if (!_isToday) {
+              setState(() {
+                _isToday = true;
+              });
+              _fetchTasks(isRefresh: true, resetPage: true);
+            }
+          },
+        ),
+        const SizedBox(width: 8),
+        _buildFilterChip(
+          title: "Tồn đọng",
+          icon: Icons.all_inbox_rounded,
+          isSelected: !_isToday,
+          onTap: () {
+            if (_isToday) {
+              setState(() {
+                _isToday = false;
+              });
+              _fetchTasks(isRefresh: true, resetPage: true);
+            }
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFilterChip({
+    required String title,
+    required IconData icon,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? ColorUtil.bangladeshGreen.withValues(alpha: 0.12)
+              : Colors.white,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: isSelected
+                ? ColorUtil.bangladeshGreen
+                : const Color(0xFFE5E7EB),
+            width: isSelected ? 1.3 : 1.0,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 14,
+              color: isSelected
+                  ? ColorUtil.bangladeshGreen
+                  : const Color(0xFF6B7280),
+            ),
+            const SizedBox(width: 5),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 12.5,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                color: isSelected
+                    ? ColorUtil.bangladeshGreen
+                    : const Color(0xFF4B5563),
               ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _itemBuilder(BuildContext context, int index) {
-    if (index >= _bloc.staffListTaskBydayModel.length) {
+    final tasks = _bloc.staffListAllTasks;
+    if (index >= tasks.length) {
       return const IndicatorLoadMore();
     }
-    TaskModel taskModel = _bloc.staffListTaskBydayModel[index];
+    TaskModel taskModel = tasks[index];
     return _buildTaskCard(taskModel);
   }
 
   Widget _buildEmptyState() {
+    final hasSearch = _searchController.text.trim().isNotEmpty;
+    final message = hasSearch
+        ? "Không tìm thấy công việc dịch vụ nào phù hợp với từ khóa \"${_searchController.text.trim()}\""
+        : (_isToday
+              ? "Chưa có công việc dịch vụ nào trong ngày hôm nay"
+              : "Chưa có công việc dịch vụ nào");
+
     return CustomScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
       slivers: [
@@ -168,16 +357,16 @@ class _MyTaskTabState extends State<MyTaskTab> {
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
-                      Icons.event_available_rounded,
+                      Icons.home_repair_service_rounded,
                       size: 40,
                       color: ColorUtil.bangladeshGreen,
                     ),
                   ),
                   const SizedBox(height: 16),
-                  const Text(
-                    "Chưa có công việc trong ngày",
-                    style: TextStyle(
-                      fontSize: 16,
+                  Text(
+                    message,
+                    style: const TextStyle(
+                      fontSize: 15,
                       fontWeight: FontWeight.bold,
                       color: ColorUtil.raisinBlack,
                     ),
@@ -185,12 +374,8 @@ class _MyTaskTabState extends State<MyTaskTab> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    "Các công việc được phân bổ hôm nay sẽ hiển thị tại đây.\nKéo xuống để làm mới danh sách.",
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Colors.grey.shade600,
-                      height: 1.4,
-                    ),
+                    "Kéo xuống để làm mới danh sách",
+                    style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
                     textAlign: TextAlign.center,
                   ),
                 ],
@@ -814,7 +999,9 @@ class _MyTaskTabState extends State<MyTaskTab> {
       context,
       Routes.detailBookingScreen,
       arguments: {'id': taskModel.id},
-    );
+    ).then((_) {
+      _fetchTasks(isRefresh: true, resetPage: false);
+    });
   }
 
   Future<void> _updateTask(TaskModel taskModel) async {

@@ -42,6 +42,20 @@ class StaffTaskScreenGetTaskDoneEvent extends RentTaskScreenEvent {
   const StaffTaskScreenGetTaskDoneEvent({this.isRefresh = false});
 }
 
+class StaffRentTaskScreenGetAllTasksEvent extends RentTaskScreenEvent {
+  final bool isRefresh;
+  final int page;
+  final String? query;
+  final bool isToday;
+
+  const StaffRentTaskScreenGetAllTasksEvent({
+    this.isRefresh = false,
+    this.page = 0,
+    this.query,
+    this.isToday = false,
+  });
+}
+
 class BookingDeleteTaskEvent extends RentTaskScreenEvent {
   final int taskId;
   final String name;

@@ -29,12 +29,15 @@ class RentTaskScreenKTVBloc
     on<StaffTaskScreenGetTaskDoneEvent>(_mapGetTaskDoneEventToState);
     on<BookingDeleteTaskEvent>(_mapBookingDeleteTaskEventToState);
     on<BookingDeleteTaskToDayEvent>(_mapBookingDeleteTaskToDayEventToState);
+    on<StaffRentTaskScreenGetAllTasksEvent>(_mapGetAllRentTasksEventToState);
   }
 
   final ApiRepository apiRepository;
   List<TaskModel> listTaskModel = [];
   List<TaskModel> staffListTaskBydayModel = [];
   List<TaskModel> staffListTaskAssigedModel = [];
+  List<TaskModel> staffListAllRentTasks = [];
+  bool hasMoreAllRentTasks = true;
   TaskModel? taskModel;
   bool isLoading = true;
   int page = 1;
@@ -133,6 +136,47 @@ class RentTaskScreenKTVBloc
         // Clear the list before adding new data, as we're fetching all data at once
         staffListTaskAssigedModel.clear();
         staffListTaskAssigedModel.addAll(newTaskModelList);
+      }
+    } catch (exception) {
+      LoggerUtil.log(jsonEncode(exception));
+    }
+    isLoading = false;
+    emit(MyTaskScreenInitialState());
+  }
+
+  FutureOr<void> _mapGetAllRentTasksEventToState(
+    StaffRentTaskScreenGetAllTasksEvent event,
+    Emitter<RentTaskScreenState> emit,
+  ) async {
+    isLoading = true;
+    emit(MyTaskScreenInitialState());
+    try {
+      final Map<String, dynamic> params = {
+        'page': event.page.toString(),
+        'limit': '20',
+      };
+      if (App.instance.userApp?.id != null) {
+        params['user_id'] = App.instance.userApp!.id.toString();
+      }
+      if (event.isToday) {
+        params['today'] = 'true';
+      }
+      if (event.query != null && event.query!.trim().isNotEmpty) {
+        params['q'] = event.query!.trim();
+      }
+
+      var url = AppConfig.instance.apiUri(ApiEndpoints.allRentTasks, params);
+      var res = await http.get(url);
+      if (res.statusCode == HttpStatus.ok) {
+        var l = Map<String, dynamic>.from(json.decode(res.body));
+        List<TaskModel> newlistTaskModel = List<TaskModel>.from(
+          (l["data"] as List? ?? []).map((model) => TaskModel.fromJson(model)),
+        );
+        if (event.isRefresh || event.page == 0) {
+          staffListAllRentTasks.clear();
+        }
+        hasMoreAllRentTasks = newlistTaskModel.length >= 20;
+        staffListAllRentTasks.addAll(newlistTaskModel);
       }
     } catch (exception) {
       LoggerUtil.log(jsonEncode(exception));

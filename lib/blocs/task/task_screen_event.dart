@@ -42,6 +42,34 @@ class StaffTaskScreenGetTaskDoneEvent extends TaskScreenEvent {
   const StaffTaskScreenGetTaskDoneEvent({this.isRefresh = false});
 }
 
+class StaffTaskScreenGetAllTasksEvent extends TaskScreenEvent {
+  final bool isRefresh;
+  final int page;
+  final String? query;
+  final bool isToday;
+
+  const StaffTaskScreenGetAllTasksEvent({
+    this.isRefresh = false,
+    this.page = 0,
+    this.query,
+    this.isToday = false,
+  });
+}
+
+class StaffTaskScreenGetContactedTasksEvent extends TaskScreenEvent {
+  final bool isRefresh;
+  final int page;
+  final String? query;
+  final bool isToday;
+
+  const StaffTaskScreenGetContactedTasksEvent({
+    this.isRefresh = false,
+    this.page = 0,
+    this.query,
+    this.isToday = true,
+  });
+}
+
 class BookingDeleteTaskEvent extends TaskScreenEvent {
   final int taskId;
   final String name;

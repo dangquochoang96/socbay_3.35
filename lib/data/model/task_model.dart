@@ -29,6 +29,9 @@ class TaskModel {
   final UserModel? sale;
   final List<String>? images;
   final String? currentAddress;
+  final String? taskType;
+  final String? taskTypeText;
+  final bool? isRent;
 
   TaskModel({
     this.id,
@@ -56,6 +59,9 @@ class TaskModel {
     this.sale,
     this.images,
     this.currentAddress,
+    this.taskType,
+    this.taskTypeText,
+    this.isRent,
   });
 
   factory TaskModel.fromJson(Map<String, dynamic> json) => TaskModel(
@@ -79,6 +85,12 @@ class TaskModel {
     productId: json["product_id"]?.toString(),
     orderId: json["order_id"]?.toString(),
     currentAddress: json["current_address"]?.toString(),
+    taskType: json["task_type"]?.toString(),
+    taskTypeText: json["task_type_text"]?.toString(),
+    isRent: json["is_rent"] == true ||
+        json["is_rent"] == 1 ||
+        json["is_rent"] == '1' ||
+        json["is_rent"] == 'true',
     productInfo: json["product_info"] != null
         ? ProductModel.fromJson(json["product_info"])
         : null,
@@ -112,6 +124,9 @@ class TaskModel {
     "order_id": orderId,
     "current_address": currentAddress,
     "created_at": createdAt,
+    "task_type": taskType,
+    "task_type_text": taskTypeText,
+    "is_rent": isRent,
   };
 
   String getStatus() {
@@ -119,7 +134,7 @@ class TaskModel {
       case "1":
         return "Chưa giao cho ai";
       case "2":
-        return "Đang thực hiện";
+        return "Đã liên hệ";
       case "3":
         return "Hoàn thành";
       case "4":

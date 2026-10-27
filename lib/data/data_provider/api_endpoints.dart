@@ -121,6 +121,8 @@ abstract final class ApiEndpoints {
   // TASK
   // =========================
   static const tasks = '/socbay/tasks';
+  static const allTasks = '/socbay/tasks/all';
+  static const contactedTasks = '/socbay/tasks/contacted';
   static const taskCreate = '/socbay/tasks/them';
   static const taskDelete = '/socbay/tasks/xoa';
   static const tasksPending = '/socbay/tasks/ton-dong';
@@ -137,6 +139,7 @@ abstract final class ApiEndpoints {
   // RENT TASK
   // =========================
   static const rentTasks = '/socbay/rent-tasks';
+  static const allRentTasks = '/socbay/rent-tasks/all';
   static const rentTaskCreate = '/socbay/rent-tasks/them';
   static const rentTaskDelete = '/socbay/rent-tasks/xoa';
   static const rentTasksPending = '/socbay/rent-tasks/ton-dong';
