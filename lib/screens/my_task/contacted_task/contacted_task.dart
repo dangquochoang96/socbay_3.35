@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:socbay/blocs/rent-task/rent_task_screen_event.dart';
+import 'package:socbay/blocs/rent-task/rent_task_screen_ktv_bloc.dart';
 import 'package:socbay/blocs/task/task_screen_bloc.dart';
 import 'package:socbay/blocs/task/task_screen_event.dart';
 import 'package:socbay/blocs/task/task_screen_state.dart';
@@ -88,7 +90,43 @@ class _ContactedTaskTabState extends State<ContactedTaskTab> {
     );
   }
 
-  void _listener(BuildContext context, TaskScreenState state) {}
+  void _listener(BuildContext context, TaskScreenState state) {
+    if (state is AcceptContactedTaskSuccessState) {
+      final msg = (state.message != null && state.message!.trim().isNotEmpty)
+          ? state.message!
+          : "Nhận đơn thành công!";
+      context.showSnackBar(msg);
+      _fetchTasks(isRefresh: true, resetPage: true);
+      _bloc.add(
+        const StaffTaskScreenGetAllTasksEvent(
+          isRefresh: true,
+          page: 0,
+          isToday: true,
+        ),
+      );
+      try {
+        final rentBloc = BlocProvider.of<RentTaskScreenKTVBloc>(
+          context,
+          listen: false,
+        );
+        if (!rentBloc.isClosed) {
+          rentBloc.add(
+            const StaffRentTaskScreenGetAllTasksEvent(
+              isRefresh: true,
+              page: 0,
+              isToday: true,
+            ),
+          );
+        }
+      } catch (_) {}
+    }
+    if (state is AcceptContactedTaskErrorState) {
+      final msg = (state.message != null && state.message!.trim().isNotEmpty)
+          ? state.message!
+          : "Nhận đơn thất bại! Vui lòng thử lại.";
+      context.showSnackBar(msg);
+    }
+  }
 
   Widget _builder(BuildContext context, TaskScreenState state) {
     final tasks = _bloc.staffListContactedTasks;
@@ -680,7 +718,7 @@ class _ContactedTaskTabState extends State<ContactedTaskTab> {
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            address!,
+                            address,
                             style: const TextStyle(
                               fontSize: 12,
                               color: Color(0xFF374151),
@@ -795,8 +833,6 @@ class _ContactedTaskTabState extends State<ContactedTaskTab> {
                           color: Color(0xFF92400E),
                           height: 1.3,
                         ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],
@@ -837,18 +873,160 @@ class _ContactedTaskTabState extends State<ContactedTaskTab> {
   }
 
   void _onClaimTask(TaskModel taskModel) {
-    // Tạm thời chưa có API xử lý nhận việc
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          "Tính năng nhận việc cho #${taskModel.id} đang được hoàn thiện!",
-          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
-        ),
-        backgroundColor: ColorUtil.bangladeshGreen,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        duration: const Duration(seconds: 2),
-      ),
+    final bool isRent =
+        taskModel.isRent == true || taskModel.taskType == 'rent';
+    final String taskCode = isRent
+        ? 'THUÊ-${taskModel.id ?? 0}'
+        : 'DV-${taskModel.id ?? 0}';
+    final String taskName =
+        (taskModel.name != null && taskModel.name!.trim().isNotEmpty)
+        ? taskModel.name!.trim()
+        : (isRent ? 'Công việc cho thuê' : 'Công việc dịch vụ');
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return Dialog(
+          backgroundColor: Colors.white,
+          surfaceTintColor: Colors.white,
+          insetPadding: const EdgeInsets.symmetric(
+            horizontal: 24,
+            vertical: 24,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 400),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 22, 20, 18),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 52,
+                    height: 52,
+                    decoration: BoxDecoration(
+                      color: ColorUtil.bangladeshGreen.withValues(alpha: 0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.how_to_reg_rounded,
+                      size: 28,
+                      color: ColorUtil.bangladeshGreen,
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  const Text(
+                    'Xác nhận nhận đơn',
+                    style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w700,
+                      color: ColorUtil.raisinBlack,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  RichText(
+                    textAlign: TextAlign.center,
+                    text: TextSpan(
+                      style: const TextStyle(
+                        fontSize: 13.5,
+                        color: Color(0xFF4B5563),
+                        height: 1.4,
+                      ),
+                      children: [
+                        const TextSpan(text: 'Bạn có chắc chắn muốn nhận đơn '),
+                        TextSpan(
+                          text: taskCode,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w700,
+                            color: ColorUtil.bangladeshGreen,
+                          ),
+                        ),
+                        TextSpan(
+                          text: ' ($taskName)',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF1F2937),
+                          ),
+                        ),
+                        const TextSpan(text: ' không?'),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () => Navigator.pop(dialogContext),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: const Color(0xFF4B5563),
+                            side: const BorderSide(color: Color(0xFFD1D5DB)),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: const Text(
+                            'Hủy',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            Navigator.pop(dialogContext);
+                            if (_bloc.isClosed) {
+                              _bloc = BlocProvider.of<TaskScreenBloc>(context);
+                            }
+                            _bloc.add(
+                              StaffTaskScreenAcceptContactedTaskEvent(
+                                taskId: taskModel.id ?? 0,
+                                taskType: taskModel.taskType,
+                                isRent: taskModel.isRent,
+                                des: taskModel.des,
+                              ),
+                            );
+                          },
+                          icon: const Icon(
+                            Icons.check_circle_outline_rounded,
+                            size: 18,
+                            color: Colors.white,
+                          ),
+                          label: const Text(
+                            'Nhận đơn',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                            ),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: ColorUtil.bangladeshGreen,
+                            foregroundColor: Colors.white,
+                            elevation: 0,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 

@@ -15,7 +15,6 @@ import 'package:socbay/utils/color_util.dart';
 import 'package:socbay/utils/context_extension.dart';
 import 'package:socbay/utils/date_util.dart';
 import 'package:socbay/utils/scroll_util.dart';
-import 'package:socbay/widgets/button_widget.dart';
 import 'package:socbay/widgets/indicator_loadmore.dart';
 import 'package:socbay/widgets/loading_indicator.dart';
 
@@ -1001,310 +1000,514 @@ class _RentTaskTabState extends State<RentTaskTab> {
 
   Future<void> _updateTask(TaskModel taskModel) async {
     _addressController.text = '';
-    int? selectedOption = 5;
-    DateTime tempDateTime = DateTime.parse(
-      taskModel.timeStart ?? DateTime.now().toString(),
-    );
+    _feedbackController.clear();
+    int selectedOption = 5;
+    DateTime tempDateTime =
+        DateTime.tryParse(taskModel.timeStart ?? '') ?? DateTime.now();
+    selectedDate = tempDateTime;
+    selectedTime = TimeOfDay.fromDateTime(tempDateTime);
+    _dateStart = tempDateTime.toDateString(format: "dd/MM/yyyy");
+    _timeStart = DateFormat('HH:mm').format(tempDateTime);
+
+    final List<String> quickReasons = [
+      'Khách bận hẹn lại giờ khác',
+      'Không liên lạc được với khách',
+      'Khách thay đổi địa chỉ',
+      'Khách yêu cầu hủy đơn thuê',
+    ];
 
     showDialog(
       context: context,
-      builder: (context) {
+      barrierDismissible: false,
+      builder: (dialogContext) {
         return StatefulBuilder(
           builder: (context, setState) {
-            return AlertDialog(
+            return Dialog(
               backgroundColor: Colors.white,
               surfaceTintColor: Colors.white,
+              insetPadding: const EdgeInsets.symmetric(
+                horizontal: 18,
+                vertical: 24,
+              ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
               ),
-              titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 8),
-              contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
-              title: const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.history_toggle_off,
-                    color: ColorUtil.bangladeshGreen,
-                  ),
-                  SizedBox(width: 8),
-                  Text(
-                    'Lý do hẹn lại',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: ColorUtil.raisinBlack,
-                    ),
-                  ),
-                ],
-              ),
-              content: SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 440),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    _buildFormDoubleHorizontal(
-                      'Hẹn lại giờ',
-                      Icons.calendar_today,
-                      Icons.av_timer_sharp,
-                      firstValue: _dateStart,
-                      secondValue: _timeStart,
-                      onTapFirst: () async {
-                        final DateTime? picked = await showDatePicker(
-                          context: context,
-                          locale: const Locale("vi", "VN"),
-                          initialDate: selectedDate ?? DateTime.now(),
-                          firstDate: DateTime.now(),
-                          lastDate: DateTime.now().add(
-                            const Duration(days: 365),
+                    // Header
+                    Container(
+                      padding: const EdgeInsets.fromLTRB(20, 18, 12, 14),
+                      decoration: const BoxDecoration(
+                        border: Border(
+                          bottom: BorderSide(
+                            color: Color(0xFFF3F4F6),
+                            width: 1,
                           ),
-                        );
-                        if (picked != null && picked != selectedDate) {
-                          selectedDate = picked;
-                          setState(() {
-                            _dateStart = selectedDate!.toDateString(
-                              format: "dd/MM/yyyy",
-                            );
-                            tempDateTime = DateTime(
-                              picked.year,
-                              picked.month,
-                              picked.day,
-                              tempDateTime.hour,
-                              tempDateTime.minute,
-                            );
-                          });
-                        }
-                      },
-                      onTapSecond: () async {
-                        final TimeOfDay? picked = await showTimePicker(
-                          context: context,
-                          initialTime: selectedTime ?? TimeOfDay.now(),
-                        );
-                        if (picked != null && picked != selectedTime) {
-                          selectedTime = picked;
-                          setState(() {
-                            final hour = picked.hour.toString().padLeft(2, "0");
-                            final minute = picked.minute.toString().padLeft(
-                              2,
-                              "0",
-                            );
-                            _timeStart = "$hour:$minute";
-                            tempDateTime = DateTime(
-                              tempDateTime.year,
-                              tempDateTime.month,
-                              tempDateTime.day,
-                              picked.hour,
-                              picked.minute,
-                            );
-                            print("X1");
-                            print(tempDateTime);
-                          });
-                        }
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      controller: _addressController,
-                      maxLines: 2,
-                      decoration: InputDecoration(
-                        labelText: 'Địa chỉ mới của khách hàng',
-                        labelStyle: TextStyle(
-                          color: Colors.grey.shade600,
-                          fontSize: 13,
-                        ),
-                        hintText: 'Nhập địa chỉ mới của khách hàng (nếu có)',
-                        hintStyle: TextStyle(
-                          color: Colors.grey.shade400,
-                          fontSize: 13,
-                        ),
-                        prefixIcon: const Icon(
-                          Icons.location_on_outlined,
-                          color: ColorUtil.bangladeshGreen,
-                          size: 20,
-                        ),
-                        filled: true,
-                        fillColor: Colors.grey.shade50,
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(
-                            color: Colors.grey.shade300,
-                            width: 1.0,
-                          ),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(
-                            color: ColorUtil.bangladeshGreen,
-                            width: 1.5,
-                          ),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 10,
                         ),
                       ),
-                      style: const TextStyle(fontSize: 13),
-                    ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      controller: _feedbackController,
-                      maxLines: 3,
-                      decoration: InputDecoration(
-                        labelText: 'Lý do',
-                        labelStyle: TextStyle(
-                          color: Colors.grey.shade600,
-                          fontSize: 13,
-                        ),
-                        hintText: 'Nhập lý do hẹn lại',
-                        hintStyle: TextStyle(
-                          color: Colors.grey.shade400,
-                          fontSize: 13,
-                        ),
-                        prefixIcon: const Icon(
-                          Icons.edit_note_outlined,
-                          color: ColorUtil.bangladeshGreen,
-                          size: 20,
-                        ),
-                        filled: true,
-                        fillColor: Colors.grey.shade50,
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(
-                            color: Colors.grey.shade300,
-                            width: 1.0,
-                          ),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(
-                            color: ColorUtil.bangladeshGreen,
-                            width: 1.5,
-                          ),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 10,
-                        ),
-                      ),
-                      style: const TextStyle(fontSize: 13),
-                    ),
-                    const SizedBox(height: 16),
-                    const Text(
-                      'Trạng thái đơn hàng',
-                      style: TextStyle(
-                        color: ColorUtil.raisinBlack,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: [5, 1, 2].map((val) {
-                        final isSelected = selectedOption == val;
-                        String label = '';
-                        if (val == 5) label = 'Nhận Đơn';
-                        if (val == 1) label = 'Không nhận Đơn';
-                        if (val == 2) label = 'Khách hàng hủy';
-                        return ChoiceChip(
-                          label: Text(
-                            label,
-                            style: TextStyle(
-                              color: isSelected ? Colors.white : Colors.black87,
-                              fontWeight: isSelected
-                                  ? FontWeight.bold
-                                  : FontWeight.normal,
-                              fontSize: 13,
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: ColorUtil.bangladeshGreen.withValues(
+                                alpha: 0.1,
+                              ),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Icon(
+                              Icons.edit_calendar_rounded,
+                              color: ColorUtil.bangladeshGreen,
+                              size: 22,
                             ),
                           ),
-                          selected: isSelected,
-                          selectedColor: ColorUtil.bangladeshGreen,
-                          backgroundColor: Colors.grey.shade100,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
-                            side: BorderSide(
-                              color: isSelected
-                                  ? ColorUtil.bangladeshGreen
-                                  : Colors.grey.shade300,
-                              width: 1,
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'Cập nhật & Hẹn lại',
+                                  style: TextStyle(
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.w700,
+                                    color: ColorUtil.raisinBlack,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  'TH-${taskModel.id ?? 0}${taskModel.name != null && taskModel.name!.trim().isNotEmpty ? ' • ${taskModel.name}' : ''}',
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: Color(0xFF6B7280),
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
                             ),
                           ),
-                          onSelected: (bool selected) {
-                            if (selected) {
-                              setState(() {
-                                selectedOption = val;
-                              });
-                            }
-                          },
-                        );
-                      }).toList(),
+                          IconButton(
+                            onPressed: () {
+                              Navigator.pop(dialogContext);
+                              _feedbackController.clear();
+                              _addressController.clear();
+                            },
+                            icon: const Icon(
+                              Icons.close_rounded,
+                              color: Color(0xFF9CA3AF),
+                              size: 22,
+                            ),
+                            splashRadius: 20,
+                            tooltip: 'Đóng',
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // Body
+                    Flexible(
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            // 1. Trạng thái đơn hàng
+                            _buildSectionLabel(
+                              icon: Icons.flag_outlined,
+                              title: 'Trạng thái xử lý',
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                _buildStatusOptionCard(
+                                  value: 5,
+                                  selectedValue: selectedOption,
+                                  label: 'Hẹn lại',
+                                  icon: Icons.check_circle_outline_rounded,
+                                  activeColor: ColorUtil.bangladeshGreen,
+                                  activeBg: const Color(0xFFECFDF5),
+                                  onTap: () {
+                                    setState(() {
+                                      selectedOption = 5;
+                                    });
+                                  },
+                                ),
+                                const SizedBox(width: 8),
+                                _buildStatusOptionCard(
+                                  value: 2,
+                                  selectedValue: selectedOption,
+                                  label: 'Bỏ đơn',
+                                  icon: Icons.assignment_return_outlined,
+                                  activeColor: const Color(0xFFD97706),
+                                  activeBg: const Color(0xFFFFFBEB),
+                                  onTap: () {
+                                    setState(() {
+                                      selectedOption = 2;
+                                    });
+                                  },
+                                ),
+                                const SizedBox(width: 8),
+                                _buildStatusOptionCard(
+                                  value: 4,
+                                  selectedValue: selectedOption,
+                                  label: 'Khách hủy',
+                                  icon: Icons.cancel_outlined,
+                                  activeColor: const Color(0xFFDC2626),
+                                  activeBg: const Color(0xFFFEF2F2),
+                                  onTap: () {
+                                    setState(() {
+                                      selectedOption = 4;
+                                    });
+                                  },
+                                ),
+                              ],
+                            ),
+
+                            const SizedBox(height: 18),
+
+                            // 2. Hẹn lại giờ
+                            _buildFormDoubleHorizontal(
+                              'Thời gian hẹn lại',
+                              Icons.calendar_today_rounded,
+                              Icons.access_time_rounded,
+                              firstValue: _dateStart,
+                              secondValue: _timeStart,
+                              onTapFirst: () async {
+                                final now = DateTime.now();
+                                final today = DateTime(
+                                  now.year,
+                                  now.month,
+                                  now.day,
+                                );
+                                final initial =
+                                    (selectedDate != null &&
+                                        !selectedDate!.isBefore(today))
+                                    ? selectedDate!
+                                    : today;
+                                final DateTime? picked = await showDatePicker(
+                                  context: context,
+                                  locale: const Locale("vi", "VN"),
+                                  initialDate: initial,
+                                  firstDate: today,
+                                  lastDate: today.add(
+                                    const Duration(days: 365),
+                                  ),
+                                );
+                                if (picked != null) {
+                                  selectedDate = picked;
+                                  setState(() {
+                                    _dateStart = selectedDate!.toDateString(
+                                      format: "dd/MM/yyyy",
+                                    );
+                                    tempDateTime = DateTime(
+                                      picked.year,
+                                      picked.month,
+                                      picked.day,
+                                      tempDateTime.hour,
+                                      tempDateTime.minute,
+                                    );
+                                  });
+                                }
+                              },
+                              onTapSecond: () async {
+                                final TimeOfDay? picked = await showTimePicker(
+                                  context: context,
+                                  initialTime: selectedTime ?? TimeOfDay.now(),
+                                );
+                                if (picked != null) {
+                                  selectedTime = picked;
+                                  setState(() {
+                                    final hour = picked.hour.toString().padLeft(
+                                      2,
+                                      "0",
+                                    );
+                                    final minute = picked.minute
+                                        .toString()
+                                        .padLeft(2, "0");
+                                    _timeStart = "$hour:$minute";
+                                    tempDateTime = DateTime(
+                                      tempDateTime.year,
+                                      tempDateTime.month,
+                                      tempDateTime.day,
+                                      picked.hour,
+                                      picked.minute,
+                                    );
+                                  });
+                                }
+                              },
+                            ),
+
+                            const SizedBox(height: 18),
+
+                            // 3. Lý do hẹn lại / Ghi chú
+                            _buildSectionLabel(
+                              icon: Icons.edit_note_rounded,
+                              title: 'Lý do / Ghi chú',
+                            ),
+                            const SizedBox(height: 8),
+                            TextField(
+                              controller: _feedbackController,
+                              maxLines: 3,
+                              minLines: 2,
+                              onChanged: (_) => setState(() {}),
+                              decoration: InputDecoration(
+                                hintText:
+                                    'Nhập lý do hẹn lại hoặc phản hồi của khách hàng...',
+                                hintStyle: const TextStyle(
+                                  color: Color(0xFF9CA3AF),
+                                  fontSize: 13,
+                                ),
+                                filled: true,
+                                fillColor: const Color(0xFFF9FAFB),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: const BorderSide(
+                                    color: Color(0xFFE5E7EB),
+                                    width: 1.0,
+                                  ),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: const BorderSide(
+                                    color: ColorUtil.bangladeshGreen,
+                                    width: 1.5,
+                                  ),
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                  vertical: 12,
+                                ),
+                              ),
+                              style: const TextStyle(
+                                fontSize: 13.5,
+                                color: Color(0xFF1F2937),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Wrap(
+                              spacing: 6,
+                              runSpacing: 6,
+                              children: quickReasons.map((reason) {
+                                final isMatched =
+                                    _feedbackController.text.trim() == reason;
+                                return InkWell(
+                                  onTap: () {
+                                    setState(() {
+                                      _feedbackController.text = reason;
+                                      _feedbackController.selection =
+                                          TextSelection.fromPosition(
+                                            TextPosition(offset: reason.length),
+                                          );
+                                    });
+                                  },
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                      vertical: 5,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: isMatched
+                                          ? ColorUtil.bangladeshGreen
+                                                .withValues(alpha: 0.1)
+                                          : const Color(0xFFF3F4F6),
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(
+                                        color: isMatched
+                                            ? ColorUtil.bangladeshGreen
+                                            : const Color(0xFFE5E7EB),
+                                      ),
+                                    ),
+                                    child: Text(
+                                      reason,
+                                      style: TextStyle(
+                                        fontSize: 11.5,
+                                        fontWeight: isMatched
+                                            ? FontWeight.w600
+                                            : FontWeight.w500,
+                                        color: isMatched
+                                            ? ColorUtil.bangladeshGreen
+                                            : const Color(0xFF4B5563),
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
+                            ),
+
+                            const SizedBox(height: 18),
+
+                            // 4. Địa chỉ mới của khách hàng
+                            _buildSectionLabel(
+                              icon: Icons.location_on_outlined,
+                              title: 'Địa chỉ mới của khách hàng',
+                              isOptional: true,
+                            ),
+                            const SizedBox(height: 8),
+                            TextField(
+                              controller: _addressController,
+                              maxLines: 2,
+                              minLines: 1,
+                              decoration: InputDecoration(
+                                hintText:
+                                    taskModel.customer?.address != null &&
+                                        taskModel.customer!.address!
+                                            .trim()
+                                            .isNotEmpty
+                                    ? 'Hiện tại: ${taskModel.customer!.address}'
+                                    : 'Nhập địa chỉ mới nếu khách thay đổi...',
+                                hintStyle: const TextStyle(
+                                  color: Color(0xFF9CA3AF),
+                                  fontSize: 13,
+                                ),
+                                prefixIcon: const Icon(
+                                  Icons.place_outlined,
+                                  color: ColorUtil.bangladeshGreen,
+                                  size: 20,
+                                ),
+                                filled: true,
+                                fillColor: const Color(0xFFF9FAFB),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: const BorderSide(
+                                    color: Color(0xFFE5E7EB),
+                                    width: 1.0,
+                                  ),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: const BorderSide(
+                                    color: ColorUtil.bangladeshGreen,
+                                    width: 1.5,
+                                  ),
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 11,
+                                ),
+                              ),
+                              style: const TextStyle(
+                                fontSize: 13.5,
+                                color: Color(0xFF1F2937),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    // Footer Actions
+                    Container(
+                      padding: const EdgeInsets.fromLTRB(20, 12, 20, 18),
+                      decoration: const BoxDecoration(
+                        border: Border(
+                          top: BorderSide(color: Color(0xFFF3F4F6), width: 1),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () {
+                                Navigator.pop(dialogContext);
+                                _feedbackController.clear();
+                                _addressController.clear();
+                              },
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: const Color(0xFF4B5563),
+                                side: const BorderSide(
+                                  color: Color(0xFFD1D5DB),
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 12,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              child: const Text(
+                                'Hủy bỏ',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            flex: 2,
+                            child: ElevatedButton.icon(
+                              onPressed: () {
+                                if (_bloc.isClosed) {
+                                  _bloc = BlocProvider.of(this.context);
+                                }
+                                _bloc.add(
+                                  StaffTaskScreenUpdateTaskDoneEvent(
+                                    taskModel.id ?? 0,
+                                    taskModel.name ?? '',
+                                    _feedbackController.text.trim(),
+                                    taskModel.des ?? '',
+                                    selectedOption.toString(),
+                                    taskModel.priority ?? "1",
+                                    tempDateTime.toString(),
+                                    address: _addressController.text.trim(),
+                                  ),
+                                );
+
+                                if (selectedOption == 2 ||
+                                    selectedOption == 4) {
+                                  _bloc.staffListTaskBydayModel.removeWhere(
+                                    (element) => element.id == taskModel.id,
+                                  );
+                                }
+
+                                Navigator.pop(dialogContext);
+                                _feedbackController.clear();
+                                _addressController.clear();
+                              },
+                              icon: const Icon(
+                                Icons.send_rounded,
+                                size: 17,
+                                color: Colors.white,
+                              ),
+                              label: const Text(
+                                'Lưu cập nhật',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: selectedOption == 4
+                                    ? const Color(0xFFDC2626)
+                                    : ColorUtil.bangladeshGreen,
+                                foregroundColor: Colors.white,
+                                elevation: 0,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 12,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
               ),
-              actions: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _buildButtonDialog(
-                      isPositive: false,
-                      text: 'Cancel',
-                      action: () {
-                        Navigator.pop(context);
-                        _feedbackController.clear();
-                        _addressController.clear();
-                      },
-                    ),
-                    const SizedBox(width: 16),
-                    _buildButtonDialog(
-                      isPositive: true,
-                      text: 'Gửi',
-                      action: () {
-                        if (_bloc.isClosed) _bloc = BlocProvider.of(context);
-                        if (selectedOption == 1 || selectedOption == 2) {
-                          _bloc.add(
-                            StaffTaskScreenUpdateTaskDoneEvent(
-                              taskModel.id ?? 0,
-                              taskModel.name!,
-                              _feedbackController.text,
-                              taskModel.des ?? '',
-                              selectedOption.toString(),
-                              taskModel.priority ?? "1",
-                              tempDateTime.toString(),
-                              address: _addressController.text,
-                            ),
-                          );
-
-                          _bloc.staffListTaskBydayModel.removeWhere(
-                            (element) => element.id == taskModel.id,
-                          );
-
-                          Navigator.pop(context);
-                          _feedbackController.clear();
-                          _addressController.clear();
-                        } else {
-                          _bloc.add(
-                            StaffTaskScreenUpdateTaskDoneEvent(
-                              taskModel.id ?? 0,
-                              taskModel.name!,
-                              _feedbackController.text,
-                              taskModel.des ?? '',
-                              selectedOption.toString(),
-                              taskModel.priority ?? "1",
-                              tempDateTime.toString(),
-                              address: _addressController.text,
-                            ),
-                          );
-
-                          Navigator.pop(context);
-                          _feedbackController.clear();
-                          _addressController.clear();
-                        }
-                      },
-                    ),
-                  ],
-                ),
-              ],
             );
           },
         );
@@ -1312,26 +1515,86 @@ class _RentTaskTabState extends State<RentTaskTab> {
     );
   }
 
-  Widget _buildButtonDialog({isPositive, action, text}) {
-    return Expanded(child: _button(isPositive, action, text));
+  Widget _buildSectionLabel({
+    required IconData icon,
+    required String title,
+    bool isOptional = false,
+  }) {
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: ColorUtil.bangladeshGreen),
+        const SizedBox(width: 6),
+        Text(
+          title,
+          style: const TextStyle(
+            color: ColorUtil.raisinBlack,
+            fontSize: 13.5,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        if (isOptional) ...[
+          const SizedBox(width: 4),
+          const Text(
+            '(Tùy chọn)',
+            style: TextStyle(
+              color: Color(0xFF9CA3AF),
+              fontSize: 12,
+              fontWeight: FontWeight.w400,
+            ),
+          ),
+        ],
+      ],
+    );
   }
 
-  StatelessWidget _button(isPositive, action, text) {
-    return ButtonWidget(
-      color: isPositive ? ColorUtil.bangladeshGreen : Colors.grey,
-      borderRadius: BorderRadius.circular(30),
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      onTap: () {
-        if (action == null) {
-          Navigator.pop(context);
-        } else {
-          action();
-        }
-      },
-      child: Text(
-        text,
-        textAlign: TextAlign.center,
-        style: const TextStyle(fontSize: 16, color: Colors.white),
+  Widget _buildStatusOptionCard({
+    required int value,
+    required int selectedValue,
+    required String label,
+    required IconData icon,
+    required Color activeColor,
+    required Color activeBg,
+    required VoidCallback onTap,
+  }) {
+    final bool isSelected = value == selectedValue;
+    return Expanded(
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 6),
+          decoration: BoxDecoration(
+            color: isSelected ? activeBg : const Color(0xFFF9FAFB),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isSelected ? activeColor : const Color(0xFFE5E7EB),
+              width: isSelected ? 1.5 : 1.0,
+            ),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                size: 20,
+                color: isSelected ? activeColor : const Color(0xFF6B7280),
+              ),
+              const SizedBox(height: 5),
+              Text(
+                label,
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                  color: isSelected ? activeColor : const Color(0xFF4B5563),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -1348,88 +1611,123 @@ class _RentTaskTabState extends State<RentTaskTab> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          titleTextField,
-          style: const TextStyle(
-            color: ColorUtil.raisinBlack,
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
+        _buildSectionLabel(icon: Icons.schedule_rounded, title: titleTextField),
         const SizedBox(height: 8),
         Row(
           children: [
             Expanded(
               flex: 3,
-              child: GestureDetector(
+              child: InkWell(
                 onTap: onTapFirst,
+                borderRadius: BorderRadius.circular(12),
                 child: Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 12,
-                    vertical: 10,
+                    vertical: 11,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade50,
+                    color: const Color(0xFFF9FAFB),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.grey.shade300),
+                    border: Border.all(color: const Color(0xFFE5E7EB)),
                   ),
                   child: Row(
                     children: [
                       Icon(
                         iconPrefixFirst,
-                        size: 20,
+                        size: 18,
                         color: ColorUtil.bangladeshGreen,
                       ),
                       const SizedBox(width: 8),
                       Expanded(
-                        child: Text(
-                          firstValue.isEmpty ? 'Chọn ngày' : firstValue,
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: firstValue.isEmpty
-                                ? Colors.grey.shade400
-                                : ColorUtil.raisinBlack,
-                          ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Ngày hẹn',
+                              style: TextStyle(
+                                fontSize: 10.5,
+                                color: Color(0xFF6B7280),
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              firstValue.isEmpty ? 'Chọn ngày' : firstValue,
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: firstValue.isEmpty
+                                    ? const Color(0xFF9CA3AF)
+                                    : ColorUtil.raisinBlack,
+                              ),
+                            ),
+                          ],
                         ),
+                      ),
+                      const Icon(
+                        Icons.keyboard_arrow_down_rounded,
+                        size: 18,
+                        color: Color(0xFF9CA3AF),
                       ),
                     ],
                   ),
                 ),
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 10),
             Expanded(
               flex: 2,
-              child: GestureDetector(
+              child: InkWell(
                 onTap: onTapSecond,
+                borderRadius: BorderRadius.circular(12),
                 child: Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 12,
-                    vertical: 10,
+                    vertical: 11,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade50,
+                    color: const Color(0xFFF9FAFB),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.grey.shade300),
+                    border: Border.all(color: const Color(0xFFE5E7EB)),
                   ),
                   child: Row(
                     children: [
                       Icon(
                         iconPrefixSecond,
-                        size: 20,
+                        size: 18,
                         color: ColorUtil.bangladeshGreen,
                       ),
                       const SizedBox(width: 8),
                       Expanded(
-                        child: Text(
-                          secondValue.isEmpty ? 'Giờ' : secondValue,
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: secondValue.isEmpty
-                                ? Colors.grey.shade400
-                                : ColorUtil.raisinBlack,
-                          ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Giờ hẹn',
+                              style: TextStyle(
+                                fontSize: 10.5,
+                                color: Color(0xFF6B7280),
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              secondValue.isEmpty ? 'Chọn giờ' : secondValue,
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: secondValue.isEmpty
+                                    ? const Color(0xFF9CA3AF)
+                                    : ColorUtil.raisinBlack,
+                              ),
+                            ),
+                          ],
                         ),
+                      ),
+                      const Icon(
+                        Icons.keyboard_arrow_down_rounded,
+                        size: 18,
+                        color: Color(0xFF9CA3AF),
                       ),
                     ],
                   ),

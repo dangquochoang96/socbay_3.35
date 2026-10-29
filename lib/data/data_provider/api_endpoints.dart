@@ -80,7 +80,7 @@ abstract final class ApiEndpoints {
   // PRODUCT
   // =========================
   static const products = '/product';
-  static const productListAll = '/product/listProduct';
+  static const productListAll = '/product/listActiveProduct';
   static const productSearch = '/product/search';
   static const productListCate = '/product/listCate';
 
@@ -123,6 +123,7 @@ abstract final class ApiEndpoints {
   static const tasks = '/socbay/tasks';
   static const allTasks = '/socbay/tasks/all';
   static const contactedTasks = '/socbay/tasks/contacted';
+  static String acceptContactedTasks(Object? id) => '/socbay/tasks/accept/$id';
   static const taskCreate = '/socbay/tasks/them';
   static const taskDelete = '/socbay/tasks/xoa';
   static const tasksPending = '/socbay/tasks/ton-dong';

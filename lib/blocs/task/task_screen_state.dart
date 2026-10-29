@@ -17,3 +17,13 @@ class BookingDeleteTodaySuccessState extends TaskScreenState {}
 class BookingDeleteErrorState extends TaskScreenState {}
 
 class BookingDeleteTodayErrorState extends TaskScreenState {}
+
+class AcceptContactedTaskSuccessState extends TaskScreenState {
+  final String? message;
+  AcceptContactedTaskSuccessState({this.message});
+}
+
+class AcceptContactedTaskErrorState extends TaskScreenState {
+  final String? message;
+  AcceptContactedTaskErrorState({this.message});
+}

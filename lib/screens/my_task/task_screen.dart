@@ -16,7 +16,7 @@ class TaskScreen extends StatefulWidget {
 }
 
 class _TaskScreenState extends State<TaskScreen> {
-  int _orderTypeIndex = 0; // 0: Đã liên hệ, 1: Đơn dịch vụ, 2: Đơn thuê
+  int _orderTypeIndex = 0; // 0: Tự nhận việc, 1: Đơn dịch vụ, 2: Đơn thuê
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +45,7 @@ class _TaskScreenState extends State<TaskScreen> {
             child: IndexedStack(
               index: _orderTypeIndex,
               children: const [
-                ContactedTaskTab(), // Đã liên hệ (api contactedTasks)
+                ContactedTaskTab(), // Tự nhận việc (api contactedTasks)
                 MyTaskTab(), // Đơn dịch vụ (api allTasks)
                 RentTaskTab(), // Đơn thuê (api allRentTasks)
               ],
@@ -69,7 +69,7 @@ class _TaskScreenState extends State<TaskScreen> {
       child: Row(
         children: [
           _buildOrderTypeItem(
-            title: 'Đã liên hệ',
+            title: 'Tự nhận việc',
             icon: Icons.phone_callback_rounded,
             isSelected: _orderTypeIndex == 0,
             onTap: () {
@@ -81,7 +81,7 @@ class _TaskScreenState extends State<TaskScreen> {
             },
           ),
           _buildOrderTypeItem(
-            title: 'Đơn dịch vụ',
+            title: 'CV dịch vụ',
             icon: Icons.home_repair_service_rounded,
             isSelected: _orderTypeIndex == 1,
             onTap: () {
@@ -93,7 +93,7 @@ class _TaskScreenState extends State<TaskScreen> {
             },
           ),
           _buildOrderTypeItem(
-            title: 'Đơn thuê',
+            title: 'CV thuê',
             icon: Icons.handshake_rounded,
             isSelected: _orderTypeIndex == 2,
             onTap: () {

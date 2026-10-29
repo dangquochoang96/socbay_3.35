@@ -70,6 +70,20 @@ class StaffTaskScreenGetContactedTasksEvent extends TaskScreenEvent {
   });
 }
 
+class StaffTaskScreenAcceptContactedTaskEvent extends TaskScreenEvent {
+  final int taskId;
+  final String? taskType;
+  final bool? isRent;
+  final String? des;
+
+  const StaffTaskScreenAcceptContactedTaskEvent({
+    required this.taskId,
+    this.taskType,
+    this.isRent,
+    this.des,
+  });
+}
+
 class BookingDeleteTaskEvent extends TaskScreenEvent {
   final int taskId;
   final String name;

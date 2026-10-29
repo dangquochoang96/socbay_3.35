@@ -191,17 +191,29 @@ class RentTaskScreenKTVBloc
   ) async {
     isLoading = true;
     emit(MyTaskScreenInitialState());
+    final String staffName =
+        (App.instance.userApp?.username != null &&
+            App.instance.userApp!.username!.trim().isNotEmpty)
+        ? App.instance.userApp!.username!.trim()
+        : 'Kỹ thuật viên';
+    final String oldDes = event.des.trim();
+    final String dropNote = '$staffName đã bỏ đơn';
+    final String mergedDes = event.status == '2'
+        ? (oldDes.isEmpty ? dropNote : '$oldDes\n$dropNote')
+        : event.des.toString();
     Map<String, dynamic> params = {
       "type": event.taskId.toString(),
       "name": event.name.toString(),
       "status": event.status.toString(),
       "noti": event.noti.toString(),
-      "des": event.des.toString(),
+      "des": mergedDes,
       "priority": event.priority.toString(),
-      "customer": event.status == '1' || event.status == '2'
+      "customer":
+          event.status == '1' || event.status == '2' || event.status == '4'
           ? null
           : App.instance.userApp!.id.toString(),
-      "user_id": event.status == '1' || event.status == '2'
+      "user_id":
+          event.status == '1' || event.status == '2' || event.status == '4'
           ? null
           : App.instance.userApp!.id.toString(),
       "time_start": DateFormat(
@@ -241,17 +253,29 @@ class RentTaskScreenKTVBloc
   ) async {
     isLoading = true;
     emit(MyTaskScreenInitialState());
+    final String staffName =
+        (App.instance.userApp?.username != null &&
+            App.instance.userApp!.username!.trim().isNotEmpty)
+        ? App.instance.userApp!.username!.trim()
+        : 'Kỹ thuật viên';
+    final String oldDes = event.des.trim();
+    final String dropNote = '$staffName đã bỏ đơn';
+    final String mergedDes = event.status == '2'
+        ? (oldDes.isEmpty ? dropNote : '$oldDes\n$dropNote')
+        : event.des.toString();
 
     Map<String, dynamic> params = {
       "name": event.name.toString(),
       "status": event.status.toString(),
       "noti": event.noti.toString(),
-      "des": event.des.toString(),
+      "des": mergedDes,
       "priority": event.priority.toString(),
-      "customer": event.status == '1' || event.status == '2'
+      "customer":
+          event.status == '1' || event.status == '2' || event.status == '4'
           ? null
           : App.instance.userApp!.id.toString(),
-      "user_id": event.status == '1' || event.status == '2'
+      "user_id":
+          event.status == '1' || event.status == '2' || event.status == '4'
           ? null
           : App.instance.userApp!.id.toString(),
       "time_start": DateFormat(
