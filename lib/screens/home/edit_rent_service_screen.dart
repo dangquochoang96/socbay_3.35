@@ -405,7 +405,7 @@ class _EditRentServiceScreenState extends State<EditRentServiceScreen> {
   Widget _buildStatusDropdownField() {
     const statuses = [
       DropdownMenuItem<int>(value: 1, child: Text('Chưa giao cho ai')),
-      DropdownMenuItem<int>(value: 2, child: Text('Đang thực hiện')),
+      DropdownMenuItem<int>(value: 2, child: Text('Đã liên hệ')),
       DropdownMenuItem<int>(value: 3, child: Text('Hoàn thành')),
       DropdownMenuItem<int>(value: 4, child: Text('Hủy')),
       DropdownMenuItem<int>(value: 5, child: Text('Đã giao')),

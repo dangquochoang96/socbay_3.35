@@ -16,7 +16,7 @@ class TaskScreen extends StatefulWidget {
 }
 
 class _TaskScreenState extends State<TaskScreen> {
-  int _orderTypeIndex = 0; // 0: Tự nhận việc, 1: Đơn dịch vụ, 2: Đơn thuê
+  int _orderTypeIndex = 1; // 0: Tự nhận việc, 1: Đơn dịch vụ, 2: Đơn thuê
 
   @override
   Widget build(BuildContext context) {

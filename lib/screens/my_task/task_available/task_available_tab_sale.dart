@@ -38,7 +38,7 @@ class _TaskAvailableTabState extends State<TaskAvailableTabSale> {
     _StatusFilterOption(label: 'Tất cả'),
     _StatusFilterOption(label: 'Chưa giao', value: '1'),
     _StatusFilterOption(label: 'Đã giao', value: '5'),
-    _StatusFilterOption(label: 'Đang thực hiện', value: '2'),
+    _StatusFilterOption(label: 'Đã liên hệ', value: '2'),
     _StatusFilterOption(label: 'Hoàn thành', value: '3'),
     _StatusFilterOption(label: 'Hủy', value: '4'),
   ];

@@ -407,138 +407,175 @@ class _ContactedTaskTabState extends State<ContactedTaskTab> {
           children: [
             // Top Tag & Badges Row
             Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Code Tag
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: isRent
-                        ? const Color(0xFFFFFBEB)
-                        : const Color(0xFFF3F4F6),
-                    borderRadius: BorderRadius.circular(6),
-                    border: Border.all(
-                      color: isRent
-                          ? const Color(0xFFFDE68A)
-                          : const Color(0xFFE5E7EB),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
+                Expanded(
+                  child: Wrap(
+                    spacing: 5,
+                    runSpacing: 5,
+                    crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
-                      Icon(
-                        Icons.tag_rounded,
-                        size: 13,
-                        color: isRent
-                            ? const Color(0xFFD97706)
-                            : ColorUtil.bangladeshGreen,
-                      ),
-                      const SizedBox(width: 3),
-                      Text(
-                        isRent
-                            ? 'THUÊ-${taskModel.id ?? 0}'
-                            : 'DV-${taskModel.id ?? 0}',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 12,
+                      // Code Tag
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 7,
+                          vertical: 3.5,
+                        ),
+                        decoration: BoxDecoration(
                           color: isRent
-                              ? const Color(0xFFB45309)
-                              : ColorUtil.raisinBlack,
+                              ? const Color(0xFFFFFBEB)
+                              : const Color(0xFFF3F4F6),
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(
+                            color: isRent
+                                ? const Color(0xFFFDE68A)
+                                : const Color(0xFFE5E7EB),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.tag_rounded,
+                              size: 12,
+                              color: isRent
+                                  ? const Color(0xFFD97706)
+                                  : ColorUtil.bangladeshGreen,
+                            ),
+                            const SizedBox(width: 2.5),
+                            Text(
+                              isRent
+                                  ? 'THUÊ-${taskModel.id ?? 0}'
+                                  : 'DV-${taskModel.id ?? 0}',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 11.5,
+                                color: isRent
+                                    ? const Color(0xFFB45309)
+                                    : ColorUtil.raisinBlack,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
+                      // Task Type Badge (Đơn dịch vụ vs Đơn thuê)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 7,
+                          vertical: 3.5,
+                        ),
+                        decoration: BoxDecoration(
+                          color: isRent
+                              ? const Color(0xFFFEF3C7)
+                              : const Color(0xFFEFF6FF),
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(
+                            color: isRent
+                                ? const Color(0xFFFCD34D)
+                                : const Color(0xFFBFDBFE),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              isRent
+                                  ? Icons.handshake_rounded
+                                  : Icons.home_repair_service_rounded,
+                              size: 11,
+                              color: isRent
+                                  ? const Color(0xFFB45309)
+                                  : const Color(0xFF1D4ED8),
+                            ),
+                            const SizedBox(width: 3.5),
+                            Text(
+                              isRent ? 'Đơn thuê' : 'Đơn dịch vụ',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                color: isRent
+                                    ? const Color(0xFFB45309)
+                                    : const Color(0xFF1D4ED8),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (taskModel.priority == '2')
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6.5,
+                            vertical: 3.5,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFEF2F2),
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(color: const Color(0xFFFECACA)),
+                          ),
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.bolt_rounded,
+                                size: 12,
+                                color: Color(0xFFDC2626),
+                              ),
+                              SizedBox(width: 2),
+                              Text(
+                                'Gấp',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                  color: Color(0xFFDC2626),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      if (taskModel.isLongDistanceTask)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6.5,
+                            vertical: 3.5,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFFF7ED),
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(color: const Color(0xFFFFEDD5)),
+                          ),
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.directions_car_filled_outlined,
+                                size: 11,
+                                color: Color(0xFFEA580C),
+                              ),
+                              SizedBox(width: 3),
+                              Text(
+                                'Đi xa',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                  color: Color(0xFFEA580C),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                     ],
                   ),
                 ),
                 const SizedBox(width: 6),
-                // Task Type Badge (Đơn dịch vụ vs Đơn thuê)
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 7,
-                    vertical: 3.5,
-                  ),
-                  decoration: BoxDecoration(
-                    color: isRent
-                        ? const Color(0xFFFEF3C7)
-                        : const Color(0xFFEFF6FF),
-                    borderRadius: BorderRadius.circular(6),
-                    border: Border.all(
-                      color: isRent
-                          ? const Color(0xFFFCD34D)
-                          : const Color(0xFFBFDBFE),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        isRent
-                            ? Icons.handshake_rounded
-                            : Icons.home_repair_service_rounded,
-                        size: 11,
-                        color: isRent
-                            ? const Color(0xFFB45309)
-                            : const Color(0xFF1D4ED8),
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        isRent ? 'Đơn thuê' : 'Đơn dịch vụ',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          color: isRent
-                              ? const Color(0xFFB45309)
-                              : const Color(0xFF1D4ED8),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                if (taskModel.priority == '2') ...[
-                  const SizedBox(width: 6),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 3,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFEF2F2),
-                      borderRadius: BorderRadius.circular(6),
-                      border: Border.all(color: const Color(0xFFFECACA)),
-                    ),
-                    child: const Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.error_outline_rounded,
-                          size: 11,
-                          color: Color(0xFFDC2626),
-                        ),
-                        SizedBox(width: 3),
-                        Text(
-                          'Gấp',
-                          style: TextStyle(
-                            fontSize: 10.5,
-                            fontWeight: FontWeight.w700,
-                            color: Color(0xFFDC2626),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-                const Spacer(),
                 // Status Badge: "Đã liên hệ"
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 8,
-                    vertical: 4,
+                    vertical: 3.5,
                   ),
                   decoration: BoxDecoration(
                     color: const Color(0xFFF3E8FF),
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(20),
                     border: Border.all(color: const Color(0xFFE9D5FF)),
                   ),
                   child: const Row(
@@ -546,14 +583,14 @@ class _ContactedTaskTabState extends State<ContactedTaskTab> {
                     children: [
                       Icon(
                         Icons.phone_callback_rounded,
-                        size: 12,
+                        size: 11.5,
                         color: Color(0xFF7E22CE),
                       ),
-                      SizedBox(width: 4),
+                      SizedBox(width: 3.5),
                       Text(
                         'Đã liên hệ',
                         style: TextStyle(
-                          fontSize: 11.5,
+                          fontSize: 11,
                           fontWeight: FontWeight.w700,
                           color: Color(0xFF7E22CE),
                         ),

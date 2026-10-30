@@ -54,7 +54,7 @@ class _TaskTimelineScreenState extends State<TaskTimelineScreen> {
       case "1":
         return Colors.grey[600]!; // Chưa giao cho ai
       case "2":
-        return Colors.orange[800]!; // Đang thực hiện
+        return Colors.orange[800]!; // Đã liên hệ
       case "3":
         return Colors.green[700]!; // Hoàn thành
       case "4":
@@ -71,7 +71,7 @@ class _TaskTimelineScreenState extends State<TaskTimelineScreen> {
       case "1":
         return "Chưa giao cho ai";
       case "2":
-        return "Đang thực hiện";
+        return "Đã liên hệ";
       case "3":
         return "Hoàn thành";
       case "4":

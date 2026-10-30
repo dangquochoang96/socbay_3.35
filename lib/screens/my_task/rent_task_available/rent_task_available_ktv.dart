@@ -730,7 +730,7 @@ class _RentTaskAvailableTabState extends State<RentTaskAvailableTab> {
           icon: Icons.play_circle_outline_rounded,
           label: task.getStatus().isNotEmpty
               ? task.getStatus()
-              : "Đang thực hiện",
+              : "Đã liên hệ",
         );
       case "3":
         return _TaskStatusConfig(
