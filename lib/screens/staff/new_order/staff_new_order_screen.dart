@@ -122,8 +122,12 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
       }
     } else {
       lstKeyValueCores
-        ..add(KeyValue(TextEditingController(), TextEditingController()))
-        ..add(KeyValue(TextEditingController(), TextEditingController()));
+        ..add(
+          KeyValue(TextEditingController(), TextEditingController(), null, [1]),
+        )
+        ..add(
+          KeyValue(TextEditingController(), TextEditingController(), null, [2]),
+        );
     }
     lstKeyValueMaintainCores
       ..add(
@@ -223,6 +227,25 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
   bool get _isMachineInstallTask {
     final type = _currentTaskType;
     return type == 4 || type == 9 || type == 11 || type == 12;
+  }
+
+  bool get _isCoreConfigTask {
+    final type = _currentTaskType;
+    return type == 2 || type == 3;
+  }
+
+  int _getNextAvailableCoreNumber() {
+    final Set<int> usedCores = {};
+    for (final row in lstKeyValueCores) {
+      if (!row.isOtherService) {
+        usedCores.addAll(row.selectedCores);
+      }
+    }
+    int candidate = 1;
+    while (usedCores.contains(candidate)) {
+      candidate++;
+    }
+    return candidate;
   }
 
   String? _getDefaultCoreName([int? type]) {
@@ -393,6 +416,12 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                     .skip(1)
                     .every((e) => e.key.text.isEmpty && e.value.text.isEmpty)) {
               lstKeyValueCores.removeRange(1, lstKeyValueCores.length);
+            }
+          }
+        } else if (_isCoreConfigTask) {
+          for (int i = 0; i < lstKeyValueCores.length; i++) {
+            if (!lstKeyValueCores[i].hasCorePositionSelected) {
+              lstKeyValueCores[i].selectedCores = [i + 1];
             }
           }
         }
@@ -1190,6 +1219,13 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                     List<OrderFilterCoreModel> lst2 = [];
                     for (var item in lstKeyValueCores) {
                       if (item.key.text.isNotEmpty) {
+                        if (_isCoreConfigTask &&
+                            !item.hasCorePositionSelected) {
+                          context.showSnackBar(
+                            'Vui lòng chọn vị trí lõi / combo cho vật tư ${item.key.text}',
+                          );
+                          return;
+                        }
                         String priceText = item.value.text.trim();
                         if (priceText.isEmpty) {
                           context.showSnackBar(
@@ -1447,6 +1483,13 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                     List<OrderFilterCoreModel> lst2 = [];
                     for (var item in lstKeyValueCores) {
                       if (item.key.text.isNotEmpty) {
+                        if (_isCoreConfigTask &&
+                            !item.hasCorePositionSelected) {
+                          context.showSnackBar(
+                            'Vui lòng chọn vị trí lõi / combo cho vật tư ${item.key.text}',
+                          );
+                          return;
+                        }
                         String priceText = item.value.text.trim();
                         if (priceText.isEmpty) {
                           context.showSnackBar(
@@ -1944,10 +1987,13 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                   GestureDetector(
                     onTap: () {
                       setState(() {
+                        final int nextCoreNum = _getNextAvailableCoreNumber();
                         lstKeyValueCores.add(
                           KeyValue(
                             TextEditingController(),
                             TextEditingController(),
+                            null,
+                            [nextCoreNum],
                           ),
                         );
                       });
@@ -2020,6 +2066,12 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
             final bool isFixedFirstRow = hasDefaultCore && i == 0;
             final bool isFixedMachineRow = _isMachineInstallTask && i == 1;
             final bool isReadOnlyRow = isFixedFirstRow || isFixedMachineRow;
+            final bool isCoreConfigMode = _isCoreConfigTask && !isReadOnlyRow;
+            final KeyValue currentItem = lstKeyValueCores[i];
+            final bool hasPos = currentItem.hasCorePositionSelected;
+            final bool isComboPos =
+                !currentItem.isOtherService &&
+                currentItem.selectedCores.length > 1;
 
             return Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -2030,7 +2082,179 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Hàng trên: Ô chọn lõi / vật tư (kèm STT) + Nút xoá
+                  if (isCoreConfigMode) ...[
+                    // Hàng 1 (cho task type 2, 3): Chọn vị trí lõi / Combo + Nút xoá
+                    SizedBox(
+                      height: 40,
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Expanded(
+                            child: InkWell(
+                              onTap: () =>
+                                  _showCorePositionSelector(context, i),
+                              borderRadius: BorderRadius.circular(8),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: hasPos
+                                      ? (isComboPos
+                                            ? const Color(0xFFF0FDF4)
+                                            : (currentItem.isOtherService
+                                                  ? const Color(0xFFF8FAFC)
+                                                  : const Color(0xFFF0FDF4)))
+                                      : const Color(0xFFFFFBEB),
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: hasPos
+                                        ? (currentItem.isOtherService
+                                              ? Colors.grey.shade300
+                                              : ColorUtil.bangladeshGreen
+                                                    .withValues(alpha: 0.45))
+                                        : const Color(
+                                            0xFFF59E0B,
+                                          ).withValues(alpha: 0.6),
+                                  ),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      width: 22,
+                                      height: 22,
+                                      alignment: Alignment.center,
+                                      decoration: BoxDecoration(
+                                        color: ColorUtil.bangladeshGreen
+                                            .withValues(alpha: 0.14),
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: Text(
+                                        "${i + 1}",
+                                        style: const TextStyle(
+                                          fontSize: 11.5,
+                                          fontWeight: FontWeight.bold,
+                                          color: ColorUtil.bangladeshGreen,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Icon(
+                                      hasPos
+                                          ? (isComboPos
+                                                ? Icons.widgets_outlined
+                                                : (currentItem.isOtherService
+                                                      ? Icons.handyman_outlined
+                                                      : Icons
+                                                            .filter_alt_outlined))
+                                          : Icons.tune_rounded,
+                                      size: 17,
+                                      color: hasPos
+                                          ? (currentItem.isOtherService
+                                                ? Colors.blueGrey.shade600
+                                                : ColorUtil.bangladeshGreen)
+                                          : const Color(0xFFD97706),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Expanded(
+                                      child: Text(
+                                        hasPos
+                                            ? currentItem.corePositionLabel
+                                            : 'Chọn số lõi / Combo thay thế...',
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          fontWeight: hasPos
+                                              ? FontWeight.w700
+                                              : FontWeight.w500,
+                                          color: hasPos
+                                              ? (currentItem.isOtherService
+                                                    ? Colors.blueGrey.shade800
+                                                    : ColorUtil.bangladeshGreen)
+                                              : const Color(0xFFB45309),
+                                        ),
+                                      ),
+                                    ),
+                                    if (hasPos) ...[
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 6,
+                                          vertical: 2,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: currentItem.isOtherService
+                                              ? Colors.blueGrey.withValues(
+                                                  alpha: 0.12,
+                                                )
+                                              : ColorUtil.bangladeshGreen
+                                                    .withValues(alpha: 0.12),
+                                          borderRadius: BorderRadius.circular(
+                                            4,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          isComboPos
+                                              ? '${currentItem.selectedCores.length} lõi'
+                                              : (currentItem.isOtherService
+                                                    ? 'Dịch vụ'
+                                                    : 'Lõi lẻ'),
+                                          style: TextStyle(
+                                            fontSize: 10.5,
+                                            fontWeight: FontWeight.w600,
+                                            color: currentItem.isOtherService
+                                                ? Colors.blueGrey.shade700
+                                                : ColorUtil.bangladeshGreen,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 4),
+                                    ],
+                                    Icon(
+                                      Icons.keyboard_arrow_down_rounded,
+                                      size: 18,
+                                      color: hasPos
+                                          ? ColorUtil.bangladeshGreen
+                                          : const Color(0xFFD97706),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          InkWell(
+                            onTap: () {
+                              setState(() {
+                                lstKeyValueCores.removeAt(i);
+                                _recalculateTotal();
+                              });
+                            },
+                            borderRadius: BorderRadius.circular(8),
+                            child: Container(
+                              width: 40,
+                              height: 40,
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFEF2F2),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: const Color(0xFFFECACA),
+                                ),
+                              ),
+                              child: const Icon(
+                                Icons.delete_outline_rounded,
+                                color: Color(0xFFDC2626),
+                                size: 20,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                  ],
+                  // Ô chọn tên lõi / vật tư trong kho
                   SizedBox(
                     height: 40,
                     child: Row(
@@ -2079,7 +2303,9 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                                         ? 'Chọn máy ở Thông tin sản phẩm'
                                         : (_ktvWarehouseCores.isEmpty
                                               ? 'Kho trống!'
-                                              : 'Chọn lõi / vật tư...'),
+                                              : (isCoreConfigMode && hasPos
+                                                    ? 'Chọn tên vật tư cho ${currentItem.corePositionLabel}...'
+                                                    : 'Chọn tên lõi / vật tư trong kho...')),
                                     hintStyle: TextStyle(
                                       fontSize: 13,
                                       color: Colors.grey.shade400,
@@ -2101,26 +2327,33 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                                       ),
                                       child: Center(
                                         widthFactor: 1,
-                                        child: Container(
-                                          width: 22,
-                                          height: 22,
-                                          alignment: Alignment.center,
-                                          decoration: BoxDecoration(
-                                            color: ColorUtil.bangladeshGreen
-                                                .withValues(alpha: 0.12),
-                                            borderRadius: BorderRadius.circular(
-                                              6,
-                                            ),
-                                          ),
-                                          child: Text(
-                                            "${i + 1}",
-                                            style: const TextStyle(
-                                              fontSize: 11.5,
-                                              fontWeight: FontWeight.bold,
-                                              color: ColorUtil.bangladeshGreen,
-                                            ),
-                                          ),
-                                        ),
+                                        child: isCoreConfigMode
+                                            ? Icon(
+                                                Icons.inventory_2_outlined,
+                                                size: 18,
+                                                color: Colors.grey.shade600,
+                                              )
+                                            : Container(
+                                                width: 22,
+                                                height: 22,
+                                                alignment: Alignment.center,
+                                                decoration: BoxDecoration(
+                                                  color: ColorUtil
+                                                      .bangladeshGreen
+                                                      .withValues(alpha: 0.12),
+                                                  borderRadius:
+                                                      BorderRadius.circular(6),
+                                                ),
+                                                child: Text(
+                                                  "${i + 1}",
+                                                  style: const TextStyle(
+                                                    fontSize: 11.5,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: ColorUtil
+                                                        .bangladeshGreen,
+                                                  ),
+                                                ),
+                                              ),
                                       ),
                                     ),
                                     suffixIconConstraints: const BoxConstraints(
@@ -2186,7 +2419,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                                   ),
                                 ),
                         ),
-                        if (!isReadOnlyRow) ...[
+                        if (!isReadOnlyRow && !isCoreConfigMode) ...[
                           const SizedBox(width: 8),
                           InkWell(
                             onTap: () {
@@ -2813,7 +3046,9 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
 
                 if (matchedCore != null) {
                   setState(() {
-                    final startIndex = _isMachineInstallTask ? 2 : 1;
+                    final startIndex = _isMachineInstallTask
+                        ? 2
+                        : (_getDefaultCoreName() != null ? 1 : 0);
                     int emptyIndex = -1;
                     for (int i = startIndex; i < lstKeyValueCores.length; i++) {
                       if (lstKeyValueCores[i].key.text.isEmpty) {
@@ -2824,10 +3059,13 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                     if (emptyIndex != -1) {
                       lstKeyValueCores[emptyIndex].key.text = matchedCore!;
                     } else {
+                      final int nextCoreNum = _getNextAvailableCoreNumber();
                       lstKeyValueCores.add(
                         KeyValue(
                           TextEditingController(text: matchedCore),
                           TextEditingController(),
+                          null,
+                          [nextCoreNum],
                         ),
                       );
                     }
@@ -2995,6 +3233,12 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                                   onTap: () {
                                     setState(() {
                                       lstKeyValueCores[index].key.text = item;
+                                      if (item == manualOption ||
+                                          item == "Thu tiền đơn thuê/đại lý") {
+                                        lstKeyValueCores[index]
+                                          ..selectedCores = []
+                                          ..isOtherService = true;
+                                      }
                                     });
                                     Navigator.pop(context);
                                   },
@@ -3002,6 +3246,680 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                               },
                             ),
                     ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _showCorePositionSelector(BuildContext context, int index) {
+    final currentRow = lstKeyValueCores[index];
+    List<int> tempSelectedCores = [...currentRow.selectedCores]..sort();
+    bool tempIsOther = currentRow.isOtherService;
+    bool isComboMode = !tempIsOther && tempSelectedCores.length > 1;
+
+    // Tập hợp các số lõi đã được chọn ở các dòng khác để hiển thị gợi ý
+    final Set<int> coresInOtherRows = {};
+    for (int r = 0; r < lstKeyValueCores.length; r++) {
+      if (r != index && !lstKeyValueCores[r].isOtherService) {
+        coresInOtherRows.addAll(lstKeyValueCores[r].selectedCores);
+      }
+    }
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (BuildContext sheetContext) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setModalState) {
+            tempSelectedCores.sort();
+            final bool hasAnySelection =
+                tempIsOther || tempSelectedCores.isNotEmpty;
+
+            return SafeArea(
+              child: Padding(
+                padding: EdgeInsets.only(
+                  bottom: MediaQuery.of(context).viewInsets.bottom,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Header
+                    Container(
+                      padding: const EdgeInsets.fromLTRB(16, 14, 12, 12),
+                      decoration: BoxDecoration(
+                        border: Border(
+                          bottom: BorderSide(color: Colors.grey.shade200),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: ColorUtil.bangladeshGreen.withValues(
+                                alpha: 0.12,
+                              ),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: const Icon(
+                              Icons.tune_rounded,
+                              color: ColorUtil.bangladeshGreen,
+                              size: 20,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Đổi vị trí lõi / Combo (Mục #${index + 1})',
+                                  style: const TextStyle(
+                                    fontSize: 15.5,
+                                    fontWeight: FontWeight.bold,
+                                    color: ColorUtil.raisinBlack,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  isComboMode
+                                      ? 'Tích chọn các lõi trong Combo'
+                                      : 'Chạm vào số lõi để đổi ngay',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey.shade600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          IconButton(
+                            onPressed: () => Navigator.pop(sheetContext),
+                            icon: const Icon(Icons.close_rounded),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // Chuyển chế độ: Đổi lõi lẻ vs Chọn Combo
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF1F5F9),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: () {
+                                  setModalState(() {
+                                    isComboMode = false;
+                                    if (tempSelectedCores.length > 1) {
+                                      tempSelectedCores = [
+                                        tempSelectedCores.first,
+                                      ];
+                                    }
+                                  });
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 8,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: !isComboMode
+                                        ? Colors.white
+                                        : Colors.transparent,
+                                    borderRadius: BorderRadius.circular(8),
+                                    boxShadow: !isComboMode
+                                        ? [
+                                            BoxShadow(
+                                              color: Colors.black.withValues(
+                                                alpha: 0.06,
+                                              ),
+                                              blurRadius: 4,
+                                              offset: const Offset(0, 1),
+                                            ),
+                                          ]
+                                        : null,
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.filter_alt_outlined,
+                                        size: 16,
+                                        color: !isComboMode
+                                            ? ColorUtil.bangladeshGreen
+                                            : Colors.grey.shade600,
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        'Đổi lõi lẻ',
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w700,
+                                          color: !isComboMode
+                                              ? ColorUtil.bangladeshGreen
+                                              : Colors.grey.shade600,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: () {
+                                  setModalState(() {
+                                    isComboMode = true;
+                                    tempIsOther = false;
+                                  });
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 8,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: isComboMode
+                                        ? Colors.white
+                                        : Colors.transparent,
+                                    borderRadius: BorderRadius.circular(8),
+                                    boxShadow: isComboMode
+                                        ? [
+                                            BoxShadow(
+                                              color: Colors.black.withValues(
+                                                alpha: 0.06,
+                                              ),
+                                              blurRadius: 4,
+                                              offset: const Offset(0, 1),
+                                            ),
+                                          ]
+                                        : null,
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.widgets_outlined,
+                                        size: 16,
+                                        color: isComboMode
+                                            ? ColorUtil.bangladeshGreen
+                                            : Colors.grey.shade600,
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        'Chọn Combo (Nhiều lõi)',
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w700,
+                                          color: isComboMode
+                                              ? ColorUtil.bangladeshGreen
+                                              : Colors.grey.shade600,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    // Grid Lõi 1 -> Lõi 12
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 10, 16, 8),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            isComboMode
+                                ? 'TÍCH CHỌN CÁC LÕI TRONG COMBO'
+                                : 'CHỌN VỊ TRÍ LÕI THAY THẾ',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 0.5,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                          if (isComboMode && hasAnySelection)
+                            InkWell(
+                              onTap: () {
+                                setModalState(() {
+                                  tempSelectedCores.clear();
+                                  tempIsOther = false;
+                                });
+                              },
+                              borderRadius: BorderRadius.circular(12),
+                              child: const Padding(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 2,
+                                ),
+                                child: Text(
+                                  'Bỏ chọn hết',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: Color(0xFFDC2626),
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: GridView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: 12,
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 4,
+                              crossAxisSpacing: 8,
+                              mainAxisSpacing: 8,
+                              childAspectRatio: 1.75,
+                            ),
+                        itemBuilder: (context, idx) {
+                          final int coreNum = idx + 1;
+                          final bool isSelected =
+                              !tempIsOther &&
+                              tempSelectedCores.contains(coreNum);
+                          final bool isUsedElsewhere = coresInOtherRows
+                              .contains(coreNum);
+
+                          return InkWell(
+                            onTap: isUsedElsewhere
+                                ? null
+                                : () {
+                                    if (!isComboMode) {
+                                      // Chế độ Đổi lõi lẻ: chạm 1 lần là đổi ngay và đóng bảng
+                                      setState(() {
+                                        lstKeyValueCores[index]
+                                          ..selectedCores = [coreNum]
+                                          ..isOtherService = false;
+                                      });
+                                      Navigator.pop(sheetContext);
+                                    } else {
+                                      setModalState(() {
+                                        tempIsOther = false;
+                                        if (tempSelectedCores.contains(
+                                          coreNum,
+                                        )) {
+                                          tempSelectedCores.remove(coreNum);
+                                        } else {
+                                          tempSelectedCores.add(coreNum);
+                                        }
+                                      });
+                                    }
+                                  },
+                            borderRadius: BorderRadius.circular(10),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 150),
+                              decoration: BoxDecoration(
+                                color: isSelected
+                                    ? ColorUtil.bangladeshGreen
+                                    : (isUsedElsewhere
+                                          ? Colors.grey.shade100
+                                          : Colors.white),
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(
+                                  color: isSelected
+                                      ? ColorUtil.bangladeshGreen
+                                      : (isUsedElsewhere
+                                            ? Colors.grey.shade200
+                                            : Colors.grey.shade300),
+                                  width: isSelected ? 1.5 : 1,
+                                ),
+                                boxShadow: isSelected
+                                    ? [
+                                        BoxShadow(
+                                          color: ColorUtil.bangladeshGreen
+                                              .withValues(alpha: 0.22),
+                                          blurRadius: 6,
+                                          offset: const Offset(0, 2),
+                                        ),
+                                      ]
+                                    : null,
+                              ),
+                              child: Stack(
+                                children: [
+                                  Center(
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          'Lõi số $coreNum',
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.bold,
+                                            color: isSelected
+                                                ? Colors.white
+                                                : (isUsedElsewhere
+                                                      ? Colors.grey.shade400
+                                                      : ColorUtil.raisinBlack),
+                                          ),
+                                        ),
+                                        if (isUsedElsewhere && !isSelected)
+                                          Text(
+                                            'Đã chọn ở dòng khác',
+                                            style: TextStyle(
+                                              fontSize: 9,
+                                              color: Colors.grey.shade400,
+                                            ),
+                                          ),
+                                      ],
+                                    ),
+                                  ),
+                                  if (isSelected)
+                                    const Positioned(
+                                      top: 4,
+                                      right: 4,
+                                      child: Icon(
+                                        Icons.check_circle_rounded,
+                                        size: 14,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: InkWell(
+                        onTap: () {
+                          if (!isComboMode) {
+                            setState(() {
+                              lstKeyValueCores[index]
+                                ..selectedCores = []
+                                ..isOtherService = true;
+                            });
+                            Navigator.pop(sheetContext);
+                          } else {
+                            setModalState(() {
+                              tempIsOther = !tempIsOther;
+                              if (tempIsOther) {
+                                tempSelectedCores.clear();
+                              }
+                            });
+                          }
+                        },
+                        borderRadius: BorderRadius.circular(10),
+                        child: Container(
+                          height: 40,
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          decoration: BoxDecoration(
+                            color: tempIsOther
+                                ? ColorUtil.bangladeshGreen
+                                : const Color(0xFFF8FAFC),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: tempIsOther
+                                  ? ColorUtil.bangladeshGreen
+                                  : Colors.grey.shade300,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.handyman_outlined,
+                                size: 16,
+                                color: tempIsOther
+                                    ? Colors.white
+                                    : ColorUtil.raisinBlack,
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                'Khác / Dịch vụ (không gắn số lõi)',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: tempIsOther
+                                      ? Colors.white
+                                      : ColorUtil.raisinBlack,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 14),
+
+                    if (isComboMode)
+                      // Thanh xác nhận ở dưới cùng khi chọn Combo / Nhiều lõi
+                      Container(
+                        padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF8FAFC),
+                          border: Border(
+                            top: BorderSide(color: Colors.grey.shade200),
+                          ),
+                        ),
+                        child: !hasAnySelection
+                            ? SizedBox(
+                                height: 44,
+                                child: ElevatedButton(
+                                  onPressed: null,
+                                  style: ElevatedButton.styleFrom(
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                  ),
+                                  child: const Text(
+                                    'Vui lòng tích chọn các lõi trong Combo',
+                                  ),
+                                ),
+                              )
+                            : (!tempIsOther && tempSelectedCores.length > 1)
+                            ? Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.only(bottom: 8),
+                                    child: Text(
+                                      'Đã chọn: Combo ${tempSelectedCores.join(", ")} (${tempSelectedCores.length} lõi)',
+                                      style: const TextStyle(
+                                        fontSize: 12.5,
+                                        fontWeight: FontWeight.w600,
+                                        color: ColorUtil.raisinBlack,
+                                      ),
+                                    ),
+                                  ),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: SizedBox(
+                                          height: 44,
+                                          child: OutlinedButton.icon(
+                                            onPressed: () {
+                                              setState(() {
+                                                final sorted = [
+                                                  ...tempSelectedCores,
+                                                ]..sort();
+                                                // Dòng hiện tại nhận lõi đầu tiên
+                                                lstKeyValueCores[index]
+                                                  ..selectedCores = [
+                                                    sorted.first,
+                                                  ]
+                                                  ..isOtherService = false;
+
+                                                // Các lõi tiếp theo điền vào dòng trống kế tiếp hoặc tạo dòng mới
+                                                int insertPos = index + 1;
+                                                for (
+                                                  int k = 1;
+                                                  k < sorted.length;
+                                                  k++
+                                                ) {
+                                                  final int cNum = sorted[k];
+                                                  if (insertPos <
+                                                          lstKeyValueCores
+                                                              .length &&
+                                                      lstKeyValueCores[insertPos]
+                                                          .key
+                                                          .text
+                                                          .isEmpty) {
+                                                    lstKeyValueCores[insertPos]
+                                                      ..selectedCores = [cNum]
+                                                      ..isOtherService = false;
+                                                  } else {
+                                                    lstKeyValueCores.insert(
+                                                      insertPos,
+                                                      KeyValue(
+                                                        TextEditingController(),
+                                                        TextEditingController(),
+                                                        null,
+                                                        [cNum],
+                                                        false,
+                                                      ),
+                                                    );
+                                                  }
+                                                  insertPos++;
+                                                }
+                                              });
+                                              Navigator.pop(sheetContext);
+                                            },
+                                            icon: const Icon(
+                                              Icons
+                                                  .format_list_bulleted_rounded,
+                                              size: 17,
+                                            ),
+                                            style: OutlinedButton.styleFrom(
+                                              foregroundColor:
+                                                  ColorUtil.bangladeshGreen,
+                                              side: const BorderSide(
+                                                color:
+                                                    ColorUtil.bangladeshGreen,
+                                                width: 1.2,
+                                              ),
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 8,
+                                                  ),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(10),
+                                              ),
+                                            ),
+                                            label: Text(
+                                              'Tách ${tempSelectedCores.length} dòng lẻ',
+                                              style: const TextStyle(
+                                                fontSize: 12.5,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 10),
+                                      Expanded(
+                                        child: SizedBox(
+                                          height: 44,
+                                          child: ElevatedButton.icon(
+                                            onPressed: () {
+                                              setState(() {
+                                                lstKeyValueCores[index]
+                                                  ..selectedCores = [
+                                                    ...tempSelectedCores,
+                                                  ]
+                                                  ..isOtherService = false;
+                                              });
+                                              Navigator.pop(sheetContext);
+                                            },
+                                            icon: const Icon(
+                                              Icons.widgets_outlined,
+                                              size: 17,
+                                              color: Colors.white,
+                                            ),
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor:
+                                                  ColorUtil.bangladeshGreen,
+                                              foregroundColor: Colors.white,
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 8,
+                                                  ),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(10),
+                                              ),
+                                            ),
+                                            label: Text(
+                                              'Xác nhận Combo (${tempSelectedCores.length} lõi)',
+                                              style: const TextStyle(
+                                                fontSize: 12.5,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              )
+                            : SizedBox(
+                                height: 44,
+                                child: ElevatedButton.icon(
+                                  onPressed: () {
+                                    setState(() {
+                                      lstKeyValueCores[index]
+                                        ..selectedCores = tempIsOther
+                                            ? []
+                                            : [...tempSelectedCores]
+                                        ..isOtherService = tempIsOther;
+                                    });
+                                    Navigator.pop(sheetContext);
+                                  },
+                                  icon: const Icon(
+                                    Icons.check_circle_outline_rounded,
+                                    color: Colors.white,
+                                    size: 18,
+                                  ),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: ColorUtil.bangladeshGreen,
+                                    foregroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                  ),
+                                  label: Text(
+                                    tempIsOther
+                                        ? 'Xác nhận: Khác / Dịch vụ'
+                                        : 'Xác nhận: Lõi số ${tempSelectedCores.first}',
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                      ),
                   ],
                 ),
               ),
@@ -3386,10 +4304,31 @@ class KeyValue {
   late TextEditingController key;
   late TextEditingController value;
   late TextEditingController quantity;
+  List<int> selectedCores;
+  bool isOtherService;
 
   //late TextEditingController selectedDate;
-  KeyValue(this.key, this.value, [TextEditingController? quantity]) {
+  KeyValue(
+    this.key,
+    this.value, [
+    TextEditingController? quantity,
+    List<int>? selectedCores,
+    this.isOtherService = false,
+  ]) : selectedCores = selectedCores ?? [] {
     this.quantity = quantity ?? TextEditingController(text: "1");
+  }
+
+  bool get hasCorePositionSelected =>
+      isOtherService || selectedCores.isNotEmpty;
+
+  String get corePositionLabel {
+    if (isOtherService) return "Khác / Dịch vụ";
+    if (selectedCores.isEmpty) return "";
+    final sorted = [...selectedCores]..sort();
+    if (sorted.length == 1) {
+      return "Lõi số ${sorted.first}";
+    }
+    return "Combo ${sorted.join(', ')}";
   }
 }
 
