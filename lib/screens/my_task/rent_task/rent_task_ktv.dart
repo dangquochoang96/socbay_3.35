@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:socbay/application.dart';
 import 'package:socbay/blocs/rent-task/rent_task_screen_event.dart';
 import 'package:socbay/blocs/rent-task/rent_task_screen_ktv_bloc.dart';
 import 'package:socbay/blocs/rent-task/rent_task_screen_state.dart';
@@ -390,9 +391,10 @@ class _RentTaskTabState extends State<RentTaskTab> {
         taskModel.customer?.address != null &&
         taskModel.customer!.address!.trim().isNotEmpty;
     final canUpdate =
-        taskModel.status == '1' ||
-        taskModel.status == '2' ||
-        taskModel.status == '5';
+        (App.instance.userApp?.canCompleteRentTask ?? true) &&
+        (taskModel.status == '1' ||
+            taskModel.status == '2' ||
+            taskModel.status == '5');
 
     return Container(
       decoration: BoxDecoration(
@@ -436,7 +438,7 @@ class _RentTaskTabState extends State<RentTaskTab> {
                         children: [
                           const Icon(
                             Icons.tag_rounded,
-                            size: 13,
+                            size: 14,
                             color: ColorUtil.bangladeshGreen,
                           ),
                           const SizedBox(width: 3),
@@ -444,7 +446,7 @@ class _RentTaskTabState extends State<RentTaskTab> {
                             'TH-${taskModel.id ?? 0}',
                             style: const TextStyle(
                               fontWeight: FontWeight.w700,
-                              fontSize: 12,
+                              fontSize: 13.5,
                               color: ColorUtil.raisinBlack,
                             ),
                           ),
@@ -468,14 +470,14 @@ class _RentTaskTabState extends State<RentTaskTab> {
                           children: [
                             Icon(
                               Icons.directions_car_filled_outlined,
-                              size: 12,
+                              size: 13,
                               color: Color(0xFFEA580C),
                             ),
                             SizedBox(width: 3),
                             Text(
                               'Đi xa',
                               style: TextStyle(
-                                fontSize: 11,
+                                fontSize: 12.5,
                                 fontWeight: FontWeight.w600,
                                 color: Color(0xFFEA580C),
                               ),
@@ -494,7 +496,7 @@ class _RentTaskTabState extends State<RentTaskTab> {
                       ? taskModel.name!
                       : 'Đơn thuê thiết bị',
                   style: const TextStyle(
-                    fontSize: 15,
+                    fontSize: 16.5,
                     fontWeight: FontWeight.w700,
                     color: Color(0xFF1E2336),
                     height: 1.3,
@@ -517,14 +519,14 @@ class _RentTaskTabState extends State<RentTaskTab> {
                     children: [
                       const Icon(
                         Icons.access_time_filled_rounded,
-                        size: 16,
+                        size: 17,
                         color: ColorUtil.bangladeshGreen,
                       ),
                       const SizedBox(width: 8),
                       const Text(
                         'Thời gian:',
                         style: TextStyle(
-                          fontSize: 12,
+                          fontSize: 13.5,
                           color: Color(0xFF6B7280),
                           fontWeight: FontWeight.w500,
                         ),
@@ -534,7 +536,7 @@ class _RentTaskTabState extends State<RentTaskTab> {
                         child: Text(
                           _formatTaskDatetime(taskModel.timeStart),
                           style: const TextStyle(
-                            fontSize: 12,
+                            fontSize: 13.5,
                             fontWeight: FontWeight.w700,
                             color: Color(0xFFDC2626),
                           ),
@@ -559,7 +561,7 @@ class _RentTaskTabState extends State<RentTaskTab> {
                         children: [
                           const Icon(
                             Icons.person_rounded,
-                            size: 16,
+                            size: 17,
                             color: Color(0xFF6B7280),
                           ),
                           const SizedBox(width: 8),
@@ -572,7 +574,7 @@ class _RentTaskTabState extends State<RentTaskTab> {
                                   ? taskModel.customer!.username!
                                   : 'Khách hàng',
                               style: const TextStyle(
-                                fontSize: 13,
+                                fontSize: 14.5,
                                 fontWeight: FontWeight.w600,
                                 color: Color(0xFF1F2937),
                               ),
@@ -602,14 +604,14 @@ class _RentTaskTabState extends State<RentTaskTab> {
                                   children: [
                                     const Icon(
                                       Icons.phone_in_talk_rounded,
-                                      size: 13,
+                                      size: 14,
                                       color: Color(0xFF059669),
                                     ),
                                     const SizedBox(width: 4),
                                     Text(
                                       taskModel.customer!.phone!,
                                       style: const TextStyle(
-                                        fontSize: 11,
+                                        fontSize: 12.5,
                                         fontWeight: FontWeight.w700,
                                         color: Color(0xFF059669),
                                       ),
@@ -636,7 +638,7 @@ class _RentTaskTabState extends State<RentTaskTab> {
                               padding: EdgeInsets.only(top: 1),
                               child: Icon(
                                 Icons.location_on_rounded,
-                                size: 16,
+                                size: 17,
                                 color: Color(0xFFEF4444),
                               ),
                             ),
@@ -645,7 +647,7 @@ class _RentTaskTabState extends State<RentTaskTab> {
                               child: Text(
                                 taskModel.customer!.address!,
                                 style: const TextStyle(
-                                  fontSize: 12,
+                                  fontSize: 13.5,
                                   color: Color(0xFF374151),
                                   height: 1.3,
                                 ),
@@ -699,7 +701,7 @@ class _RentTaskTabState extends State<RentTaskTab> {
                       children: [
                         const Icon(
                           Icons.error_outline_rounded,
-                          size: 15,
+                          size: 16,
                           color: Color(0xFFDC2626),
                         ),
                         const SizedBox(width: 6),
@@ -711,14 +713,14 @@ class _RentTaskTabState extends State<RentTaskTab> {
                                   text: 'Thông báo: ',
                                   style: TextStyle(
                                     fontWeight: FontWeight.w700,
-                                    fontSize: 12,
+                                    fontSize: 13.5,
                                     color: Color(0xFFDC2626),
                                   ),
                                 ),
                                 TextSpan(
                                   text: taskModel.noti!,
                                   style: const TextStyle(
-                                    fontSize: 12,
+                                    fontSize: 13.5,
                                     color: Color(0xFF991B1B),
                                     height: 1.3,
                                   ),
@@ -750,7 +752,7 @@ class _RentTaskTabState extends State<RentTaskTab> {
                       children: [
                         const Icon(
                           Icons.description_outlined,
-                          size: 15,
+                          size: 16,
                           color: Color(0xFF6B7280),
                         ),
                         const SizedBox(width: 6),
@@ -762,14 +764,14 @@ class _RentTaskTabState extends State<RentTaskTab> {
                                   text: 'Nội dung: ',
                                   style: TextStyle(
                                     fontWeight: FontWeight.w600,
-                                    fontSize: 12,
+                                    fontSize: 13.5,
                                     color: Color(0xFF4B5563),
                                   ),
                                 ),
                                 TextSpan(
                                   text: taskModel.des!,
                                   style: const TextStyle(
-                                    fontSize: 12,
+                                    fontSize: 13.5,
                                     color: Color(0xFF374151),
                                     height: 1.3,
                                   ),
@@ -806,7 +808,7 @@ class _RentTaskTabState extends State<RentTaskTab> {
                             Text(
                               'Xem chi tiết',
                               style: TextStyle(
-                                fontSize: 13,
+                                fontSize: 14,
                                 fontWeight: FontWeight.w600,
                                 color: ColorUtil.bangladeshGreen,
                               ),
@@ -814,7 +816,7 @@ class _RentTaskTabState extends State<RentTaskTab> {
                             SizedBox(width: 4),
                             Icon(
                               Icons.arrow_forward_ios_rounded,
-                              size: 12,
+                              size: 13,
                               color: ColorUtil.bangladeshGreen,
                             ),
                           ],
@@ -826,13 +828,13 @@ class _RentTaskTabState extends State<RentTaskTab> {
                         onPressed: () => _updateTask(taskModel),
                         icon: const Icon(
                           Icons.edit_calendar_rounded,
-                          size: 15,
+                          size: 16,
                           color: Colors.white,
                         ),
                         label: const Text(
                           'Cập nhật',
                           style: TextStyle(
-                            fontSize: 13,
+                            fontSize: 14,
                             fontWeight: FontWeight.w600,
                             color: Colors.white,
                           ),
@@ -872,13 +874,13 @@ class _RentTaskTabState extends State<RentTaskTab> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(config.icon, size: 12, color: config.text),
+          Icon(config.icon, size: 13, color: config.text),
           const SizedBox(width: 4),
           Text(
             config.label,
             style: TextStyle(
               color: config.text,
-              fontSize: 11,
+              fontSize: 12.5,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -903,9 +905,7 @@ class _RentTaskTabState extends State<RentTaskTab> {
           text: const Color(0xFFD97706),
           border: const Color(0xFFFDE68A),
           icon: Icons.play_circle_outline_rounded,
-          label: task.getStatus().isNotEmpty
-              ? task.getStatus()
-              : "Đã liên hệ",
+          label: task.getStatus().isNotEmpty ? task.getStatus() : "Đã liên hệ",
         );
       case "3":
         return _TaskStatusConfig(

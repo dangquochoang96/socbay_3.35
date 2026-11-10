@@ -167,7 +167,19 @@ class ApiProvider {
       );
       final res = DefaultResponse.fromJson(resJson);
       if ((res.status == 200 || res.status == 1) && res.data != null) {
-        final item = UserModel.fromJson(res.data);
+        final Map<String, dynamic> dataMap = Map<String, dynamic>.from(
+          res.data,
+        );
+        final Map<String, dynamic> userMap = dataMap['user'] is Map
+            ? Map<String, dynamic>.from(dataMap['user'])
+            : dataMap;
+        if (userMap['roles'] == null && dataMap['roles'] != null) {
+          userMap['roles'] = dataMap['roles'];
+        }
+        if (userMap['permissions'] == null && dataMap['permissions'] != null) {
+          userMap['permissions'] = dataMap['permissions'];
+        }
+        final item = UserModel.fromJson(userMap);
         return DefaultResponse(data: item, status: 200);
       } else {
         return DefaultResponse(status: res.status, message: res.message);

@@ -109,7 +109,7 @@ class LocationTrackingService {
   Future<bool> startTracking() async {
     // Tuyệt đối không cho phép tài khoản khách hàng hoặc tài khoản khác bật theo dõi
     final user = App.instance.userApp;
-    if (user == null || user.isUserRole() != true) {
+    if (user == null || user.canTrackTechnicianLocation != true) {
       print('⛔ [LOCATION SERVICE] Denied startTracking: User is not KTV!');
       return false;
     }

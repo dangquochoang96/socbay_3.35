@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:full_screen_image_null_safe/full_screen_image_null_safe.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:socbay/application.dart';
 import 'package:socbay/blocs/home/feedback/feedback_screen_bloc.dart';
 import 'package:socbay/blocs/home/feedback/feedback_screen_event.dart';
 import 'package:socbay/blocs/home/feedback/feedback_screen_state.dart';
@@ -107,8 +108,7 @@ class _FeedbackScreenState extends State<StaffDetailFeedbackScreen>
                   text: "Xem chi tiết đơn hàng",
                   isPositive: true,
                   action: () {
-                    final orderIdStr =
-                        _bloc.feedbackDetail.orderId?.toString();
+                    final orderIdStr = _bloc.feedbackDetail.orderId?.toString();
                     final orderIdInt = int.tryParse(orderIdStr ?? "");
                     if (orderIdInt == null || orderIdInt <= 0) {
                       context.showSnackBar("Không có thông tin đơn hàng!");
@@ -123,7 +123,8 @@ class _FeedbackScreenState extends State<StaffDetailFeedbackScreen>
                     );
                   },
                 ),
-                if (_bloc.feedbackDetail.status == "1") ...[
+                if (_bloc.feedbackDetail.status == "1" &&
+                    (App.instance.userApp?.canUpdateFeedback ?? true)) ...[
                   _buildButton(
                     text: "Đã xử lý",
                     isPositive: true,

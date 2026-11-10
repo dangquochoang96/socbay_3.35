@@ -72,7 +72,8 @@ class RootBloc extends Bloc<RootEvent, RootState> {
         emit(Unauthenticated());
       } else {
         final localUser = currentUser.first;
-        App.instance.userApp = UserToUserModel()(localUser);
+        final restoredUser = UserToUserModel()(localUser);
+        App.instance.userApp = restoredUser;
         LoggerUtil.info(
           'AppStarted -> local session restored userId=${localUser.id}',
           tag: tag,
@@ -80,16 +81,36 @@ class RootBloc extends Bloc<RootEvent, RootState> {
         emit(Authenticated());
         try {
           var dio = _authorizedDio(token!);
-          final Response resJson = await dio.get(
-            AppConfig.instance.apiUrl(ApiEndpoints.userById(localUser.id)),
-          );
+          Response resJson;
+          try {
+            resJson = await dio.get(
+              AppConfig.instance.apiUrl(ApiEndpoints.userInfo),
+            );
+          } catch (_) {
+            resJson = await dio.get(
+              AppConfig.instance.apiUrl(ApiEndpoints.userById(localUser.id)),
+            );
+          }
           LoggerUtil.info(
-            'AppStarted userById response=${resJson.data}',
+            'AppStarted user profile response=${resJson.data}',
             tag: tag,
           );
           var map = Map<String, dynamic>.from(json.decode(resJson.toString()));
           if (_isApiSuccess(map)) {
-            UserModel userProfile = UserModel.fromJson(map['data']);
+            final rawData = Map<String, dynamic>.from(map['data']);
+            final userMap = rawData['user'] is Map
+                ? Map<String, dynamic>.from(rawData['user'])
+                : rawData;
+            UserModel userProfile = UserModel.fromJson(userMap);
+            if (!userMap.containsKey('roles') && restoredUser.roles.isNotEmpty) {
+              userProfile = userProfile.copyWith(roles: restoredUser.roles);
+            }
+            if (!userMap.containsKey('permissions') &&
+                restoredUser.permissions.isNotEmpty) {
+              userProfile = userProfile.copyWith(
+                permissions: restoredUser.permissions,
+              );
+            }
             if ((userProfile.id ?? 0) <= 0) {
               LoggerUtil.warning(
                 'AppStarted -> invalid user id from API',

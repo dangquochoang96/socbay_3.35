@@ -80,7 +80,11 @@ class StaffServiceScreenBloc
         "priority": (event.createTaskRequest.priority).toString(),
         "staff": App.instance.userApp?.id,
         "user_create": "1",
-        "sale_id": "12985",
+        "sale_id":
+            (App.instance.userApp?.isSaleRole == true ||
+                App.instance.userApp?.isCoordinatorOrAdmin == true)
+            ? App.instance.userApp!.id.toString()
+            : "12985",
         "product_id": event.createTaskRequest.productId == 0
             ? null
             : event.createTaskRequest.productId,

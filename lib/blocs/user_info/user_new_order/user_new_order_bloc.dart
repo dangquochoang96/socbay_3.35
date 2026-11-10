@@ -139,7 +139,11 @@ class UserNewOrderBloc extends Bloc<UserNewOrderEvent, UserNewOrderState> {
           'tru_diem': event.subSavePoint.toString(),
           'type_payment': event.paymentType.toString(),
           'staff': '1',
-          'sale_id': '12985',
+          'sale_id':
+              (App.instance.userApp?.isSaleRole == true ||
+                  App.instance.userApp?.isCoordinatorOrAdmin == true)
+              ? App.instance.userApp!.id.toString()
+              : '12985',
           'product_id': event.productId.toString(),
           'replaceDate': listReplaceDate,
           'replaceDatePromise': listNextDate,

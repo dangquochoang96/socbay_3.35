@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:bloc/bloc.dart';
+import 'package:flutter/foundation.dart';
 import 'package:socbay/application.dart';
 import 'package:socbay/config/app_config.dart';
 import 'package:socbay/data/data_provider/api_endpoints.dart';
@@ -14,6 +15,8 @@ import 'package:socbay/data/model/product_model.dart';
 import 'package:socbay/data/model/staff_sales_income_model.dart';
 import 'package:socbay/data/model/user_model.dart';
 import 'package:socbay/data/repository/auth/api_repository.dart';
+import 'package:socbay/db/database.dart';
+import 'package:socbay/db/object_mapper/object_mapper.dart';
 import 'package:socbay/utils/logger_util.dart';
 import 'home_event.dart';
 import 'home_state.dart';
@@ -95,10 +98,35 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
   Future<void> _mapGetUserInfo() async {
     try {
+      final prevUser = App.instance.userApp;
       final res = await apiRepository.getUserInfo();
       if (res.status == HttpStatus.ok && res.data != null) {
-        App.instance.userApp = res.data;
-        user = res.data;
+        var updatedUser = res.data!;
+        if (updatedUser.roles.isEmpty && (prevUser?.roles.isNotEmpty ?? false)) {
+          updatedUser = updatedUser.copyWith(roles: prevUser!.roles);
+        }
+        if (updatedUser.permissions.isEmpty &&
+            (prevUser?.permissions.isNotEmpty ?? false)) {
+          updatedUser = updatedUser.copyWith(
+            permissions: prevUser!.permissions,
+          );
+        }
+        App.instance.userApp = updatedUser;
+        user = updatedUser;
+        if ((updatedUser.id ?? 0) > 0 &&
+            (defaultTargetPlatform == TargetPlatform.android ||
+                defaultTargetPlatform == TargetPlatform.iOS)) {
+          final database = await $FloorAppDatabase
+              .databaseBuilder('socbay.db')
+              .build();
+          try {
+            final usr = UserModelToUser()(updatedUser);
+            await database.userDao.deleteAllUser();
+            await database.userDao.insertUser(usr);
+          } finally {
+            await database.close();
+          }
+        }
       } else {
         user = App.instance.userApp;
       }
@@ -131,7 +159,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
   Future<void> _mapGetSalesIncome() async {
     try {
-      final isSale = App.instance.userApp?.isUserSale() == true;
+      final isSale = App.instance.userApp?.canViewSalesIncomeBySale == true;
       var url = AppConfig.instance.apiUri(
         isSale
             ? ApiEndpoints.orderSalesIncomeBySale(App.instance.userApp?.id)

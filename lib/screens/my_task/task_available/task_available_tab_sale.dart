@@ -1,6 +1,7 @@
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:socbay/application.dart';
 import 'package:socbay/blocs/task/task_screen_event.dart';
 import 'package:socbay/blocs/task/task_screen_sale_bloc.dart';
 import 'package:socbay/blocs/task/task_screen_state.dart';
@@ -387,6 +388,7 @@ class _TaskAvailableTabState extends State<TaskAvailableTabSale> {
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       if (_canAssignOrCancel(taskModel) &&
+                          (App.instance.userApp?.canAssignTask ?? true) &&
                           (taskModel.userId == null ||
                               taskModel.userId!.isEmpty ||
                               taskModel.userId == "0") &&
@@ -399,14 +401,16 @@ class _TaskAvailableTabState extends State<TaskAvailableTabSale> {
                         ),
                         const SizedBox(width: 12),
                       ],
-                      _buildActionButton(
-                        icon: Icons.edit_outlined,
-                        text: 'Sửa',
-                        color: ColorUtil.bangladeshGreen,
-                        onTap: () => _editBooking(taskModel),
-                        isOutlined: true,
-                      ),
-                      if (_canAssignOrCancel(taskModel)) ...[
+                      if (App.instance.userApp?.canEditTask ?? true)
+                        _buildActionButton(
+                          icon: Icons.edit_outlined,
+                          text: 'Sửa',
+                          color: ColorUtil.bangladeshGreen,
+                          onTap: () => _editBooking(taskModel),
+                          isOutlined: true,
+                        ),
+                      if (_canAssignOrCancel(taskModel) &&
+                          (App.instance.userApp?.canDeleteTask ?? true)) ...[
                         const SizedBox(width: 12),
                         _buildActionButton(
                           icon: Icons.cancel_outlined,

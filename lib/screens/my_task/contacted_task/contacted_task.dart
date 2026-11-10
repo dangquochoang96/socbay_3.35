@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:socbay/application.dart';
 import 'package:socbay/blocs/rent-task/rent_task_screen_event.dart';
 import 'package:socbay/blocs/rent-task/rent_task_screen_ktv_bloc.dart';
 import 'package:socbay/blocs/task/task_screen_bloc.dart';
@@ -437,7 +438,7 @@ class _ContactedTaskTabState extends State<ContactedTaskTab> {
                           children: [
                             Icon(
                               Icons.tag_rounded,
-                              size: 12,
+                              size: 13.5,
                               color: isRent
                                   ? const Color(0xFFD97706)
                                   : ColorUtil.bangladeshGreen,
@@ -449,7 +450,7 @@ class _ContactedTaskTabState extends State<ContactedTaskTab> {
                                   : 'DV-${taskModel.id ?? 0}',
                               style: TextStyle(
                                 fontWeight: FontWeight.w700,
-                                fontSize: 11.5,
+                                fontSize: 13,
                                 color: isRent
                                     ? const Color(0xFFB45309)
                                     : ColorUtil.raisinBlack,
@@ -482,7 +483,7 @@ class _ContactedTaskTabState extends State<ContactedTaskTab> {
                               isRent
                                   ? Icons.handshake_rounded
                                   : Icons.home_repair_service_rounded,
-                              size: 11,
+                              size: 12.5,
                               color: isRent
                                   ? const Color(0xFFB45309)
                                   : const Color(0xFF1D4ED8),
@@ -491,7 +492,7 @@ class _ContactedTaskTabState extends State<ContactedTaskTab> {
                             Text(
                               isRent ? 'Đơn thuê' : 'Đơn dịch vụ',
                               style: TextStyle(
-                                fontSize: 11,
+                                fontSize: 12.5,
                                 fontWeight: FontWeight.w700,
                                 color: isRent
                                     ? const Color(0xFFB45309)
@@ -517,14 +518,14 @@ class _ContactedTaskTabState extends State<ContactedTaskTab> {
                             children: [
                               Icon(
                                 Icons.bolt_rounded,
-                                size: 12,
+                                size: 13.5,
                                 color: Color(0xFFDC2626),
                               ),
                               SizedBox(width: 2),
                               Text(
                                 'Gấp',
                                 style: TextStyle(
-                                  fontSize: 11,
+                                  fontSize: 12.5,
                                   fontWeight: FontWeight.w700,
                                   color: Color(0xFFDC2626),
                                 ),
@@ -548,14 +549,14 @@ class _ContactedTaskTabState extends State<ContactedTaskTab> {
                             children: [
                               Icon(
                                 Icons.directions_car_filled_outlined,
-                                size: 11,
+                                size: 12.5,
                                 color: Color(0xFFEA580C),
                               ),
                               SizedBox(width: 3),
                               Text(
                                 'Đi xa',
                                 style: TextStyle(
-                                  fontSize: 11,
+                                  fontSize: 12.5,
                                   fontWeight: FontWeight.w600,
                                   color: Color(0xFFEA580C),
                                 ),
@@ -583,14 +584,14 @@ class _ContactedTaskTabState extends State<ContactedTaskTab> {
                     children: [
                       Icon(
                         Icons.phone_callback_rounded,
-                        size: 11.5,
+                        size: 13,
                         color: Color(0xFF7E22CE),
                       ),
                       SizedBox(width: 3.5),
                       Text(
                         'Đã liên hệ',
                         style: TextStyle(
-                          fontSize: 11,
+                          fontSize: 12.5,
                           fontWeight: FontWeight.w700,
                           color: Color(0xFF7E22CE),
                         ),
@@ -607,7 +608,7 @@ class _ContactedTaskTabState extends State<ContactedTaskTab> {
                   ? taskModel.name!
                   : (isRent ? 'Công việc cho thuê' : 'Công việc dịch vụ'),
               style: const TextStyle(
-                fontSize: 15,
+                fontSize: 16.5,
                 fontWeight: FontWeight.w700,
                 color: Color(0xFF1E2336),
                 height: 1.3,
@@ -628,14 +629,14 @@ class _ContactedTaskTabState extends State<ContactedTaskTab> {
                 children: [
                   const Icon(
                     Icons.access_time_filled_rounded,
-                    size: 16,
+                    size: 17,
                     color: Color(0xFF7E22CE),
                   ),
                   const SizedBox(width: 8),
                   const Text(
                     'Thời gian:',
                     style: TextStyle(
-                      fontSize: 12,
+                      fontSize: 13.5,
                       color: Color(0xFF6B7280),
                       fontWeight: FontWeight.w500,
                     ),
@@ -645,7 +646,7 @@ class _ContactedTaskTabState extends State<ContactedTaskTab> {
                     child: Text(
                       _formatTaskDatetime(taskModel.timeStart),
                       style: const TextStyle(
-                        fontSize: 12,
+                        fontSize: 13.5,
                         fontWeight: FontWeight.w700,
                         color: Color(0xFFDC2626),
                       ),
@@ -671,7 +672,7 @@ class _ContactedTaskTabState extends State<ContactedTaskTab> {
                     children: [
                       const Icon(
                         Icons.person_rounded,
-                        size: 16,
+                        size: 17,
                         color: Color(0xFF6B7280),
                       ),
                       const SizedBox(width: 8),
@@ -684,7 +685,7 @@ class _ContactedTaskTabState extends State<ContactedTaskTab> {
                               ? taskModel.customer!.username!
                               : 'Khách hàng',
                           style: const TextStyle(
-                            fontSize: 13,
+                            fontSize: 14.5,
                             fontWeight: FontWeight.w600,
                             color: Color(0xFF1F2937),
                           ),
@@ -714,14 +715,14 @@ class _ContactedTaskTabState extends State<ContactedTaskTab> {
                               children: [
                                 const Icon(
                                   Icons.phone_in_talk_rounded,
-                                  size: 13,
+                                  size: 14,
                                   color: Color(0xFF059669),
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
                                   taskModel.customer!.phone!,
                                   style: const TextStyle(
-                                    fontSize: 11,
+                                    fontSize: 12.5,
                                     fontWeight: FontWeight.w700,
                                     color: Color(0xFF059669),
                                   ),
@@ -748,7 +749,7 @@ class _ContactedTaskTabState extends State<ContactedTaskTab> {
                           padding: EdgeInsets.only(top: 1),
                           child: Icon(
                             Icons.location_on_rounded,
-                            size: 16,
+                            size: 17,
                             color: Color(0xFFEF4444),
                           ),
                         ),
@@ -757,7 +758,7 @@ class _ContactedTaskTabState extends State<ContactedTaskTab> {
                           child: Text(
                             address,
                             style: const TextStyle(
-                              fontSize: 12,
+                              fontSize: 13.5,
                               color: Color(0xFF374151),
                               height: 1.3,
                             ),
@@ -814,7 +815,7 @@ class _ContactedTaskTabState extends State<ContactedTaskTab> {
                       padding: EdgeInsets.only(top: 2),
                       child: Icon(
                         Icons.inventory_2_outlined,
-                        size: 14,
+                        size: 15,
                         color: Color(0xFF16A34A),
                       ),
                     ),
@@ -823,7 +824,7 @@ class _ContactedTaskTabState extends State<ContactedTaskTab> {
                       child: Text(
                         'Thiết bị: ${taskModel.productInfo!.name!.trim()}',
                         style: const TextStyle(
-                          fontSize: 12,
+                          fontSize: 13.5,
                           fontWeight: FontWeight.w600,
                           color: Color(0xFF15803D),
                           height: 1.3,
@@ -857,7 +858,7 @@ class _ContactedTaskTabState extends State<ContactedTaskTab> {
                       padding: EdgeInsets.only(top: 2),
                       child: Icon(
                         Icons.sticky_note_2_outlined,
-                        size: 14,
+                        size: 15,
                         color: Color(0xFFB45309),
                       ),
                     ),
@@ -866,7 +867,7 @@ class _ContactedTaskTabState extends State<ContactedTaskTab> {
                       child: Text(
                         'Ghi chú sale: ${taskModel.des!.trim()}',
                         style: const TextStyle(
-                          fontSize: 12,
+                          fontSize: 13.5,
                           color: Color(0xFF92400E),
                           height: 1.3,
                         ),
@@ -876,33 +877,40 @@ class _ContactedTaskTabState extends State<ContactedTaskTab> {
                 ),
               ),
             ],
-            const SizedBox(height: 12),
-            // Button: "Nhận việc"
-            SizedBox(
-              width: double.infinity,
-              height: 42,
-              child: ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: ColorUtil.bangladeshGreen,
-                  foregroundColor: Colors.white,
-                  elevation: 1.5,
-                  shadowColor: ColorUtil.bangladeshGreen.withValues(alpha: 0.3),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+            if ((isRent
+                    ? App.instance.userApp?.canAcceptRentTask
+                    : App.instance.userApp?.canAcceptTask) ??
+                true) ...[
+              const SizedBox(height: 12),
+              // Button: "Nhận việc"
+              SizedBox(
+                width: double.infinity,
+                height: 42,
+                child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: ColorUtil.bangladeshGreen,
+                    foregroundColor: Colors.white,
+                    elevation: 1.5,
+                    shadowColor: ColorUtil.bangladeshGreen.withValues(
+                      alpha: 0.3,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
-                ),
-                onPressed: () => _onClaimTask(taskModel),
-                icon: const Icon(Icons.how_to_reg_rounded, size: 18),
-                label: const Text(
-                  "Nhận việc",
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 0.3,
+                  onPressed: () => _onClaimTask(taskModel),
+                  icon: const Icon(Icons.how_to_reg_rounded, size: 19),
+                  label: const Text(
+                    "Nhận việc",
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.3,
+                    ),
                   ),
                 ),
               ),
-            ),
+            ],
           ],
         ),
       ),

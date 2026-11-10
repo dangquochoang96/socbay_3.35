@@ -12,6 +12,7 @@ import 'package:socbay/data/model/user_model.dart';
 import 'package:socbay/data/repository/auth/api_repository.dart';
 import 'package:socbay/data/response/api_response.dart';
 import 'package:socbay/db/database.dart';
+import 'package:socbay/db/object_mapper/object_mapper.dart';
 
 class UserScreenBloc extends Bloc<UserScreenEvent, UserScreenState> {
   late ApiRepository apiRepository;
@@ -31,11 +32,33 @@ class UserScreenBloc extends Bloc<UserScreenEvent, UserScreenState> {
     Emitter<UserScreenState> emit,
   ) async {
     // accounts = await DbManager.instance.getAccounts();
-
+    final prevUser = App.instance.userApp;
     final DefaultResponse res = await apiRepository.getUserInfo();
-    if (res.status == HttpStatus.ok) {
-      App.instance.userApp = res.data;
-      user = res.data;
+    if (res.status == HttpStatus.ok && res.data != null) {
+      UserModel updatedUser = res.data;
+      if (updatedUser.roles.isEmpty && (prevUser?.roles.isNotEmpty ?? false)) {
+        updatedUser = updatedUser.copyWith(roles: prevUser!.roles);
+      }
+      if (updatedUser.permissions.isEmpty &&
+          (prevUser?.permissions.isNotEmpty ?? false)) {
+        updatedUser = updatedUser.copyWith(permissions: prevUser!.permissions);
+      }
+      App.instance.userApp = updatedUser;
+      user = updatedUser;
+      if ((updatedUser.id ?? 0) > 0 &&
+          (defaultTargetPlatform == TargetPlatform.android ||
+              defaultTargetPlatform == TargetPlatform.iOS)) {
+        final database = await $FloorAppDatabase
+            .databaseBuilder('socbay.db')
+            .build();
+        try {
+          final usr = UserModelToUser()(updatedUser);
+          await database.userDao.deleteAllUser();
+          await database.userDao.insertUser(usr);
+        } finally {
+          await database.close();
+        }
+      }
     }
     emit(UserScreenInitialState());
   }

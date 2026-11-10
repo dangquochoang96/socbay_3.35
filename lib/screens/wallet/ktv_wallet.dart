@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:full_screen_image_null_safe/full_screen_image_null_safe.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:socbay/application.dart';
 import 'package:socbay/blocs/staff/wallet/ktv_wallet_bloc.dart';
 import 'package:socbay/blocs/staff/wallet/ktv_wallet_event.dart';
 import 'package:socbay/blocs/staff/wallet/ktv_wallet_state.dart';
@@ -277,51 +278,37 @@ class _KtvWalletScreenState extends State<KtvWalletScreen> {
     );
   }
 
-  // Widget _buildWalletSubStat(String label, double amount, Color color) {
-  //   return Column(
-  //     crossAxisAlignment: CrossAxisAlignment.start,
-  //     children: [
-  //       Text(
-  //         label,
-  //         style: const TextStyle(color: Colors.white70, fontSize: 11),
-  //       ),
-  //       const SizedBox(height: 4),
-  //       Text(
-  //         NumberFormatUtil.parseToVND(amount),
-  //         style: TextStyle(
-  //           color: color,
-  //           fontSize: 13,
-  //           fontWeight: FontWeight.bold,
-  //         ),
-  //       ),
-  //     ],
-  //   );
-  // }
-
   Widget _buildQuickActions() {
+    final canAdvance = App.instance.userApp?.canRequestWalletAdvance ?? true;
+    final canDeposit = App.instance.userApp?.canRequestWalletDeposit ?? true;
+    if (!canAdvance && !canDeposit) {
+      return const SizedBox.shrink();
+    }
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Row(
         children: [
-          Expanded(
-            child: _buildActionButton(
-              title: 'Ứng tiền',
-              subtitle: 'Yêu cầu ứng trước',
-              icon: Icons.unarchive_outlined,
-              color: Colors.blue,
-              onTap: () => _showRequestFormBottomSheet(isAdvance: true),
+          if (canAdvance)
+            Expanded(
+              child: _buildActionButton(
+                title: 'Ứng tiền',
+                subtitle: 'Yêu cầu ứng trước',
+                icon: Icons.unarchive_outlined,
+                color: Colors.blue,
+                onTap: () => _showRequestFormBottomSheet(isAdvance: true),
+              ),
             ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: _buildActionButton(
-              title: 'Nộp tiền',
-              subtitle: 'Nộp tiền về công ty',
-              icon: Icons.archive_outlined,
-              color: ColorUtil.green,
-              onTap: () => _showRequestFormBottomSheet(isAdvance: false),
+          if (canAdvance && canDeposit) const SizedBox(width: 16),
+          if (canDeposit)
+            Expanded(
+              child: _buildActionButton(
+                title: 'Nộp tiền',
+                subtitle: 'Nộp tiền về công ty',
+                icon: Icons.archive_outlined,
+                color: ColorUtil.green,
+                onTap: () => _showRequestFormBottomSheet(isAdvance: false),
+              ),
             ),
-          ),
         ],
       ),
     );
@@ -576,7 +563,10 @@ class _KtvWalletScreenState extends State<KtvWalletScreen> {
                       ),
                     ),
                   ),
-                  if (tx.status == 0 && (tx.type == 1 || tx.type == 2)) ...[
+                  if (tx.status == 0 &&
+                      (tx.type == 1 || tx.type == 2) &&
+                      (App.instance.userApp?.canDeleteWalletTransaction ??
+                          true)) ...[
                     const SizedBox(width: 8),
                     InkWell(
                       onTap: () => _confirmDeleteTransaction(context, tx.id),

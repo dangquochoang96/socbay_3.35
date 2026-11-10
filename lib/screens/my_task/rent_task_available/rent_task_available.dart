@@ -1,6 +1,7 @@
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:socbay/application.dart';
 import 'package:socbay/blocs/booking/detail_booking/detail_booking_bloc.dart';
 import 'package:socbay/blocs/booking/detail_booking/detail_booking_event.dart';
 import 'package:socbay/blocs/rent-task/rent_task_screen_bloc.dart';
@@ -387,6 +388,7 @@ class _RentTaskAvailableTabState extends State<RentTaskAvailableTabSale> {
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       if (_canAssignOrCancel(taskModel) &&
+                          (App.instance.userApp?.canAssignRentTask ?? true) &&
                           (taskModel.userId == null ||
                               taskModel.userId!.isEmpty ||
                               taskModel.userId == "0") &&
@@ -399,14 +401,17 @@ class _RentTaskAvailableTabState extends State<RentTaskAvailableTabSale> {
                         ),
                         const SizedBox(width: 12),
                       ],
-                      _buildActionButton(
-                        icon: Icons.edit_outlined,
-                        text: 'Sửa',
-                        color: ColorUtil.bangladeshGreen,
-                        onTap: () => _editBooking(taskModel),
-                        isOutlined: true,
-                      ),
-                      if (_canAssignOrCancel(taskModel)) ...[
+                      if (App.instance.userApp?.canEditRentTask ?? true)
+                        _buildActionButton(
+                          icon: Icons.edit_outlined,
+                          text: 'Sửa',
+                          color: ColorUtil.bangladeshGreen,
+                          onTap: () => _editBooking(taskModel),
+                          isOutlined: true,
+                        ),
+                      if (_canAssignOrCancel(taskModel) &&
+                          (App.instance.userApp?.canDeleteRentTask ??
+                              true)) ...[
                         const SizedBox(width: 12),
                         _buildActionButton(
                           icon: Icons.cancel_outlined,

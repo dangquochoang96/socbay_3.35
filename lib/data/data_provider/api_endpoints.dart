@@ -26,6 +26,7 @@ abstract final class ApiEndpoints {
   static const userSearchList = '/user/searchUser_list';
   static const userSearch = '/user/searchUser';
   static const userChangePassword = '/user/changePassWord';
+  static const updateLiveAdress = 'user/updateLiveAddress';
 
   static String userById(Object? id) => '/user/$id';
   static String userProducts(Object? id) => '/user/listProduct/$id';

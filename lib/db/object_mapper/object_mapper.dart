@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:socbay/data/model/user_model.dart';
 import 'package:socbay/db/entity/users.dart';
 
@@ -31,11 +33,27 @@ class UserModelToUser implements Mapper<UserModel, User> {
       object.createdAt,
       object.certification,
       object.cmt,
+      jsonEncode(object.roles),
+      jsonEncode(object.permissions),
     );
   }
 }
 
 class UserToUserModel implements Mapper<User, UserModel> {
+  static List<String> _decodeList(String? raw) {
+    if (raw == null || raw.isEmpty) return const [];
+    try {
+      final decoded = jsonDecode(raw);
+      if (decoded is List) {
+        return decoded
+            .map((e) => e?.toString().trim() ?? '')
+            .where((s) => s.isNotEmpty)
+            .toList();
+      }
+    } catch (_) {}
+    return const [];
+  }
+
   @override
   UserModel call(User object) {
     return UserModel(
@@ -61,6 +79,8 @@ class UserToUserModel implements Mapper<User, UserModel> {
       createdAt: object.createdAt,
       certification: object.certification,
       cmt: object.cmt,
+      roles: _decodeList(object.roles),
+      permissions: _decodeList(object.permissions),
     );
   }
 }

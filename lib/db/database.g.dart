@@ -86,6 +86,13 @@ class _$AppDatabase extends AppDatabase {
         await callback?.onConfigure?.call(database);
       },
       onOpen: (database) async {
+        try {
+          await database.execute('ALTER TABLE `User` ADD COLUMN `roles` TEXT');
+        } catch (_) {}
+        try {
+          await database
+              .execute('ALTER TABLE `User` ADD COLUMN `permissions` TEXT');
+        } catch (_) {}
         await callback?.onOpen?.call(database);
       },
       onUpgrade: (database, startVersion, endVersion) async {
@@ -96,7 +103,7 @@ class _$AppDatabase extends AppDatabase {
       },
       onCreate: (database, version) async {
         await database.execute(
-            'CREATE TABLE IF NOT EXISTS `User` (`id` INTEGER NOT NULL, `username` TEXT, `avatar` TEXT, `email` TEXT, `phone` TEXT, `address` TEXT, `password` TEXT, `type` TEXT, `typeStaff` TEXT, `otp` INTEGER, `birthday` TEXT, `status` INTEGER, `isAgency` INTEGER, `isAdmin` INTEGER, `sex` INTEGER, `point` INTEGER, `lat` REAL, `lng` REAL, `distance` REAL, `createdAt` TEXT, `certification` TEXT, `cmt` TEXT, PRIMARY KEY (`id`))');
+            'CREATE TABLE IF NOT EXISTS `User` (`id` INTEGER NOT NULL, `username` TEXT, `avatar` TEXT, `email` TEXT, `phone` TEXT, `address` TEXT, `password` TEXT, `type` TEXT, `typeStaff` TEXT, `otp` INTEGER, `birthday` TEXT, `status` INTEGER, `isAgency` INTEGER, `isAdmin` INTEGER, `sex` INTEGER, `point` INTEGER, `lat` REAL, `lng` REAL, `distance` REAL, `createdAt` TEXT, `certification` TEXT, `cmt` TEXT, `roles` TEXT, `permissions` TEXT, PRIMARY KEY (`id`))');
 
         await callback?.onCreate?.call(database, version);
       },
@@ -140,7 +147,9 @@ class _$UserDao extends UserDao {
                   'distance': item.distance,
                   'createdAt': item.createdAt,
                   'certification': item.certification,
-                  'cmt': item.cmt
+                  'cmt': item.cmt,
+                  'roles': item.roles,
+                  'permissions': item.permissions,
                 },
             changeListener);
 
@@ -177,7 +186,9 @@ class _$UserDao extends UserDao {
             row['distance'] as double?,
             row['createdAt'] as String?,
             row['certification'] as String?,
-            row['cmt'] as String?));
+            row['cmt'] as String?,
+            row['roles'] as String?,
+            row['permissions'] as String?));
   }
 
   @override
@@ -213,7 +224,9 @@ class _$UserDao extends UserDao {
             row['distance'] as double?,
             row['createdAt'] as String?,
             row['certification'] as String?,
-            row['cmt'] as String?),
+            row['cmt'] as String?,
+            row['roles'] as String?,
+            row['permissions'] as String?),
         arguments: [id],
         queryableName: 'User',
         isView: false);

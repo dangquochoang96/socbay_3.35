@@ -461,8 +461,13 @@ class _DetailBookingScreenState extends State<DetailBookingScreen> {
           if ((_bloc.taskModel?.status == '1' ||
                   _bloc.taskModel?.status == '2' ||
                   _bloc.taskModel?.status == '5') &&
-              _bloc.taskModel?.userCreate ==
-                  App.instance.userApp?.id.toString()) ...[
+              (_bloc.taskModel?.userCreate ==
+                      App.instance.userApp?.id.toString() ||
+                  (widget.isRent
+                      ? (App.instance.userApp?.canViewAllRentTasks == true ||
+                            App.instance.userApp?.canEditRentTask == true)
+                      : (App.instance.userApp?.canViewAllTasks == true ||
+                            App.instance.userApp?.canEditTask == true)))) ...[
             GestureDetector(
               onTap: () {
                 _editBooking(_bloc.taskModel?.id ?? 0);
@@ -519,11 +524,19 @@ class _DetailBookingScreenState extends State<DetailBookingScreen> {
                     ],
                   ),
                 ),
-              if (App.instance.userApp?.isUserRole() == true) ...[
+              if (App.instance.userApp?.isUserRole() == true ||
+                  App.instance.userApp?.canCreateServiceOrder == true) ...[
                 if (_bloc.taskModel?.status == "3") _detailTask(),
                 if (_bloc.taskModel?.status != "3" &&
                     _bloc.taskModel?.status != "4" &&
-                    !(App.instance.userApp?.isUserCustomer() == true))
+                    !(App.instance.userApp?.isUserCustomer() == true) &&
+                    (App.instance.userApp?.isUserRole() == true ||
+                        App.instance.userApp?.hasAnyPermission([
+                              'service-orders.add-order',
+                              'service-orders.store',
+                              'service-orders.save-repair',
+                            ]) ==
+                            true))
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
                     child: Row(
@@ -997,6 +1010,16 @@ class _DetailBookingScreenState extends State<DetailBookingScreen> {
               ),
             ),
           _buildCurrentAddressRow(taskModel),
+          if (widget.isRent
+              ? App.instance.userApp?.hasPermission(
+                      'rent-tasks.update-address',
+                    ) ==
+                    true
+              : App.instance.userApp?.hasPermission('tasks.update-address') ==
+                    true) ...[
+            const SizedBox(height: 8),
+            _buildLocationUpdateButton(),
+          ],
         ],
       ),
     );

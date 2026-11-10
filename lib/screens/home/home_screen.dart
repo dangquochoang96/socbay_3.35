@@ -148,7 +148,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
 
               /// Công tắc Ca làm việc / Theo dõi vị trí ngầm (Chỉ hiển thị cho tài khoản Kỹ thuật viên)
-              if (App.instance.userApp?.isUserRole() == true) ...[
+              if (App.instance.userApp?.isUserRole() == true ||
+                  App.instance.userApp?.hasAnyPermission([
+                        'technician-locations.update',
+                        'technician-locations.start-trip',
+                        'technician-locations.stop-trip',
+                      ]) ==
+                      true) ...[
                 const SizedBox(height: 15),
                 _buildTechnicianShiftCard(),
               ],

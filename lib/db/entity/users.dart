@@ -25,6 +25,8 @@ class User {
   final String? createdAt;
   final String? certification;
   final String? cmt;
+  final String? roles;
+  final String? permissions;
   User(
     this.username,
     this.avatar,
@@ -47,6 +49,8 @@ class User {
     this.distance,
     this.createdAt,
     this.certification,
-    this.cmt,
-  );
+    this.cmt, [
+    this.roles,
+    this.permissions,
+  ]);
 }

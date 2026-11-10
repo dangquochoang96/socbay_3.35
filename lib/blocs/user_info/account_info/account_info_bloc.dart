@@ -68,7 +68,19 @@ class AccountInfoBloc extends Bloc<AccountInfoEvent, AccountInfoState> {
         userInfoRequest,
       );
       if (resUpdateUserInfo.data != null && resUpdateUserInfo.status == 1) {
-        user = resUpdateUserInfo.data;
+        final prevUser = App.instance.userApp;
+        var updatedUser = resUpdateUserInfo.data!;
+        if (updatedUser.roles.isEmpty &&
+            (prevUser?.roles.isNotEmpty ?? false)) {
+          updatedUser = updatedUser.copyWith(roles: prevUser!.roles);
+        }
+        if (updatedUser.permissions.isEmpty &&
+            (prevUser?.permissions.isNotEmpty ?? false)) {
+          updatedUser = updatedUser.copyWith(
+            permissions: prevUser!.permissions,
+          );
+        }
+        user = updatedUser;
         if ((user?.id ?? 0) > 0) {
           final userGetMapper = UserModelToUser();
           final usr = userGetMapper(user!);
