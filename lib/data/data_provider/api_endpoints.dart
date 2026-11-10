@@ -26,7 +26,7 @@ abstract final class ApiEndpoints {
   static const userSearchList = '/user/searchUser_list';
   static const userSearch = '/user/searchUser';
   static const userChangePassword = '/user/changePassWord';
-  static const updateLiveAdress = 'user/updateLiveAddress';
+  static const updateLiveAddress = '/user/updateLiveAddress';
 
   static String userById(Object? id) => '/user/$id';
   static String userProducts(Object? id) => '/user/listProduct/$id';
@@ -134,8 +134,6 @@ abstract final class ApiEndpoints {
       '/socbay/tasks/customer/$customerId';
   static String taskById(Object? id) => '/socbay/tasks/$id';
   static String taskEdit(Object? id) => '/socbay/tasks/edit/$id';
-  static String taskUpdateAddress(Object? id) =>
-      '/socbay/tasks/update-address/$id';
 
   // =========================
   // RENT TASK
@@ -150,8 +148,6 @@ abstract final class ApiEndpoints {
       '/socbay/rent-tasks/customer/$customerId';
   static String rentTaskById(Object? id) => '/socbay/rent-tasks/$id';
   static String rentTaskEdit(Object? id) => '/socbay/rent-tasks/edit/$id';
-  static String rentTaskUpdateAddress(Object? id) =>
-      '/socbay/rent-tasks/update-address/$id';
 
   // =========================
   // ORDER

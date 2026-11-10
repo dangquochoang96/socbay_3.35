@@ -15,6 +15,7 @@ class UserModel {
   final String? email;
   final String? phone;
   final String? address;
+  final String? liveAddress;
   final String? password;
   final String? type;
   final String? typeStaff;
@@ -48,6 +49,7 @@ class UserModel {
     this.email,
     this.phone,
     this.address,
+    this.liveAddress,
     this.password,
     this.type,
     this.typeStaff,
@@ -111,6 +113,7 @@ class UserModel {
     email: json['email'],
     phone: json['phone']?.toString(),
     address: json['address'],
+    liveAddress: json['live_address']?.toString(),
     password: json['password'],
     type: json['type']?.toString(),
     typeStaff: json['type_staff']?.toString(),
@@ -154,6 +157,7 @@ class UserModel {
     'birthday': birthday,
     'phone': phone,
     'address': address,
+    'live_address': liveAddress,
     'status': status,
     'is_agency': isAgency,
     'type': type,
@@ -184,6 +188,7 @@ class UserModel {
     String? email,
     String? phone,
     String? address,
+    String? liveAddress,
     String? password,
     String? type,
     String? typeStaff,
@@ -218,6 +223,7 @@ class UserModel {
       email: email ?? this.email,
       phone: phone ?? this.phone,
       address: address ?? this.address,
+      liveAddress: liveAddress ?? this.liveAddress,
       password: password ?? this.password,
       type: type ?? this.type,
       typeStaff: typeStaff ?? this.typeStaff,
@@ -291,13 +297,7 @@ class UserModel {
       !isUserCustomer() &&
       (isSaleRole ||
           isCoordinatorOrAdmin ||
-          hasAnyRole([
-            'socbay',
-            'warehouse',
-            'nhansu',
-            'ke-toan-online',
-            'shopee-manager',
-          ]) ||
+          hasAnyRole(['socbay', 'warehouse', 'nhansu', 'ke-toan-online']) ||
           (!isKtvRole &&
               type != "1" &&
               ["2", "4", "6", "7", "8"].contains(typeStaff)));
@@ -387,13 +387,13 @@ class UserModel {
 
   // 4. Module Đơn dịch vụ, Doanh thu & Thanh toán (service-orders, order-payments)
   bool get canCreateServiceOrder =>
-      hasAnyPermission([
-        'service-orders.add-order',
-        'service-orders.store',
-        'service-orders.save-repair',
-      ]) ||
-      isUserRole() ||
-      isUserSale();
+      !isUserCustomer() &&
+      (isUserRole() ||
+          hasAnyPermission([
+            'service-orders.add-order',
+            'service-orders.store',
+            'service-orders.save-repair',
+          ]));
 
   bool get canViewSalesIncomeBySale =>
       hasPermission('service-orders.sales-income') ||

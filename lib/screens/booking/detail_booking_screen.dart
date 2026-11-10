@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:full_screen_image_null_safe/full_screen_image_null_safe.dart';
-import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:socbay/utils/auth_http.dart' as http;
 import 'package:intl/intl.dart';
@@ -47,9 +46,24 @@ class _DetailBookingScreenState extends State<DetailBookingScreen> {
   late dynamic _taskScreenSaleBloc;
   String? _selectedTaskType;
   bool _isUpdatingAddress = false;
+  String? _latestLiveAddress;
 
   Future<void> _updateAddressLocation() async {
-    if (_bloc.taskModel?.id == null) return;
+    final dynamic customerId =
+        _bloc.taskModel?.customer?.id ??
+        int.tryParse(_bloc.taskModel?.userCustomer ?? '') ??
+        _bloc.taskModel?.userCustomer ??
+        (App.instance.userApp?.isUserCustomer() == true
+            ? App.instance.userApp?.id
+            : null);
+    if (customerId == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Không tìm thấy thông tin khách hàng.')),
+        );
+      }
+      return;
+    }
 
     setState(() {
       _isUpdatingAddress = true;
@@ -104,57 +118,28 @@ class _DetailBookingScreenState extends State<DetailBookingScreen> {
         ),
       );
 
-      String addressString = '${position.latitude}, ${position.longitude}';
-      try {
-        List<Placemark> placemarks = await placemarkFromCoordinates(
-          position.latitude,
-          position.longitude,
-        );
-        if (placemarks.isNotEmpty) {
-          final p = placemarks.first;
-          List<String> parts = [];
-          if (p.street != null && p.street!.trim().isNotEmpty) {
-            parts.add(p.street!.trim());
-          }
-          if (p.subAdministrativeArea != null &&
-              p.subAdministrativeArea!.trim().isNotEmpty) {
-            parts.add(p.subAdministrativeArea!.trim());
-          }
-          if (p.administrativeArea != null &&
-              p.administrativeArea!.trim().isNotEmpty) {
-            parts.add(p.administrativeArea!.trim());
-          }
-          if (p.country != null && p.country!.trim().isNotEmpty) {
-            parts.add(p.country!.trim());
-          }
-          if (parts.isNotEmpty) {
-            addressString = parts.join(', ');
-          }
-        }
-      } catch (e) {
-        LoggerUtil.error("Error reverse geocoding: $e");
-      }
-
-      final String endpoint = widget.isRent
-          ? ApiEndpoints.rentTaskUpdateAddress(_bloc.taskModel!.id)
-          : ApiEndpoints.taskUpdateAddress(_bloc.taskModel!.id);
-      final url = AppConfig.instance.apiUri(endpoint);
+      final String liveAddress = '${position.latitude},${position.longitude}';
+      final url = AppConfig.instance.apiUri(ApiEndpoints.updateLiveAddress);
 
       final response = await http.post(
         url,
         headers: {'Content-Type': 'application/json'},
-        body: {'current_address': addressString},
+        body: {'user': customerId, 'live_address': liveAddress},
       );
 
       if (response.statusCode == HttpStatus.ok) {
         final data = Map<String, dynamic>.from(json.decode(response.body));
         if (data['code'] == 1) {
-          if (data['data'] != null) {
-            try {
-              _bloc.taskModel = TaskModel.fromJson(data['data']);
-            } catch (e) {
-              LoggerUtil.error("Error parsing updated taskModel: $e");
-            }
+          final String updatedAddress =
+              (data['data'] is Map && data['data']['live_address'] != null)
+              ? data['data']['live_address'].toString()
+              : liveAddress;
+          _latestLiveAddress = updatedAddress;
+          if (App.instance.userApp != null &&
+              App.instance.userApp?.id?.toString() == customerId.toString()) {
+            App.instance.userApp = App.instance.userApp!.copyWith(
+              liveAddress: updatedAddress,
+            );
           }
           if (mounted) {
             setState(() {});
@@ -234,18 +219,28 @@ class _DetailBookingScreenState extends State<DetailBookingScreen> {
 
   void _listener(BuildContext context, DetailBookingState state) {}
 
-  Widget _buildLoadingScreen(BuildContext context) {
-    final dynamic taskId = _bloc.taskModel?.id ?? _bloc.args?['id'];
-    String headerTitle = widget.isRent
-        ? 'Chi tiết đơn thuê'
-        : (App.instance.userApp?.isUserCustomer() == true
-              ? 'Chi tiết đặt lịch'
-              : (App.instance.userApp?.isUserRole() == true
-                    ? 'Chi tiết công việc KT'
-                    : 'Chi tiết công việc'));
-    if (taskId != null) {
-      headerTitle += ' #$taskId';
+  String _buildHeaderTitle([dynamic taskId]) {
+    final user = App.instance.userApp;
+    String title;
+    if (widget.isRent) {
+      title = 'Chi tiết đơn thuê';
+    } else if (user?.isUserCustomer() == true) {
+      title = 'Chi tiết đặt lịch';
+    } else if (user?.isUserSale() == true) {
+      title = 'Chi tiết công việc';
+    } else {
+      title = 'Chi tiết công việc KT';
     }
+    if (taskId != null) {
+      title += ' #$taskId';
+    }
+    return title;
+  }
+
+  Widget _buildLoadingScreen(BuildContext context) {
+    final String headerTitle = _buildHeaderTitle(
+      _bloc.taskModel?.id ?? _bloc.args?['id'],
+    );
 
     return Scaffold(
       backgroundColor: const Color(0xFFF4F6F8),
@@ -261,17 +256,7 @@ class _DetailBookingScreenState extends State<DetailBookingScreen> {
   }
 
   Widget _buildErrorScreen(BuildContext context) {
-    final dynamic taskId = _bloc.args?['id'];
-    String headerTitle = widget.isRent
-        ? 'Chi tiết đơn thuê'
-        : (App.instance.userApp?.isUserCustomer() == true
-              ? 'Chi tiết đặt lịch'
-              : (App.instance.userApp?.isUserRole() == true
-                    ? 'Chi tiết công việc KT'
-                    : 'Chi tiết công việc'));
-    if (taskId != null) {
-      headerTitle += ' #$taskId';
-    }
+    final String headerTitle = _buildHeaderTitle(_bloc.args?['id']);
 
     return Scaffold(
       backgroundColor: const Color(0xFFF4F6F8),
@@ -358,77 +343,25 @@ class _DetailBookingScreenState extends State<DetailBookingScreen> {
       }
     }
 
+    final String headerTitle = _buildHeaderTitle(_bloc.taskModel?.id);
+
     return Scaffold(
       backgroundColor: const Color(0xFFF4F6F8),
       appBar: MyAppBar(
         titleWidget: GestureDetector(
           //onTap: onTapTitleWidget,
-          child: RichText(
-            text: TextSpan(
-              children: <TextSpan>[
-                //  thuê
-                if (widget.isRent)
-                  const TextSpan(
-                    text: 'Chi tiết đơn thuê ',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      decoration: TextDecoration.underline,
-                      fontSize: 18,
-                      color: ColorUtil.white,
-                    ),
-                  ),
-                //  khách hàng
-                if (!widget.isRent &&
-                    App.instance.userApp?.isUserCustomer() == true)
-                  const TextSpan(
-                    text: 'Chi tiết đặt lịch ',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      decoration: TextDecoration.underline,
-                      fontSize: 18,
-                      color: ColorUtil.white,
-                    ),
-                  ),
-                //  kỹ thuật
-                if (!widget.isRent &&
-                    App.instance.userApp?.isUserRole() == true)
-                  const TextSpan(
-                    text: 'Chi tiết công việc KT ',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      decoration: TextDecoration.underline,
-                      fontSize: 18,
-                      color: ColorUtil.white,
-                    ),
-                  ),
-                if (!widget.isRent &&
-                    App.instance.userApp?.isUserSale() == true)
-                  const TextSpan(
-                    text: 'Chi tiết công việc ',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      decoration: TextDecoration.underline,
-                      fontSize: 18,
-                      color: ColorUtil.white,
-                    ),
-                  ),
-                TextSpan(
-                  text: '${_bloc.taskModel?.id}',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    decoration: TextDecoration.underline,
-                    fontSize: 18,
-                    color: ColorUtil.white,
-                  ),
-                ),
-              ],
+          child: Text(
+            headerTitle,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              decoration: TextDecoration.underline,
+              fontSize: 18,
+              color: ColorUtil.white,
             ),
           ),
         ),
         isBackNavigation: true,
-        title: widget.isRent
-            ? 'Chi tiết đơn thuê ${_bloc.taskModel?.id}'
-            : 'Chi tiết đơn hàng ${_bloc.taskModel?.id}',
+        title: headerTitle,
         centerTitle: true,
         actionWidgets: [
           if (App.instance.userApp?.isUserCustomer() == true)
@@ -524,19 +457,10 @@ class _DetailBookingScreenState extends State<DetailBookingScreen> {
                     ],
                   ),
                 ),
-              if (App.instance.userApp?.isUserRole() == true ||
-                  App.instance.userApp?.canCreateServiceOrder == true) ...[
-                if (_bloc.taskModel?.status == "3") _detailTask(),
-                if (_bloc.taskModel?.status != "3" &&
-                    _bloc.taskModel?.status != "4" &&
-                    !(App.instance.userApp?.isUserCustomer() == true) &&
-                    (App.instance.userApp?.isUserRole() == true ||
-                        App.instance.userApp?.hasAnyPermission([
-                              'service-orders.add-order',
-                              'service-orders.store',
-                              'service-orders.save-repair',
-                            ]) ==
-                            true))
+              if (App.instance.userApp?.canCreateServiceOrder == true) ...[
+                if (_bloc.taskModel?.status == "3")
+                  _detailTask()
+                else if (_bloc.taskModel?.status != "4")
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
                     child: Row(
@@ -752,11 +676,16 @@ class _DetailBookingScreenState extends State<DetailBookingScreen> {
   }
 
   Widget _buildCurrentAddressRow(TaskModel? taskModel) {
-    if (taskModel?.currentAddress == null ||
-        taskModel!.currentAddress!.trim().isEmpty) {
+    final String? rawLiveAddress =
+        _latestLiveAddress ??
+        taskModel?.customer?.liveAddress ??
+        (App.instance.userApp?.isUserCustomer() == true
+            ? App.instance.userApp?.liveAddress
+            : null);
+    if (rawLiveAddress == null || rawLiveAddress.trim().isEmpty) {
       return const SizedBox();
     }
-    final addressText = taskModel.currentAddress!.trim();
+    final addressText = rawLiveAddress.trim();
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
       child: Row(

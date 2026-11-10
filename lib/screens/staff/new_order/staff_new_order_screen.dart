@@ -11,7 +11,6 @@ import 'package:socbay/blocs/staff/new_order/staff_new_order_event.dart';
 import 'package:socbay/blocs/staff/new_order/staff_new_order_state.dart';
 import 'package:socbay/config/app_config.dart';
 import 'package:socbay/data/model/bill_data.dart';
-import 'package:socbay/data/model/list_order_core_model.dart';
 import 'package:socbay/data/model/machine_model.dart';
 import 'package:socbay/data/model/order_filter_core_model.dart';
 import 'package:socbay/data/model/order_model.dart';
@@ -25,7 +24,6 @@ import 'package:socbay/widgets/button_widget.dart';
 import 'package:socbay/widgets/dialog/custom_alert_dialog.dart';
 import 'package:socbay/widgets/loading_indicator.dart';
 import 'package:socbay/widgets/my_app_bar.dart';
-import 'package:socbay/widgets/textfield_search.dart';
 import 'package:socbay/utils/context_extension.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:socbay/application.dart';
@@ -130,13 +128,13 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
     lstKeyValueMaintainCores
       ..add(
         KeyValue(
-          TextEditingController(),
+          TextEditingController(text: "Vệ sinh bảo dưỡng"),
           TextEditingController(text: dateDefault),
         ),
       )
       ..add(
         KeyValue(
-          TextEditingController(),
+          TextEditingController(text: "Lõi số 1"),
           TextEditingController(text: dateDefault),
         ),
       );
@@ -2506,9 +2504,12 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
               GestureDetector(
                 onTap: () {
                   setState(() {
+                    final String nextLabel = lstKeyValueMaintainCores.isEmpty
+                        ? "Vệ sinh bảo dưỡng"
+                        : "Lõi số ${lstKeyValueMaintainCores.length}";
                     lstKeyValueMaintainCores.add(
                       KeyValue(
-                        TextEditingController(),
+                        TextEditingController(text: nextLabel),
                         TextEditingController(
                           text: DateTime.now()
                               .add(const Duration(days: 183))
@@ -2545,6 +2546,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                   ),
                 ),
               ),
+              SizedBox(width: 12),
               Expanded(
                 flex: 1,
                 child: Text(
@@ -2556,6 +2558,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                   ),
                 ),
               ),
+              SizedBox(width: 48),
             ],
           ),
         ),
@@ -2571,9 +2574,12 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                 children: [
                   Expanded(
                     flex: 1,
-                    child: TextFieldSearch(
-                      label: '',
+                    child: TextFormField(
+                      controller: lstKeyValueMaintainCores[i].key,
+                      readOnly: true,
                       decoration: InputDecoration(
+                        filled: true,
+                        fillColor: Colors.grey.shade100,
                         hintText: 'Tên lõi...',
                         isDense: true,
                         contentPadding: const EdgeInsets.symmetric(
@@ -2588,11 +2594,11 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                           borderRadius: BorderRadius.circular(8),
                           borderSide: BorderSide(color: Colors.grey.shade300),
                         ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
+                        ),
                       ),
-                      controller: lstKeyValueMaintainCores[i].key,
-                      itemsInView: 10,
-                      minStringLength: 0,
-                      initialList: ListOrderCoreModel.coreList,
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -2629,6 +2635,40 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                       ),
                     ),
                   ),
+                  const SizedBox(width: 8),
+                  if (i > 0)
+                    InkWell(
+                      onTap: () {
+                        setState(() {
+                          lstKeyValueMaintainCores.removeAt(i);
+                          for (
+                            int j = 1;
+                            j < lstKeyValueMaintainCores.length;
+                            j++
+                          ) {
+                            lstKeyValueMaintainCores[j].key.text = "Lõi số $j";
+                          }
+                        });
+                      },
+                      borderRadius: BorderRadius.circular(8),
+                      child: Container(
+                        width: 40,
+                        height: 40,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFEF2F2),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: const Color(0xFFFECACA)),
+                        ),
+                        child: const Icon(
+                          Icons.delete_outline_rounded,
+                          color: Color(0xFFDC2626),
+                          size: 20,
+                        ),
+                      ),
+                    )
+                  else
+                    const SizedBox(width: 40, height: 40),
                 ],
               ),
             ),
