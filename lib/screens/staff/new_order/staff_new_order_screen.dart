@@ -1245,6 +1245,9 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                             name: item.key.text,
                             price: priceValue,
                             quantity: qty,
+                            coreNumber: _isCoreConfigTask
+                                ? item.coreNumberValue
+                                : "0",
                           ),
                         );
                       }
@@ -1255,6 +1258,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                           OrderFilterCoreModel(
                             name: item.key.text,
                             replaceDatePromise: item.value.text,
+                            coreNumber: "0",
                           ),
                         );
                       }
@@ -1509,6 +1513,9 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                             name: item.key.text,
                             price: priceValue,
                             quantity: qty,
+                            coreNumber: _isCoreConfigTask
+                                ? item.coreNumberValue
+                                : "0",
                           ),
                         );
                       }
@@ -1519,6 +1526,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                           OrderFilterCoreModel(
                             name: item.key.text,
                             replaceDatePromise: item.value.text,
+                            coreNumber: "0",
                           ),
                         );
                       }
@@ -4329,6 +4337,12 @@ class KeyValue {
       return "Lõi số ${sorted.first}";
     }
     return "Combo ${sorted.join(', ')}";
+  }
+
+  String get coreNumberValue {
+    if (isOtherService || selectedCores.isEmpty) return "0";
+    final sorted = [...selectedCores]..sort();
+    return sorted.join('|');
   }
 }
 

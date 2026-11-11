@@ -270,6 +270,7 @@ class StaffNewOrderBloc extends Bloc<StaffNewOrderEvent, StaffNewOrderState> {
         List<String> listNextDate = [];
         List<String> listPrice = [];
         List<String> listQuantities = [];
+        List<String> listCoreNumbers = [];
         var lst1 = event.lstNew;
         var lst2 = event.lstMaintain;
         for (OrderFilterCoreModel filterCore in lst1) {
@@ -300,6 +301,11 @@ class StaffNewOrderBloc extends Bloc<StaffNewOrderEvent, StaffNewOrderState> {
                       : 1)
                   .toString(),
             );
+            listCoreNumbers.add(
+              filterCore.coreNumber != null && filterCore.coreNumber!.isNotEmpty
+                  ? filterCore.coreNumber!
+                  : "0",
+            );
           }
         }
         for (OrderFilterCoreModel filterCore in lst2) {
@@ -320,6 +326,11 @@ class StaffNewOrderBloc extends Bloc<StaffNewOrderEvent, StaffNewOrderState> {
                       ? filterCore.quantity!
                       : 1)
                   .toString(),
+            );
+            listCoreNumbers.add(
+              filterCore.coreNumber != null && filterCore.coreNumber!.isNotEmpty
+                  ? filterCore.coreNumber!
+                  : "0",
             );
           }
         }
@@ -349,6 +360,7 @@ class StaffNewOrderBloc extends Bloc<StaffNewOrderEvent, StaffNewOrderState> {
           'listCores': listFilterId,
           'quantities': listQuantities,
           'quantity': listQuantities,
+          'coreNumbers': listCoreNumbers,
           "images": images,
           'sale_id': taskModel?.saleId?.toString() ?? event.saleId.toString(),
           'address': event.newAddressSP.toString(),
@@ -542,23 +554,4 @@ class StaffNewOrderBloc extends Bloc<StaffNewOrderEvent, StaffNewOrderState> {
       );
     }
   }
-
-  // FutureOr<void> _updateAddressCustomer(String? newAddress) async {
-  //   try {
-  //     UserInfoRequest userInfo = UserInfoRequest(
-  //       phone: taskModel?.customer?.phone,
-  //       birthday: taskModel?.customer?.birthday
-  //           ?.substring(0, 10)
-  //           .split("-")
-  //           .reversed
-  //           .join("/"),
-  //       address: newAddress,
-  //       email: taskModel?.customer?.email,
-  //       avatar: taskModel?.customer?.avatar,
-  //     );
-  //     await apiRepository.updateUserInfo(userInfo);
-  //   } catch (ex) {
-  //     LoggerUtil.log(ex.toString());
-  //   }
-  // }
 }
