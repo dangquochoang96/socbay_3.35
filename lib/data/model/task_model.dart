@@ -16,6 +16,7 @@ class TaskModel {
   final String? priority;
   final String? timeStart;
   final String? timeEnd;
+  final String? machineSellerId;
   final String? userId;
   final String? saleId;
   final String? userCreate;
@@ -46,6 +47,7 @@ class TaskModel {
     this.priority,
     this.timeStart,
     this.timeEnd,
+    this.machineSellerId,
     this.userId,
     this.saleId,
     this.userCreate,
@@ -77,6 +79,7 @@ class TaskModel {
     priority: json["priority"]?.toString(),
     timeStart: json["time_start"]?.toString(),
     timeEnd: json["time_end"]?.toString(),
+    machineSellerId: json["machine_seller_id"]?.toString(),
     saleId: json["sale_id"]?.toString(),
     userId: json["user_id"]?.toString(),
     userCreate: json["user_create"]?.toString(),
@@ -87,7 +90,8 @@ class TaskModel {
     currentAddress: json["current_address"]?.toString(),
     taskType: json["task_type"]?.toString(),
     taskTypeText: json["task_type_text"]?.toString(),
-    isRent: json["is_rent"] == true ||
+    isRent:
+        json["is_rent"] == true ||
         json["is_rent"] == 1 ||
         json["is_rent"] == '1' ||
         json["is_rent"] == 'true',
@@ -116,6 +120,7 @@ class TaskModel {
     "noti": noti,
     "time_start": timeStart,
     "time_end": timeEnd,
+    "machine_seller_id": machineSellerId,
     "staff": staff,
     "sale_id": saleId,
     "user_create": userCreate,

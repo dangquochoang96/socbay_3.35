@@ -634,7 +634,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                           _buildBoxSummary(
                             context,
-                            "Thưởng DS",
+                            "Thưởng nóng",
                             _formatMonthlyBonus(
                               _bloc.user?.userProfile?.monthlyBonus ??
                                   App

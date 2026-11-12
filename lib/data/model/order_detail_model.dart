@@ -8,6 +8,7 @@ class OrderDetailModel {
   final int? id;
   final String? status;
   final String? userId;
+  final String? machineSellerId;
   final String? type;
   final String? subType;
   final String? isLongDistance;
@@ -42,6 +43,7 @@ class OrderDetailModel {
     this.id,
     this.status,
     this.userId,
+    this.machineSellerId,
     this.type,
     this.subType,
     this.isLongDistance,
@@ -80,6 +82,7 @@ class OrderDetailModel {
     id: _asInt(json['id']),
     status: _asString(json['status']),
     userId: _asString(json['user_id']),
+    machineSellerId: _asString(json['machine_seller_id']),
     type: _asString(json['type']),
     subType: _asString(json['sub_type']),
     isLongDistance: _asString(json['is_long_distance']),
@@ -136,6 +139,7 @@ class OrderDetailModel {
     'id': id,
     'status': status,
     'user_id': userId,
+    'machine_seller_id': machineSellerId,
     'type': type,
     'sub_type': subType,
     'is_long_distance': isLongDistance,
