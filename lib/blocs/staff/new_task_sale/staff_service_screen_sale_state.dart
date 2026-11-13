@@ -67,3 +67,8 @@ class UserAddressScreenSaleCreateAddressFailState
 
   const UserAddressScreenSaleCreateAddressFailState({this.error = ""});
 }
+
+class StaffServiceScreenSaleGetMachineSellersSuccessState
+    extends StaffServiceSaleScreenState {
+  const StaffServiceScreenSaleGetMachineSellersSuccessState();
+}

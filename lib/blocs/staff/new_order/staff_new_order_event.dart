@@ -33,6 +33,7 @@ class StaffCreateOrderEvent extends StaffNewOrderEvent {
   int subType;
   double? cashAmount;
   double? transferAmount;
+  String? machineSellerId;
   StaffCreateOrderEvent(
     this.productId,
     this.newProductId,
@@ -57,6 +58,7 @@ class StaffCreateOrderEvent extends StaffNewOrderEvent {
     this.subType, {
     this.cashAmount,
     this.transferAmount,
+    this.machineSellerId,
   });
 }
 

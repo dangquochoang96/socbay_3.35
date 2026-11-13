@@ -129,25 +129,15 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
           KeyValue(TextEditingController(), TextEditingController(), null, [2]),
         );
     }
-    lstKeyValueMaintainCores
-      ..add(
-        KeyValue(
-          TextEditingController(text: "Vệ sinh bảo dưỡng"),
-          TextEditingController(text: dateDefault),
-          null,
-          [],
-          true,
-        ),
-      )
-      ..add(
-        KeyValue(
-          TextEditingController(text: "Lõi số 1"),
-          TextEditingController(text: dateDefault),
-          null,
-          [1],
-          false,
-        ),
-      );
+    lstKeyValueMaintainCores.add(
+      KeyValue(
+        TextEditingController(text: "Vệ sinh bảo dưỡng"),
+        TextEditingController(text: dateDefault),
+        null,
+        [],
+        true,
+      ),
+    );
     _picker = ImagePicker();
     _fetchKtvWarehouse();
     currentSelectedProductAllValue.addListener(() {
@@ -1674,6 +1664,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                                   ) ??
                                   0.0)
                             : null,
+                        machineSellerId: _bloc.taskModel?.machineSellerId,
                       ),
                     );
                   },

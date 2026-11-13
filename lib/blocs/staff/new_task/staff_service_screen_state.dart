@@ -80,3 +80,8 @@ class UserAddressScreenCreateAddressFailState extends StaffServiceScreenState {
 
   const UserAddressScreenCreateAddressFailState({this.error = ""});
 }
+
+class StaffServiceScreenGetMachineSellersSuccessState
+    extends StaffServiceScreenState {
+  const StaffServiceScreenGetMachineSellersSuccessState();
+}

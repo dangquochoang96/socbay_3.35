@@ -30,6 +30,8 @@ class StaffServiceScreenBloc
   List<TaskModel> listTaskModel = [];
   List<String> paths = [];
   UserModel? customerInfor;
+  List<UserModel> machineSellers = [];
+  bool isLoadingMachineSellers = false;
   StaffServiceScreenBloc({required this.apiRepository, required this.args})
     : super(StaffServiceScreenInitialState()) {
     on<StaffServiceScreenChangeTypeServiceEvent>(
@@ -39,6 +41,7 @@ class StaffServiceScreenBloc
     on<StaffServiceScreenUploadImageEvent>(_mapUploadImageEventToState);
     on<StaffServiceScreenCheckCustomerEvent>(_mapCheckCustomerEventToState);
     on<UserAddressScreenCreateUserAddressEvent>(_mapCreateUserAddressToState);
+    on<StaffServiceScreenGetMachineSellersEvent>(_mapGetMachineSellersToState);
   }
 
   FutureOr<void> _mapChangeTypeServiceEventToState(
@@ -93,6 +96,9 @@ class StaffServiceScreenBloc
         "request_user_id": App.instance.userApp!.id.toString(),
         "is_long_distance":
             event.createTaskRequest.isLongDistance == true ? "1" : "0",
+        if (event.createTaskRequest.machineSellerId != null)
+          "machine_seller_id":
+              event.createTaskRequest.machineSellerId.toString(),
       };
       var url = AppConfig.instance.apiUri(
         event.createTaskEndpoint ?? ApiEndpoints.taskCreate,
@@ -248,5 +254,44 @@ class StaffServiceScreenBloc
       );
     }
     // emit(StaffServiceScreenInitialState());
+  }
+
+  FutureOr<void> _mapGetMachineSellersToState(
+    StaffServiceScreenGetMachineSellersEvent event,
+    Emitter<StaffServiceScreenState> emit,
+  ) async {
+    isLoadingMachineSellers = true;
+    emit(StaffServiceScreenInitialState());
+    try {
+      final res = await http.get(
+        AppConfig.instance.apiUri(ApiEndpoints.userSupport, {'type': 'all'}),
+      );
+
+      final Map<int, UserModel> merged = {};
+
+      if (res.statusCode == 200) {
+        final body = jsonDecode(res.body);
+        final data = body is Map ? body['data'] : null;
+        if (data is List) {
+          for (final item in data) {
+            if (item is Map<String, dynamic>) {
+              final user = UserModel.fromJson(item);
+              final id = user.id;
+              if (id != null) {
+                merged[id] = user;
+              }
+            }
+          }
+        }
+      }
+
+      machineSellers = merged.values.toList();
+    } catch (e) {
+      LoggerUtil.error('Error fetching machine sellers: $e');
+    } finally {
+      isLoadingMachineSellers = false;
+      emit(const StaffServiceScreenGetMachineSellersSuccessState());
+      emit(StaffServiceScreenInitialState());
+    }
   }
 }

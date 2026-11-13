@@ -30,6 +30,8 @@ class StaffServiceSaleScreenBloc
   List<String> paths = [];
   List<HomeServiceModel> listService = [];
   UserModel? customerInfo;
+  List<UserModel> machineSellers = [];
+  bool isLoadingMachineSellers = false;
 
   StaffServiceSaleScreenBloc({
     required this.apiRepository,
@@ -44,6 +46,9 @@ class StaffServiceSaleScreenBloc
     on<StaffServiceSaleScreenCheckCustomerEvent>(_mapCheckCustomerEventToState);
     on<UserAddressScreenSaleCreateUserAddressEvent>(
       _mapCreateUserAddressToState,
+    );
+    on<StaffServiceScreenSaleGetMachineSellersEvent>(
+      _mapGetMachineSellersToState,
     );
   }
 
@@ -97,6 +102,9 @@ class StaffServiceSaleScreenBloc
         "is_long_distance": event.createTaskRequest.isLongDistance == true
             ? "1"
             : "0",
+        if (event.createTaskRequest.machineSellerId != null)
+          "machine_seller_id": event.createTaskRequest.machineSellerId
+              .toString(),
       };
       var url = AppConfig.instance.apiUri(
         event.createTaskEndpoint ?? createTaskEndpoint,
@@ -262,5 +270,44 @@ class StaffServiceSaleScreenBloc
       );
     }
     emit(StaffServiceScreenSaleInitialState());
+  }
+
+  FutureOr<void> _mapGetMachineSellersToState(
+    StaffServiceScreenSaleGetMachineSellersEvent event,
+    Emitter<StaffServiceSaleScreenState> emit,
+  ) async {
+    isLoadingMachineSellers = true;
+    emit(StaffServiceScreenSaleInitialState());
+    try {
+      final res = await http.get(
+        AppConfig.instance.apiUri(ApiEndpoints.userSupport, {'type': 'all'}),
+      );
+
+      final Map<int, UserModel> merged = {};
+
+      if (res.statusCode == 200) {
+        final body = jsonDecode(res.body);
+        final data = body is Map ? body['data'] : null;
+        if (data is List) {
+          for (final item in data) {
+            if (item is Map<String, dynamic>) {
+              final user = UserModel.fromJson(item);
+              final id = user.id;
+              if (id != null) {
+                merged[id] = user;
+              }
+            }
+          }
+        }
+      }
+
+      machineSellers = merged.values.toList();
+    } catch (e) {
+      LoggerUtil.error('Error fetching machine sellers: $e');
+    } finally {
+      isLoadingMachineSellers = false;
+      emit(const StaffServiceScreenSaleGetMachineSellersSuccessState());
+      emit(StaffServiceScreenSaleInitialState());
+    }
   }
 }

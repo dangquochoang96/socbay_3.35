@@ -46,3 +46,8 @@ class UserAddressScreenSaleCreateUserAddressEvent
 
   const UserAddressScreenSaleCreateUserAddressEvent(this.userAddressRequest);
 }
+
+class StaffServiceScreenSaleGetMachineSellersEvent
+    extends StaffServiceSaleScreenEvent {
+  const StaffServiceScreenSaleGetMachineSellersEvent();
+}

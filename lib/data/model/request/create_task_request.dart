@@ -16,6 +16,7 @@ class CreateTaskRequest {
   String? video;
   List<String>? images;
   bool? isLongDistance;
+  int? machineSellerId;
 
   CreateTaskRequest({
     required this.type,
@@ -35,5 +36,6 @@ class CreateTaskRequest {
     this.images,
     this.customerId,
     this.isLongDistance,
+    this.machineSellerId,
   });
 }

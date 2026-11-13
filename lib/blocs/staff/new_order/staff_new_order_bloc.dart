@@ -97,6 +97,7 @@ class StaffNewOrderBloc extends Bloc<StaffNewOrderEvent, StaffNewOrderState> {
             timeEnd: taskModel?.timeEnd,
             userId: taskModel?.userId,
             saleId: taskModel?.saleId,
+            machineSellerId: taskModel?.machineSellerId,
             userCreate: taskModel?.userCreate,
             userCustomer: taskModel?.userCustomer,
             origin: taskModel?.origin,
@@ -126,6 +127,7 @@ class StaffNewOrderBloc extends Bloc<StaffNewOrderEvent, StaffNewOrderState> {
             timeEnd: taskModel?.timeEnd,
             userId: taskModel?.userId,
             saleId: taskModel?.saleId,
+            machineSellerId: taskModel?.machineSellerId,
             userCreate: taskModel?.userCreate,
             userCustomer: taskModel?.userCustomer,
             origin: taskModel?.origin,
@@ -363,6 +365,10 @@ class StaffNewOrderBloc extends Bloc<StaffNewOrderEvent, StaffNewOrderState> {
           'coreNumbers': listCoreNumbers,
           "images": images,
           'sale_id': taskModel?.saleId?.toString() ?? event.saleId.toString(),
+          if ((event.machineSellerId ?? taskModel?.machineSellerId ?? '')
+              .isNotEmpty)
+            'machine_seller_id':
+                event.machineSellerId ?? taskModel?.machineSellerId,
           'address': event.newAddressSP.toString(),
           'sub_type': event.subType.toString(),
           if (isTaskLongDistance) 'is_long_distance': '1',

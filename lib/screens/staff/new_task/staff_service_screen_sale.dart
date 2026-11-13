@@ -71,6 +71,8 @@ class _StaffServiceSaleScreenState extends State<StaffServiceSaleScreen> {
   String _dateStart = '';
   String _timeStart = '';
   UserModel? _favouriteStaff;
+  UserModel? _machineSeller;
+  bool _isCustomerMachineSeller = false;
   late TaskOrderType _selectedOrderType;
   bool _isLongDistance = false;
 
@@ -126,6 +128,7 @@ class _StaffServiceSaleScreenState extends State<StaffServiceSaleScreen> {
       _onSearchCustomer();
     }
     customerController.addListener(_onSearchCustomer);
+    _bloc.add(const StaffServiceScreenSaleGetMachineSellersEvent());
     super.initState();
   }
 
@@ -929,6 +932,8 @@ class _StaffServiceSaleScreenState extends State<StaffServiceSaleScreen> {
             Icons.person_pin_rounded,
           ),
           _buildFavoriteStaffSelector(),
+          const SizedBox(height: 12),
+          _buildMachineSellerSelector(),
           const SizedBox(height: 16),
           _buildFormDescribe(
             'Nhập chi tiết mô tả yêu cầu công việc hoặc lưu ý đặc biệt tại đây...',
@@ -1068,6 +1073,395 @@ class _StaffServiceSaleScreenState extends State<StaffServiceSaleScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildMachineSellerSelector() {
+    if (!_isCustomerMachineSeller && _machineSeller == null) {
+      return InkWell(
+        onTap: _onChooseMachineSeller,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          decoration: BoxDecoration(
+            color: Colors.grey.shade50,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.grey.shade200, width: 1.5),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: ColorUtil.bangladeshGreen.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.storefront_rounded,
+                  color: ColorUtil.bangladeshGreen,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Người bán máy',
+                      style: TextStyle(
+                        color: ColorUtil.raisinBlack,
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 2),
+                    Text(
+                      'Nhấn để chọn người bán máy',
+                      style: TextStyle(
+                        color: ColorUtil.spanishGray,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(
+                Icons.arrow_forward_ios_rounded,
+                color: ColorUtil.spanishGray,
+                size: 16,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final displayName = _isCustomerMachineSeller
+        ? 'Máy của khách hàng'
+        : (_machineSeller?.username ?? '');
+    final subtitleText = _isCustomerMachineSeller
+        ? ((_bloc.customerInfo?.username?.isNotEmpty == true)
+              ? 'Khách hàng: ${_bloc.customerInfo!.username}'
+              : 'Sử dụng thông tin của khách hàng')
+        : 'Người bán máy';
+    final initial = _isCustomerMachineSeller
+        ? 'K'
+        : (_machineSeller?.username?.isNotEmpty == true
+              ? _machineSeller!.username![0].toUpperCase()
+              : 'S');
+
+    return InkWell(
+      onTap: _onChooseMachineSeller,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: ColorUtil.bangladeshGreen, width: 1.5),
+          boxShadow: [
+            BoxShadow(
+              color: ColorUtil.bangladeshGreen.withValues(alpha: 0.05),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            CircleAvatar(
+              radius: 20,
+              backgroundColor: ColorUtil.bangladeshGreen,
+              child: Text(
+                initial,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    displayName,
+                    style: const TextStyle(
+                      color: ColorUtil.raisinBlack,
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitleText,
+                    style: const TextStyle(
+                      color: ColorUtil.bangladeshGreen,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            IconButton(
+              icon: const Icon(
+                Icons.close_rounded,
+                color: ColorUtil.spanishGray,
+                size: 20,
+              ),
+              onPressed: () => setState(() {
+                _machineSeller = null;
+                _isCustomerMachineSeller = false;
+              }),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _onChooseMachineSeller() async {
+    if (_bloc.machineSellers.isEmpty && !_bloc.isLoadingMachineSellers) {
+      _bloc.add(const StaffServiceScreenSaleGetMachineSellersEvent());
+    }
+
+    String searchQuery = '';
+
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return BlocBuilder<
+          StaffServiceSaleScreenBloc,
+          StaffServiceSaleScreenState
+        >(
+          bloc: _bloc,
+          builder: (context, state) {
+            return StatefulBuilder(
+              builder: (context, setModalState) {
+                final query = searchQuery.trim().toLowerCase();
+                final showCustomerOption =
+                    query.isEmpty ||
+                    'máy của khách hàng'.contains(query) ||
+                    'may cua khach hang'.contains(query);
+                final filteredUsers = _bloc.machineSellers.where((user) {
+                  if (query.isEmpty) return true;
+                  final name = (user.username ?? '').toLowerCase();
+                  final phone = (user.phone ?? '').toLowerCase();
+                  return name.contains(query) || phone.contains(query);
+                }).toList();
+
+                final totalItems =
+                    (showCustomerOption ? 1 : 0) + filteredUsers.length;
+
+                return SafeArea(
+                  child: SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.72,
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 10),
+                        Container(
+                          width: 40,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade300,
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 12, 8, 8),
+                          child: Row(
+                            children: [
+                              const Expanded(
+                                child: Text(
+                                  'Chọn người bán máy',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: ColorUtil.raisinBlack,
+                                  ),
+                                ),
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.close_rounded),
+                                onPressed: () => Navigator.of(context).pop(),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: TextField(
+                            decoration: InputDecoration(
+                              hintText: 'Tìm theo tên hoặc số điện thoại...',
+                              prefixIcon: const Icon(Icons.search_rounded),
+                              isDense: true,
+                              filled: true,
+                              fillColor: Colors.grey.shade100,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide.none,
+                              ),
+                            ),
+                            onChanged: (value) {
+                              setModalState(() => searchQuery = value);
+                            },
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        const Divider(height: 1),
+                        Expanded(
+                          child:
+                              _bloc.isLoadingMachineSellers &&
+                                  _bloc.machineSellers.isEmpty
+                              ? const Center(child: CircularProgressIndicator())
+                              : totalItems == 0
+                              ? const Center(
+                                  child: Text(
+                                    'Không tìm thấy người bán máy phù hợp',
+                                    style: TextStyle(
+                                      color: ColorUtil.spanishGray,
+                                    ),
+                                  ),
+                                )
+                              : ListView.separated(
+                                  itemCount: totalItems,
+                                  separatorBuilder: (_, _) =>
+                                      const Divider(height: 1),
+                                  itemBuilder: (context, index) {
+                                    if (showCustomerOption && index == 0) {
+                                      return ListTile(
+                                        leading: CircleAvatar(
+                                          backgroundColor:
+                                              _isCustomerMachineSeller
+                                              ? ColorUtil.bangladeshGreen
+                                              : ColorUtil.bangladeshGreen
+                                                    .withValues(alpha: 0.12),
+                                          child: Icon(
+                                            Icons.person_outline_rounded,
+                                            color: _isCustomerMachineSeller
+                                                ? Colors.white
+                                                : ColorUtil.bangladeshGreen,
+                                          ),
+                                        ),
+                                        title: const Text(
+                                          'Máy của khách hàng',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.w600,
+                                            color: ColorUtil.raisinBlack,
+                                          ),
+                                        ),
+                                        subtitle:
+                                            (_bloc
+                                                    .customerInfo
+                                                    ?.username
+                                                    ?.isNotEmpty ==
+                                                true)
+                                            ? Text(
+                                                '${_bloc.customerInfo!.username} (${_bloc.customerInfo?.phone ?? ''})',
+                                                style: const TextStyle(
+                                                  color: ColorUtil.spanishGray,
+                                                ),
+                                              )
+                                            : const Text(
+                                                'Lấy khách hàng đã chọn của Công việc',
+                                                style: TextStyle(
+                                                  color: ColorUtil.spanishGray,
+                                                ),
+                                              ),
+                                        trailing: _isCustomerMachineSeller
+                                            ? const Icon(
+                                                Icons.check_circle_rounded,
+                                                color:
+                                                    ColorUtil.bangladeshGreen,
+                                              )
+                                            : null,
+                                        onTap: () {
+                                          setState(() {
+                                            _isCustomerMachineSeller = true;
+                                            _machineSeller = null;
+                                          });
+                                          Navigator.of(context).pop();
+                                        },
+                                      );
+                                    }
+
+                                    final userIndex = showCustomerOption
+                                        ? index - 1
+                                        : index;
+                                    final user = filteredUsers[userIndex];
+                                    final isPicked =
+                                        !_isCustomerMachineSeller &&
+                                        _machineSeller?.id == user.id;
+                                    final userInitial =
+                                        (user.username?.isNotEmpty == true)
+                                        ? user.username![0].toUpperCase()
+                                        : 'U';
+                                    return ListTile(
+                                      leading: CircleAvatar(
+                                        backgroundColor: isPicked
+                                            ? ColorUtil.bangladeshGreen
+                                            : ColorUtil.bangladeshGreen
+                                                  .withValues(alpha: 0.12),
+                                        child: Text(
+                                          userInitial,
+                                          style: TextStyle(
+                                            color: isPicked
+                                                ? Colors.white
+                                                : ColorUtil.bangladeshGreen,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                      title: Text(
+                                        user.username ?? '',
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                          color: ColorUtil.raisinBlack,
+                                        ),
+                                      ),
+                                      subtitle: (user.phone ?? '').isNotEmpty
+                                          ? Text(
+                                              user.phone!,
+                                              style: const TextStyle(
+                                                color: ColorUtil.spanishGray,
+                                              ),
+                                            )
+                                          : null,
+                                      trailing: isPicked
+                                          ? const Icon(
+                                              Icons.check_circle_rounded,
+                                              color: ColorUtil.bangladeshGreen,
+                                            )
+                                          : null,
+                                      onTap: () {
+                                        setState(() {
+                                          _isCustomerMachineSeller = false;
+                                          _machineSeller = user;
+                                        });
+                                        Navigator.of(context).pop();
+                                      },
+                                    );
+                                  },
+                                ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            );
+          },
+        );
+      },
     );
   }
 
@@ -1318,6 +1712,9 @@ class _StaffServiceSaleScreenState extends State<StaffServiceSaleScreen> {
           timeStart: '$_dateStart $_timeStart',
           timeEnd: '',
           staffId: _favouriteStaff?.id,
+          machineSellerId: _isCustomerMachineSeller
+              ? _bloc.customerInfo?.id
+              : _machineSeller?.id,
           customerId: _bloc.customerInfo?.id ?? 0,
           video: '',
           address: addressSPRequestTxtController.text,
