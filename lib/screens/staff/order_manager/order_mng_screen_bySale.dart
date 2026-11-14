@@ -341,6 +341,24 @@ class _OrderManagerScreenState extends State<OrderManagerScreenBySale> {
     );
   }
 
+  String _computePaymentStatus(OrderDetailModel order) {
+    if (order.orderPayment != null && order.orderPayment!.isNotEmpty) {
+      bool hasUnpaid = order.orderPayment!.any((p) => p.paymentStatus == '0');
+      if (hasUnpaid) {
+        return '0';
+      }
+      bool hasPending = order.orderPayment!.any((p) => p.paymentStatus == '2');
+      if (hasPending) {
+        return '2';
+      }
+      bool allPaid = order.orderPayment!.every((p) => p.paymentStatus == '1');
+      if (allPaid) {
+        return '1';
+      }
+    }
+    return order.paymentStatus ?? '0';
+  }
+
   Widget _buildPaymentStatusBadge(String? status) {
     String text = 'Chưa thanh toán';
     Color bgColor = const Color(0xFFFEF2F2);
@@ -468,7 +486,9 @@ class _OrderManagerScreenState extends State<OrderManagerScreenBySale> {
               ),
               const SizedBox(height: 6),
             ],
-            if (order.paymentStatus != null) ...[
+            if ((order.orderPayment != null &&
+                    order.orderPayment!.isNotEmpty) ||
+                order.paymentStatus != null) ...[
               Row(
                 children: [
                   const Icon(
@@ -484,7 +504,7 @@ class _OrderManagerScreenState extends State<OrderManagerScreenBySale> {
                       color: ColorUtil.graniteGray,
                     ),
                   ),
-                  _buildPaymentStatusBadge(order.paymentStatus),
+                  _buildPaymentStatusBadge(_computePaymentStatus(order)),
                 ],
               ),
               const SizedBox(height: 6),

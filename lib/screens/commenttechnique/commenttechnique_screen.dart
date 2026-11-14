@@ -93,11 +93,13 @@ class _CommentTechniqueListScreenState
     return Align(
       alignment: Alignment.center,
       child: SizedBox(
-        width: MediaQuery.of(context).size.width * 0.8,
-        height: MediaQuery.of(context).size.width * 0.2,
+        width: MediaQuery.of(context).size.width * 0.85,
         child: Row(
-          children: [_staffImage(), _staffInfo()],
-          //height: 300,
+          children: [
+            _staffImage(),
+            const SizedBox(width: 8),
+            Expanded(child: _staffInfo()),
+          ],
         ),
       ),
     );
@@ -266,50 +268,62 @@ class _CommentTechniqueListScreenState
   }
 
   Widget _staffInfo() {
-    return Wrap(
-      spacing: 3.0, // gap between adjacent chips
-      runSpacing: 4.0, // gap between lines
-      direction: Axis.horizontal, // main axis (rows or columns)
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TextButton(
-              onPressed: () {
-                _goToStaffInfo(_bloc.userProfile!);
-              },
-              child: Text(
-                _bloc.userProfile?.username ?? "",
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                  color: ColorUtil.bangladeshGreen,
-                ),
+        TextButton(
+          style: TextButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            minimumSize: Size.zero,
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          ),
+          onPressed: () {
+            _goToStaffInfo(_bloc.userProfile!);
+          },
+          child: Text(
+            _bloc.userProfile?.username ?? "",
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
+              color: ColorUtil.bangladeshGreen,
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(left: 10),
+          child: Text(
+            _bloc.userProfile?.phone ?? "",
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Padding(
+          padding: const EdgeInsets.only(left: 6),
+          child: Row(
+            children: [
+              RatingBarIndicator(
+                rating: _bloc.rating,
+                direction: Axis.horizontal,
+                unratedColor: Colors.amber.withAlpha(23),
+                itemCount: 5,
+                itemSize: 13.0,
+                itemPadding: const EdgeInsets.symmetric(horizontal: 4.0),
+                itemBuilder: (context, _) =>
+                    const Icon(Icons.star, color: Colors.amber),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(left: 10),
-              child: Text(_bloc.userProfile?.phone ?? ""),
-            ),
-            Row(
-              children: [
-                RatingBarIndicator(
-                  rating: _bloc.rating,
-                  direction: Axis.horizontal,
-                  unratedColor: Colors.amber.withAlpha(23),
-                  itemCount: 5,
-                  itemSize: 13.0,
-                  itemPadding: const EdgeInsets.symmetric(horizontal: 4.0),
-                  itemBuilder: (context, _) =>
-                      const Icon(Icons.star, color: Colors.amber),
-                ),
-                Text(
+              Flexible(
+                child: Text(
                   "(${_bloc.dem.toString()} đánh giá)",
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(fontSize: 11),
                 ),
-              ],
-            ),
-          ],
+              ),
+            ],
+          ),
         ),
       ],
     );

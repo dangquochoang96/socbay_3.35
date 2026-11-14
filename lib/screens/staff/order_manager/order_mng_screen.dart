@@ -1105,6 +1105,10 @@ class _OrderManagerScreenState extends State<OrderManagerScreen> {
       if (hasUnpaid) {
         return '0';
       }
+      bool hasPending = order.orderPayment!.any((p) => p.paymentStatus == '2');
+      if (hasPending) {
+        return '2';
+      }
       bool allPaid = order.orderPayment!.every((p) => p.paymentStatus == '1');
       if (allPaid) {
         return '1';

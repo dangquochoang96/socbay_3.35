@@ -129,15 +129,10 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
           KeyValue(TextEditingController(), TextEditingController(), null, [2]),
         );
     }
-    lstKeyValueMaintainCores.add(
-      KeyValue(
-        TextEditingController(text: "Vệ sinh bảo dưỡng"),
-        TextEditingController(text: dateDefault),
-        null,
-        [],
-        true,
-      ),
-    );
+    _hadReplacementCores = _hasReplacementCores;
+    if (_hadReplacementCores) {
+      _populateDefaultMaintainSchedule(dateDefault);
+    }
     _picker = ImagePicker();
     _fetchKtvWarehouse();
     currentSelectedProductAllValue.addListener(() {
@@ -256,6 +251,53 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
       candidate++;
     }
     return candidate;
+  }
+
+  bool _hadReplacementCores = false;
+
+  bool get _hasReplacementCores =>
+      _isMachineInstallTask ||
+      lstKeyValueCores.any(
+        (row) => !row.isOtherService && row.selectedCores.isNotEmpty,
+      );
+
+  void _populateDefaultMaintainSchedule([String? defaultDate]) {
+    final String dateStr =
+        defaultDate ??
+        DateTime.now()
+            .add(const Duration(days: 183))
+            .toDateString(format: "dd/MM/yyyy");
+    final KeyValue comboRow = KeyValue(
+      TextEditingController(),
+      TextEditingController(text: dateStr),
+      null,
+      [1, 2, 3],
+      false,
+    );
+    comboRow.key.text = comboRow.corePositionLabel;
+    lstKeyValueMaintainCores
+      ..clear()
+      ..add(
+        KeyValue(
+          TextEditingController(text: "Vệ sinh bảo dưỡng"),
+          TextEditingController(text: dateStr),
+          null,
+          [],
+          true,
+        ),
+      )
+      ..add(comboRow);
+  }
+
+  void _syncMaintainScheduleWithReplacementCores() {
+    final bool hasCores = _hasReplacementCores;
+    if (hasCores == _hadReplacementCores) return;
+    _hadReplacementCores = hasCores;
+    if (!hasCores) {
+      lstKeyValueMaintainCores.clear();
+    } else if (lstKeyValueMaintainCores.isEmpty) {
+      _populateDefaultMaintainSchedule();
+    }
   }
 
   String? _getDefaultCoreName([int? type]) {
@@ -435,6 +477,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
             }
           }
         }
+        _syncMaintainScheduleWithReplacementCores();
         _recalculateTotal();
         final bool isNewInstall =
             taskType == 4 ||
@@ -1423,268 +1466,276 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                     style: TextStyle(fontSize: 16, color: Colors.white),
                   ),
                 ),
-                ButtonWidget(
-                  onTap: () {
-                    if (_isLoading) return;
-                    if (_bloc.totalPay == 0 &&
-                        (_bloc.paymentType == null || _bloc.paymentType == 0)) {
-                      _bloc.paymentType = 1;
-                    }
-                    if (_bloc.totalPay > 0 &&
-                        (_bloc.paymentType == null || _bloc.paymentType == 0)) {
-                      context.showSnackBar(
-                        'Vui lòng chọn hình thức thanh toán',
-                      );
-                      return;
-                    }
-                    final now = DateTime.now().millisecondsSinceEpoch;
-                    if (now - _lastClickTime < 2000) return;
-                    _lastClickTime = now;
-                    var getProductNew = _listProductsAll.where(
-                      (element) =>
-                          element.name == currentSelectedProductAllValue.text,
-                    );
-                    if (_currentSelectedProductValue == 0 &&
-                        getProductNew.isEmpty) {
-                      context.showSnackBar('Vui lòng chọn sản phẩm');
-                      return;
-                    }
-                    _bloc.total =
-                        int.tryParse(
-                          _bloc.total
-                              .toString()
-                              .replaceAll(".", "")
-                              .replaceAll("đ", "")
-                              .nonBreaking
-                              .trim(),
-                        ) ??
-                        0;
-                    _bloc.chietKhau =
-                        int.tryParse(
-                          chietKhauController.text
-                              .replaceAll(".", "")
-                              .replaceAll("đ", "")
-                              .nonBreaking
-                              .trim(),
-                        ) ??
-                        0;
-                    _bloc.subSavePoint =
-                        int.tryParse(
-                          subSavePointController.text
-                              .replaceAll(".", "")
-                              .replaceAll("đ", "")
-                              .nonBreaking
-                              .trim(),
-                        ) ??
-                        0;
-                    _bloc.totalPay =
-                        int.tryParse(
-                          _bloc.totalPay
-                              .toString()
-                              .replaceAll(".", "")
-                              .replaceAll("đ", "")
-                              .nonBreaking
-                              .trim(),
-                        ) ??
-                        0;
-                    _bloc.savePoint = _bloc.savePoint;
-                    if (_bloc.totalPay < 0) {
-                      context.showSnackBar('Tổng thanh toán không được âm');
-                      return;
-                    }
-                    _syncSelectedMachineToCoreTable();
-                    List<OrderFilterCoreModel> lst1 = [];
-                    List<OrderFilterCoreModel> lst2 = [];
-                    for (var item in lstKeyValueCores) {
-                      if (item.key.text.isNotEmpty) {
-                        if (_isCoreConfigTask &&
-                            !item.hasCorePositionSelected) {
-                          context.showSnackBar(
-                            'Vui lòng chọn vị trí lõi / combo cho vật tư ${item.key.text}',
-                          );
-                          return;
-                        }
-                        String priceText = item.value.text.trim();
-                        if (priceText.isEmpty) {
-                          context.showSnackBar(
-                            'Vui lòng nhập thành tiền cho vật tư ${item.key.text}',
-                          );
-                          return;
-                        }
-                        String priceValue = priceText
-                            .replaceAll(".", "")
-                            .replaceAll("đ", "")
-                            .nonBreaking
-                            .trim();
-                        int qty = int.tryParse(item.quantity.text.trim()) ?? 1;
-                        if (qty <= 0) qty = 1;
-                        lst1.add(
-                          OrderFilterCoreModel(
-                            name: item.key.text,
-                            price: priceValue,
-                            quantity: qty,
-                            coreNumber: _isCoreConfigTask
-                                ? item.coreNumberValue
-                                : "0",
-                          ),
-                        );
+                if (App.instance.userApp?.isUserRole() == true)
+                  ButtonWidget(
+                    onTap: () {
+                      if (App.instance.userApp?.isUserRole() != true) return;
+                      if (_isLoading) return;
+                      if (_bloc.totalPay == 0 &&
+                          (_bloc.paymentType == null ||
+                              _bloc.paymentType == 0)) {
+                        _bloc.paymentType = 1;
                       }
-                    }
-                    for (var item in lstKeyValueMaintainCores) {
-                      if (item.key.text.isNotEmpty) {
-                        lst2.add(
-                          OrderFilterCoreModel(
-                            name: item.key.text,
-                            replaceDatePromise: item.value.text,
-                            coreNumber: "0",
-                          ),
-                        );
-                      }
-                    }
-
-                    if (lst1.isEmpty) {
-                      context.showSnackBar('Chưa nhập chi tiết lần thay lõi');
-                      return;
-                    }
-
-                    if (_listPath.isEmpty) {
-                      context.showSnackBar('Vui lòng lưu ảnh!');
-                      return;
-                    }
-
-                    if (_bloc.paymentType == 3) {
-                      final cash =
-                          double.tryParse(
-                            _cashAmountController.text
-                                .replaceAll('.', '')
-                                .trim(),
-                          ) ??
-                          0.0;
-                      final transfer =
-                          double.tryParse(
-                            _transferAmountController.text
-                                .replaceAll('.', '')
-                                .trim(),
-                          ) ??
-                          0.0;
-                      if ((cash + transfer - _bloc.totalPay).abs() > 0.01) {
+                      if (_bloc.totalPay > 0 &&
+                          (_bloc.paymentType == null ||
+                              _bloc.paymentType == 0)) {
                         context.showSnackBar(
-                          'Tổng số tiền mặt và chuyển khoản phải bằng tổng tiền thanh toán (${_bloc.totalPay.toString().toVND()})',
+                          'Vui lòng chọn hình thức thanh toán',
                         );
                         return;
                       }
-                    }
+                      final now = DateTime.now().millisecondsSinceEpoch;
+                      if (now - _lastClickTime < 2000) return;
+                      _lastClickTime = now;
+                      var getProductNew = _listProductsAll.where(
+                        (element) =>
+                            element.name == currentSelectedProductAllValue.text,
+                      );
+                      if (_currentSelectedProductValue == 0 &&
+                          getProductNew.isEmpty) {
+                        context.showSnackBar('Vui lòng chọn sản phẩm');
+                        return;
+                      }
+                      _bloc.total =
+                          int.tryParse(
+                            _bloc.total
+                                .toString()
+                                .replaceAll(".", "")
+                                .replaceAll("đ", "")
+                                .nonBreaking
+                                .trim(),
+                          ) ??
+                          0;
+                      _bloc.chietKhau =
+                          int.tryParse(
+                            chietKhauController.text
+                                .replaceAll(".", "")
+                                .replaceAll("đ", "")
+                                .nonBreaking
+                                .trim(),
+                          ) ??
+                          0;
+                      _bloc.subSavePoint =
+                          int.tryParse(
+                            subSavePointController.text
+                                .replaceAll(".", "")
+                                .replaceAll("đ", "")
+                                .nonBreaking
+                                .trim(),
+                          ) ??
+                          0;
+                      _bloc.totalPay =
+                          int.tryParse(
+                            _bloc.totalPay
+                                .toString()
+                                .replaceAll(".", "")
+                                .replaceAll("đ", "")
+                                .nonBreaking
+                                .trim(),
+                          ) ??
+                          0;
+                      _bloc.savePoint = _bloc.savePoint;
+                      if (_bloc.totalPay < 0) {
+                        context.showSnackBar('Tổng thanh toán không được âm');
+                        return;
+                      }
+                      _syncSelectedMachineToCoreTable();
+                      List<OrderFilterCoreModel> lst1 = [];
+                      List<OrderFilterCoreModel> lst2 = [];
+                      for (var item in lstKeyValueCores) {
+                        if (item.key.text.isNotEmpty) {
+                          if (_isCoreConfigTask &&
+                              !item.hasCorePositionSelected) {
+                            context.showSnackBar(
+                              'Vui lòng chọn vị trí lõi / combo cho vật tư ${item.key.text}',
+                            );
+                            return;
+                          }
+                          String priceText = item.value.text.trim();
+                          if (priceText.isEmpty) {
+                            context.showSnackBar(
+                              'Vui lòng nhập thành tiền cho vật tư ${item.key.text}',
+                            );
+                            return;
+                          }
+                          String priceValue = priceText
+                              .replaceAll(".", "")
+                              .replaceAll("đ", "")
+                              .nonBreaking
+                              .trim();
+                          int qty =
+                              int.tryParse(item.quantity.text.trim()) ?? 1;
+                          if (qty <= 0) qty = 1;
+                          lst1.add(
+                            OrderFilterCoreModel(
+                              name: item.key.text,
+                              price: priceValue,
+                              quantity: qty,
+                              coreNumber: _isCoreConfigTask
+                                  ? item.coreNumberValue
+                                  : "0",
+                            ),
+                          );
+                        }
+                      }
+                      for (var item in lstKeyValueMaintainCores) {
+                        if (item.key.text.isNotEmpty) {
+                          lst2.add(
+                            OrderFilterCoreModel(
+                              name: item.key.text,
+                              replaceDatePromise: item.value.text,
+                              coreNumber: "0",
+                            ),
+                          );
+                        }
+                      }
 
-                    final bool hasNewProduct = getProductNew.isNotEmpty;
-                    final int taskType =
-                        int.tryParse(
-                          _bloc.taskModel?.type ??
-                              _bloc.args['taskType']?.toString() ??
-                              '',
-                        ) ??
-                        0;
-                    final int subType;
-                    if (taskType == 7) {
-                      subType = 4;
-                    } else if (taskType == 8) {
-                      subType = 5;
-                    } else if (taskType == 9) {
-                      subType = 6;
-                    } else if (taskType == 10) {
-                      subType = 7;
-                    } else if (taskType == 11) {
-                      subType = 8;
-                    } else if (taskType == 12) {
-                      subType = 9;
-                    } else if (hasNewProduct &&
-                        (taskType == 4 || taskType == 5)) {
-                      subType = 1;
-                    } else if (_bloc.totalPay != 0) {
-                      subType = 2;
-                    } else {
-                      subType = 3;
-                    }
+                      if (lst1.isEmpty) {
+                        context.showSnackBar('Chưa nhập chi tiết lần thay lõi');
+                        return;
+                      }
 
-                    _bloc.add(
-                      StaffCreateOrderEvent(
-                        _currentSelectedProductValue,
-                        getProductNew.isNotEmpty ? getProductNew.first.id : 0,
-                        lst1,
-                        lst2,
-                        _bloc.total,
-                        (int.tryParse(
-                              chietKhauController.text
-                                  .replaceAll(".", "")
-                                  .replaceAll("đ", "")
-                                  .nonBreaking
+                      if (_listPath.isEmpty) {
+                        context.showSnackBar('Vui lòng lưu ảnh!');
+                        return;
+                      }
+
+                      if (_bloc.paymentType == 3) {
+                        final cash =
+                            double.tryParse(
+                              _cashAmountController.text
+                                  .replaceAll('.', '')
                                   .trim(),
                             ) ??
-                            0),
-                        (_bloc.total == 0 && _bloc.totalPay == 0)
-                            ? 0
-                            : (int.tryParse(subSavePointController.text) ?? 0),
-                        _bloc.totalPay,
-                        _bloc.savePoint,
-                        _bloc.paymentType!,
-                        _vatController.text.isEmpty ? '0' : _vatController.text,
-                        _listPath,
-                        addressCustomerController.text,
-                        addressCustomerControllerSP.text,
-                        widget.isRent ? _rentalDurationController.text : '0',
-                        widget.isRent
-                            ? _depositController.text
-                                  .replaceAll(".", "")
-                                  .replaceAll("đ", "")
-                                  .nonBreaking
-                                  .trim()
-                            : '0',
-                        widget.isRent
-                            ? _monthlyPaymentController.text
-                                  .replaceAll(".", "")
-                                  .replaceAll("đ", "")
-                                  .nonBreaking
-                                  .trim()
-                            : '0',
-                        widget.isRent ? _selectedEndDate : DateTime.now(),
-                        _noteController.text,
-                        subType,
-                        cashAmount: _bloc.paymentType == 3
-                            ? (double.tryParse(
-                                    _cashAmountController.text
-                                        .replaceAll('.', '')
-                                        .trim(),
-                                  ) ??
-                                  0.0)
-                            : null,
-                        transferAmount: _bloc.paymentType == 3
-                            ? (double.tryParse(
-                                    _transferAmountController.text
-                                        .replaceAll('.', '')
-                                        .trim(),
-                                  ) ??
-                                  0.0)
-                            : null,
-                        machineSellerId: _bloc.taskModel?.machineSellerId,
-                      ),
-                    );
-                  },
-                  padding: const EdgeInsets.only(top: 10.0, bottom: 10.0),
-                  borderRadius: BorderRadius.circular(30),
-                  margin: const EdgeInsets.only(
-                    left: 60.0,
-                    right: 60,
-                    bottom: 60,
-                    top: 10,
+                            0.0;
+                        final transfer =
+                            double.tryParse(
+                              _transferAmountController.text
+                                  .replaceAll('.', '')
+                                  .trim(),
+                            ) ??
+                            0.0;
+                        if ((cash + transfer - _bloc.totalPay).abs() > 0.01) {
+                          context.showSnackBar(
+                            'Tổng số tiền mặt và chuyển khoản phải bằng tổng tiền thanh toán (${_bloc.totalPay.toString().toVND()})',
+                          );
+                          return;
+                        }
+                      }
+
+                      final bool hasNewProduct = getProductNew.isNotEmpty;
+                      final int taskType =
+                          int.tryParse(
+                            _bloc.taskModel?.type ??
+                                _bloc.args['taskType']?.toString() ??
+                                '',
+                          ) ??
+                          0;
+                      final int subType;
+                      if (taskType == 7) {
+                        subType = 4;
+                      } else if (taskType == 8) {
+                        subType = 5;
+                      } else if (taskType == 9) {
+                        subType = 6;
+                      } else if (taskType == 10) {
+                        subType = 7;
+                      } else if (taskType == 11) {
+                        subType = 8;
+                      } else if (taskType == 12) {
+                        subType = 9;
+                      } else if (hasNewProduct &&
+                          (taskType == 4 || taskType == 5)) {
+                        subType = 1;
+                      } else if (_bloc.totalPay != 0) {
+                        subType = 2;
+                      } else {
+                        subType = 3;
+                      }
+
+                      _bloc.add(
+                        StaffCreateOrderEvent(
+                          _currentSelectedProductValue,
+                          getProductNew.isNotEmpty ? getProductNew.first.id : 0,
+                          lst1,
+                          lst2,
+                          _bloc.total,
+                          (int.tryParse(
+                                chietKhauController.text
+                                    .replaceAll(".", "")
+                                    .replaceAll("đ", "")
+                                    .nonBreaking
+                                    .trim(),
+                              ) ??
+                              0),
+                          (_bloc.total == 0 && _bloc.totalPay == 0)
+                              ? 0
+                              : (int.tryParse(subSavePointController.text) ??
+                                    0),
+                          _bloc.totalPay,
+                          _bloc.savePoint,
+                          _bloc.paymentType!,
+                          _vatController.text.isEmpty
+                              ? '0'
+                              : _vatController.text,
+                          _listPath,
+                          addressCustomerController.text,
+                          addressCustomerControllerSP.text,
+                          widget.isRent ? _rentalDurationController.text : '0',
+                          widget.isRent
+                              ? _depositController.text
+                                    .replaceAll(".", "")
+                                    .replaceAll("đ", "")
+                                    .nonBreaking
+                                    .trim()
+                              : '0',
+                          widget.isRent
+                              ? _monthlyPaymentController.text
+                                    .replaceAll(".", "")
+                                    .replaceAll("đ", "")
+                                    .nonBreaking
+                                    .trim()
+                              : '0',
+                          widget.isRent ? _selectedEndDate : DateTime.now(),
+                          _noteController.text,
+                          subType,
+                          cashAmount: _bloc.paymentType == 3
+                              ? (double.tryParse(
+                                      _cashAmountController.text
+                                          .replaceAll('.', '')
+                                          .trim(),
+                                    ) ??
+                                    0.0)
+                              : null,
+                          transferAmount: _bloc.paymentType == 3
+                              ? (double.tryParse(
+                                      _transferAmountController.text
+                                          .replaceAll('.', '')
+                                          .trim(),
+                                    ) ??
+                                    0.0)
+                              : null,
+                          machineSellerId: _bloc.taskModel?.machineSellerId,
+                        ),
+                      );
+                    },
+                    padding: const EdgeInsets.only(top: 10.0, bottom: 10.0),
+                    borderRadius: BorderRadius.circular(30),
+                    margin: const EdgeInsets.only(
+                      left: 60.0,
+                      right: 60,
+                      bottom: 60,
+                      top: 10,
+                    ),
+                    color: ColorUtil.bangladeshGreen,
+                    child: Text(
+                      _bloc.paymentType == 2 || _bloc.paymentType == 3
+                          ? "TẠO ĐƠN & HIỂN THỊ QR"
+                          : "HOÀN THÀNH",
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(fontSize: 16, color: Colors.white),
+                    ),
                   ),
-                  color: ColorUtil.bangladeshGreen,
-                  child: Text(
-                    _bloc.paymentType == 2 || _bloc.paymentType == 3
-                        ? "TẠO ĐƠN & HIỂN THỊ QR"
-                        : "HOÀN THÀNH",
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 16, color: Colors.white),
-                  ),
-                ),
               ],
             ),
           ),
@@ -2015,6 +2066,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                             [nextCoreNum],
                           ),
                         );
+                        _syncMaintainScheduleWithReplacementCores();
                       });
                     },
                     child: Container(
@@ -2221,6 +2273,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                             onTap: () {
                               setState(() {
                                 lstKeyValueCores.removeAt(i);
+                                _syncMaintainScheduleWithReplacementCores();
                                 _recalculateTotal();
                               });
                             },
@@ -2419,6 +2472,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                             onTap: () {
                               setState(() {
                                 lstKeyValueCores.removeAt(i);
+                                _syncMaintainScheduleWithReplacementCores();
                                 _recalculateTotal();
                               });
                             },
@@ -2731,37 +2785,21 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
               GestureDetector(
                 onTap: () {
                   setState(() {
-                    if (lstKeyValueMaintainCores.isEmpty) {
-                      lstKeyValueMaintainCores.add(
-                        KeyValue(
-                          TextEditingController(text: "Vệ sinh bảo dưỡng"),
-                          TextEditingController(
-                            text: DateTime.now()
-                                .add(const Duration(days: 183))
-                                .toDateString(format: "dd/MM/yyyy"),
-                          ),
-                          null,
-                          [],
-                          true,
+                    final int nextCoreNum =
+                        _getNextAvailableMaintainCoreNumber();
+                    lstKeyValueMaintainCores.add(
+                      KeyValue(
+                        TextEditingController(text: "Lõi số $nextCoreNum"),
+                        TextEditingController(
+                          text: DateTime.now()
+                              .add(const Duration(days: 183))
+                              .toDateString(format: "dd/MM/yyyy"),
                         ),
-                      );
-                    } else {
-                      final int nextCoreNum =
-                          _getNextAvailableMaintainCoreNumber();
-                      lstKeyValueMaintainCores.add(
-                        KeyValue(
-                          TextEditingController(text: "Lõi số $nextCoreNum"),
-                          TextEditingController(
-                            text: DateTime.now()
-                                .add(const Duration(days: 183))
-                                .toDateString(format: "dd/MM/yyyy"),
-                          ),
-                          null,
-                          [nextCoreNum],
-                          false,
-                        ),
-                      );
-                    }
+                        null,
+                        [nextCoreNum],
+                        false,
+                      ),
+                    );
                   });
                 },
                 child: Container(
@@ -2807,13 +2845,22 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
             ],
           ),
         ),
-        if (lstKeyValueMaintainCores.isNotEmpty)
+        if (lstKeyValueMaintainCores.isEmpty)
+          const Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Center(
+              child: Text(
+                "Chưa có lịch hẹn bảo dưỡng (nhấn + để thêm)",
+                style: TextStyle(color: ColorUtil.spanishGray, fontSize: 13),
+              ),
+            ),
+          )
+        else
           ...List.generate(lstKeyValueMaintainCores.length, (i) {
             final KeyValue maintainItem = lstKeyValueMaintainCores[i];
-            final bool isFixedFirstMaintainRow = i == 0;
+            final bool isVsbdRow = maintainItem.isOtherService;
             final bool isComboMaintain =
-                !isFixedFirstMaintainRow &&
-                maintainItem.selectedCores.length > 1;
+                !isVsbdRow && maintainItem.selectedCores.length > 1;
 
             return Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -2824,7 +2871,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                 children: [
                   Expanded(
                     flex: 1,
-                    child: isFixedFirstMaintainRow
+                    child: isVsbdRow
                         ? TextFormField(
                             controller: maintainItem.key,
                             readOnly: true,
@@ -2949,32 +2996,29 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  if (i > 0)
-                    InkWell(
-                      onTap: () {
-                        setState(() {
-                          lstKeyValueMaintainCores.removeAt(i);
-                        });
-                      },
-                      borderRadius: BorderRadius.circular(8),
-                      child: Container(
-                        width: 40,
-                        height: 40,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFFEF2F2),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: const Color(0xFFFECACA)),
-                        ),
-                        child: const Icon(
-                          Icons.delete_outline_rounded,
-                          color: Color(0xFFDC2626),
-                          size: 20,
-                        ),
+                  InkWell(
+                    onTap: () {
+                      setState(() {
+                        lstKeyValueMaintainCores.removeAt(i);
+                      });
+                    },
+                    borderRadius: BorderRadius.circular(8),
+                    child: Container(
+                      width: 40,
+                      height: 40,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFEF2F2),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: const Color(0xFFFECACA)),
                       ),
-                    )
-                  else
-                    const SizedBox(width: 40, height: 40),
+                      child: const Icon(
+                        Icons.delete_outline_rounded,
+                        color: Color(0xFFDC2626),
+                        size: 20,
+                      ),
+                    ),
+                  ),
                 ],
               ),
             );
@@ -3142,6 +3186,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                         ),
                       );
                     }
+                    _syncMaintainScheduleWithReplacementCores();
                   });
                   context.showSnackBar("Đã thêm lõi: $matchedCore");
                 } else {
@@ -3312,6 +3357,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                                           ..selectedCores = []
                                           ..isOtherService = true;
                                       }
+                                      _syncMaintainScheduleWithReplacementCores();
                                     });
                                     Navigator.pop(context);
                                   },
@@ -3563,45 +3609,70 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                             lstKeyValueCores[index]
                               ..selectedCores = []
                               ..isOtherService = true;
+                            _syncMaintainScheduleWithReplacementCores();
                           });
                           Navigator.pop(sheetContext);
                           _showCoreSearchSelector(this.context, index);
                         },
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(12),
                         child: Container(
-                          height: 40,
-                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          height: 44,
+                          padding: const EdgeInsets.symmetric(horizontal: 14),
                           decoration: BoxDecoration(
                             color: tempIsOther
                                 ? ColorUtil.bangladeshGreen
-                                : const Color(0xFFF8FAFC),
-                            borderRadius: BorderRadius.circular(10),
+                                : const Color(0xFFF1F5F9),
+                            borderRadius: BorderRadius.circular(12),
                             border: Border.all(
                               color: tempIsOther
                                   ? ColorUtil.bangladeshGreen
-                                  : Colors.grey.shade300,
+                                  : const Color(0xFF94A3B8),
+                              width: 1.5,
                             ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: tempIsOther
+                                    ? ColorUtil.bangladeshGreen.withValues(
+                                        alpha: 0.16,
+                                      )
+                                    : Colors.black.withValues(alpha: 0.08),
+                                blurRadius: 8,
+                                offset: const Offset(0, 3),
+                              ),
+                            ],
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Icon(
-                                Icons.handyman_outlined,
-                                size: 16,
+                                Icons.handyman_rounded,
+                                size: 18,
                                 color: tempIsOther
                                     ? Colors.white
                                     : ColorUtil.raisinBlack,
                               ),
-                              const SizedBox(width: 6),
-                              Text(
-                                'Chọn phụ kiện / Dịch vụ (Kiểm tra, VSBD)',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600,
-                                  color: tempIsOther
-                                      ? Colors.white
-                                      : ColorUtil.raisinBlack,
+                              const SizedBox(width: 8),
+                              Flexible(
+                                child: Text(
+                                  'Chọn phụ kiện / Dịch vụ (Kiểm tra, VSBD)',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 13.5,
+                                    fontWeight: FontWeight.bold,
+                                    color: tempIsOther
+                                        ? Colors.white
+                                        : ColorUtil.raisinBlack,
+                                  ),
                                 ),
+                              ),
+                              const SizedBox(width: 6),
+                              Icon(
+                                Icons.arrow_forward_ios_rounded,
+                                size: 13,
+                                color: tempIsOther
+                                    ? Colors.white
+                                    : ColorUtil.raisinBlack,
                               ),
                             ],
                           ),
@@ -3684,6 +3755,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                                         lstKeyValueCores[index]
                                           ..selectedCores = [coreNum]
                                           ..isOtherService = false;
+                                        _syncMaintainScheduleWithReplacementCores();
                                       });
                                       Navigator.pop(sheetContext);
                                     } else {
@@ -3914,6 +3986,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                                                     ...tempSelectedCores,
                                                   ]
                                                   ..isOtherService = false;
+                                                _syncMaintainScheduleWithReplacementCores();
                                               });
                                               Navigator.pop(sheetContext);
                                             },
@@ -3959,6 +4032,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                                             ? []
                                             : [...tempSelectedCores]
                                         ..isOtherService = tempIsOther;
+                                      _syncMaintainScheduleWithReplacementCores();
                                     });
                                     Navigator.pop(sheetContext);
                                   },
@@ -4002,7 +4076,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
     bool isComboMode = tempSelectedCores.length > 1;
 
     final Set<int> coresInOtherRows = {};
-    for (int r = 1; r < lstKeyValueMaintainCores.length; r++) {
+    for (int r = 0; r < lstKeyValueMaintainCores.length; r++) {
       if (r != index) {
         coresInOtherRows.addAll(lstKeyValueMaintainCores[r].selectedCores);
       }

@@ -925,8 +925,10 @@ class _ServiceScreenState extends State<StaffServiceScreen> {
             _buildFavoriteStaffSelector(),
             const SizedBox(height: 12),
           ],
-          _buildMachineSellerSelector(),
-          const SizedBox(height: 16),
+          if (_currentSelectedValue == '4') ...[
+            _buildMachineSellerSelector(),
+            const SizedBox(height: 16),
+          ],
           _buildFormDescribe(
             'Nhập chi tiết mô tả yêu cầu công việc hoặc lưu ý đặc biệt tại đây...',
             describeRequestTxtController,
@@ -1706,9 +1708,11 @@ class _ServiceScreenState extends State<StaffServiceScreen> {
           timeEnd: '',
           customerId: _bloc.customerInfor?.id ?? 0,
           staffId: _favouriteStaff?.id,
-          machineSellerId: _isCustomerMachineSeller
-              ? _bloc.customerInfor?.id
-              : _machineSeller?.id,
+          machineSellerId: _currentSelectedValue == '4'
+              ? (_isCustomerMachineSeller
+                    ? _bloc.customerInfor?.id
+                    : _machineSeller?.id)
+              : null,
           video: '',
           productId: orderDetailId,
           address: addressSPRequestTxtController.text,
