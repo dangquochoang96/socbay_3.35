@@ -291,13 +291,109 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
 
   void _syncMaintainScheduleWithReplacementCores() {
     final bool hasCores = _hasReplacementCores;
-    if (hasCores == _hadReplacementCores) return;
-    _hadReplacementCores = hasCores;
-    if (!hasCores) {
-      lstKeyValueMaintainCores.clear();
-    } else if (lstKeyValueMaintainCores.isEmpty) {
-      _populateDefaultMaintainSchedule();
+    if (hasCores != _hadReplacementCores) {
+      _hadReplacementCores = hasCores;
+      if (!hasCores) {
+        lstKeyValueMaintainCores.clear();
+      } else if (lstKeyValueMaintainCores.isEmpty) {
+        _populateDefaultMaintainSchedule();
+      }
     }
+    _syncMaintainCoresFromProductFilterCores();
+  }
+
+  DateTime _addMonths(DateTime date, int months) {
+    final int totalMonths = date.year * 12 + (date.month - 1) + months;
+    final int targetYear = totalMonths ~/ 12;
+    final int targetMonth = (totalMonths % 12) + 1;
+    final int lastDayOfMonth = DateTime(targetYear, targetMonth + 1, 0).day;
+    final int targetDay = date.day > lastDayOfMonth ? lastDayOfMonth : date.day;
+    return DateTime(targetYear, targetMonth, targetDay);
+  }
+
+  DateTime? _calculateNextDateFromReplacementTime(String? rawTime) {
+    final text = (rawTime ?? '').trim();
+    if (text.isEmpty) return null;
+    final int? parsed = int.tryParse(text);
+    final int months =
+        parsed ??
+        (int.tryParse(RegExp(r'(\d+)').firstMatch(text)?.group(1) ?? '') ?? 0);
+    if (months <= 0) return null;
+
+    return _addMonths(DateTime.now(), months);
+  }
+
+  String? _findProductFilterCoreDate(
+    List<ProductFilterCoresModel> productCores,
+    List<int> coreNumbers,
+  ) {
+    if (productCores.isEmpty || coreNumbers.isEmpty) return null;
+
+    DateTime? earliestDate;
+    for (final int coreNum in coreNumbers) {
+      if (coreNum >= 1 && coreNum <= productCores.length) {
+        final core = productCores[coreNum - 1];
+        final nextDate = _calculateNextDateFromReplacementTime(
+          core.replacementTime,
+        );
+        if (nextDate != null &&
+            (earliestDate == null || nextDate.isBefore(earliestDate))) {
+          earliestDate = nextDate;
+        }
+      }
+    }
+    return earliestDate?.toDateString(format: "dd/MM/yyyy");
+  }
+
+  void _syncMaintainCoresFromProductFilterCores() {
+    if (!_isCoreConfigTask || _currentSelectedProductValue == 0) return;
+
+    final selectedOrder = _listProducts.firstWhere(
+      (item) => item.id == _currentSelectedProductValue,
+      orElse: () => OrderModel(),
+    );
+    final List<ProductFilterCoresModel> productCores =
+        selectedOrder.productFilterCoresModel ?? [];
+    if (productCores.isEmpty) return;
+
+    final selectedCoreRows = lstKeyValueCores
+        .where(
+          (row) =>
+              !row.isOtherService &&
+              row.selectedCores.isNotEmpty &&
+              row.key.text.trim().isNotEmpty,
+        )
+        .toList();
+    if (selectedCoreRows.isEmpty) return;
+
+    final String fallbackDate = DateTime.now()
+        .add(const Duration(days: 183))
+        .toDateString(format: "dd/MM/yyyy");
+
+    final List<KeyValue> preservedOtherRows = lstKeyValueMaintainCores
+        .where((row) => row.isOtherService)
+        .toList();
+
+    final List<KeyValue> syncedCoreRows = [];
+    for (final row in selectedCoreRows) {
+      final String resolvedDate =
+          _findProductFilterCoreDate(productCores, row.selectedCores) ??
+          fallbackDate;
+      final KeyValue maintainRow = KeyValue(
+        TextEditingController(),
+        TextEditingController(text: resolvedDate),
+        null,
+        [...row.selectedCores],
+        false,
+      );
+      maintainRow.key.text = maintainRow.corePositionLabel;
+      syncedCoreRows.add(maintainRow);
+    }
+
+    lstKeyValueMaintainCores
+      ..clear()
+      ..addAll(preservedOtherRows)
+      ..addAll(syncedCoreRows);
   }
 
   String? _getDefaultCoreName([int? type]) {
@@ -541,6 +637,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
       }
       setState(() {
         _isLoading = _bloc.isLoading;
+        _syncMaintainCoresFromProductFilterCores();
       });
     }
     if (state is StaffNewOrderGetListProductsAllSuccessState) {
@@ -550,12 +647,14 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
       }
       setState(() {
         _isLoading = _bloc.isLoading;
+        _syncMaintainCoresFromProductFilterCores();
       });
     }
     if (state is StaffCreateOrderCoresFailState) {
       context.showSnackBarSuccess("Đã xảy ra lỗi");
       setState(() {
         _isLoading = _bloc.isLoading;
+        _syncMaintainCoresFromProductFilterCores();
       });
     }
     if (state is StaffCreateOrderCoresSuccessState) {
@@ -578,6 +677,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
       context.showSnackBar("Upload ảnh lỗi!");
       setState(() {
         _isLoading = _bloc.isLoading;
+        _syncMaintainCoresFromProductFilterCores();
       });
     }
     if (state is ServiceScreenUploadImageSuccessState) {
@@ -586,6 +686,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
       }
       setState(() {
         _isLoading = _bloc.isLoading;
+        _syncMaintainCoresFromProductFilterCores();
       });
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Ảnh đã được lưu thành công!')),
@@ -1927,6 +2028,28 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                   : "0",
               isDense: true,
               isExpanded: true,
+              itemHeight: null,
+              selectedItemBuilder: (BuildContext context) {
+                return filteredProducts.map((OrderModel sv) {
+                  final String name = sv.product?.name ?? sv.proad?.name ?? "";
+                  final String address = sv.address?.trim() ?? "";
+                  final String label = (sv.id == 0 || address.isEmpty)
+                      ? name
+                      : '$name - $address';
+                  return Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: ColorUtil.raisinBlack,
+                      ),
+                    ),
+                  );
+                }).toList();
+              },
               onChanged: (String? newValue) {
                 setState(() {
                   _currentSelectedProductValue = int.parse(newValue ?? "0");
@@ -1944,6 +2067,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                               .address ??
                           '';
                       addressCustomerControllerSP.text = add;
+                      _syncMaintainCoresFromProductFilterCores();
                     });
                   }
                 });
@@ -1975,6 +2099,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                     children: [
                       Text(
                         name,
+                        maxLines: 1,
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
@@ -1985,6 +2110,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                       const SizedBox(height: 2),
                       Text(
                         address,
+                        maxLines: 1,
                         style: TextStyle(
                           fontSize: 12,
                           color: Colors.grey.shade600,
