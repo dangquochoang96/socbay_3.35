@@ -14,6 +14,7 @@ class OrderFilterCoreModel {
   final String? product;
   final int? quantity;
   final String? coreNumber;
+  final String? replacementTime;
 
   String createdDateConvert() {
     if (createdAt == null) {
@@ -37,6 +38,7 @@ class OrderFilterCoreModel {
     this.product,
     this.quantity,
     this.coreNumber,
+    this.replacementTime,
   });
 
   factory OrderFilterCoreModel.fromJson(Map<String, dynamic> json) =>
@@ -74,6 +76,7 @@ class OrderFilterCoreModel {
                 : null),
         coreNumber: json['core_number']?.toString() ??
             json['coreNumbers']?.toString(),
+        replacementTime: json['replacement_time']?.toString(),
       );
 
   Map<String, dynamic> toJson() => <String, dynamic>{
@@ -90,5 +93,6 @@ class OrderFilterCoreModel {
     'product': product,
     'quantity': quantity,
     'core_number': coreNumber,
+    'replacement_time': replacementTime,
   };
 }

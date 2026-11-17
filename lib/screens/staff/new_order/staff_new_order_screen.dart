@@ -58,6 +58,8 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
   bool _hasUserSelectedPayment = false;
 
   bool _showRentalDetails = false;
+  bool _isMachineCoresExpanded = true;
+  final Map<int, int> _editedCoreReplacementMonths = {};
   DateTime _selectedEndDate = DateTime.now();
 
   final TextEditingController _rentalDurationController =
@@ -331,6 +333,14 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
 
     DateTime? earliestDate;
     for (final int coreNum in coreNumbers) {
+      final int? editedMonths = _editedCoreReplacementMonths[coreNum];
+      if (editedMonths != null && editedMonths > 0) {
+        final nextDate = _addMonths(DateTime.now(), editedMonths);
+        if (earliestDate == null || nextDate.isBefore(earliestDate)) {
+          earliestDate = nextDate;
+        }
+        continue;
+      }
       if (coreNum >= 1 && coreNum <= productCores.length) {
         final core = productCores[coreNum - 1];
         final nextDate = _calculateNextDateFromReplacementTime(
@@ -975,6 +985,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                   ],
                 ),
                 _itemFilterCoreMaintainTable(),
+                _buildSelectedMachineCoresSection(),
                 _buildCard(
                   children: [
                     _buildSectionTitle('Thanh toán', Icons.payment_outlined),
@@ -1667,6 +1678,26 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                           int qty =
                               int.tryParse(item.quantity.text.trim()) ?? 1;
                           if (qty <= 0) qty = 1;
+                          String? replacementTimeValue;
+                          if (_isCoreConfigTask &&
+                              !item.isOtherService &&
+                              item.selectedCores.isNotEmpty) {
+                            final sortedCores = [...item.selectedCores]..sort();
+                            final hasEdited = sortedCores.any(
+                              (c) =>
+                                  _editedCoreReplacementMonths.containsKey(c),
+                            );
+                            if (hasEdited) {
+                              replacementTimeValue = sortedCores
+                                  .map(
+                                    (c) =>
+                                        _editedCoreReplacementMonths[c]
+                                            ?.toString() ??
+                                        '',
+                                  )
+                                  .join('|');
+                            }
+                          }
                           lst1.add(
                             OrderFilterCoreModel(
                               name: item.key.text,
@@ -1675,6 +1706,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                               coreNumber: _isCoreConfigTask
                                   ? item.coreNumberValue
                                   : "0",
+                              replacementTime: replacementTimeValue,
                             ),
                           );
                         }
@@ -2053,6 +2085,7 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
               onChanged: (String? newValue) {
                 setState(() {
                   _currentSelectedProductValue = int.parse(newValue ?? "0");
+                  _editedCoreReplacementMonths.clear();
                   if (_currentSelectedProductValue != 0) {
                     setState(() {
                       currentSelectedProductAllValue.text = "";
@@ -2123,6 +2156,553 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
               }).toList(),
             ),
           ),
+        );
+      },
+    );
+  }
+
+  DateTime? _parseCoreDate(String? dateStr) {
+    if (dateStr == null || dateStr.isEmpty || dateStr.contains("-0001")) {
+      return null;
+    }
+    return DateTime.tryParse(dateStr);
+  }
+
+  String _formatCoreDate(String? dateStr) {
+    final parsed = _parseCoreDate(dateStr);
+    if (parsed != null) {
+      return DateFormat("dd/MM/yyyy").format(parsed);
+    }
+    if (dateStr == null || dateStr.isEmpty || dateStr.contains("-0001")) {
+      return "Chưa có";
+    }
+    return dateStr;
+  }
+
+  Widget _buildSelectedMachineCoresSection() {
+    if (_currentSelectedProductValue == 0) {
+      return const SizedBox.shrink();
+    }
+
+    final selectedOrder = _listProducts.firstWhere(
+      (item) => item.id == _currentSelectedProductValue,
+      orElse: () => OrderModel(),
+    );
+    final List<ProductFilterCoresModel> cores =
+        selectedOrder.productFilterCoresModel ?? [];
+    if (cores.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final DateTime today = DateTime(
+      DateTime.now().year,
+      DateTime.now().month,
+      DateTime.now().day,
+    );
+    final Set<int> replacingCoreNumbers = {};
+    for (final row in lstKeyValueCores) {
+      if (!row.isOtherService &&
+          row.key.text.trim().isNotEmpty &&
+          row.selectedCores.isNotEmpty) {
+        replacingCoreNumbers.addAll(row.selectedCores);
+      }
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Column(
+        children: [
+          InkWell(
+            onTap: () {
+              setState(() {
+                _isMachineCoresExpanded = !_isMachineCoresExpanded;
+              });
+            },
+            borderRadius: BorderRadius.circular(12),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: ColorUtil.bangladeshGreen.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(
+                      Icons.layers_outlined,
+                      size: 16,
+                      color: ColorUtil.bangladeshGreen,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  const Expanded(
+                    child: Text(
+                      "Danh sách lõi của máy",
+                      style: TextStyle(
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w700,
+                        color: ColorUtil.raisinBlack,
+                      ),
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      color: ColorUtil.bangladeshGreen.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      "${cores.length} lõi",
+                      style: const TextStyle(
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.bold,
+                        color: ColorUtil.bangladeshGreen,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Icon(
+                    _isMachineCoresExpanded
+                        ? Icons.keyboard_arrow_up_rounded
+                        : Icons.keyboard_arrow_down_rounded,
+                    size: 20,
+                    color: ColorUtil.spanishGray,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          if (_isMachineCoresExpanded) ...[
+            Divider(height: 1, thickness: 1, color: Colors.grey.shade200),
+            ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              itemCount: cores.length,
+              separatorBuilder: (_, _) => Divider(
+                height: 1,
+                indent: 12,
+                endIndent: 12,
+                color: Colors.grey.shade200,
+              ),
+              itemBuilder: (context, index) {
+                final core = cores[index];
+                final int coreNumber = index + 1;
+                final bool isBeingReplaced = replacingCoreNumbers.contains(
+                  coreNumber,
+                );
+                final String coreName = (core.name ?? '').trim().isNotEmpty
+                    ? core.name!.trim()
+                    : "Lõi số $coreNumber";
+                final int? editedMonths =
+                    _editedCoreReplacementMonths[coreNumber];
+                final bool isCycleEdited = editedMonths != null;
+                final String? effectiveReplacementTime = isCycleEdited
+                    ? editedMonths.toString()
+                    : core.replacementTime;
+                final String cycleText =
+                    (effectiveReplacementTime ?? '').trim().isNotEmpty
+                    ? "${effectiveReplacementTime!.trim()} tháng"
+                    : "Chưa cài đặt";
+                final DateTime? calculatedNextDate = isBeingReplaced
+                    ? _calculateNextDateFromReplacementTime(
+                        effectiveReplacementTime,
+                      )
+                    : null;
+                final DateTime? parsedEndDate =
+                    calculatedNextDate ?? _parseCoreDate(core.endTime);
+                final bool isOverdue =
+                    parsedEndDate != null && parsedEndDate.isBefore(today);
+                final String lastDateText = isBeingReplaced
+                    ? DateFormat("dd/MM/yyyy").format(today)
+                    : _formatCoreDate(core.startTime);
+                final String nextDateText = calculatedNextDate != null
+                    ? DateFormat("dd/MM/yyyy").format(calculatedNextDate)
+                    : _formatCoreDate(core.endTime);
+
+                return Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 9,
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        constraints: const BoxConstraints(minWidth: 52),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: isBeingReplaced
+                              ? ColorUtil.bangladeshGreen
+                              : ColorUtil.bangladeshGreen.withValues(
+                                  alpha: 0.1,
+                                ),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          "Lõi $coreNumber",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.bold,
+                            color: isBeingReplaced
+                                ? Colors.white
+                                : ColorUtil.bangladeshGreen,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              coreName,
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: ColorUtil.raisinBlack,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Wrap(
+                              spacing: 12,
+                              runSpacing: 4,
+                              children: [
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.history_rounded,
+                                      size: 13,
+                                      color: Colors.grey.shade600,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      "Thay gần nhất: $lastDateText",
+                                      style: TextStyle(
+                                        fontSize: 11.5,
+                                        color: Colors.grey.shade700,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                InkWell(
+                                  onTap: () => _showEditCoreCycleSheet(
+                                    coreNumber,
+                                    coreName,
+                                    effectiveReplacementTime,
+                                  ),
+                                  borderRadius: BorderRadius.circular(6),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 6,
+                                      vertical: 2,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: isCycleEdited
+                                          ? ColorUtil.bangladeshGreen
+                                                .withValues(alpha: 0.12)
+                                          : Colors.grey.shade100,
+                                      borderRadius: BorderRadius.circular(6),
+                                      border: Border.all(
+                                        color: isCycleEdited
+                                            ? ColorUtil.bangladeshGreen
+                                                  .withValues(alpha: 0.4)
+                                            : Colors.grey.shade300,
+                                      ),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          Icons.autorenew_rounded,
+                                          size: 13,
+                                          color: isCycleEdited
+                                              ? ColorUtil.bangladeshGreen
+                                              : Colors.grey.shade600,
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          "Chu kỳ: $cycleText",
+                                          style: TextStyle(
+                                            fontSize: 11.5,
+                                            fontWeight: isCycleEdited
+                                                ? FontWeight.w600
+                                                : FontWeight.normal,
+                                            color: isCycleEdited
+                                                ? ColorUtil.bangladeshGreen
+                                                : Colors.grey.shade700,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 3),
+                                        Icon(
+                                          Icons.edit_outlined,
+                                          size: 11.5,
+                                          color: isCycleEdited
+                                              ? ColorUtil.bangladeshGreen
+                                              : Colors.grey.shade500,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.event_available_outlined,
+                                      size: 13,
+                                      color: isOverdue
+                                          ? const Color(0xFFDC2626)
+                                          : ColorUtil.bangladeshGreen,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      "Thay tiếp: $nextDateText",
+                                      style: TextStyle(
+                                        fontSize: 11.5,
+                                        fontWeight: isOverdue
+                                            ? FontWeight.w600
+                                            : FontWeight.w500,
+                                        color: isOverdue
+                                            ? const Color(0xFFDC2626)
+                                            : ColorUtil.raisinBlack,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  void _showEditCoreCycleSheet(
+    int coreNumber,
+    String coreName,
+    String? currentRawTime,
+  ) {
+    final TextEditingController cycleController = TextEditingController(
+      text: (currentRawTime ?? '').replaceAll(RegExp(r'[^0-9]'), ''),
+    );
+    final List<int> quickMonths = [3, 6, 9, 12, 18, 24, 36];
+    final bool hasCustomEdit =
+        _editedCoreReplacementMonths.containsKey(coreNumber);
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (sheetContext) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            final int? currentVal = int.tryParse(cycleController.text.trim());
+            return Padding(
+              padding: EdgeInsets.only(
+                left: 16,
+                right: 16,
+                top: 16,
+                bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade300,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Sửa chu kỳ thay • Lõi $coreNumber",
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: ColorUtil.raisinBlack,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              coreName,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 12.5,
+                                color: ColorUtil.spanishGray,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () => Navigator.pop(sheetContext),
+                        icon: const Icon(Icons.close_rounded),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    "Chọn nhanh (tháng)",
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w600,
+                      color: ColorUtil.raisinBlack,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: quickMonths.map((m) {
+                      final bool selected = currentVal == m;
+                      return ChoiceChip(
+                        label: Text("$m tháng"),
+                        selected: selected,
+                        selectedColor: ColorUtil.bangladeshGreen.withValues(
+                          alpha: 0.15,
+                        ),
+                        labelStyle: TextStyle(
+                          fontSize: 12.5,
+                          fontWeight: selected
+                              ? FontWeight.bold
+                              : FontWeight.normal,
+                          color: selected
+                              ? ColorUtil.bangladeshGreen
+                              : ColorUtil.raisinBlack,
+                        ),
+                        onSelected: (_) {
+                          setModalState(() {
+                            cycleController.text = m.toString();
+                          });
+                        },
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 14),
+                  TextField(
+                    controller: cycleController,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    onChanged: (_) => setModalState(() {}),
+                    decoration: InputDecoration(
+                      labelText: "Số tháng chu kỳ",
+                      hintText: "Nhập số tháng (VD: 6, 12, 24)...",
+                      suffixText: "tháng",
+                      isDense: true,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: const BorderSide(
+                          color: ColorUtil.bangladeshGreen,
+                          width: 1.5,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      if (hasCustomEdit) ...[
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () {
+                              setState(() {
+                                _editedCoreReplacementMonths.remove(coreNumber);
+                                _syncMaintainCoresFromProductFilterCores();
+                              });
+                              Navigator.pop(sheetContext);
+                            },
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: ColorUtil.raisinBlack,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            child: const Text("Mặc định"),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                      ],
+                      Expanded(
+                        flex: 2,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            final int? months = int.tryParse(
+                              cycleController.text.trim(),
+                            );
+                            if (months == null || months <= 0) {
+                              context.showSnackBar(
+                                "Vui lòng nhập số tháng hợp lệ (> 0)",
+                              );
+                              return;
+                            }
+                            setState(() {
+                              _editedCoreReplacementMonths[coreNumber] = months;
+                              _syncMaintainCoresFromProductFilterCores();
+                            });
+                            Navigator.pop(sheetContext);
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: ColorUtil.bangladeshGreen,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: const Text(
+                            "Áp dụng",
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          },
         );
       },
     );
@@ -3090,33 +3670,36 @@ class _StaffNewOrderScreen extends State<StaffNewOrderScreen> {
                   const SizedBox(width: 12),
                   Expanded(
                     flex: 1,
-                    child: InkWell(
-                      onTap: () => _selectDate(i),
-                      child: IgnorePointer(
-                        child: TextFormField(
-                          controller: maintainItem.value,
-                          textAlign: TextAlign.right,
-                          decoration: InputDecoration(
-                            hintText: 'dd/MM/yyyy',
-                            isDense: true,
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 10,
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(
-                                color: Colors.grey.shade300,
-                              ),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(
-                                color: Colors.grey.shade300,
-                              ),
-                            ),
+                    child: TextFormField(
+                      controller: maintainItem.value,
+                      textAlign: TextAlign.right,
+                      readOnly: true,
+                      enabled: false,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: ColorUtil.raisinBlack,
+                      ),
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: Colors.grey.shade100,
+                        hintText: 'dd/MM/yyyy',
+                        isDense: true,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 10,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(
+                            color: Colors.grey.shade300,
                           ),
-                          readOnly: true,
+                        ),
+                        disabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(
+                            color: Colors.grey.shade300,
+                          ),
                         ),
                       ),
                     ),

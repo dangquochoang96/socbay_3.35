@@ -273,6 +273,7 @@ class StaffNewOrderBloc extends Bloc<StaffNewOrderEvent, StaffNewOrderState> {
         List<String> listPrice = [];
         List<String> listQuantities = [];
         List<String> listCoreNumbers = [];
+        List<String> listReplacementTime = [];
         var lst1 = event.lstNew;
         var lst2 = event.lstMaintain;
         for (OrderFilterCoreModel filterCore in lst1) {
@@ -308,6 +309,7 @@ class StaffNewOrderBloc extends Bloc<StaffNewOrderEvent, StaffNewOrderState> {
                   ? filterCore.coreNumber!
                   : "0",
             );
+            listReplacementTime.add(filterCore.replacementTime ?? "");
           }
         }
         for (OrderFilterCoreModel filterCore in lst2) {
@@ -334,6 +336,7 @@ class StaffNewOrderBloc extends Bloc<StaffNewOrderEvent, StaffNewOrderState> {
                   ? filterCore.coreNumber!
                   : "0",
             );
+            listReplacementTime.add(filterCore.replacementTime ?? "");
           }
         }
         //Add cores
@@ -363,6 +366,8 @@ class StaffNewOrderBloc extends Bloc<StaffNewOrderEvent, StaffNewOrderState> {
           'quantities': listQuantities,
           'quantity': listQuantities,
           'coreNumbers': listCoreNumbers,
+          if (listReplacementTime.any((e) => e.isNotEmpty))
+            'replacement_time': listReplacementTime,
           "images": images,
           'sale_id': taskModel?.saleId?.toString() ?? event.saleId.toString(),
           if ((event.machineSellerId ?? taskModel?.machineSellerId ?? '')
